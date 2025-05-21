@@ -39,10 +39,10 @@
 
 **Package Name and Repository:** Decide on a name for the unified library. We can either **retain one of the existing names** (e.g. keep `kupicelib` as the base name since it’s already at v1.0.1, or use `kuPyLTSpice` if we want to emphasize LTSpice compatibility), or **choose a new name** to represent the merged tool (for example, something like `kuSpice` or `kupice` if desired). The choice may depend on branding and scope: if the unified package will support multiple SPICE engines (not just LTSpice), a more general name (like **kupicelib** or a new name) is appropriate, whereas `kuPyLTSpice` is LTSpice-specific by name. For this plan, we’ll assume **kupicelib** will be the base for merging (and likely version it to 2.0.0 to indicate the major update).
 
-**Proposed Directory Structure:** Below is a possible layout for the merged package (using `kupicelib` as the package name for illustration). This structure unifies both codebases and organizes modules by functionality:
+**Proposed Directory Structure:** Below is a possible layout for the merged package (using `cespy` (named from “Spice” → “ceSpi” → “cespy”) as the package name for illustration). This structure unifies both codebases and organizes modules by functionality:
 
 ```text
-kupicelib/                  - Top-level package for the unified library
+cespy/                  - Top-level package for the unified library
     __init__.py             - Initialize package (could import key classes for convenience)
     editor/                 - Schematic and netlist editing utilities
         __init__.py
@@ -111,9 +111,9 @@ kupicelib/                  - Top-level package for the unified library
   * Any functionality unique to kuPyLTSpice (not already in kupicelib) must be integrated. For instance, kuPyLTSpice might have provided certain convenience classes or batch simulation orchestration (e.g., `sim_batch.py`, `sim_runner.py` in kuPyLTSpice) – we will incorporate those into the `sim/` module of the unified package. The goal is **no loss of major features** from either project.
   * Redundant files will be eliminated. We will avoid having two versions of the same utility. This means dropping the smaller duplicate modules from kuPyLTSpice and keeping the robust ones from kupicelib, merging differences as needed.
 
-* **Shared Utilities:** Both packages have a `utils` (or similar) module for things like encoding detection, sweep iteration, etc. These will be unified under `kupicelib.utils`. For example, the `sweep_iterators.py` appears in both (with identical or similar purpose); we will maintain one version (likely the one from kupicelib unless kuPyLTSpice’s differs significantly).
+* **Shared Utilities:** Both packages have a `utils` (or similar) module for things like encoding detection, sweep iteration, etc. These will be unified under `cespy.utils`. For example, the `sweep_iterators.py` appears in both (with identical or similar purpose); we will maintain one version (likely the one from kupicelib unless kuPyLTSpice’s differs significantly).
 
-* **Engine Interfaces:** We will keep the multiple simulator support from kupicelib’s `simulators/` intact (this is a strength of kupicelib). The LTSpice control logic in kuPyLTSpice (which presumably was adapted from PyLTSpice) can be merged with kupicelib’s `ltspice_simulator.py` if there are improvements or differences. The unified package will thus support all the simulators kupicelib supported, under one roof. If the merged package name is still **kupicelib**, this is fitting since it was already not LTSpice-specific in capability.
+* **Engine Interfaces:** We will keep the multiple simulator support from kupicelib’s `simulators/` intact (this is a strength of kupicelib). The LTSpice control logic in kuPyLTSpice (which presumably was adapted from PyLTSpice) can be merged with kupicelib’s `ltspice_simulator.py` if there are improvements or differences. The unified package will thus support all the simulators kupicelib supported, under one roof.
 
 * **Client-Server Mode:** If maintaining the remote simulation server capability is desired (it likely is, since kupicelib includes it), we keep the `client_server` subpackage. We might simplify it if possible (for example, ensure that the normal `sim_runner` can optionally run jobs via the server, rather than having entirely separate code paths), but such integration can be an enhancement. At minimum, the existing server/client functionality will be preserved in the unified package (so users can run a `sim_server` and submit simulation tasks remotely or in parallel).
 
@@ -133,9 +133,9 @@ kupicelib/                  - Top-level package for the unified library
     * Pin versions or ranges as appropriate (e.g., Python >=3.10 as currently, and ensure compatibility with latest versions of dependencies).
   * Define any **entry points** for console scripts if we want to expose command-line tools. For instance, we can create console entry points in `pyproject.toml` like:
 
-    * `kupicelib-asc-to-qsch = kupicelib.editor.asc_editor:main` (if we have a main function to convert a file).
-    * `kupicelib-run-server = kupicelib.client_server.sim_server:main` (to start the simulation server).
-    * `kupicelib-rawplot = kupicelib.raw.raw_plot:main` (for plotting raw files, if such a function exists).
+    * `cespy-asc-to-qsch = cespy.editor.asc_editor:main` (if we have a main function to convert a file).
+    * `cespy-run-server = cespy.client_server.sim_server:main` (to start the simulation server).
+    * `cespy-rawplot = cespy.raw.raw_plot:main` (for plotting raw files, if such a function exists).
       By providing these, we replace the need for separate scripts directory. Each script from the original `kupicelib/scripts` can be refactored into a function within the appropriate module, and exposed as a command-line tool via setup. This improves integration and maintainability (no duplicate code in scripts vs library).
   * Ensure that the package is marked as compatible with relevant Python versions and that the license (GPL-3.0) is correctly specified.
 
@@ -163,7 +163,7 @@ To achieve a maintainable and scalable codebase, we will refactor parts of the c
   * Combine the READMEs of both projects, distilling the important information from each. The new README should introduce the unified tool, list its features (covering what both original projects did), and provide basic usage examples.
   * If not already present, consider creating a **User Guide** or reference manual. This could cover topics like: setting up LTSpice for use with the library, using the API to modify a circuit and run sweeps, parsing results, performing Monte Carlo analyses, etc.
   * Ensure that any API changes (due to refactoring or renaming) are reflected in the documentation. Since backward compatibility isn't strictly required, we can simplify function names or parameters, but we must update examples accordingly.
-  * (Optional) Prepare a short **migration guide** in the documentation: for instance, “If you previously used `kuPyLTSpice.LTSpiceSimulation(...)`, now use `kupicelib.simulators.LTSpiceSimulator`” – this will help any existing user (or the author themselves) transition smoothly.
+  * (Optional) Prepare a short **migration guide** in the documentation: for instance, “If you previously used `kuPyLTSpice.LTSpiceSimulation(...)`, now use `cespy.simulators.LTSpiceSimulator`” – this will help any existing user (or the author themselves) transition smoothly.
 * **Retain Major Functionality:** As a guiding principle, all the capabilities from both packages should still be available:
 
   * **LTSpice Automation:** Running LTSpice simulations headlessly and retrieving data (the core of PyLTSpice/kuPyLTSpice) – this must work seamlessly in the new package.
@@ -172,13 +172,13 @@ To achieve a maintainable and scalable codebase, we will refactor parts of the c
   * **Multi-Engine Support:** Keep support for NGSpice, QSpice, etc., as provided by kupicelib’s design. This may widen the appeal of the unified tool beyond just LTSpice users.
   * **Performance Considerations:** If there are any performance bottlenecks or heavy resource usage (e.g., reading large .raw files can be memory-intensive), note if any refactoring can improve that (maybe using more efficient numpy operations, etc.). While not a primary goal of the merge, it’s worth keeping an eye on opportunities to optimize during consolidation.
 
-By the end of refactoring, the codebase should be organized logically with minimal redundancy. The unified **kupicelib** package (or whatever name is chosen) will act as a single source of truth for all simulation automation tasks, making it easier to maintain and extend.
+By the end of refactoring, the codebase should be organized logically with minimal redundancy. The unified **cespy** package will act as a single source of truth for all simulation automation tasks, making it easier to maintain and extend.
 
 ## Unified Packaging and Configuration
 
 With the code merged, the next step is to unify the build and distribution setup:
 
-* **Single PyPI Package:** Only one package will be published. Assuming we keep the name `kupicelib` (as an example), we will release a new version, e.g. **kupicelib 2.0.0**, on PyPI. This version will include all functionality from the old kupicelib 1.0.1 *and* kuPyLTSpice 1.0.0. We will clearly mention in the release notes that this is a merged project (perhaps noting “kuPyLTSpice is now integrated into kupicelib”).
+* **Single PyPI Package:** Only one package will be published. Assuming we keep the name `cespy` (as an example), we will release a new version, e.g. **cespy 0.1.0**, on PyPI. This version will include all functionality from the old kupicelib 1.0.1 *and* kuPyLTSpice 1.0.0. We will clearly mention in the release notes that this is a merged project.
 
   * If using a new name entirely, ensure to publish that and potentially deprecate the old ones (see “Migration Plan” below for handling existing users of the old packages).
 
@@ -195,13 +195,12 @@ With the code merged, the next step is to unify the build and distribution setup
     * `histogram` and `ltsteps`: these might have been internal or example utilities; we can expose them if they might be generally useful (e.g., maybe `ltsteps` prints the step values from a .log file – that can be a quick diagnostic tool).
     * Make sure each entry point has a corresponding function in the code that can be invoked.
   * **Testing configuration:** If using pytest or any test framework, ensure it’s listed under dev dependencies and that tests are included in the package manifest if needed.
-  * **Package data:** Include any non-code files needed (e.g., the `asc_to_qsch_data.xml` from kupicelib’s scripts should be included in the package, likely by moving it to a proper location inside the package, such as `kupicelib/editor/asc_to_qsch_data.xml` and listing it in package data). We must be careful to include such data files in the build so that functions can access them at runtime.
+  * **Package data:** Include any non-code files needed (e.g., the `asc_to_qsch_data.xml` from kupicelib’s scripts should be included in the package, likely by moving it to a proper location inside the package, such as `cespy/editor/asc_to_qsch_data.xml` and listing it in package data). We must be careful to include such data files in the build so that functions can access them at runtime.
 
 * **Version Control & Repository Merge:** On the GitHub side, merge the repositories. This could be done by one of:
 
   * Moving files from one repo to the other and committing, or
   * Using git subtree or history import to preserve commit history of both (optional but nice for record-keeping).
-    For simplicity, you might choose **kupicelib’s repository as the base**, and then add the unique files from kuPyLTSpice into it. After merging code and verifying everything, the kuPyLTSpice repository can be archived or marked as deprecated, with a note referring to the unified project.
   * Update the repository README, CI workflows (if any), and issue trackers accordingly.
   * Set up continuous integration (CI) if not already, to run tests and perhaps build wheels.
 
@@ -224,9 +223,9 @@ Ensuring that the unified package preserves all functionality is critical. We wi
   * *Analysis Tools:* If the library includes Monte Carlo or worst-case analysis functions, test these on known circuits to see that they produce reasonable outputs (or at least run without errors).
   * *CLI Tools:* For each console script we provide, run it in a test scenario:
 
-    * e.g., run `kupicelib-run-server` to start the server and see that it listens (perhaps connect a client in tests).
-    * Run `kupicelib-asc-to-qsch example.asc` on a sample file and confirm it outputs a .qsch (and that the output matches expected format).
-    * Run `kupicelib-rawplot example.raw` on a known raw file and see that it produces a plot (this might be hard to automate, but we can at least ensure it does not throw errors).
+    * e.g., run `cespy-run-server` to start the server and see that it listens (perhaps connect a client in tests).
+    * Run `cespy-asc-to-qsch example.asc` on a sample file and confirm it outputs a .qsch (and that the output matches expected format).
+    * Run `cespy-rawplot example.raw` on a known raw file and see that it produces a plot (this might be hard to automate, but we can at least ensure it does not throw errors).
   * Consider writing **unit tests** for critical modules (if not already existing). For instance, tests for the raw file parser (feeding it a small known binary and checking parsed values), tests for the sweep iterator utility, etc. Automate these with a framework like `pytest`.
   * If possible, integrate these tests into a CI pipeline to run on every commit.
 
@@ -235,7 +234,7 @@ Ensuring that the unified package preserves all functionality is critical. We wi
 * **Migration for Users:** Even if backward compatibility is not required, we should make the transition clear:
 
   * In the **kuPyLTSpice** repository (and PyPI project), it’s wise to publish a final minor release or at least update the README to state that “kuPyLTSpice has been merged into \[new package name] as of \[version]. Please install that package for future updates.” If possible, you could release kuPyLTSpice 1.0.1 that simply imports the unified package and perhaps throws a deprecation warning when used. This way, any existing code using kuPyLTSpice isn’t immediately broken – it will still function by relying on the unified package under the hood – but users are notified to switch. This step is optional, but it smooths the migration.
-  * For **kupicelib** users, if we keep the name but restructure some APIs, highlight changes in the documentation. E.g., “The `kupicelib.simulators.LTSpice_Simulator` class is replaced by `kupicelib.simulators.LTSpiceSimulator` (name change)” or “Functions X and Y moved from module A to module B.”
+  * For **kupicelib** users, if we keep the name but restructure some APIs, highlight changes in the documentation. E.g., “The `kupicelib.simulators.LTSpice_Simulator` class is replaced by `cespy.simulators.LTSpiceSimulator` (name change)” or “Functions X and Y moved from module A to module B.”
   * Clearly version the unified release as a new major version (2.x) to signal that breaking changes may be present. This manages expectations for users upgrading.
   * Ensure that both old GitHub repos (if the unified is new or one is deprecated) have pointers to the new unified repo in their descriptions.
 
@@ -253,11 +252,11 @@ During or after the merge, a few enhancements can further improve the unified pa
 
 * **Improved Documentation**: Beyond a basic README, consider setting up a documentation site (using Sphinx or MkDocs) for the unified package. This can include tutorials (e.g., “Automating LTSpice with Python – a step-by-step guide using the unified library”), an API reference (documenting all classes and functions), and examples for advanced features (like Monte Carlo analysis).
 * **Examples and Tutorials**: Include a directory of example circuits and scripts demonstrating usage. For instance, an `examples/` folder in the repo with small LTSpice files and Python scripts on how to modify and simulate them. This not only tests the library but also serves as user guidance.
-* **Command-Line Interface (CLI)**: In addition to the small entry point tools, consider a more unified CLI experience. For example, using something like `argparse` or `click` to allow a command `kupicelib` with subcommands:
+* **Command-Line Interface (CLI)**: In addition to the small entry point tools, consider a more unified CLI experience. For example, using something like `argparse` or `click` to allow a command `cespy` with subcommands:
 
-  * `kupicelib simulate <circuit.asc>` – to run a simulation on the given schematic or netlist.
-  * `kupicelib convert asc2qsch <file.asc>` – to convert formats.
-  * `kupicelib analyze montecarlo <netlist> --runs 100` – to perform a Monte Carlo analysis via CLI.
+  * `cespy simulate <circuit.asc>` – to run a simulation on the given schematic or netlist.
+  * `cespy convert asc2qsch <file.asc>` – to convert formats.
+  * `cespy analyze montecarlo <netlist> --runs 100` – to perform a Monte Carlo analysis via CLI.
     This could make the tool usable directly from the shell for quick tasks, complementing the Python API. This can be built on top of the existing functions.
 * **API Restructuring**: Consider introducing a higher-level API class that unifies common tasks. For example, a `CircuitSimulator` class where the user can specify which engine to use (LTSpice/NGSpice) and then call methods to run simulations, rather than the user having to manually pick the correct simulator class. This can increase ease of use. Under the hood, it would utilize the classes in `simulators/` and `sim/sim_runner`, but it provides a cleaner facade.
 * **Scalability Considerations**: If users might run large numbers of simulations or very large circuits, consider features like:
@@ -267,53 +266,27 @@ During or after the merge, a few enhancements can further improve the unified pa
     While these might be future enhancements, structuring the code with scalability in mind (e.g. a clear separation between data model and processing, so it’s easier to extend later) is beneficial.
 * **Community and Contribution**: Since the unified project is larger in scope, it might attract more users or contributors (especially if it’s the only tool combining LTSpice, NGSpice, etc., with Python automation). Setting up contribution guidelines, improving code readability, and writing tests will facilitate external contributions if the project becomes open to them.
 
-## Implementation Roadmap
+## Release Roadmap
 
-Finally, here is a step-by-step action plan to execute the merge and achieve the above goals:
-
-1. **Repository Preparation**: Decide where the merged code will live. For example, use the existing `kupicelib` repository as the base for the unified package. Update or create project management items (issues or a project board) to track the merge tasks. Communicate (even if just to team members or future self) the plan for deprecating the other repo (kuPyLTSpice).
-2. **Merge Codebases**:
-
-   * Export or copy the content of `kuPyLTSpice` into the `kupicelib` project. Place files into their corresponding locations in the new structure. For instance, integrate `kuPyLTSpice/sim/sim_batch.py` into `kupicelib/sim/` directory.
-   * If using git, you might add the kuPyLTSpice repo as a remote and merge branches, or simply manually copy files and commit. Ensure the history of important files is not lost if that’s important for future reference (optional).
-   * Add any missing pieces from kuPyLTSpice that kupicelib didn’t have (there may be a few helper classes or minor features).
-   * Initially, keep both versions of overlapping files in case you need to compare them. For example, bring in `kuPyLTSpice/raw/raw_read.py` alongside `kupicelib/raw/raw_read.py` (renaming one temporarily) to diff and see if kuPyLTSpice’s version had modifications. Merge any relevant differences into the main file and then remove the duplicate.
-3. **Unify and Refactor the Code**:
-
-   * Go through each set of duplicate functionality and consolidate:
-
-     * Choose the primary implementation (mostly from kupicelib) and enhance it with any missing functionality from the kuPyLTSpice side.
-     * Update import statements across the codebase to reflect the new single-package structure. For example, where kuPyLTSpice code did `from kupicelib.editor import asc_editor`, it can now do `from kupicelib.editor import asc_editor` (which is internal now, not a separate installed package). Relative imports might be used within the package for clarity.
-     * Rename modules or functions for consistency (`tookit` -> `toolkit`, etc.) and adjust all references accordingly.
-     * Remove the duplicate/trivial modules that are no longer needed (like the nearly empty wrappers from kuPyLTSpice).
-   * Run linting/formatting tools to ensure the merged codebase is clean and uniform (if you use flake8, black, etc.).
-   * Double-check that all necessary data files (like any XML or other templates) are in place and being accessed correctly by the code after reorganization.
-4. **Merge Packaging Config**:
-
-   * Create/update the `pyproject.toml` or `setup.py` in the merged repository. Populate it with the combined metadata and dependencies as discussed.
-   * If using Poetry, update the dependency list with the union of both projects’ dependencies. Remove `spicelib` if not needed, or if still needed for something, include it for now (with a note to remove in the future).
-   * Set the new version number (e.g. 2.0.0).
-   * Define console script entry points for all relevant utilities (this involves writing small `main()` functions in those modules if not already present).
-   * Ensure that the package will include all subpackages and data files. Adjust MANIFEST.in or Poetry include settings as needed (e.g., include `*.xml` data files).
-5. **Testing**:
+1. **Testing**:
 
    * Before releasing, perform the testing plan. Write automated tests where possible and/or do manual testing of each feature. Start with small unit tests for critical components (file parsing, etc.), then integration tests for full simulation runs.
    * Test installation locally: build the wheel (`poetry build` or `python -m build`) and try `pip install`ing it in a fresh virtual environment. Then run a few example uses to ensure everything is included and working (catch issues like missing files in the package, etc.).
    * Fix any bugs or issues uncovered by testing (e.g., import errors from the refactor, missing dependencies, etc.). Iterate until the unified package runs all tests successfully.
-6. **Documentation & Examples**:
+2. **Documentation & Examples**:
 
    * Write a new README.md that reflects the unified library. Include usage examples (maybe adapted from kuPyLTSpice’s readme and kupicelib’s readme). Make sure to highlight any changes in usage.
    * Optionally, set up a docs site. If not immediately, at least prepare an extended README or a docs/ directory for future expansion.
    * Update any badges or CI status in the README for the unified repo. Remove or update references that are obsolete (e.g., if README still refers to installing kuPyLTSpice separately, change that).
    * If providing a migration guide or deprecation notes, include those in the docs or as a section in the README.
-7. **Release**:
+3. **Release**:
 
    * Once the code and documentation are ready and tested, publish the unified package to PyPI. For example, if using Poetry: `poetry publish` for version 2.0.0.
    * Verify the PyPI release by installing it via pip and running a quick functionality test.
-   * Post-release, in the **kuPyLTSpice** PyPI project, consider releasing a final update (version 1.0.1) that has an install requirement of `kupicelib>=2.0.0` and perhaps prints a warning if used. This will effectively push users to migrate. If you choose not to do this, at least update the project description on PyPI and the GitHub README to indicate it’s deprecated in favor of the new package.
+   * Post-release, in the **kuPyLTSpice** PyPI project, consider releasing a final update (version 1.0.1) that has an install requirement of `cespy>=0.1.0` and perhaps prints a warning if used. This will effectively push users to migrate. If you choose not to do this, at least update the project description on PyPI and the GitHub README to indicate it’s deprecated in favor of the new package.
    * Similarly, update the **kupicelib** project description on PyPI if needed (to reflect the new scope).
-   * If the unified project has a new name, publish under that name and possibly yank old releases or leave them with notes. If the name is the same (kupicelib), then it’s just a new version for users to upgrade to.
-8. **Post-Merge Follow-Up**:
+   * Publish under the name `cespy` and possibly yank old releases or leave them with notes.
+4. **Post-Release Follow-Up**:
 
    * Monitor any issue trackers or user feedback for the new release. Fix any unforeseen issues (e.g., if some environment had a problem, or if an important feature was unintentionally broken).
    * Close out any redundant issue pages or pull requests in the old repos, directing people to the new repository.
