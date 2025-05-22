@@ -32,7 +32,7 @@ from typing import Any, Callable, Optional, Tuple, Type, Union
 from .process_callback import ProcessCallback
 from .simulator import Simulator
 
-_logger = logging.getLogger("kupicelib.RunTask")
+_logger = logging.getLogger("cespy.RunTask")
 
 # Configure structured logging formatter if python-json-logger is installed
 try:

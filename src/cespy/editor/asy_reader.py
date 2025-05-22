@@ -21,7 +21,7 @@ import logging
 import re
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Union, Optional
+from typing import Dict, Optional, Union
 
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .base_schematic import (
@@ -37,7 +37,7 @@ from .base_schematic import (
 from .ltspice_utils import asc_text_align_set
 from .qsch_editor import QschTag
 
-_logger = logging.getLogger("kupicelib.AsyReader")
+_logger = logging.getLogger("cespy.AsyReader")
 SCALE_X = 6.25
 SCALE_Y = -6.25
 

@@ -29,7 +29,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path, PureWindowsPath
 from typing import Any, List, Optional, Union
 
-_logger = logging.getLogger("kupicelib.Simulator")
+_logger = logging.getLogger("cespy.Simulator")
 
 if sys.version_info.major >= 3 and sys.version_info.minor >= 6:
 
@@ -98,7 +98,7 @@ class Simulator(ABC):
 
 
     The ``run_function()`` can be imported from the simulator.py with
-    ``from kupicelib.sim.simulator import run_function`` instruction.
+    ``from cespy.sim.simulator import run_function`` instruction.
     """
 
     spice_exe: List[str] = []

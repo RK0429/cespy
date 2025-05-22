@@ -30,7 +30,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Iterable, List, Optional, Union
 
-_logger = logging.getLogger("kupicelib.SimClient")
+_logger = logging.getLogger("cespy.SimClient")
 
 
 class SimClientInvalidRunId(LookupError):

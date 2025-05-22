@@ -28,7 +28,7 @@ from typing import Any, Optional, Union
 
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
-_logger = logging.getLogger("kupicelib.XYCESimulator")
+_logger = logging.getLogger("cespy.XYCESimulator")
 
 
 class XyceSimulator(Simulator):
@@ -188,7 +188,7 @@ class XyceSimulator(Simulator):
         generator used by expressions and sampling methods * `-plugin <plugin list>`:
         load device plugin libraries (comma-separated list)
 
-        The following parameters will already be filled in by kupicelib, and cannot be
+        The following parameters will already be filled in by cespy, and cannot be
         set:
 
         * `-l <path>`: place the log output into <path>, "cout" to log to stdout * `-r

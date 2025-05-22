@@ -201,7 +201,7 @@ class RawWrite:
         if len(self._imported_data):
             self._consolidate()
         f = open(filename, "wb")
-        f.write("Title: * kupicelib RawWrite\n".encode(self.encoding))
+        f.write("Title: * cespy RawWrite\n".encode(self.encoding))
         f.write(
             "Date: {}\n".format(strftime("%a %b %d %H:%M:%S %Y")).encode(self.encoding)
         )

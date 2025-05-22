@@ -30,7 +30,7 @@ from typing import List, Union
 
 from ..sim.simulator import Simulator
 
-_logger = logging.getLogger("kupicelib.BaseEditor")
+_logger = logging.getLogger("cespy.BaseEditor")
 
 #: This controls the sub-circuit divider when setting component values inside sub-circuits.
 SUBCKT_DIVIDER = ":"

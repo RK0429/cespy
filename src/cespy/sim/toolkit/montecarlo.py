@@ -26,7 +26,7 @@ from ...log.logfile_data import LogfileData
 from ..process_callback import ProcessCallback
 from .tolerance_deviations import ComponentDeviation, DeviationType, ToleranceDeviations
 
-_logger = logging.getLogger("kupicelib.SimAnalysis")
+_logger = logging.getLogger("cespy.SimAnalysis")
 
 
 class Montecarlo(ToleranceDeviations):

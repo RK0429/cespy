@@ -106,7 +106,7 @@ from .process_callback import ProcessCallback
 from .sim_runner import SimRunner
 from .simulator import Simulator
 
-_logger = logging.getLogger("kupicelib.SimBatch")
+_logger = logging.getLogger("cespy.SimBatch")
 
 END_LINE_TERM = "\n"
 

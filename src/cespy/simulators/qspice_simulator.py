@@ -28,7 +28,7 @@ from typing import Any, Optional, Union
 
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
-_logger = logging.getLogger("kupicelib.QSpiceSimulator")
+_logger = logging.getLogger("cespy.QSpiceSimulator")
 
 
 class Qspice(Simulator):
@@ -126,7 +126,7 @@ class Qspice(Simulator):
         `-ProtectSubcircuits <path>`: Protect the body of subcircuits with encryption. *
         `-r <path>`: Specify the name of the output data(.qraw) file.
 
-        The following parameters will already be filled in by kupicelib, and cannot be
+        The following parameters will already be filled in by cespy, and cannot be
         set:
 
         * `-o <path>`: Specify the name of a file for the console output.

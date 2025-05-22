@@ -25,7 +25,7 @@ from typing import Callable, Dict, Optional, Tuple, Type, Union
 from ..process_callback import ProcessCallback
 from .worst_case import DeviationType, WorstCaseAnalysis
 
-_logger = logging.getLogger("kupicelib.SimAnalysis")
+_logger = logging.getLogger("cespy.SimAnalysis")
 
 
 class WorstCaseType(IntEnum):

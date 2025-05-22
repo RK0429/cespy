@@ -158,13 +158,13 @@
 
 ## VI. Documentation and Examples
 
-- [ ] **A. Unified README:**
-  - [ ] Combine the `README.md` files from `kupicelib` and `kuPyLTSpice`.
-  - [ ] The new README should:
-    - [ ] Introduce the UnifiedPackage.
-    - [ ] List its key features (covering combined capabilities).
-    - [ ] Provide basic installation and usage examples.
-    - [ ] Clearly state the license (GPL-3.0).
+- [x] **A. Unified README:**
+  - [x] Combine the `README.md` files from `kupicelib` and `kuPyLTSpice`.
+  - [x] The new README should:
+    - [x] Introduce the UnifiedPackage.
+    - [x] List its key features (covering combined capabilities).
+    - [x] Provide basic installation and usage examples.
+    - [x] Clearly state the license (GPL-3.0).
 - [ ] **B. API Documentation:**
   - [ ] Ensure all public APIs (classes, functions, methods) have clear docstrings.
   - [ ] Update all documentation to reflect any API changes due to refactoring or renaming.
@@ -201,8 +201,8 @@
     - [ ] Identify any necessary non-code files (e.g., `asc_to_qsch_data.xml`).
     - [ ] Move these files to an appropriate location within the package (e.g., `cespy/editor/data/asc_to_qsch_data.xml`).
     - [ ] Ensure these files are included in the build (e.g., using `include` in `pyproject.toml` or `MANIFEST.in` if necessary).
-  - [ ] **Typing Information:**
-    - [ ] Ensure a `py.typed` marker file is present in the top-level package directory (`cespy/py.typed`) if providing type information.
+  - [x] **Typing Information:**
+    - [x] Ensure a `py.typed` marker file is present in the top-level package directory (`cespy/py.typed`) if providing type information.
 - [ ] **B. Build System:**
   - [ ] Ensure the chosen build system (Poetry) is correctly configured for the unified project.
 

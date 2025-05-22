@@ -38,7 +38,7 @@ from .base_editor import (
     format_eng,
 )
 
-_logger = logging.getLogger("kupicelib.SpiceEditor")
+_logger = logging.getLogger("cespy.SpiceEditor")
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
@@ -519,7 +519,7 @@ class SpiceCircuit(BaseEditor):
         :returns: SpiceCircuit instance
         :rtype: SpiceCircuit
         :raises UnrecognizedSyntaxError: when an spice command is not recognized by
-            kupicelib
+            cespy
         :raises ComponentNotFoundError: When the reference was not found
         """
         if SUBCKT_DIVIDER in instance_name:
@@ -674,7 +674,7 @@ class SpiceCircuit(BaseEditor):
         self.modified_subcircuits.clear()
 
         if create_blank:
-            lines = ["* netlist generated from kupicelib", ".end"]
+            lines = ["* netlist generated from cespy", ".end"]
             finished = self._add_lines(iter(lines))
             if not finished:
                 raise SyntaxError("Netlist with missing .END or .ENDS statements")
@@ -1493,7 +1493,7 @@ class SpiceEditor(SpiceCircuit):
         self.modified_subcircuits.clear()
 
         if create_blank:
-            lines = ["* netlist generated from kupicelib", ".end"]
+            lines = ["* netlist generated from cespy", ".end"]
             finished = self._add_lines(iter(lines))
             if not finished:
                 raise SyntaxError("Netlist with missing .END or .ENDS statements")

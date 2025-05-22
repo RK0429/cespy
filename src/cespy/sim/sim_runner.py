@@ -26,9 +26,9 @@ models.
 The code snipped below will simulate a circuit with two different diode models, set the
 simulation temperature to 80 degrees, and update the values of R1 and R2 to 3.3k. ::
 
-from kupicelib.sim.sim_runner import SimRunner from kupicelib.sim.sweep import sweep
-from kupicelib.editor.spice_editor import SpiceEditor from
-kupicelib.sim.ltspice_simulator import LTspice
+from cespy.sim.sim_runner import SimRunner from cespy.sim.sweep import sweep
+from cespy.editor.spice_editor import SpiceEditor from
+cespy.sim.ltspice_simulator import LTspice
 
 runner = SimRunner(simulator=LTspice, parallel_sims=4) editor =
 SpiceEditor("my_circuit.net") editor.set_parameters(temp=80)  # Sets the simulation
@@ -137,7 +137,7 @@ from ..sim.simulator import Simulator
 from ..simulators.ltspice_simulator import LTspice as CustomLTspice
 from .process_callback import ProcessCallback
 
-_logger = logging.getLogger("kupicelib.SimRunner")
+_logger = logging.getLogger("cespy.SimRunner")
 END_LINE_TERM = "\n"
 
 # Define a callback type alias for readability
@@ -249,8 +249,8 @@ class SimRunner(AnyRunner):
             _logger.setLevel(logging.DEBUG)
             _logger.debug("Verbose mode enabled: logger level set to DEBUG")
             # also set RunTask logger level to DEBUG
-            logging.getLogger("kupicelib.RunTask").setLevel(logging.DEBUG)
-            logging.getLogger("kupicelib.RunTask").debug(
+            logging.getLogger("cespy.RunTask").setLevel(logging.DEBUG)
+            logging.getLogger("cespy.RunTask").debug(
                 "RunTask logger level set to DEBUG")
 
     def __del__(self):

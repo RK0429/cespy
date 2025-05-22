@@ -28,7 +28,7 @@ from typing import Union
 
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
-_logger = logging.getLogger("kupicelib.LTSpiceSimulator")
+_logger = logging.getLogger("cespy.LTSpiceSimulator")
 
 
 class LTspice(Simulator):

@@ -33,7 +33,7 @@ from ..editor.base_editor import BaseEditor
 from .process_callback import ProcessCallback
 from .sim_runner import AnyRunner
 
-_logger = logging.getLogger("kupicelib.SimStepper")
+_logger = logging.getLogger("cespy.SimStepper")
 
 
 class StepInfo(object):
