@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
 
+# flake8: noqa
+
 # -------------------------------------------------------------------------------
 #    ____        _   _____ ____        _
 #   |  _ \ _   _| | |_   _/ ___| _ __ (_) ___ ___
@@ -99,10 +101,10 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Optional, Type, Union
 
-from kupicelib.editor.spice_editor import SpiceEditor
-from kupicelib.sim.process_callback import ProcessCallback
-from kupicelib.sim.sim_runner import SimRunner
-from kupicelib.sim.simulator import Simulator
+from ..editor.spice_editor import SpiceEditor
+from .process_callback import ProcessCallback
+from .sim_runner import SimRunner
+from .simulator import Simulator
 
 _logger = logging.getLogger("kupicelib.SimBatch")
 
@@ -127,7 +129,9 @@ class SimCommander(SpiceEditor):
         encoding: str = "autodetect",
         simulator: Optional[Union[str, Type[Simulator]]] = None,
     ):
-        from ..sim.ltspice_simulator import LTspice  # In case no simulator is given
+        from ..simulators.ltspice_simulator import (
+            LTspice,  # In case no simulator is given
+        )
 
         # Convert simulator to the right type
         actual_simulator: Type[Simulator]
@@ -180,7 +184,7 @@ class SimCommander(SpiceEditor):
         :return: Nothing
         :rtype: None
         """
-        from ..sim.ltspice_simulator import LTspice
+        from ..simulators.ltspice_simulator import LTspice
 
         # Convert spice_tool to the right type
         actual_simulator: Type[Simulator]

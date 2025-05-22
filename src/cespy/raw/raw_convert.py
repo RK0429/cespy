@@ -40,7 +40,7 @@ from optparse import OptionParser
 
 import clipboard  # type: ignore
 
-from kupicelib.raw.raw_read import RawRead
+from .raw_read import RawRead
 
 
 def main():

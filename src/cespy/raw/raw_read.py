@@ -1,4 +1,6 @@
-# coding=utf-8
+#!/usr/bin/env python
+
+# flake8: noqa
 
 # -------------------------------------------------------------------------------
 #
@@ -203,8 +205,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from numpy import float32, float64, frombuffer
 from numpy.typing import NDArray
 
-from kupicelib.log.logfile_data import try_convert_value
-
+from ..log.logfile_data import try_convert_value
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .raw_classes import Axis, DummyTrace, SpiceReadException, TraceRead
 

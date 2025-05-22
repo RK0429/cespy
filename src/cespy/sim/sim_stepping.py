@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# flake8: noqa
+
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -27,9 +29,8 @@ import logging
 from functools import wraps
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
-from kupicelib.sim.process_callback import ProcessCallback
-
 from ..editor.base_editor import BaseEditor
+from .process_callback import ProcessCallback
 from .sim_runner import AnyRunner
 
 _logger = logging.getLogger("kupicelib.SimStepper")
@@ -224,9 +225,9 @@ class SimStepper(object):
 
 
 if __name__ == "__main__":
-    from kupicelib.editor.spice_editor import SpiceEditor
-    from kupicelib.sim.sim_runner import SimRunner
-    from kupicelib.utils.sweep_iterators import sweep_log
+    from ..editor.spice_editor import SpiceEditor
+    from ..utils.sweep_iterators import sweep_log
+    from .sim_runner import SimRunner
 
     # Correct example for demonstration purposes
     netlist = SpiceEditor("../../tests/DC sweep.asc")
