@@ -30,10 +30,10 @@
 - [x] **C. Create `log/` Subpackage:**
   - [x] Create `cespy/log/` directory.
   - [x] Create `cespy/log/__init__.py`.
-  - [ ] Create/Move `cespy/log/logfile_data.py` (data structures for log info).
-  - [ ] Create/Move `cespy/log/ltsteps.py` (LTSpice `.log` step data parser).
-  - [ ] Create/Move `cespy/log/semi_dev_op_reader.py` (device operating point info reader).
-  - [ ] Create/Move `cespy/log/qspice_log_reader.py` (if needed for QSpice logs).
+  - [x] Create/Move `cespy/log/logfile_data.py` (data structures for log info).
+  - [x] Create/Move `cespy/log/ltsteps.py` (LTSpice `.log` step data parser).
+  - [x] Create/Move `cespy/log/semi_dev_op_reader.py` (device operating point info reader).
+  - [x] Create/Move `cespy/log/qspice_log_reader.py` (if needed for QSpice logs).
 - [x] **D. Create `raw/` Subpackage:**
   - [x] Create `cespy/raw/` directory.
   - [x] Create `cespy/raw/__init__.py`.
