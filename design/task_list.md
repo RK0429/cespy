@@ -94,28 +94,28 @@
 - [x] **C. Integrate Unique `kuPyLTSpice` Functionality:**
   - [x] Identify features or modules unique to `kuPyLTSpice` (e.g., specific batch simulation orchestration like `sim_batch.py`, or specific `sim_runner.py` logic if different).
   - [x] Merge these unique features into the appropriate subpackages of the UnifiedPackage (e.g., into `cespy/sim/`).
-- [ ] **D. Unify Shared Utilities:**
-  - [ ] Consolidate all utility functions (e.g., encoding detection, sweep iterators) into the `cespy/utils/` subpackage.
-  - [ ] For utilities like `sweep_iterators.py` appearing in both, select the most comprehensive/correct version (likely `kupicelib`'s), merging any distinct, valuable features from the other.
-- [ ] **E. Consolidate Simulator Interfaces:**
-  - [ ] Retain the multi-engine support from `kupicelib`'s `simulators/` directory.
-  - [ ] Review `kuPyLTSpice's LTSpice control logic.
-  - [ ] Merge any improvements or distinct, valuable features from `kuPyLTSpice's LTSpice control into`cespy/simulators/ltspice_simulator.py`.
-- [ ] **F. Client-Server Functionality:**
-  - [ ] If `client_server/` subpackage is retained, ensure all its existing functionality from `kupicelib` is preserved.
-- [ ] **G. Eliminate Redundant Files:**
-  - [ ] After merging logic, delete all duplicate or wrapper files originating from `kuPyLTSpice` that are now superseded.
+- [x] **D. Unify Shared Utilities:**
+  - [x] Consolidate all utility functions (e.g., encoding detection, sweep iterators) into the `cespy/utils/` subpackage.
+  - [x] For utilities like `sweep_iterators.py` appearing in both, select the most comprehensive/correct version (kupicelib's), merging any distinct, valuable features from the other.
+- [x] **E. Consolidate Simulator Interfaces:**
+  - [x] Retain the multi-engine support from `kupicelib`'s `simulators/` directory.
+  - [x] Review `kuPyLTSpice`'s LTSpice control logic.
+  - [x] Merge any improvements or distinct, valuable features from `kuPyLTSpice`'s LTSpice control into `cespy/simulators/ltspice_simulator.py`.
+- [x] **F. Client-Server Functionality:**
+  - [x] If `client_server/` subpackage is retained, ensure all its existing functionality from `kupicelib` is preserved.
+- [x] **G. Eliminate Redundant Files:**
+  - [x] After merging logic, delete all duplicate or wrapper files originating from `kuPyLTSpice` that are now superseded.
 
 ## IV. Dependency Management
 
-- [ ] **A. Analyze `spicelib` Dependency (from `kuPyLTSpice`):**
-  - [ ] Audit `kuPyLTSpice` code for all imports and uses of `spicelib`.
-  - [ ] Determine if `kupicelib` (now UnifiedPackage) already provides equivalent functionality.
-  - [ ] **If `spicelib` functionality is needed and not covered:**
+- [x] **A. Analyze `spicelib` Dependency (from `kuPyLTSpice`):**
+  - [x] Audit `kuPyLTSpice` code for all imports and uses of `spicelib`.
+  - [x] Determine if `kupicelib` (now UnifiedPackage) already provides equivalent functionality.
+  - [x] **If `spicelib` functionality is needed and not covered:**
     - [ ] Attempt to port the required functionality directly into the UnifiedPackage.
     - [ ] *If porting is infeasible, make a conscious decision to keep `spicelib` as a dependency (note: preference is to remove).*
     - [ ] *If incorporating code from `spicelib`, ensure GPL license compatibility is maintained.*
-  - [ ] Aim to remove `spicelib` from the UnifiedPackage's dependencies.
+  - [x] Aim to remove `spicelib` from the UnifiedPackage's dependencies.
 - [ ] **B. Consolidate All Other Dependencies:**
   - [ ] List all dependencies from `kupicelib` (e.g., `numpy`, `scipy`, `matplotlib`, `pandas`, `psutil`, `keyboard`, `clipboard`).
   - [ ] List any remaining, necessary dependencies from `kuPyLTSpice`.
