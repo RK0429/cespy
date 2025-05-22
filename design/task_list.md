@@ -91,9 +91,9 @@
   - [x] Remove the thin wrapper versions from `kuPyLTSpice` (not copied to `cespy`).
   - [x] Review `kuPyLTSpice` wrapper versions for any additional logic or convenience functions not present in `kupicelib`.
   - [x] Integrate any such unique, valuable logic from `kuPyLTSpice` wrappers into the corresponding `kupicelib` (now UnifiedPackage) modules (none were needed).
-- [ ] **C. Integrate Unique `kuPyLTSpice` Functionality:**
-  - [ ] Identify features or modules unique to `kuPyLTSpice` (e.g., specific batch simulation orchestration like `sim_batch.py`, or specific `sim_runner.py` logic if different).
-  - [ ] Merge these unique features into the appropriate subpackages of the UnifiedPackage (e.g., into `cespy/sim/`).
+- [x] **C. Integrate Unique `kuPyLTSpice` Functionality:**
+  - [x] Identify features or modules unique to `kuPyLTSpice` (e.g., specific batch simulation orchestration like `sim_batch.py`, or specific `sim_runner.py` logic if different).
+  - [x] Merge these unique features into the appropriate subpackages of the UnifiedPackage (e.g., into `cespy/sim/`).
 - [ ] **D. Unify Shared Utilities:**
   - [ ] Consolidate all utility functions (e.g., encoding detection, sweep iterators) into the `cespy/utils/` subpackage.
   - [ ] For utilities like `sweep_iterators.py` appearing in both, select the most comprehensive/correct version (likely `kupicelib`'s), merging any distinct, valuable features from the other.
