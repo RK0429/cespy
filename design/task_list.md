@@ -37,10 +37,10 @@
 - [x] **D. Create `raw/` Subpackage:**
   - [x] Create `cespy/raw/` directory.
   - [x] Create `cespy/raw/__init__.py`.
-  - [ ] Create/Move `cespy/raw/raw_read.py` (full binary `.raw` reader from `kupicelib`).
-  - [ ] Create/Move `cespy/raw/raw_write.py` (for writing `.raw` files).
-  - [ ] Create/Move `cespy/raw/raw_classes.py` (data classes for waveform data).
-  - [ ] Create/Move `cespy/raw/raw_convert.py` (if exists, for raw data conversion).
+  - [x] Create/Move `cespy/raw/raw_read.py` (full binary `.raw` reader from `kupicelib`).
+  - [x] Create/Move `cespy/raw/raw_write.py` (for writing `.raw` files).
+  - [x] Create/Move `cespy/raw/raw_classes.py` (data classes for waveform data).
+  - [x] Create/Move `cespy/raw/raw_convert.py` (if exists, for raw data conversion).
 - [x] **E. Create `sim/` Subpackage:**
   - [x] Create `cespy/sim/` directory.
   - [x] Create `cespy/sim/__init__.py`.
