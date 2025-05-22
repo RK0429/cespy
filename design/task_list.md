@@ -2,24 +2,24 @@
 
 ## I. Project Initialization and High-Level Design
 
-- [ ] **A. Decide on Unified Package Name:**
-  - [ ] Evaluate options: `kupicelib`, `kuPyLTSpice`, a new name (e.g., `cespy`, `kuSpice`, `kupice`).
-  - [ ] Finalize the chosen name for the unified library. (Let's use "UnifiedPackage" as a placeholder if not decided, or "cespy" as per the plan's example).
-- [ ] **B. Versioning Strategy:**
-  - [ ] If retaining an existing name (e.g., `kupicelib`), plan for a major version bump (e.g., to 2.0.0).
-  - [ ] If using a new name (e.g., `cespy`), plan for an initial version (e.g., 0.1.0 or 1.0.0).
-- [ ] **C. Choose Packaging Tool:**
-  - [ ] Confirm continuation with Poetry (as used by both packages) or decide to switch to an alternative. (Assume Poetry for this checklist).
+- [x] **A. Decide on Unified Package Name:**
+  - [x] Evaluate options: `kupicelib`, `kuPyLTSpice`, a new name (e.g., `cespy`, `kuSpice`, `kupice`).
+  - [x] Finalize the chosen name for the unified library. (Using `cespy`).
+- [x] **B. Versioning Strategy:**
+  - [x] If retaining an existing name (e.g., `kupicelib`), plan for a major version bump (e.g., to 2.0.0).
+  - [x] If using a new name (e.g., `cespy`), plan for an initial version (e.g., 0.1.0).
+- [x] **C. Choose Packaging Tool:**
+  - [x] Confirm continuation with Poetry (as used by both packages).
 
 ## II. Proposed Unified Directory Structure Setup (using `cespy` as example name)
 
-- [ ] **A. Create Top-Level Package Directory:**
-  - [ ] Create `cespy/`.
-  - [ ] Create `cespy/__init__.py`.
+- [x] **A. Create Top-Level Package Directory:**
+  - [x] Create `cespy/`.
+  - [x] Create `cespy/__init__.py`.
     - [ ] *Consider importing key classes into `cespy/__init__.py` for user convenience.*
 - [ ] **B. Create `editor/` Subpackage:**
-  - [ ] Create `cespy/editor/` directory.
-  - [ ] Create `cespy/editor/__init__.py`.
+  - [x] Create `cespy/editor/` directory.
+  - [x] Create `cespy/editor/__init__.py`.
   - [ ] Create/Move `cespy/editor/asc_editor.py` (full implementation from `kupicelib`).
   - [ ] Create/Move `cespy/editor/qsch_editor.py` (from `kupicelib`).
   - [ ] Create/Move `cespy/editor/base_editor.py` (common editor base classes).
@@ -27,23 +27,23 @@
   - [ ] Create/Move `cespy/editor/asy_reader.py` (LTSpice symbol file reader, if present/needed).
   - [ ] Create/Move `cespy/editor/ltspice_utils.py` (helper functions for LTSpice files).
   - [ ] Create/Move `cespy/editor/spice_editor.py` (general SPICE netlist editor).
-- [ ] **C. Create `log/` Subpackage:**
-  - [ ] Create `cespy/log/` directory.
-  - [ ] Create `cespy/log/__init__.py`.
+- [x] **C. Create `log/` Subpackage:**
+  - [x] Create `cespy/log/` directory.
+  - [x] Create `cespy/log/__init__.py`.
   - [ ] Create/Move `cespy/log/logfile_data.py` (data structures for log info).
   - [ ] Create/Move `cespy/log/ltsteps.py` (LTSpice `.log` step data parser).
   - [ ] Create/Move `cespy/log/semi_dev_op_reader.py` (device operating point info reader).
   - [ ] Create/Move `cespy/log/qspice_log_reader.py` (if needed for QSpice logs).
-- [ ] **D. Create `raw/` Subpackage:**
-  - [ ] Create `cespy/raw/` directory.
-  - [ ] Create `cespy/raw/__init__.py`.
+- [x] **D. Create `raw/` Subpackage:**
+  - [x] Create `cespy/raw/` directory.
+  - [x] Create `cespy/raw/__init__.py`.
   - [ ] Create/Move `cespy/raw/raw_read.py` (full binary `.raw` reader from `kupicelib`).
   - [ ] Create/Move `cespy/raw/raw_write.py` (for writing `.raw` files).
   - [ ] Create/Move `cespy/raw/raw_classes.py` (data classes for waveform data).
   - [ ] Create/Move `cespy/raw/raw_convert.py` (if exists, for raw data conversion).
-- [ ] **E. Create `sim/` Subpackage:**
-  - [ ] Create `cespy/sim/` directory.
-  - [ ] Create `cespy/sim/__init__.py`.
+- [x] **E. Create `sim/` Subpackage:**
+  - [x] Create `cespy/sim/` directory.
+  - [x] Create `cespy/sim/__init__.py`.
   - [ ] Create/Move `cespy/sim/simulator.py` (generic simulation interface/base).
   - [ ] Create/Move `cespy/sim/sim_runner.py` (local simulation job management).
   - [ ] Create/Move `cespy/sim/sim_batch.py` (batch simulation, from `kuPyLTSpice`).
@@ -51,7 +51,7 @@
   - [ ] Create/Move `cespy/sim/process_callback.py` (async process callback handling).
   - [ ] Create/Move `cespy/sim/run_task.py` (if needed, or integrate into `sim_runner`).
   - [ ] Create `cespy/sim/toolkit/` subpackage (ensure rename from "tookit").
-    - [ ] Create `cespy/sim/toolkit/__init__.py`.
+    - [x] Create `cespy/sim/toolkit/__init__.py`.
     - [ ] Create/Move `cespy/sim/toolkit/montecarlo.py`.
     - [ ] Create/Move `cespy/sim/toolkit/worst_case.py`.
     - [ ] Create/Move `cespy/sim/toolkit/fast_worst_case.py` (if distinct).
@@ -59,33 +59,33 @@
     - [ ] Create/Move `cespy/sim/toolkit/sensitivity_analysis.py`.
     - [ ] Create/Move `cespy/sim/toolkit/tolerance_deviations.py`.
     - [ ] Create/Move `cespy/sim/toolkit/sim_analysis.py`.
-- [ ] **F. Create `simulators/` Subpackage:**
-  - [ ] Create `cespy/simulators/` directory.
-  - [ ] Create `cespy/simulators/__init__.py`.
+- [x] **F. Create `simulators/` Subpackage:**
+  - [x] Create `cespy/simulators/` directory.
+  - [x] Create `cespy/simulators/__init__.py`.
   - [ ] Create/Move `cespy/simulators/ltspice_simulator.py`.
   - [ ] Create/Move `cespy/simulators/ngspice_simulator.py`.
   - [ ] Create/Move `cespy/simulators/qspice_simulator.py`.
   - [ ] Create/Move `cespy/simulators/xyce_simulator.py`.
-- [ ] **G. Create `utils/` Subpackage:**
-  - [ ] Create `cespy/utils/` directory.
-  - [ ] Create `cespy/utils/__init__.py`.
+- [x] **G. Create `utils/` Subpackage:**
+  - [x] Create `cespy/utils/` directory.
+  - [x] Create `cespy/utils/__init__.py`.
   - [ ] Create/Move `cespy/utils/detect_encoding.py`.
   - [ ] Create/Move `cespy/utils/file_search.py`.
   - [ ] Create/Move `cespy/utils/sweep_iterators.py`.
-- [ ] **H. Create `client_server/` Subpackage (if retaining remote execution):**
-  - [ ] Create `cespy/client_server/` directory.
-  - [ ] Create `cespy/client_server/__init__.py`.
+- [x] **H. Create `client_server/` Subpackage (if retaining remote execution):**
+  - [x] Create `cespy/client_server/` directory.
+  - [x] Create `cespy/client_server/__init__.py`.
   - [ ] Create/Move `cespy/client_server/sim_server.py`.
   - [ ] Create/Move `cespy/client_server/sim_client.py`.
   - [ ] Create/Move `cespy/client_server/srv_sim_runner.py`.
-- [ ] **I. Plan for `scripts/` directory removal:**
-  - [ ] Identify all scripts in `kupicelib/scripts/`.
-  - [ ] Plan to refactor their functionality into functions within appropriate modules and expose via CLI entry points.
+- [x] **I. Plan for `scripts/` directory removal:**
+  - [x] Identify all scripts in `kupicelib/scripts/`.
+  - [x] Plan to refactor their functionality into functions within appropriate modules and expose via CLI entry points.
 
 ## III. Code Consolidation from `kupicelib` and `kuPyLTSpice`
 
-- [ ] **A. Prioritize `kupicelib` Implementations:**
-  - [ ] For all modules, retain the comprehensive implementations from `kupicelib`.
+- [x] **A. Prioritize `kupicelib` Implementations:**
+  - [x] For all modules, retain the comprehensive implementations from `kupicelib`.
 - [ ] **B. Merge Overlapping Modules:**
   - [ ] Identify modules present in both `kupicelib` and `kuPyLTSpice` (e.g., `asc_editor.py`, `spice_editor.py`, `ltsteps.py`, `raw_read.py`).
   - [ ] Remove the thin wrapper versions from `kuPyLTSpice`.
@@ -98,9 +98,9 @@
   - [ ] Consolidate all utility functions (e.g., encoding detection, sweep iterators) into the `cespy/utils/` subpackage.
   - [ ] For utilities like `sweep_iterators.py` appearing in both, select the most comprehensive/correct version (likely `kupicelib`'s), merging any distinct, valuable features from the other.
 - [ ] **E. Consolidate Simulator Interfaces:**
-  - [ ] Retain the multi-engine support from `kupicelib`’s `simulators/` directory.
-  - [ ] Review `kuPyLTSpice`'s LTSpice control logic.
-  - [ ] Merge any improvements or distinct, valuable features from `kuPyLTSpice`'s LTSpice control into `cespy/simulators/ltspice_simulator.py`.
+  - [ ] Retain the multi-engine support from `kupicelib`'s `simulators/` directory.
+  - [ ] Review `kuPyLTSpice's LTSpice control logic.
+  - [ ] Merge any improvements or distinct, valuable features from `kuPyLTSpice's LTSpice control into`cespy/simulators/ltspice_simulator.py`.
 - [ ] **F. Client-Server Functionality:**
   - [ ] If `client_server/` subpackage is retained, ensure all its existing functionality from `kupicelib` is preserved.
 - [ ] **G. Eliminate Redundant Files:**
