@@ -2,9 +2,9 @@
 
 ## I. Project Initialization and High-Level Design
 
-- [ ] **A. Decide on Unified Package Name:**
-  - [ ] Evaluate options: `kupicelib`, `kuPyLTSpice`, a new name (e.g., `cespy`, `kuSpice`, `kupice`).
-  - [ ] Finalize the chosen name for the unified library. (Let's use "UnifiedPackage" as a placeholder if not decided, or "cespy" as per the plan's example).
+- [x] **A. Decide on Unified Package Name:**
+  - [x] Evaluate options: `kupicelib`, `kuPyLTSpice`, a new name (e.g., `cespy`, `kuSpice`, `kupice`).
+  - [x] Finalize the chosen name for the unified library. (Let's use "UnifiedPackage" as a placeholder if not decided, or "cespy" as per the plan's example).
 - [ ] **B. Versioning Strategy:**
   - [ ] If retaining an existing name (e.g., `kupicelib`), plan for a major version bump (e.g., to 2.0.0).
   - [ ] If using a new name (e.g., `cespy`), plan for an initial version (e.g., 0.1.0 or 1.0.0).
