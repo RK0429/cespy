@@ -1530,7 +1530,8 @@ class SpiceEditor(SpiceCircuit):
             available before running. If false, it will return an error if resources are
             not available.
         :type wait_resource: bool
-        :param callback: The callback that will be called when the simulation is finished
+        :param callback: The callback that will be called when the simulation is
+            finished
         :type callback: Optional[Callable[[Path, Path], Any]]
         :param timeout: The timeout for the simulation
         :type timeout: Optional[float]
