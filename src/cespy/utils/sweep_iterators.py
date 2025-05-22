@@ -48,11 +48,11 @@ class BaseIterator(object):
             self.stop = stop
         self.finished = False
 
-    def __iter__(self):
+    def __iter__(self) -> "BaseIterator":
         self.finished = False
         return self
 
-    def __next__(self):
+    def __next__(self) -> Union[int, float]:
         raise NotImplementedError("This function needs to be overriden")
 
 
@@ -84,13 +84,13 @@ class sweep(BaseIterator):
             self.step = -self.step  # In this case invert the sigh
         self.niter = 0
 
-    def __iter__(self):
+    def __iter__(self) -> "sweep":
         super().__iter__()
-        # Resets the interator
+        # Resets the iterator
         self.niter = 0
         return self
 
-    def __next__(self):
+    def __next__(self) -> Union[int, float]:
         val = self.start + self.niter * self.step
         self.niter += 1
         if (self.step > 0 and val <= self.stop) or (self.step < 0 and val >= self.stop):
@@ -152,12 +152,12 @@ class sweep_log(BaseIterator):
             self.step = 1 / self.step
         self.val = self.start
 
-    def __iter__(self):
+    def __iter__(self) -> "sweep_log":
         super().__iter__()
         self.val = self.start
         return self
 
-    def __next__(self):
+    def __next__(self) -> Union[int, float]:
         val = self.val  # Store previous value
         self.val *= self.step  # Calculate the next item
         if (self.start < self.stop and val <= self.stop) or (
@@ -194,12 +194,12 @@ class sweep_log_n(BaseIterator):
         super().__init__(start, number_of_elements, step)
         self.niter = 0
 
-    def __iter__(self):
+    def __iter__(self) -> "sweep_log_n":
         super().__iter__()
         self.niter = 0
         return self
 
-    def __next__(self):
+    def __next__(self) -> Union[int, float]:
         if self.niter < self.stop:
             val = self.start * (self.step**self.niter)
             self.niter += 1
@@ -207,24 +207,3 @@ class sweep_log_n(BaseIterator):
         else:
             self.finished = True
             raise StopIteration
-
-
-if __name__ == "__main__":
-
-    print("list(sweep(10))", list(sweep(10)))
-    print("list(sweep(1, 8))", list(sweep(1, 8)))
-    print("list(sweep(2, 8, 2))", list(sweep(2, 8, 2)))
-    print("list(sweep(2, 8, -2))", list(sweep(2, 8, -2)))
-    print("list(sweep(8, 2, 2))", list(sweep(8, 2, 2)))
-    print("list(sweep(0.3, 1.1, 0.2))", list(sweep(0.3, 1.1, 0.2)))
-    print("list(sweep(15, -15, 2.5))", list(sweep(15, -15, 2.5)))
-    print("list(sweep(-2, 2, 2))", list(sweep(-2, 2, 2)))
-    print("list(sweep(-2, 2, -2))", list(sweep(-2, 2, -2)))
-    print("list(sweep(2, -2, 2))", list(sweep(2, -2, 2)))
-    print("list(sweep(2, -2, -2))", list(sweep(2, -2, -2)))
-    print("list(sweep_n(0.3, 1.1, 4)", list(sweep_n(0.3, 1.1, 5)))
-    print("list(sweep_n(15, -15, 13))", list(sweep_n(15, -15, 13)))
-    print("list(sweepLog(0.1, 11e3, 10))", list(sweep_log(0.1, 11e3, 10)))
-    print("list(sweep_log(1000, 1, 2))", list(sweep_log(1000, 1, 2)))
-    print("list(sweep_log_n(1, 10, 6))", list(sweep_log_n(1, 10, 6)))
-    print("list(sweep_log_(10, 1, 5))", list(sweep_log_n(10, 1, 5)))
