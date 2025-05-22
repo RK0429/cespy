@@ -44,40 +44,40 @@
 - [x] **E. Create `sim/` Subpackage:**
   - [x] Create `cespy/sim/` directory.
   - [x] Create `cespy/sim/__init__.py`.
-  - [ ] Create/Move `cespy/sim/simulator.py` (generic simulation interface/base).
-  - [ ] Create/Move `cespy/sim/sim_runner.py` (local simulation job management).
-  - [ ] Create/Move `cespy/sim/sim_batch.py` (batch simulation, from `kuPyLTSpice`).
-  - [ ] Create/Move `cespy/sim/sim_stepping.py` (parameter sweep/step handling).
-  - [ ] Create/Move `cespy/sim/process_callback.py` (async process callback handling).
-  - [ ] Create/Move `cespy/sim/run_task.py` (if needed, or integrate into `sim_runner`).
-  - [ ] Create `cespy/sim/toolkit/` subpackage (ensure rename from "tookit").
+  - [x] Create/Move `cespy/sim/simulator.py` (generic simulation interface/base).
+  - [x] Create/Move `cespy/sim/sim_runner.py` (local simulation job management).
+  - [x] Create/Move `cespy/sim/sim_batch.py` (batch simulation, from `kuPyLTSpice`).
+  - [x] Create/Move `cespy/sim/sim_stepping.py` (parameter sweep/step handling).
+  - [x] Create/Move `cespy/sim/process_callback.py` (async process callback handling).
+  - [x] Create/Move `cespy/sim/run_task.py` (if needed, or integrate into `sim_runner`).
+  - [x] Create `cespy/sim/toolkit/` subpackage (ensure rename from "tookit").
     - [x] Create `cespy/sim/toolkit/__init__.py`.
-    - [ ] Create/Move `cespy/sim/toolkit/montecarlo.py`.
-    - [ ] Create/Move `cespy/sim/toolkit/worst_case.py`.
-    - [ ] Create/Move `cespy/sim/toolkit/fast_worst_case.py` (if distinct).
-    - [ ] Create/Move `cespy/sim/toolkit/failure_modes.py`.
-    - [ ] Create/Move `cespy/sim/toolkit/sensitivity_analysis.py`.
-    - [ ] Create/Move `cespy/sim/toolkit/tolerance_deviations.py`.
-    - [ ] Create/Move `cespy/sim/toolkit/sim_analysis.py`.
+    - [x] Create/Move `cespy/sim/toolkit/montecarlo.py`.
+    - [x] Create/Move `cespy/sim/toolkit/worst_case.py`.
+    - [x] Create/Move `cespy/sim/toolkit/fast_worst_case.py` (if distinct).
+    - [x] Create/Move `cespy/sim/toolkit/failure_modes.py`.
+    - [x] Create/Move `cespy/sim/toolkit/sensitivity_analysis.py`.
+    - [x] Create/Move `cespy/sim/toolkit/tolerance_deviations.py`.
+    - [x] Create/Move `cespy/sim/toolkit/sim_analysis.py`.
 - [x] **F. Create `simulators/` Subpackage:**
   - [x] Create `cespy/simulators/` directory.
   - [x] Create `cespy/simulators/__init__.py`.
-  - [ ] Create/Move `cespy/simulators/ltspice_simulator.py`.
-  - [ ] Create/Move `cespy/simulators/ngspice_simulator.py`.
-  - [ ] Create/Move `cespy/simulators/qspice_simulator.py`.
-  - [ ] Create/Move `cespy/simulators/xyce_simulator.py`.
+  - [x] Create/Move `cespy/simulators/ltspice_simulator.py`.
+  - [x] Create/Move `cespy/simulators/ngspice_simulator.py`.
+  - [x] Create/Move `cespy/simulators/qspice_simulator.py`.
+  - [x] Create/Move `cespy/simulators/xyce_simulator.py`.
 - [x] **G. Create `utils/` Subpackage:**
   - [x] Create `cespy/utils/` directory.
   - [x] Create `cespy/utils/__init__.py`.
-  - [ ] Create/Move `cespy/utils/detect_encoding.py`.
-  - [ ] Create/Move `cespy/utils/file_search.py`.
-  - [ ] Create/Move `cespy/utils/sweep_iterators.py`.
+  - [x] Create/Move `cespy/utils/detect_encoding.py`.
+  - [x] Create/Move `cespy/utils/file_search.py`.
+  - [x] Create/Move `cespy/utils/sweep_iterators.py`.
 - [x] **H. Create `client_server/` Subpackage (if retaining remote execution):**
   - [x] Create `cespy/client_server/` directory.
   - [x] Create `cespy/client_server/__init__.py`.
-  - [ ] Create/Move `cespy/client_server/sim_server.py`.
-  - [ ] Create/Move `cespy/client_server/sim_client.py`.
-  - [ ] Create/Move `cespy/client_server/srv_sim_runner.py`.
+  - [x] Create/Move `cespy/client_server/sim_server.py`.
+  - [x] Create/Move `cespy/client_server/sim_client.py`.
+  - [x] Create/Move `cespy/client_server/srv_sim_runner.py`.
 - [x] **I. Plan for `scripts/` directory removal:**
   - [x] Identify all scripts in `kupicelib/scripts/`.
   - [x] Plan to refactor their functionality into functions within appropriate modules and expose via CLI entry points.
