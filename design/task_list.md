@@ -17,16 +17,16 @@
   - [x] Create `cespy/`.
   - [x] Create `cespy/__init__.py`.
     - [ ] *Consider importing key classes into `cespy/__init__.py` for user convenience.*
-- [ ] **B. Create `editor/` Subpackage:**
+- [x] **B. Create `editor/` Subpackage:**
   - [x] Create `cespy/editor/` directory.
   - [x] Create `cespy/editor/__init__.py`.
-  - [ ] Create/Move `cespy/editor/asc_editor.py` (full implementation from `kupicelib`).
-  - [ ] Create/Move `cespy/editor/qsch_editor.py` (from `kupicelib`).
-  - [ ] Create/Move `cespy/editor/base_editor.py` (common editor base classes).
-  - [ ] Create/Move `cespy/editor/base_schematic.py` (common schematic abstractions).
-  - [ ] Create/Move `cespy/editor/asy_reader.py` (LTSpice symbol file reader, if present/needed).
-  - [ ] Create/Move `cespy/editor/ltspice_utils.py` (helper functions for LTSpice files).
-  - [ ] Create/Move `cespy/editor/spice_editor.py` (general SPICE netlist editor).
+  - [x] Create/Move `cespy/editor/asc_editor.py` (full implementation from `kupicelib`).
+  - [x] Create/Move `cespy/editor/qsch_editor.py` (from `kupicelib`).
+  - [x] Create/Move `cespy/editor/base_editor.py` (common editor base classes).
+  - [x] Create/Move `cespy/editor/base_schematic.py` (common schematic abstractions).
+  - [x] Create/Move `cespy/editor/asy_reader.py` (LTSpice symbol file reader, if present/needed).
+  - [x] Create/Move `cespy/editor/ltspice_utils.py` (helper functions for LTSpice files).
+  - [x] Create/Move `cespy/editor/spice_editor.py` (general SPICE netlist editor).
 - [x] **C. Create `log/` Subpackage:**
   - [x] Create `cespy/log/` directory.
   - [x] Create `cespy/log/__init__.py`.
