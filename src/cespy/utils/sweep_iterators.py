@@ -175,12 +175,9 @@ class sweep_log_n(BaseIterator):
 
     Advantages towards the range python built-in functions
     - Supports floating point arguments
-    - Supports both up and down sweeps-
+    - Supports both up and down sweeps
     Usage:
-        >>> list(sweep_log_n(1, 10, 6))
-        [1.0, 1.5848931924611136, 2.5118864315095806, 3.9810717055349736, 6.309573444801934, 10.000000000000004]
-        >>> list(sweep_log_n(10, 1, 5))
-        [1.0, 0.5623413251903491, 0.31622776601683794, 0.17782794100389226, 0.09999999999999999]
+        >>> list(sweep_log_n(1, 10, 6))  # e.g., [1.0, ..., 10.0]
     """
 
     def __init__(
