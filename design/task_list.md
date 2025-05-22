@@ -86,11 +86,11 @@
 
 - [x] **A. Prioritize `kupicelib` Implementations:**
   - [x] For all modules, retain the comprehensive implementations from `kupicelib`.
-- [ ] **B. Merge Overlapping Modules:**
-  - [ ] Identify modules present in both `kupicelib` and `kuPyLTSpice` (e.g., `asc_editor.py`, `spice_editor.py`, `ltsteps.py`, `raw_read.py`).
-  - [ ] Remove the thin wrapper versions from `kuPyLTSpice`.
-  - [ ] Review `kuPyLTSpice` wrapper versions for any additional logic or convenience functions not present in `kupicelib`.
-  - [ ] Integrate any such unique, valuable logic from `kuPyLTSpice` wrappers into the corresponding `kupicelib` (now UnifiedPackage) modules.
+- [x] **B. Merge Overlapping Modules:**
+  - [x] Identify modules present in both `kupicelib` and `kuPyLTSpice` (e.g., `asc_editor.py`, `spice_editor.py`, `ltsteps.py`, `raw_read.py`).
+  - [x] Remove the thin wrapper versions from `kuPyLTSpice` (not copied to `cespy`).
+  - [x] Review `kuPyLTSpice` wrapper versions for any additional logic or convenience functions not present in `kupicelib`.
+  - [x] Integrate any such unique, valuable logic from `kuPyLTSpice` wrappers into the corresponding `kupicelib` (now UnifiedPackage) modules (none were needed).
 - [ ] **C. Integrate Unique `kuPyLTSpice` Functionality:**
   - [ ] Identify features or modules unique to `kuPyLTSpice` (e.g., specific batch simulation orchestration like `sim_batch.py`, or specific `sim_runner.py` logic if different).
   - [ ] Merge these unique features into the appropriate subpackages of the UnifiedPackage (e.g., into `cespy/sim/`).

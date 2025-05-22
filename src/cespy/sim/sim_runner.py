@@ -112,6 +112,7 @@ import concurrent.futures
 import inspect  # Library used to get the arguments of the callback function
 import logging
 import shutil
+import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 from time import sleep
@@ -133,6 +134,7 @@ from typing import (
 from ..editor.base_editor import BaseEditor
 from ..sim.run_task import RunTask, clock_function
 from ..sim.simulator import Simulator
+from ..simulators.ltspice_simulator import LTspice as CustomLTspice
 from .process_callback import ProcessCallback
 
 _logger = logging.getLogger("kupicelib.SimRunner")
@@ -234,13 +236,14 @@ class SimRunner(AnyRunner):
 
         # Gets a simulator.
         if simulator is None:
-            raise SimRunnerConfigError(
-                "No default simulator defined; please specify a simulator")
+            simulator = CustomLTspice
+        elif isinstance(simulator, (str, Path)):
+            simulator = CustomLTspice.create_from(simulator)
         elif issubclass(simulator, Simulator):
-            self.simulator = simulator
+            pass
         else:
-            raise SimRunnerConfigError(
-                "Invalid simulator type; expected subclass of Simulator")
+            simulator = CustomLTspice
+        self.simulator = simulator
         _logger.info("SimRunner initialized")
         if self.verbose:
             _logger.setLevel(logging.DEBUG)
@@ -815,3 +818,24 @@ class SimRunner(AnyRunner):
 
             # Wait for the active tasks to finish with a timeout
             sleep(0.2)  # Go asleep for a while
+
+    def create_netlist(
+        self, asc_file: Union[str, Path], cmd_line_args: Optional[List[str]] = None
+    ):
+        """Creates a .net from an .asc using the LTspice -netlist command line."""
+        if not isinstance(asc_file, Path):
+            asc_file = Path(asc_file)
+        if asc_file.suffix == ".asc":
+            if self.verbose:
+                _logger.info("Creating Netlist")
+            if self.verbose and sys.platform == "darwin":
+                _logger.info(
+                    "Creating netlist on MacOS using LTspice at: %s",
+                    getattr(self.simulator, "executable", "unknown"),
+                )
+            return self.simulator.create_netlist(
+                asc_file, cmd_line_switches=cmd_line_args
+            )
+        else:
+            _logger.warning(f"Unable to create the Netlist from {asc_file}")
+            return None
