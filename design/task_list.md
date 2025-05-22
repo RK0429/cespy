@@ -116,12 +116,12 @@
     - [ ] *If porting is infeasible, make a conscious decision to keep `spicelib` as a dependency (note: preference is to remove).*
     - [ ] *If incorporating code from `spicelib`, ensure GPL license compatibility is maintained.*
   - [x] Aim to remove `spicelib` from the UnifiedPackage's dependencies.
-- [ ] **B. Consolidate All Other Dependencies:**
-  - [ ] List all dependencies from `kupicelib` (e.g., `numpy`, `scipy`, `matplotlib`, `pandas`, `psutil`, `keyboard`, `clipboard`).
-  - [ ] List any remaining, necessary dependencies from `kuPyLTSpice`.
-  - [ ] Create a final, unified list of dependencies for `pyproject.toml`.
-- [ ] **C. Prune Unnecessary Dependencies:**
-  - [ ] Review the consolidated list and remove any dependencies that are no longer needed after the merge.
+- [x] **B. Consolidate All Other Dependencies:**
+  - [x] List all dependencies from `kupicelib` (e.g., `numpy`, `scipy`, `matplotlib`, `pandas`, `psutil`, `keyboard`, `clipboard`).
+  - [x] List any remaining, necessary dependencies from `kuPyLTSpice` (none; merged implementations cover everything).
+  - [x] Create a final, unified list of dependencies for `pyproject.toml`.
+- [x] **C. Prune Unnecessary Dependencies:**
+  - [x] Review the consolidated list and remove any dependencies that are no longer needed after the merge (spicelib, kupicelib removed).
 
 ## V. Refactoring, Code Organization, and API Simplification
 

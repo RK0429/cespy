@@ -6,8 +6,18 @@ authors = [
     {name = "Ryota Kobayashi",email = "s.woods.m.29@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10,<4.0"
 dependencies = [
+  "numpy",
+  "scipy",
+  "psutil",
+  "clipboard",
+  "matplotlib",
+  "keyboard",
+  "types-keyboard>=0.13.2.20240310",
+  "types-psutil>=7.0.0.20250516",
+  "pandas>=2.2.3",
+  "pandas-stubs>=2.2.3.241126",
 ]
 
 [tool.poetry]
