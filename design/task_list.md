@@ -5,16 +5,16 @@
 - [x] **A. Decide on Unified Package Name:**
   - [x] Evaluate options: `kupicelib`, `kuPyLTSpice`, a new name (e.g., `cespy`, `kuSpice`, `kupice`).
   - [x] Finalize the chosen name for the unified library. (Let's use "UnifiedPackage" as a placeholder if not decided, or "cespy" as per the plan's example).
-- [ ] **B. Versioning Strategy:**
-  - [ ] If retaining an existing name (e.g., `kupicelib`), plan for a major version bump (e.g., to 2.0.0).
-  - [ ] If using a new name (e.g., `cespy`), plan for an initial version (e.g., 0.1.0 or 1.0.0).
-- [ ] **C. Choose Packaging Tool:**
-  - [ ] Confirm continuation with Poetry (as used by both packages) or decide to switch to an alternative. (Assume Poetry for this checklist).
+- [x] **B. Versioning Strategy:**
+  - [ ] ~~If retaining an existing name (e.g., `kupicelib`), plan for a major version bump (e.g., to 2.0.0).~~
+  - [x] If using a new name (e.g., `cespy`), plan for an initial version (e.g., 0.1.0 or 1.0.0).
+- [x] **C. Choose Packaging Tool:**
+  - [x] Confirm continuation with Poetry (as used by both packages) or decide to switch to an alternative. (Assume Poetry for this checklist).
 
 ## II. Proposed Unified Directory Structure Setup (using `cespy` as example name)
 
 - [ ] **A. Create Top-Level Package Directory:**
-  - [ ] Create `cespy/`.
+  - [x] Create `cespy/`.
   - [ ] Create `cespy/__init__.py`.
     - [ ] *Consider importing key classes into `cespy/__init__.py` for user convenience.*
 - [ ] **B. Create `editor/` Subpackage:**
