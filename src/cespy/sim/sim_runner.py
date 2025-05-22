@@ -833,7 +833,7 @@ class SimRunner(AnyRunner):
                     "Creating netlist on MacOS using LTspice at: %s",
                     getattr(self.simulator, "executable", "unknown"),
                 )
-            return self.simulator.create_netlist(
+            return self.simulator.create_netlist(  # type: ignore[attr-defined]
                 asc_file, cmd_line_switches=cmd_line_args
             )
         else:
