@@ -16,7 +16,7 @@
 - [x] **A. Create Top-Level Package Directory:**
   - [x] Create `cespy/`.
   - [x] Create `cespy/__init__.py`.
-    - [ ] *Consider importing key classes into `cespy/__init__.py` for user convenience.*
+    - [x] *Imported key simulator classes into `cespy/__init__.py` for user convenience.*
 - [x] **B. Create `editor/` Subpackage:**
   - [x] Create `cespy/editor/` directory.
   - [x] Create `cespy/editor/__init__.py`.
@@ -112,9 +112,9 @@
   - [x] Audit `kuPyLTSpice` code for all imports and uses of `spicelib`.
   - [x] Determine if `kupicelib` (now UnifiedPackage) already provides equivalent functionality.
   - [x] **If `spicelib` functionality is needed and not covered:**
-    - [ ] Attempt to port the required functionality directly into the UnifiedPackage.
-    - [ ] *If porting is infeasible, make a conscious decision to keep `spicelib` as a dependency (note: preference is to remove).*
-    - [ ] *If incorporating code from `spicelib`, ensure GPL license compatibility is maintained.*
+    - [x] Attempt to port the required functionality directly into the UnifiedPackage. (Not needed, functionality covered by kupicelib)
+    - [x] *If porting is infeasible, make a conscious decision to keep `spicelib` as a dependency (preference was to remove).*
+    - [x] *If incorporating code from `spicelib`, ensure GPL license compatibility is maintained. (N/A)*
   - [x] Aim to remove `spicelib` from the UnifiedPackage's dependencies.
 - [x] **B. Consolidate All Other Dependencies:**
   - [x] List all dependencies from `kupicelib` (e.g., `numpy`, `scipy`, `matplotlib`, `pandas`, `psutil`, `keyboard`, `clipboard`).
