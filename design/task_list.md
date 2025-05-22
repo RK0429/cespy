@@ -15,22 +15,22 @@
 
 - [ ] **A. Create Top-Level Package Directory:**
   - [x] Create `cespy/`.
-  - [ ] Create `cespy/__init__.py`.
+  - [x] Create `cespy/__init__.py`.
     - [ ] *Consider importing key classes into `cespy/__init__.py` for user convenience.*
 - [ ] **B. Create `editor/` Subpackage:**
-  - [ ] Create `cespy/editor/` directory.
-  - [ ] Create `cespy/editor/__init__.py`.
-  - [ ] Create/Move `cespy/editor/asc_editor.py` (full implementation from `kupicelib`).
-  - [ ] Create/Move `cespy/editor/qsch_editor.py` (from `kupicelib`).
-  - [ ] Create/Move `cespy/editor/base_editor.py` (common editor base classes).
-  - [ ] Create/Move `cespy/editor/base_schematic.py` (common schematic abstractions).
-  - [ ] Create/Move `cespy/editor/asy_reader.py` (LTSpice symbol file reader, if present/needed).
-  - [ ] Create/Move `cespy/editor/ltspice_utils.py` (helper functions for LTSpice files).
-  - [ ] Create/Move `cespy/editor/spice_editor.py` (general SPICE netlist editor).
+  - [x] Create `cespy/editor/` directory.
+  - [x] Create `cespy/editor/__init__.py`.
+  - [x] Create/Move `cespy/editor/asc_editor.py` (full implementation from `kupicelib`).
+  - [x] Create/Move `cespy/editor/qsch_editor.py` (from `kupicelib`).
+  - [x] Create/Move `cespy/editor/base_editor.py` (common editor base classes).
+  - [x] Create/Move `cespy/editor/base_schematic.py` (common schematic abstractions).
+  - [x] Create/Move `cespy/editor/asy_reader.py` (LTSpice symbol file reader, if present/needed).
+  - [x] Create/Move `cespy/editor/ltspice_utils.py` (helper functions for LTSpice files).
+  - [x] Create/Move `cespy/editor/spice_editor.py` (general SPICE netlist editor).
 - [ ] **C. Create `log/` Subpackage:**
-  - [ ] Create `cespy/log/` directory.
-  - [ ] Create `cespy/log/__init__.py`.
-  - [ ] Create/Move `cespy/log/logfile_data.py` (data structures for log info).
+  - [x] Create `cespy/log/` directory.
+  - [x] Create `cespy/log/__init__.py`.
+  - [x] Create/Move `cespy/log/logfile_data.py` (data structures for log info).
   - [ ] Create/Move `cespy/log/ltsteps.py` (LTSpice `.log` step data parser).
   - [ ] Create/Move `cespy/log/semi_dev_op_reader.py` (device operating point info reader).
   - [ ] Create/Move `cespy/log/qspice_log_reader.py` (if needed for QSpice logs).
@@ -98,9 +98,9 @@
   - [ ] Consolidate all utility functions (e.g., encoding detection, sweep iterators) into the `cespy/utils/` subpackage.
   - [ ] For utilities like `sweep_iterators.py` appearing in both, select the most comprehensive/correct version (likely `kupicelib`'s), merging any distinct, valuable features from the other.
 - [ ] **E. Consolidate Simulator Interfaces:**
-  - [ ] Retain the multi-engine support from `kupicelib`’s `simulators/` directory.
+  - [ ] Retain the multi-engine support from `kupicelib`'s `simulators/` directory.
   - [ ] Review `kuPyLTSpice`'s LTSpice control logic.
-  - [ ] Merge any improvements or distinct, valuable features from `kuPyLTSpice`'s LTSpice control into `cespy/simulators/ltspice_simulator.py`.
+  - [ ] Merge any improvements or distinct, valuable features from `kuPyLTSpice's LTSpice control into`cespy/simulators/ltspice_simulator.py`.
 - [ ] **F. Client-Server Functionality:**
   - [ ] If `client_server/` subpackage is retained, ensure all its existing functionality from `kupicelib` is preserved.
 - [ ] **G. Eliminate Redundant Files:**
