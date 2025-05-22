@@ -23,6 +23,19 @@ dependencies = [
 [tool.poetry]
 packages = [{include = "cespy", from = "src"}]
 
+[tool.poetry.dev-dependencies]
+black = "^23.1.0"
+flake8 = "^6.0.0"
+mypy = "^1.5.1"
+pytest = "^7.4.0"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ['E203', 'W503']
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
