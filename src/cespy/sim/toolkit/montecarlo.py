@@ -225,9 +225,10 @@ class Montecarlo(ToleranceDeviations):
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[Any] = None,
+        switches: Optional[list[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
+        measure: Optional[str] = None,
         num_runs: int = 1000,
     ) -> None:
         """This method runs the analysis without updating the netlist.
@@ -239,7 +240,7 @@ class Montecarlo(ToleranceDeviations):
         """
         self.elements_analysed.clear()
         self.clear_simulation_data()
-        for run in range(num_runs):
+        for _ in range(num_runs):
             self._reset_netlist()  # reset the netlist
             self.play_instructions()  # play the instructions
             # Preparing the variation on components
