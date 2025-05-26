@@ -911,7 +911,7 @@ class SpiceCircuit(BaseEditor):
 
     def get_component_parameters(self, reference: str) -> dict[str, Any]:
         # docstring inherited from BaseEditor
-        line_no, match = self._get_component_line_and_regex(reference)
+        _, match = self._get_component_line_and_regex(reference)
         if match and match.groupdict().get("params"):
             params_str = match.group("params")
             return self._parse_params(params_str)
@@ -935,7 +935,7 @@ class SpiceCircuit(BaseEditor):
         :raises: ParameterNotFoundError - In case the component is not found
         """
 
-        line_no, match = self._get_param_named(param)
+        _, match = self._get_param_named(param)
         if match:
             return str(match.group("value"))
         else:
