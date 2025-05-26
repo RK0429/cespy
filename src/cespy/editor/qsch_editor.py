@@ -1232,7 +1232,6 @@ class QschEditor(BaseSchematic):
 
             # Create simplified version for now - the full implementation has type issues
             # Placeholder to avoid "None has no attribute items" errors
-            pass
 
     def set_component_value(
         self, reference: str, value: Union[str, int, float]
