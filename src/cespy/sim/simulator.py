@@ -232,6 +232,20 @@ class Simulator(ABC):
         ...
 
     @classmethod
+    @abstractmethod
+    def create_netlist(
+        cls,
+        circuit_file: Union[str, Path],
+        cmd_line_switches: Optional[List[Any]] = None,
+        timeout: Optional[float] = None,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+        exe_log: bool = False,
+    ) -> Path:
+        """Create a netlist from a circuit file. This should be implemented by subclasses."""
+        raise SpiceSimulatorError("create_netlist must be implemented by subclass")
+
+    @classmethod
     def is_available(cls) -> bool:
         """This method checks if the simulator exists in the system.
 
