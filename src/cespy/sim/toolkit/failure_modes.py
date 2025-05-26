@@ -23,8 +23,9 @@ from collections import OrderedDict
 from typing import Any, Dict, Iterable, Optional, Type, Union
 
 from ...editor.base_editor import BaseEditor, ComponentNotFoundError
+from ..sim_runner import AnyRunner, RunTask
 from ..simulator import Simulator
-from .sim_analysis import AnyRunner, SimAnalysis
+from .sim_analysis import SimAnalysis
 
 
 class FailureMode(SimAnalysis):
@@ -59,8 +60,13 @@ class FailureMode(SimAnalysis):
         self.mosfets = self.editor.get_components("M")
         self.subcircuits = self.editor.get_components("X")
         self.user_failure_modes: Dict[str, Dict[str, Any]] = OrderedDict()
+        # Override simulations to map failure names to RunTask instances
+        self.simulations: Dict[str, Optional[RunTask]] = {}
 
-    def add_failure_circuit(self, component, sub_circuit):
+    def add_failure_circuit(self,
+                            component: str,
+                            sub_circuit: Union[str,
+                                               BaseEditor]) -> None:
         if not component.startswith("X"):
             raise RuntimeError(
                 "The failure modes addition only works with sub circuits"
@@ -69,34 +75,36 @@ class FailureMode(SimAnalysis):
             raise ComponentNotFoundError()
         raise NotImplementedError("TODO")  # TODO: Implement this
 
-    def add_failure_mode(self, component, short_pins: Iterable, open_pins: Iterable):
+    def add_failure_mode(
+            self,
+            component: str,
+            short_pins: Iterable[str],
+            open_pins: Iterable[str]) -> None:
         if not component.startswith("X"):
             raise RuntimeError("The failure modes addition only works with subcircuits")
         if component not in self.subcircuits:
             raise ComponentNotFoundError()
         raise NotImplementedError("TODO")  # TODO: Implement this
 
-    def run_all(self):
+    def run_all(self) -> None:
         for resistor in self.resistors:
-            # Short Circuit
-            self.editor.set_component_value(
-                resistor, "1f"
-            )  # replaces the resistor with a one femto-Ohm
-            self.simulations[f"{resistor}_S"] = self.runner.run()
-            # Open Circuit
+            # Short Circuit: set near-zero resistance
+            self.editor.set_component_value(resistor, "1f")
+            self.simulations[f"{resistor}_S"] = self.run()
+            # Open Circuit: remove component
             self.editor.remove_component(resistor)
-            self.simulations[f"{resistor}_O"] = self.simulator.run()
+            self.simulations[f"{resistor}_O"] = self.run()
             self.editor.reset_netlist()
 
         for two_pin_comps in (self.capacitors, self.inductors, self.diodes):
             for two_pin_component in two_pin_comps:
-                # Open Circuit
                 cinfo = self.editor.get_component(two_pin_component)
+                # Open Circuit: remove component
                 self.editor.remove_component(two_pin_component)
-                self.simulations[f"{two_pin_component}_O"] = self.simulator.run()
-                # Short Circuit
-                self.editor.netlist[cinfo["line"]] = (
-                    f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
-                )
-                self.simulations[f"{two_pin_component}_S"] = self.simulator.run()
+                self.simulations[f"{two_pin_component}_O"] = self.run()
+                # Short Circuit: insert short resistor
+                netlist = getattr(self.editor, "netlist")
+                netlist[cinfo["line"]
+                        ] = f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
+                self.simulations[f"{two_pin_component}_S"] = self.run()
                 self.editor.reset_netlist()
