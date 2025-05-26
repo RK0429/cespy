@@ -74,7 +74,7 @@ class AsyReader(object):
             _logger.info(f"Parsing ASY file {self._asy_file_path}")
             for line_text in asc_file:
                 if line_text.startswith("WINDOW"):
-                    tag, num_ref, posX, posY, alignment, size_str = line_text.split()
+                    _, num_ref, posX, posY, alignment, size_str = line_text.split()
                     coord = Point(int(posX), int(posY))
                     text_obj = Text(
                         coord=coord,
@@ -87,9 +87,9 @@ class AsyReader(object):
                 elif line_text.startswith("SYMATTR"):
                     tokens = line_text.split(maxsplit=2)
                     if len(tokens) == 3:
-                        tag, ref, attr_text = tokens
+                        _, ref, attr_text = tokens
                     elif len(tokens) == 2:
-                        tag, ref = tokens
+                        _, ref = tokens
                         attr_text = ""
                     else:
                         continue
@@ -99,7 +99,7 @@ class AsyReader(object):
                         attr_text = attr_text.upper()
                     self.attributes[ref] = attr_text
                 elif line_text.startswith("Version"):
-                    tag, version = line_text.split()
+                    _, version = line_text.split()
                     assert version in [
                         "4",
                         "4.0",
@@ -110,13 +110,13 @@ class AsyReader(object):
                     self.symbol_type = line_text[len("SymbolType "):].strip()
                 elif line_text.startswith("PINATTR"):
                     assert pin is not None, "A PIN was already created."
-                    tag, attribute, value = line_text.split(" ", maxsplit=3)
+                    _, attribute, value = line_text.split(" ", maxsplit=3)
                     value = value.strip()  # gets rid of the \n
                     pin.text += f"{attribute}={value};"
                 elif line_text.startswith("PIN"):
                     if pin is not None:
                         self.pins.append(pin)
-                    tag, x, y, justification, offset = line_text.split()
+                    _, x, y, justification, offset = line_text.split()
                     coord = Point(int(x), int(y))
                     angle = ERotation.R0
 
