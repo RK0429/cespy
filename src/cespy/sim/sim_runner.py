@@ -161,15 +161,18 @@ class AnyRunner(Protocol):
         netlist: Union[str, Path, BaseEditor],
         *,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[ProcessCallback], Callable]] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
     ) -> Optional[RunTask]: ...
 
-    def wait_completion(self, timeout=None, abort_all_on_timeout=False) -> bool: ...
+    def wait_completion(
+        self,
+        timeout: Optional[float] = None,
+        abort_all_on_timeout: bool = False) -> bool: ...
 
 
 class SimRunner(AnyRunner):
@@ -196,12 +199,12 @@ class SimRunner(AnyRunner):
     def __init__(
         self,
         *,
-        simulator=None,
+        simulator: Optional[Union[str, Path, Type[Simulator]]] = None,
         parallel_sims: int = 4,
         timeout: float = 600.0,
         verbose: bool = False,
         output_folder: Optional[str] = None,
-    ):
+    ) -> None:
         # The '*' in the parameter list forces the user to use named parameters for the
         # rest of the parameters.
         # This is a good practice to avoid confusion.
@@ -224,7 +227,7 @@ class SimRunner(AnyRunner):
             max_workers=self.parallel_sims
         )
         # track pairs of (task, future)
-        self.active_tasks: List[Tuple[RunTask, Future]] = []
+        self.active_tasks: List[Tuple[RunTask, Future[RunTask]]] = []
         self.completed_tasks: List[RunTask] = []
         self._iterator_counter = 0  # Note: Nested iterators are not supported
 
@@ -253,7 +256,7 @@ class SimRunner(AnyRunner):
             logging.getLogger("cespy.RunTask").debug(
                 "RunTask logger level set to DEBUG")
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Class Destructor : Closes Everything."""
         # Wait for all pending simulations to finish
         self.wait_completion(abort_all_on_timeout=True)
@@ -365,8 +368,8 @@ class SimRunner(AnyRunner):
 
     @staticmethod
     def validate_callback_args(
-        callback: Optional[Union[Type[ProcessCallback], Callable]],
-        callback_args: Optional[Union[tuple, dict]],
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]],
+        callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]],
     ) -> Optional[Dict[str, Any]]:
         """It validates that the callback_args are matching the callback function.
 
@@ -427,7 +430,7 @@ class SimRunner(AnyRunner):
         *,
         wait_resource: bool = True,
         callback: Optional[CallbackType] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
+        callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
@@ -570,7 +573,7 @@ class SimRunner(AnyRunner):
         if timeout is None:
             timeout = self.timeout
 
-        def dummy_callback(raw, log):
+        def dummy_callback(raw: Path, log: Path) -> None:
             """Dummy call back that does nothing."""
             return None
 
@@ -666,12 +669,15 @@ class SimRunner(AnyRunner):
         """
         alarm: Optional[float] = None
         for task, future in self.active_tasks:
+            # Skip tasks without a start time
+            if task.start_time is None:
+                continue
             # Determine appropriate timeout value for this task
             timeout_val = task.timeout if task.timeout is not None else self.timeout
             if timeout_val is None:
                 continue
-            # Cast to float now that timeout_val is guaranteed
-            candidate = cast(float, task.start_time) + cast(float, timeout_val)
+            # Calculate candidate stop time
+            candidate = task.start_time + timeout_val
             if alarm is None or candidate > alarm:
                 alarm = candidate
         return alarm
@@ -720,7 +726,7 @@ class SimRunner(AnyRunner):
         return self.failed_simulations == 0
 
     @staticmethod
-    def _del_file_if_exists(workfile: Optional[Path]):
+    def _del_file_if_exists(workfile: Optional[Path]) -> None:
         """Deletes a file if it exists.
 
         :param workfile: File to be deleted
@@ -732,7 +738,7 @@ class SimRunner(AnyRunner):
             workfile.unlink()
 
     @staticmethod
-    def _del_file_ext_if_exists(workfile: Path, ext: str):
+    def _del_file_ext_if_exists(workfile: Path, ext: str) -> None:
         """Deletes a file extension if it exists.
 
         :param workfile: File to be deleted
@@ -784,7 +790,7 @@ class SimRunner(AnyRunner):
         """
         self.cleanup_files()  # alias for backward compatibility
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[Any]:
         self._iterator_counter = (
             0  # Reset the iterator counter. Note: nested iterators are not supported
         )
@@ -821,7 +827,7 @@ class SimRunner(AnyRunner):
 
     def create_netlist(
         self, asc_file: Union[str, Path], cmd_line_args: Optional[List[str]] = None
-    ):
+    ) -> Any:
         """Creates a .net from an .asc using the LTspice -netlist command line."""
         if not isinstance(asc_file, Path):
             asc_file = Path(asc_file)
