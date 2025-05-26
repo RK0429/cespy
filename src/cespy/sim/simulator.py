@@ -229,7 +229,6 @@ class Simulator(ABC):
 
         This should be overriden by its subclass.
         """
-        ...
 
     @classmethod
     @abstractmethod
