@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 # coding=utf-8
+from __future__ import annotations
+
+import logging
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+from abc import ABC, abstractmethod
+from pathlib import Path, PureWindowsPath
+from typing import Any, List, Optional, Type, Union
 
 # -------------------------------------------------------------------------------
 #
@@ -19,21 +30,16 @@
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
 
-import logging
-import os
-import shlex
-import shutil
-import subprocess
-import sys
-from abc import ABC, abstractmethod
-from pathlib import Path, PureWindowsPath
-from typing import Any, List, Optional, Union
 
 _logger = logging.getLogger("cespy.Simulator")
 
 if sys.version_info.major >= 3 and sys.version_info.minor >= 6:
 
-    def run_function(command, timeout=None, stdout=None, stderr=None):
+    def run_function(
+            command: List[str],
+            timeout: Optional[float] = None,
+            stdout: Optional[Any] = None,
+            stderr: Optional[Any] = None) -> int:
         """Normalizing OS subprocess function calls between different platforms.
 
         This function is used for python 3.6 and higher versions.
@@ -44,7 +50,11 @@ if sys.version_info.major >= 3 and sys.version_info.minor >= 6:
 
 else:
 
-    def run_function(command, timeout=None, stdout=None, stderr=None):
+    def run_function(
+            command: List[str],
+            timeout: Optional[float] = None,
+            stdout: Optional[Any] = None,
+            stderr: Optional[Any] = None) -> int:
         """Normalizing OS subprocess function calls between different platforms.
 
         This is the old function that was used for python version prior to 3.6
@@ -121,7 +131,10 @@ class Simulator(ABC):
     _default_lib_paths: List[str] = []
 
     @classmethod
-    def create_from(cls, path_to_exe, process_name=None):
+    def create_from(cls,
+                    path_to_exe: Union[str,
+                                       Path],
+                    process_name: Optional[str] = None) -> Type[Simulator]:
         """Creates a simulator class from a path to the simulator executable.
 
         :param path_to_exe:
@@ -187,7 +200,7 @@ class Simulator(ABC):
         else:
             return Path(exe).name
 
-    def __init__(self):
+    def __init__(self) -> None:
         raise SpiceSimulatorError("This class is not supposed to be instanced.")
 
     @classmethod
@@ -197,8 +210,8 @@ class Simulator(ABC):
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[List[Any]] = None,
         timeout: Optional[float] = None,
-        stdout=None,
-        stderr=None,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
         exe_log: bool = False,
     ) -> int:
         """This method implements the call for the simulation of the netlist file.
@@ -211,7 +224,7 @@ class Simulator(ABC):
 
     @classmethod
     @abstractmethod
-    def valid_switch(cls, switch, switch_param) -> list:
+    def valid_switch(cls, switch: Any, switch_param: Any) -> List[Any]:
         """This method validates that a switch exist and is valid.
 
         This should be overriden by its subclass.
@@ -219,7 +232,7 @@ class Simulator(ABC):
         ...
 
     @classmethod
-    def is_available(cls):
+    def is_available(cls) -> bool:
         """This method checks if the simulator exists in the system.
 
         It will return a boolean value indicating if the simulator is installed or not.
