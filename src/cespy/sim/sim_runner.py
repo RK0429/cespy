@@ -173,6 +173,12 @@ class AnyRunner(Protocol):
         timeout: Optional[float] = None,
         abort_all_on_timeout: bool = False) -> bool: ...
 
+    @property
+    def okSim(self) -> int: ...
+
+    @property
+    def runno(self) -> int: ...
+
 
 class SimRunner(AnyRunner):
     """The SimRunner class implements all the methods required for launching batches of
@@ -844,3 +850,13 @@ class SimRunner(AnyRunner):
         else:
             _logger.warning(f"Unable to create the Netlist from {asc_file}")
             return None
+
+    @property
+    def okSim(self) -> int:
+        """Number of successful simulations completed."""
+        return self.successful_simulations
+
+    @property
+    def runno(self) -> int:
+        """Total number of simulation runs executed."""
+        return self.run_count
