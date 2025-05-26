@@ -97,7 +97,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         timeout: Optional[float] = None,
         exe_log: bool = True,
         measure: Optional[str] = None,
-    ) -> Tuple[float, float, Dict[str, float], float, Dict[str, float]]:
+    ) -> Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]:
         """As described in the class description, this method will perform a worst case
         analysis using a faster algorithm."""
         assert measure is not None, "The measure argument must be defined"
@@ -118,35 +118,28 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         def value_change(
                 val: Union[str, float],
                 dev: ComponentDeviation,
-                to: WorstCaseType) -> float:
-            """Sets the reference component to the maximum value if set_max is True, or
-            to the minimum value if set_max is False.
-
-            This method is used by the run_analysis() method.
-            """
-            # Preparing the variation on components, but only on the ones that have
-            # changed
+                to: WorstCaseType) -> Union[str, float]:
+            """Sets the reference component to the maximum or minimum based on deviation type."""
+            if isinstance(val, str):
+                return val
+            # val is now float
             if dev.typ == DeviationType.tolerance:
                 if to == WorstCaseType.max:
-                    new_val = val * (1 + dev.max_val)
+                    return val * (1 + dev.max_val)
                 elif to == WorstCaseType.min:
-                    new_val = val * (1 - dev.max_val)
+                    return val * (1 - dev.max_val)
                 else:
-                    # Default to nominal case
-                    new_val = val
-
+                    return val
             elif dev.typ == DeviationType.minmax:
                 if to == WorstCaseType.max:
-                    new_val = dev.max_val
+                    return dev.max_val
                 elif to == WorstCaseType.min:
-                    new_val = dev.min_val
+                    return dev.min_val
                 else:
-                    # Default to nominal case
-                    new_val = val
+                    return val
             else:
                 _logger.warning("Unknown deviation type")
-                new_val = val
-            return new_val
+                return val
 
         def set_ref_to(ref: str, to: WorstCaseType) -> None:
             val, dev, typ = worst_case_elements[ref]
@@ -354,7 +347,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         min_comp_values = {}
         max_comp_values = {}
         for ref in self.elements_analysed:
-            val, dev, typ = worst_case_elements[ref]
+            val, dev, _ = worst_case_elements[ref]
             if min_setting[ref]:
                 min_comp_values[ref] = value_change(val, dev, WorstCaseType.max)
             else:
