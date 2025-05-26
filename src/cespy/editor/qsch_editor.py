@@ -907,7 +907,7 @@ class QschEditor(BaseSchematic):
     def get_parameter(self, param: str) -> str:
         # docstring inherited from BaseEditor
 
-        tag, match = self._get_param_named(param)
+        _, match = self._get_param_named(param)
         if match is not None:
             return match.group("value")
         else:
