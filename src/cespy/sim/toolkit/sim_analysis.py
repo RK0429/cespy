@@ -22,7 +22,7 @@
 
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
@@ -61,12 +61,12 @@ class SimAnalysis(object):
         self.instructions_added = False
         self.log_data = LogfileData()
 
-    def clear_simulation_data(self):
+    def clear_simulation_data(self) -> None:
         """Clears the data from the simulations."""
         self.simulations.clear()
 
     @property
-    def runner(self):
+    def runner(self) -> AnyRunner:
         if self._runner is None:
             from ...sim.sim_runner import SimRunner
 
@@ -74,7 +74,7 @@ class SimAnalysis(object):
         return self._runner
 
     @runner.setter
-    def runner(self, new_runner: AnyRunner):
+    def runner(self, new_runner: AnyRunner) -> None:
         self._runner = new_runner
 
     def run(
@@ -92,7 +92,7 @@ class SimAnalysis(object):
 
         See runner.run() method for details on arguments.
         """
-        sim = self.runner.run(
+        sim: Optional[RunTask] = self.runner.run(
             self.editor,
             wait_resource=wait_resource,
             callback=callback,
@@ -107,17 +107,17 @@ class SimAnalysis(object):
             return sim
         return None
 
-    def wait_completion(self):
+    def wait_completion(self) -> None:
         self.runner.wait_completion()
 
     @wraps(BaseEditor.reset_netlist)
-    def reset_netlist(self):
+    def reset_netlist(self) -> None:
         """Resets the netlist to the original state and clears the instructions added by
         the user."""
         self._reset_netlist()
         self.received_instructions.clear()
 
-    def _reset_netlist(self):
+    def _reset_netlist(self) -> None:
         """Unlike the reset_netlist method of the BaseEditor, this method does not clear
         the instructions added by the user.
 
@@ -127,25 +127,25 @@ class SimAnalysis(object):
         self.editor.reset_netlist()
         self.instructions_added = False
 
-    def set_component_value(self, ref: str, new_value: str):
+    def set_component_value(self, ref: str, new_value: str) -> None:
         self.received_instructions.append(("set_component_value", ref, new_value))
 
-    def set_element_model(self, ref: str, new_model: str):
+    def set_element_model(self, ref: str, new_model: str) -> None:
         self.received_instructions.append(("set_element_model", ref, new_model))
 
-    def set_parameter(self, ref: str, new_value: str):
+    def set_parameter(self, ref: str, new_value: str) -> None:
         self.received_instructions.append(("set_parameter", ref, new_value))
 
-    def add_instruction(self, new_instruction: str):
+    def add_instruction(self, new_instruction: str) -> None:
         self.received_instructions.append(("add_instruction", new_instruction))
 
-    def remove_instruction(self, instruction: str):
+    def remove_instruction(self, instruction: str) -> None:
         self.received_instructions.append(("remove_instruction", instruction))
 
-    def remove_Xinstruction(self, search_pattern: str):
+    def remove_Xinstruction(self, search_pattern: str) -> None:
         self.received_instructions.append(("remove_Xinstruction", search_pattern))
 
-    def play_instructions(self):
+    def play_instructions(self) -> None:
         if self.instructions_added:
             return  # Nothing to do
         for instruction in self.received_instructions:
@@ -165,22 +165,22 @@ class SimAnalysis(object):
                 raise ValueError("Unknown instruction")
         self.instructions_added = True
 
-    def save_netlist(self, filename: str):
+    def save_netlist(self, filename: str) -> None:
         self.play_instructions()
         self.editor.save_netlist(filename)
 
-    def cleanup_files(self):
+    def cleanup_files(self) -> None:
         """Clears all simulation files.
 
         Typically used after a simulation run and analysis.
         """
-        self.runner.cleanup_files()
+        cast(Any, self.runner).cleanup_files()
 
-    def simulation(self, index: int):
+    def simulation(self, index: int) -> Optional[RunTask]:
         """Returns a simulation object."""
         return self.simulations[index]
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> Optional[RunTask]:
         return self.simulations[item]
 
     @staticmethod
@@ -199,16 +199,16 @@ class SimAnalysis(object):
             if run_task.log_file is None:
                 _logger.warning("Log file is None")
                 return None
-            log_results = log_reader_cls(run_task.log_file)
+            log_results = log_reader_cls(str(run_task.log_file))
         except FileNotFoundError:
-            _logger.warning("Log file not found: %s", run_task.log_file)
+            _logger.warning("Log file not found: %s", str(run_task.log_file))
             return None
         except EncodingDetectError:
-            _logger.warning("Log file %s couldn't be read", run_task.log_file)
+            _logger.warning("Log file %s couldn't be read", str(run_task.log_file))
             return None
         return log_results
 
-    def add_log_data(self, log_data: LogfileData):
+    def add_log_data(self, log_data: LogfileData) -> None:
         """Add data from a log file to the log_data object."""
         if log_data is None:
             return
@@ -240,7 +240,7 @@ class SimAnalysis(object):
 
     def configure_measurement(
         self, meas_name: str, meas_expression: str, meas_type: str = "tran"
-    ):
+    ) -> None:
         """Configures a measurement to be done in the simulation."""
         self.editor.add_instruction(
             ".meas {} {} {}".format(meas_type, meas_name, meas_expression)
