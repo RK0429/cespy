@@ -232,7 +232,7 @@ _ALLOWED_OPS: Dict[Type[Any], Callable[..., Any]] = {
 }
 
 
-def _safe_eval(expr: str, vars: Dict[str, Any]) -> Any:
+def _safe_eval(expr: str, variables: Dict[str, Any]) -> Any:
     """Safely evaluate simple arithmetic expressions using AST."""
     node = ast.parse(expr, mode="eval").body
 
@@ -244,7 +244,7 @@ def _safe_eval(expr: str, vars: Dict[str, Any]) -> Any:
         if isinstance(n, (ast.Constant, ast.Num)):
             return getattr(n, 'value', n.n)
         if isinstance(n, ast.Name):
-            return vars[n.id]
+            return variables[n.id]
         raise TypeError(f"Unsupported expression: {expr}")
     return _eval(node)
 
