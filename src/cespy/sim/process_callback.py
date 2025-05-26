@@ -53,4 +53,3 @@ class ProcessCallback(Process):
     @staticmethod
     def callback(raw_file: str, log_file: str, **kwargs: Any) -> Any:
         """This function needs to be overriden."""
-        ...
