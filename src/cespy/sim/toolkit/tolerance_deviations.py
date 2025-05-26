@@ -405,5 +405,6 @@ class ToleranceDeviations(SimAnalysis, ABC):
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
-    ) -> None:
+        measure: Optional[str] = None,
+    ) -> Optional[Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]]:
         """The override of this method should set the self.analysis_executed to True."""
