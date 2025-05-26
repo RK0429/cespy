@@ -20,10 +20,11 @@
 
 import logging
 from enum import IntEnum
-from typing import Callable, Dict, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 from ..process_callback import ProcessCallback
-from .worst_case import DeviationType, WorstCaseAnalysis
+from .tolerance_deviations import ComponentDeviation, DeviationType
+from .worst_case import WorstCaseAnalysis
 
 _logger = logging.getLogger("cespy.SimAnalysis")
 
@@ -79,9 +80,9 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         *,
         runs_per_sim: Optional[int] = None,  # This parameter is ignored
         wait_resource: bool = True,  # This parameter is ignored
-        callback: Optional[Union[Type[ProcessCallback], Callable]] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
-        switches=None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
@@ -90,13 +91,13 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
 
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable]] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
-        switches=None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
         measure: Optional[str] = None,
-    ) -> Tuple[float, float, Dict[str, float], float, Dict[str, float]]:
+    ) -> Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]:
         """As described in the class description, this method will perform a worst case
         analysis using a faster algorithm."""
         assert measure is not None, "The measure argument must be defined"
@@ -105,7 +106,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         self.elements_analysed.clear()
         worst_case_elements = {}
 
-        def check_and_add_component(ref1: str):
+        def check_and_add_component(ref1: str) -> None:
             val1, dev1 = self.get_component_value_deviation_type(
                 ref1
             )  # get there present value
@@ -114,37 +115,33 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             worst_case_elements[ref1] = val1, dev1, "component"
             self.elements_analysed.append(ref1)
 
-        def value_change(val, dev, to: WorstCaseType):
-            """Sets the reference component to the maximum value if set_max is True, or
-            to the minimum value if set_max is False.
-
-            This method is used by the run_analysis() method.
-            """
-            # Preparing the variation on components, but only on the ones that have
-            # changed
+        def value_change(
+                val: Union[str, float],
+                dev: ComponentDeviation,
+                to: WorstCaseType) -> Union[str, float]:
+            """Sets the reference component to the maximum or minimum based on deviation type."""
+            if isinstance(val, str):
+                return val
+            # val is now float
             if dev.typ == DeviationType.tolerance:
                 if to == WorstCaseType.max:
-                    new_val = val * (1 + dev.max_val)
+                    return val * (1 + dev.max_val)
                 elif to == WorstCaseType.min:
-                    new_val = val * (1 - dev.max_val)
+                    return val * (1 - dev.max_val)
                 else:
-                    # Default to nominal case
-                    new_val = val
-
+                    return val
             elif dev.typ == DeviationType.minmax:
                 if to == WorstCaseType.max:
-                    new_val = dev.max_val
+                    return dev.max_val
                 elif to == WorstCaseType.min:
-                    new_val = dev.min_val
+                    return dev.min_val
                 else:
-                    # Default to nominal case
-                    new_val = val
+                    return val
             else:
                 _logger.warning("Unknown deviation type")
-                new_val = val
-            return new_val
+                return val
 
-        def set_ref_to(ref, to: WorstCaseType):
+        def set_ref_to(ref: str, to: WorstCaseType) -> None:
             val, dev, typ = worst_case_elements[ref]
             new_val = value_change(val, dev, to)
             if typ == "component":
@@ -154,7 +151,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             else:
                 _logger.warning("Unknown type")
 
-        def run_and_get_measure():
+        def run_and_get_measure() -> float:
             # Run the simulation
             # Prepare callbacks and timeouts
             actual_callback = (
@@ -171,10 +168,12 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
                 timeout=actual_timeout,
                 exe_log=exe_log,
             )
+            assert task is not None
             self.wait_completion()
             # Get the results from the simulation
             log_data = self.add_log(task)
-            return log_data.get_measure_value(measure)
+            assert log_data is not None
+            return cast(float, log_data.get_measure_value(measure))
 
         for ref in self.device_deviations:
             check_and_add_component(ref)
@@ -234,13 +233,13 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         self.testbench_executed = True  # Idem
         # Get the results from the simulation
         log_data = self.read_logfiles()
-        nominal = log_data.get_measure_value(measure, 0)
+        nominal = cast(float, log_data.get_measure_value(measure, 0))
         _logger.info("Nominal value: %g", nominal)
         component_deltas = {}
         idx = 1
         new_measure = last_measure = nominal
         for ref in self.elements_analysed:
-            new_measure = log_data.get_measure_value(measure, idx)
+            new_measure = cast(float, log_data.get_measure_value(measure, idx))
             component_deltas[ref] = new_measure - last_measure
             last_measure = new_measure
             _logger.info("Component %s: %g", ref, component_deltas[ref])
@@ -348,7 +347,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         min_comp_values = {}
         max_comp_values = {}
         for ref in self.elements_analysed:
-            val, dev, typ = worst_case_elements[ref]
+            val, dev, _ = worst_case_elements[ref]
             if min_setting[ref]:
                 min_comp_values[ref] = value_change(val, dev, WorstCaseType.max)
             else:

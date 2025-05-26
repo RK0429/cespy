@@ -27,7 +27,18 @@ __copyright__ = "Copyright 2017, Fribourg Switzerland"
 
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    Type,
+    Union,
+)
 
 from ..editor.base_editor import BaseEditor
 from .process_callback import ProcessCallback
@@ -36,16 +47,25 @@ from .sim_runner import AnyRunner
 _logger = logging.getLogger("cespy.SimStepper")
 
 
+class RunnerProtocol(AnyRunner, Protocol):
+    """Protocol for runner used in SimStepper, includes okSim and runno attributes."""
+    @property
+    def okSim(self) -> int: ...
+
+    @property
+    def runno(self) -> int: ...
+
+
 class StepInfo(object):
-    def __init__(self, what: str, elem: str, iterable: Iterable):
+    def __init__(self, what: str, elem: str, iterable: Iterable[Any]) -> None:
         self.what = what
         self.elem = elem
         self.iter = iterable
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(list(self.iter))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Iteration on {self.what} {self.elem} : {self.iter}"
 
 
@@ -85,29 +105,29 @@ class SimStepper(object):
     speed up the simulation times.
     """
 
-    def __init__(self, circuit: BaseEditor, runner: AnyRunner):
+    def __init__(self, circuit: BaseEditor, runner: RunnerProtocol) -> None:
         self.runner = runner
         self.netlist = circuit
         self.iter_list: List[StepInfo] = []
 
     @wraps(BaseEditor.add_instruction)
-    def add_instruction(self, instruction: str):
+    def add_instruction(self, instruction: str) -> None:
         self.netlist.add_instruction(instruction)
 
     @wraps(BaseEditor.add_instructions)
-    def add_instructions(self, *instructions) -> None:
+    def add_instructions(self, *instructions: str) -> None:
         self.netlist.add_instructions(*instructions)
 
     @wraps(BaseEditor.remove_instruction)
-    def remove_instruction(self, instruction) -> None:
+    def remove_instruction(self, instruction: str) -> None:
         self.netlist.remove_instruction(instruction)
 
     @wraps(BaseEditor.remove_Xinstruction)
-    def remove_Xinstruction(self, search_pattern) -> None:
+    def remove_Xinstruction(self, search_pattern: str) -> None:
         self.netlist.remove_Xinstruction(search_pattern)
 
     @wraps(BaseEditor.set_parameters)
-    def set_parameters(self, **kwargs):
+    def set_parameters(self, **kwargs: Union[str, int, float]) -> None:
         self.netlist.set_parameters(**kwargs)
 
     @wraps(BaseEditor.set_parameter)
@@ -115,7 +135,7 @@ class SimStepper(object):
         self.netlist.set_parameter(param, value)
 
     @wraps(BaseEditor.set_component_values)
-    def set_component_values(self, **kwargs):
+    def set_component_values(self, **kwargs: Union[str, int, float]) -> None:
         self.netlist.set_component_values(**kwargs)
 
     @wraps(BaseEditor.set_component_value)
@@ -126,23 +146,23 @@ class SimStepper(object):
     def set_element_model(self, element: str, model: str) -> None:
         self.netlist.set_element_model(element, model)
 
-    def add_param_sweep(self, param: str, iterable: Iterable):
+    def add_param_sweep(self, param: str, iterable: Iterable[Any]) -> None:
         """Adds a dimension to the simulation, where the param is swept."""
         self.iter_list.append(StepInfo("param", param, iterable))
 
-    def add_value_sweep(self, comp: str, iterable: Iterable):
+    def add_value_sweep(self, comp: str, iterable: Iterable[Any]) -> None:
         """Adds a dimension to the simulation, where a component value is swept."""
         # The next line raises an ComponentNotFoundError if the component doesn't exist
         _ = self.netlist.get_component_value(comp)
         self.iter_list.append(StepInfo("component", comp, iterable))
 
-    def add_model_sweep(self, comp: str, iterable: Iterable):
+    def add_model_sweep(self, comp: str, iterable: Iterable[Any]) -> None:
         """Adds a dimension to the simulation, where a component model is swept."""
         # The next line raises an ComponentNotFoundError if the component doesn't exist
         _ = self.netlist.get_component_value(comp)
         self.iter_list.append(StepInfo("model", comp, iterable))
 
-    def total_number_of_simulations(self):
+    def total_number_of_simulations(self) -> int:
         """Returns the total number of simulations foreseen."""
         total = 1
         for step in self.iter_list:
@@ -155,12 +175,12 @@ class SimStepper(object):
 
     def run_all(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable]] = None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches=None,
+        switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
-        use_loadbias="Auto",
-        wait_completion=True,
+        use_loadbias: str = "Auto",
+        wait_completion: bool = True,
     ) -> None:
         assert use_loadbias in (
             "Auto",
@@ -211,16 +231,16 @@ class SimStepper(object):
             # Now waits for the simulations to end
             self.runner.wait_completion()
 
-    def run(self):
+    def run(self) -> None:
         """Rather uses run_all instead."""
         self.run_all()
 
     @property
-    def okSim(self):
+    def okSim(self) -> int:
         return self.runner.okSim
 
     @property
-    def runno(self):
+    def runno(self) -> int:
         return self.runner.runno
 
 
@@ -231,8 +251,8 @@ if __name__ == "__main__":
 
     # Correct example for demonstration purposes
     netlist = SpiceEditor("../../tests/DC sweep.asc")
-    runner = SimRunner()
-    test = SimStepper(netlist, runner)
+    sim_runner = SimRunner()
+    test = SimStepper(netlist, sim_runner)
     # The set_parameter method is decorated with @wraps which causes type checking issues
     # in the test code, but it works correctly at runtime
     netlist.set_parameter("R1", 3)  # Set parameter on the netlist directly

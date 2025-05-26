@@ -22,6 +22,7 @@
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2023, Fribourg Switzerland"
 
+import importlib
 import logging
 import sys
 import time
@@ -36,17 +37,16 @@ _logger = logging.getLogger("cespy.RunTask")
 
 # Configure structured logging formatter if python-json-logger is installed
 try:
-    from pythonjsonlogger import jsonlogger  # type: ignore[attr-defined]
-
+    _pjlogger = importlib.import_module("pythonjsonlogger")
     handler = logging.StreamHandler()
-    json_formatter = jsonlogger.JsonFormatter(  # type: ignore[attr-defined]
+    json_formatter = _pjlogger.jsonlogger.JsonFormatter(
         '%(asctime)s %(name)s %(levelname)s '
         '[runno=%(runno)s netlist=%(netlist)s] %(message)s'
     )
     handler.setFormatter(json_formatter)
     if not _logger.handlers:
         _logger.addHandler(handler)
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     pass
 
 END_LINE_TERM = "\n"
@@ -79,18 +79,36 @@ def format_time_difference(time_diff: float) -> str:
 class RunTask:
     """This is an internal Class and should not be used directly by the User."""
 
+    # Instance variable annotations for type checking
+    start_time: Optional[float]
+    stop_time: Optional[float]
+    verbose: bool
+    switches: Any
+    timeout: Optional[float]
+    simulator: Type[Simulator]
+    runno: int
+    netlist_file: Path
+    callback: Any
+    callback_args: Optional[dict[str, Any]]
+    retcode: int
+    raw_file: Optional[Path]
+    log_file: Optional[Path]
+    callback_return: Any
+    exe_log: bool
+    logger: Any
+
     def __init__(
         self,
         simulator: Type[Simulator],
-        runno,
+        runno: int,
         netlist_file: Path,
-        callback: Union[Type[ProcessCallback], Callable[[Path, Path], Any]],
-        callback_args: Optional[dict] = None,
+        callback: Any,
+        callback_args: Optional[dict[str, Any]] = None,
         switches: Any = None,
         timeout: Optional[float] = None,
         verbose: bool = False,
         exe_log: bool = False,
-    ):
+    ) -> None:
         self.start_time = None
         self.stop_time = None
         self.verbose = verbose
@@ -118,22 +136,19 @@ class RunTask:
         if self.verbose:
             print(f"{time.asctime()} {logger_fun.__name__}: {message}{END_LINE_TERM}")
 
-    def run(self):
+    def run(self) -> None:
         # Running the Simulation
-
         self.start_time = clock_function()
         self.print_info(
             _logger.info,
             ": Starting simulation %d: %s" % (self.runno, self.netlist_file),
         )
-        # Ensure simulator executable is configured if missing
-        if hasattr(
-                self.simulator,
-                'spice_exe') and not self.simulator.spice_exe and hasattr(
-                self.simulator,
-                'get_default_executable'):
-            # Initialize default LTspice executable
-            self.simulator = self.simulator.create_from(None)
+        # Initialize default executable if none configured and method available
+        if not self.simulator.spice_exe:
+            get_default_exec = getattr(self.simulator, "get_default_executable", None)
+            if callable(get_default_exec):
+                default_exec = get_default_exec()
+                self.simulator = self.simulator.create_from(default_exec)
         # start execution
         self.retcode = self.simulator.run(
             self.netlist_file.absolute().as_posix(),
@@ -174,19 +189,30 @@ class RunTask:
                             self.callback.__name__, callback_print
                         ),
                     )
-                    try:
+                    # Invoke callback: ProcessCallback subclass or function
+                    assert self.raw_file is not None and self.log_file is not None
+                    if isinstance(
+                            self.callback,
+                            type) and issubclass(
+                            self.callback,
+                            ProcessCallback):
+                        # ProcessCallback uses str parameters
+                        raw_str = self.raw_file.as_posix()
+                        log_str = self.log_file.as_posix()
                         if self.callback_args is not None:
                             return_or_process = self.callback(
-                                self.raw_file, self.log_file, **self.callback_args
-                            )
+                                raw_str, log_str, **self.callback_args)
+                        else:
+                            return_or_process = self.callback(raw_str, log_str)
+                    else:
+                        # Function callback uses Path parameters
+                        if self.callback_args is not None:
+                            return_or_process = self.callback(
+                                self.raw_file, self.log_file, **self.callback_args)
                         else:
                             return_or_process = self.callback(
-                                self.raw_file, self.log_file
-                            )
-                    except Exception:
-                        # Log exception with full traceback
-                        self.logger.exception("Exception during callback execution")
-                    else:
+                                self.raw_file, self.log_file)
+                    try:
                         if isinstance(return_or_process, ProcessCallback):
                             proc = return_or_process
                             proc.start()
@@ -194,7 +220,10 @@ class RunTask:
                             proc.join()
                         else:
                             self.callback_return = return_or_process
-                    finally:
+                    except (ValueError, TypeError, RuntimeError) as exc:
+                        self.logger.exception(
+                            "Exception during callback execution: %s", exc)
+                    else:
                         callback_start_time = self.stop_time
                         self.stop_time = clock_function()
                         self.print_info(

@@ -28,51 +28,51 @@ class LTComplex(complex):
         r"\((?P<mag>.*?)(?P<dB>dB)?,(?P<ph>.*?)(?P<degrees>°)?\)"
     )
 
-    def __new__(self, strvalue):
-        match = self.complex_match.match(strvalue)
+    def __new__(cls, strvalue: str) -> "LTComplex":
+        match = cls.complex_match.match(strvalue)
         if match:
             mag = float(match.group("mag"))
             ph = float(match.group("ph"))
             if match.group("degrees") is None:
                 # This is the cartesian format
-                return super().__new__(self, mag, ph)
+                return super().__new__(cls, mag, ph)
             else:
                 if match.group("dB") is not None:
                     # This is the polar format
                     mag = 10 ** (mag / 20)
                 return super().__new__(
-                    self,
+                    cls,
                     mag * math.cos(math.pi * ph / 180),
                     mag * math.sin(math.pi * ph / 180),
                 )
         else:
             raise ValueError("Invalid complex value format")
 
-    def __init__(self, strvalue):
+    def __init__(self, strvalue: str) -> None:
         self.strvalue = strvalue
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.strvalue
 
     @property
-    def mag(self):
+    def mag(self) -> float:
         """Returns the magnitude of the complex number."""
         return abs(self)
 
     @property
-    def ph(self):
+    def ph(self) -> float:
         """Returns the phase of the complex number in degrees."""
         return math.atan2(self.imag, self.real) * 180 / math.pi
 
-    def mag_db(self):
+    def mag_db(self) -> float:
         """Returns the magnitude of the complex number in dBV."""
         return 20 * math.log10(self.mag)
 
-    def ph_rad(self):
+    def ph_rad(self) -> float:
         return math.atan2(self.imag, self.real)
 
     @property
-    def unit(self):
+    def unit(self) -> Optional[str]:
         _unit = None
         match = self.complex_match.match(self.strvalue)
         if match:
@@ -92,7 +92,7 @@ class Comparable(Protocol):
 T = TypeVar("T", bound=Comparable)
 
 
-def try_convert_value(value: Union[str, int, float, list]) -> ValueType:
+def try_convert_value(value: Union[str, int, float, List[Any], bytes]) -> ValueType:
     """Tries to convert the string into an integer and if it fails, tries to convert to
     a float, if it fails, then returns the value as string.
 
@@ -109,7 +109,11 @@ def try_convert_value(value: Union[str, int, float, list]) -> ValueType:
         value = value.decode("utf-8")
 
     # Initialize ans with a default type to satisfy the type checker
-    ans: ValueType = value.strip() if isinstance(value, str) else value
+    ans: ValueType
+    if isinstance(value, str):
+        ans = value.strip()
+    else:
+        ans = cast(ValueType, value)
 
     try:
         ans = int(value)
@@ -118,11 +122,12 @@ def try_convert_value(value: Union[str, int, float, list]) -> ValueType:
             ans = float(value)
         except ValueError:
             try:
-                ans = LTComplex(value)
+                ans = LTComplex(str(value))
             except ValueError:
-                ans = (
-                    value.strip() if isinstance(value, str) else value
-                )  # Removes the leading trailing spaces
+                if isinstance(value, str):
+                    ans = value.strip()
+                else:
+                    ans = cast(ValueType, value)
     return ans
 
 
@@ -185,7 +190,7 @@ class LogfileData:
         self,
         step_set: Optional[Dict[str, List[Any]]] = None,
         dataset: Optional[Dict[str, List[Any]]] = None,
-    ):
+    ) -> None:
         if step_set is None:
             self.stepset: Dict[str, List[Any]] = {}
         else:
@@ -209,7 +214,7 @@ class LogfileData:
         # For storing the encoding when exporting
         self.encoding: str = "utf-8"
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> List[Any]:
         """__getitem__ implements :key: step or measurement name.
 
         This is case insensitive.
@@ -227,7 +232,7 @@ class LogfileData:
             ]  # This will raise an Index Error if not found here.
         raise IndexError("'%s' is not a valid step variable or measurement name" % key)
 
-    def has_steps(self):
+    def has_steps(self) -> bool:
         """Returns true if the simulation has steps :return: True if the simulation has
         steps :rtype: bool."""
         return self.step_count > 0
@@ -261,7 +266,7 @@ class LogfileData:
         # returns the positions where there is match
         return [i for i, a in enumerate(condition_set) if a == v]
 
-    def steps_with_conditions(self, **conditions) -> List[int]:
+    def steps_with_conditions(self, **conditions: Union[str, int, float]) -> List[int]:
         """Returns the steps that respect one or more equality conditions.
 
         :key conditions: parameters within the Spice simulation. Values are the matches
@@ -298,7 +303,7 @@ class LogfileData:
         return list(self.dataset.keys())
 
     def get_measure_value(
-        self, measure: str, step: Optional[Union[int, slice]] = None, **kwargs
+        self, measure: str, step: Optional[Union[int, slice]] = None, **kwargs: Union[str, int, float]
     ) -> Union[float, int, str, LTComplex]:
         """Returns a measure value on a given step.
 
@@ -388,7 +393,8 @@ class LogfileData:
         if not comparable_values:
             raise ValueError(f"No comparable values found for measure {measure}")
 
-        return max(comparable_values)  # type: ignore
+        # Cast comparable_values to Iterable[Comparable] for max
+        return cast(ValueType, max(cast(Iterable[Comparable], comparable_values)))
 
     def min_measure_value(
         self, measure: str, steps: Union[None, int, Iterable[int]] = None
@@ -413,7 +419,8 @@ class LogfileData:
         if not comparable_values:
             raise ValueError(f"No comparable values found for measure {measure}")
 
-        return min(comparable_values)  # type: ignore
+        # Cast comparable_values to Iterable[Comparable] for min
+        return cast(ValueType, min(cast(Iterable[Comparable], comparable_values)))
 
     def avg_measure_value(
         self, measure: str, steps: Union[None, int, Iterable[int]] = None
@@ -434,9 +441,9 @@ class LogfileData:
         ]
         if not numeric_values:
             raise ValueError(f"No numeric values found for measure {measure}")
-        return sum(numeric_values) / len(numeric_values)  # type: ignore
+        return sum(numeric_values) / len(numeric_values)
 
-    def obtain_amplitude_and_phase_from_complex_values(self):
+    def obtain_amplitude_and_phase_from_complex_values(self) -> None:
         """Internal function to split the complex values into additional two columns.
 
         The two columns correspond to the magnitude and phase of the complex value in
@@ -449,7 +456,7 @@ class LogfileData:
                 self.dataset[param + "_mag"] = [v.mag for v in self.dataset[param]]
                 self.dataset[param + "_ph"] = [v.ph for v in self.dataset[param]]
 
-    def split_complex_values_on_datasets(self):
+    def split_complex_values_on_datasets(self) -> None:
         """..
 
         deprecated:: 1.0 Use `obtain_amplitude_and_phase_from_complex_values()` instead.
@@ -459,11 +466,11 @@ class LogfileData:
     def export_data(
         self,
         export_file: str,
-        encoding=None,
-        append_with_line_prefix=None,
+        encoding: Optional[str] = None,
+        append_with_line_prefix: Optional[str] = None,
         value_separator: str = "\t",
         line_terminator: str = "\n",
-    ):
+    ) -> None:
         """Exports the measurement information to a tab separated value (.tsv) format.
         If step data is found, it is included in the exported file.
 
@@ -513,7 +520,7 @@ class LogfileData:
                 data_size = len(values)
             else:
                 if len(values) != data_size:
-                    raise Exception(
+                    raise ValueError(
                         "Data size mismatch. Not all measurements have the same length."
                     )
 
@@ -590,30 +597,29 @@ class LogfileData:
 
     def plot_histogram(
         self,
-        param,
-        steps: Union[None, int, Iterable] = None,
-        bins=50,
-        normalized=True,
-        sigma=3.0,
-        title=None,
-        image_file=None,
-        **kwargs,
-    ):
+        param: str,
+        steps: Optional[Union[int, Iterable[int]]] = None,
+        bins: int = 50,
+        normalized: bool = True,
+        sigma: float = 3.0,
+        title: Optional[str] = None,
+        image_file: Optional[str] = None,
+        **kwargs: Any,
+    ) -> None:
         """Plots a histogram of the parameter."""
         import matplotlib.pyplot as plt
         import numpy as np
-        from scipy.stats import norm  # type: ignore
 
         values = self.get_measure_values_at_steps(param, steps)
         x = np.array(values, dtype=float)
         mu = x.mean()
         mn = x.min()
         mx = x.max()
-        sd = np.std(x)
+        sd = x.std()
 
         # Automatic calculation of the range
-        axisXmin = mu - (sigma + 1) * sd
-        axisXmax = mu + (sigma + 1) * sd
+        axisXmin: float = mu - (sigma + 1) * sd
+        axisXmax: float = mu + (sigma + 1) * sd
 
         if mn < axisXmin:
             axisXmin = mn
@@ -621,7 +627,7 @@ class LogfileData:
         if mx > axisXmax:
             axisXmax = mx
 
-        n, bins, patches = plt.hist(
+        counts, bin_edges, _ = plt.hist(
             x,
             bins,
             density=normalized,
@@ -629,16 +635,19 @@ class LogfileData:
             alpha=0.75,
             range=(axisXmin, axisXmax),
         )
-        # Get max value from n - could be either a single value or an array
-        if hasattr(n, "max"):
-            axisYmax = n.max() * 1.1
+        # Get max value from counts - ensure single float
+        axisYmax: float
+        if isinstance(counts, np.ndarray):
+            axisYmax = float(counts.max()) * 1.1
         else:
-            axisYmax = max(n) * 1.1  # type: ignore
+            axisYmax = float(np.max(counts)) * 1.1
 
         if normalized:
             # add a 'best fit' line
-            y = norm.pdf(bins, mu, sd)
-            plt.plot(bins, y, "r--", linewidth=1)
+            # Normal distribution PDF: 1/(σ√(2π)) * exp(-(x-μ)^2/(2σ^2))
+            y = (1 / (sd * np.sqrt(2 * np.pi))) * \
+                np.exp(-(bin_edges - mu)**2 / (2 * sd**2))
+            plt.plot(bin_edges, y, "r--", linewidth=1)
             plt.axvspan(mu - sigma * sd, mu + sigma * sd, alpha=0.2, color="cyan")
             plt.ylabel("Distribution [Normalised]")
         else:
@@ -657,7 +666,7 @@ class LogfileData:
 
         plt.title(title)
 
-        plt.axis((axisXmin, axisXmax, 0, axisYmax))
+        plt.axis((axisXmin, axisXmax, 0.0, axisYmax))
         plt.grid(True)
         if image_file is not None:
             plt.savefig(image_file)

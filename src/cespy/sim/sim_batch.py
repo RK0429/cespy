@@ -99,11 +99,11 @@ __copyright__ = "Copyright 2020, Fribourg Switzerland"
 import logging
 import os
 from pathlib import Path
-from typing import Any, Callable, Optional, Type, Union
+from typing import Any, Callable, Optional, Type, Union, cast
 
 from ..editor.spice_editor import SpiceEditor
 from .process_callback import ProcessCallback
-from .sim_runner import SimRunner
+from .sim_runner import RunTask, SimRunner
 from .simulator import Simulator
 
 _logger = logging.getLogger("cespy.SimBatch")
@@ -149,10 +149,8 @@ class SimCommander(SpiceEditor):
 
         # Handle .asc files by creating a netlist
         if netlist_file_path.suffix == ".asc":
-            # Create an instance of the simulator to create the netlist
-            simulator_instance = actual_simulator.create_from(None)
-            netlist_file_path = simulator_instance.create_netlist(
-                netlist_file_path)
+            # Generate netlist from schematic file
+            netlist_file_path = actual_simulator.create_netlist(netlist_file_path)
 
         super().__init__(netlist_file_path, encoding)
 
@@ -217,7 +215,7 @@ class SimCommander(SpiceEditor):
             output_folder=output_folder,
         )
 
-    def add_LTspiceRunCmdLineSwitches(self, *args) -> None:
+    def add_LTspiceRunCmdLineSwitches(self, *args: str) -> None:
         """*(Deprecated)* Used to add an extra command line argument such as -I<path> to
         add symbol search path or -FastAccess to convert the raw file into Fast Access.
         The arguments is a list of strings as is defined in the LTSpice command line
@@ -236,12 +234,11 @@ class SimCommander(SpiceEditor):
     def run(
         self,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[Any],
-                                 Callable[[Path, Path], Any]]] = None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         timeout: Optional[float] = 600,
         run_filename: Optional[str] = None,
-        simulator=None,
-    ):
+        simulator: Optional[Union[str, Type[Simulator]]] = None,
+    ) -> Optional[RunTask]:
         """Run the simulation with the updated netlist.
 
         This overrides the parent class method to maintain backward compatibility.
@@ -254,8 +251,8 @@ class SimCommander(SpiceEditor):
         :return: A RunTask object
         """
         # Adapt callback if necessary
-        adapted_callback: Optional[Union[Type[Any],
-                                         Callable[[Path, Path], Any]]] = None
+        adapted_callback: Optional[Union[Type[ProcessCallback],
+                                         Callable[..., Any]]] = None
 
         if callback is not None:
             if isinstance(callback, type) and issubclass(
@@ -267,11 +264,9 @@ class SimCommander(SpiceEditor):
                 # For backward compatibility, convert Path objects to strings
                 def adapted_callback_wrapper(
                         raw_file: Path, log_file: Path) -> Any:
-                    # Type: ignore is used to silence the linter errors while
-                    # maintaining backward compatibility with callbacks that expect
-                    # string arguments instead of Path objects
-                    return callback(str(raw_file), str(
-                        log_file))  # type: ignore
+                    # Convert Path objects to strings for legacy callbacks
+                    func = cast(Callable[[str, str], Any], callback)
+                    return func(str(raw_file), str(log_file))
 
                 adapted_callback = adapted_callback_wrapper
 
@@ -294,7 +289,7 @@ class SimCommander(SpiceEditor):
 
         return result
 
-    def updated_stats(self):
+    def updated_stats(self) -> None:
         """*(Deprecated)* This function updates the OK/Fail statistics and releases
         finished RunTask objects from memory.
 
@@ -303,24 +298,27 @@ class SimCommander(SpiceEditor):
         self.runner.active_threads()
         return
 
-    def wait_completion(self, timeout=None,
-                        abort_all_on_timeout=False) -> bool:
+    def wait_completion(
+        self,
+        timeout: Optional[float] = None,
+        abort_all_on_timeout: bool = False,
+    ) -> bool:
         return self.runner.wait_completion(timeout, abort_all_on_timeout)
 
     @property
-    def runno(self):
-        """*(Deprecated)* Legacy property."""
-        return self.runner.runno
+    def runno(self) -> int:
+        """*(Deprecated)* Legacy property returning total runs."""
+        return self.runner.run_count
 
     @property
-    def okSim(self):
-        """*(Deprecated)* Legacy property."""
-        return self.runner.okSim
+    def okSim(self) -> int:
+        """*(Deprecated)* Legacy property returning successful simulations."""
+        return self.runner.successful_simulations
 
     @property
-    def failSim(self):
-        """*(Deprecated)* Legacy property."""
-        return self.runner.failSim
+    def failSim(self) -> int:
+        """*(Deprecated)* Legacy property returning failed simulations."""
+        return self.runner.failed_simulations
 
 
 if __name__ == "__main__":
@@ -340,9 +338,11 @@ if __name__ == "__main__":
     )
     # do parameter sweep
     for res in range(5):
-        # LTC.runs_to_do = range(2)
         LTC.set_parameters(ANA=res)
-        raw, log = LTC.run().wait_results()
+        task = LTC.run()
+        if task is None:
+            raise RuntimeError("Runner.run() returned None, which is unexpected.")
+        raw, log = task.wait_results()
         _logger.debug("Raw file '%s' | Log File '%s'" % (raw, log))
     # Sim Statistics
     _logger.info(
@@ -350,7 +350,7 @@ if __name__ == "__main__":
         str(LTC.okSim) + "/" + str(LTC.runno)
     )
 
-    def callback_function(raw_file, log_file):
+    def callback_function(raw_file: str, log_file: str) -> None:
         _logger.debug(
             "Handling the simulation data of %s, log file %s" % (
                 raw_file, log_file)

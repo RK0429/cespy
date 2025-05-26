@@ -22,7 +22,7 @@ import logging
 # -------------------------------------------------------------------------------
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from ..sim.simulator import run_function
 from ..simulators.qspice_simulator import Qspice
@@ -63,10 +63,10 @@ class QspiceLogReader(LogfileData):
     def __init__(
         self,
         log_filename: str,
-        read_measures=True,
+        read_measures: bool = True,
         step_set: Optional[Dict[str, Any]] = None,
-        encoding=None,
-    ):
+        encoding: Optional[str] = None,
+    ) -> None:
         super().__init__(step_set)
         self.logname = Path(log_filename)
         if encoding is None:
@@ -148,12 +148,12 @@ class QspiceLogReader(LogfileData):
             netlist = self.logname.with_suffix(".cir").absolute()
 
         # Run the QPOST command
-        cmd_run = qpost + [netlist, "-o", meas_filename.absolute()]
+        cmd_run = qpost + [str(netlist), "-o", str(meas_filename.absolute())]
         _logger.debug(f"Running QPOST command: {cmd_run}")
         run_function(cmd_run)
         return meas_filename
 
-    def parse_meas_file(self, meas_filename):
+    def parse_meas_file(self, meas_filename: Union[str, Path]) -> None:
         """Parses the .meas file and reads all measurements contained in the file.
         Access to the measurements is done using this class interface.
 

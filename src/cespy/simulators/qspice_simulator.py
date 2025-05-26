@@ -24,7 +24,7 @@ import subprocess
 # -------------------------------------------------------------------------------
 import sys
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import IO, Any, Optional, Union
 
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
@@ -114,7 +114,7 @@ class Qspice(Simulator):
     _default_run_switches = ["-o"]
 
     @classmethod
-    def valid_switch(cls, switch: str, path: str = "") -> list:
+    def valid_switch(cls, switch: str, path: str = "") -> list[str]:
         """Validates a command line switch. The following options are available for
         QSPICE:
 
@@ -166,8 +166,8 @@ class Qspice(Simulator):
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[list[Any]] = None,
         timeout: Optional[float] = None,
-        stdout=None,
-        stderr=None,
+        stdout: Optional[IO[Any]] = None,
+        stderr: Optional[IO[Any]] = None,
         exe_log: bool = False,
     ) -> int:
         """Executes a Qspice simulation run.
@@ -229,7 +229,7 @@ class Qspice(Simulator):
         # start execution
         if exe_log:
             log_exe_file = netlist_file.with_suffix(".exe.log")
-            with open(log_exe_file, "w") as outfile:
+            with open(log_exe_file, "w", encoding="utf-8") as outfile:
                 error = run_function(
                     cmd_run, timeout=timeout, stdout=outfile, stderr=subprocess.STDOUT
                 )

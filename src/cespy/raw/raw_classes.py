@@ -19,10 +19,13 @@
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
 """Defines base classes for the RAW file data structures."""
-from typing import List, Optional, Union
+from __future__ import annotations
+
+from typing import Any, Dict, Iterator, List, Optional, Union, cast
 
 import numpy as np
 from numpy import complex128, float32, float64, zeros
+from numpy.typing import NDArray
 
 
 class DataSet(object):
@@ -36,7 +39,14 @@ class DataSet(object):
     representing in the simulation, Voltage, Current a Time or Frequency.
     """
 
-    def __init__(self, name, whattype, datalen, numerical_type="real"):
+    data: NDArray[Any]
+
+    def __init__(
+            self,
+            name: str,
+            whattype: str,
+            datalen: int,
+            numerical_type: str = "real") -> None:
         """Base Class for both Axis and Trace Classes.
 
         Defines the common operations between both.
@@ -53,19 +63,22 @@ class DataSet(object):
         else:
             raise NotImplementedError
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"name:'{self.name}'\ntype:'{self.whattype}'\nlen:{len(self.data)}"
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[np.generic]:
         return iter(self.data)
 
-    def __getitem__(self, item):
-        return self.data[item]
+    def __getitem__(self, item: int) -> Union[float, complex]:
+        val = self.data[item]
+        if self.numerical_type == "complex":
+            return complex(val)
+        return float(val)
 
-    def get_wave(self) -> np.ndarray:
+    def get_wave(self) -> NDArray[Any]:
         """
         :return: Internal data array
         :rtype: numpy.array
@@ -88,14 +101,13 @@ class Axis(DataSet):
     store the axis values. QSpice uses doubles for all variables.
     """
 
-    def __init__(
-        self, name: str, whattype: str, datalen: int, numerical_type: str = "double"
-    ):
+    def __init__(self, name: str, whattype: str, datalen: int,
+                 numerical_type: str = "double") -> None:
         super().__init__(name, whattype, datalen, numerical_type)
-        self.step_info: Optional[List[dict]] = None
+        self.step_info: Optional[List[Dict[str, Any]]] = None
         self.step_offsets: List[Optional[int]] = []
 
-    def _set_steps(self, step_info: List[dict]):
+    def _set_steps(self, step_info: List[Dict[str, Any]]) -> None:
         self.step_info = step_info
 
         self.step_offsets = [None for _ in range(len(step_info))]
@@ -138,7 +150,7 @@ class Axis(DataSet):
                 offset = self.step_offsets[step]
                 return 0 if offset is None else offset
 
-    def get_wave(self, step: int = 0) -> np.ndarray:
+    def get_wave(self, step: int = 0) -> NDArray[Any]:
         """Returns a vector containing the wave values. If numpy is installed, data is
         returned as a numpy array. If not, the wave is returned as a list of floats.
 
@@ -158,11 +170,13 @@ class Axis(DataSet):
         if (
             self.name == "time"
         ):  # This is a bug in LTSpice, where the time axis values are sometimes negative
-            return np.abs(wave)
+            # Use typing.cast to inform the type checker that np.abs returns
+            # NDArray[Any]
+            return cast(NDArray[Any], np.abs(wave))
         else:
             return wave
 
-    def get_time_axis(self, step: int = 0) -> np.ndarray:
+    def get_time_axis(self, step: int = 0) -> NDArray[Any]:
         """.. deprecated:: 1.0 Use `get_wave()` instead.
 
         Returns the time axis raw data. Please note that the time axis may not have a
@@ -190,16 +204,22 @@ class Axis(DataSet):
         :returns: Value of the data point
         :rtype: float, complex
         """
-        return self.data[n + self.step_offset(step)]
+        val = self.data[n + self.step_offset(step)]
+        if self.numerical_type == "complex":
+            return complex(val)
+        return float(val)
 
-    def __getitem__(self, item) -> Union[float, complex]:
+    def __getitem__(self, item: int) -> Union[float, complex]:
         """This is only here for compatibility with previous code."""
         assert (
             self.step_info is None
         ), "Indexing should not be used with stepped data. Use get_point or get_wave"
-        return self.data.__getitem__(item)
+        val = self.data[item]
+        if self.numerical_type == "complex":
+            return complex(val)
+        return float(val)
 
-    def get_position(self, t, step: int = 0) -> Union[int, float]:
+    def get_position(self, t: float, step: int = 0) -> Union[int, float]:
         """Returns the position of a point in the axis. If the point doesn't exist, an
         interpolation is done between the two closest points. For example, if the point
         requested is 1.0001ms and the closest points that exist in the axis are
@@ -225,7 +245,7 @@ class Axis(DataSet):
                 if i == 0:
                     raise IndexError("Time position is lower than t0")
                 frac = (t - timex[i - 1]) / (timex[i] - timex[i - 1])
-                return i - 1 + frac
+                return (i - 1) + float(frac)
         # Handle case where t is greater than all values in timex
         raise IndexError(f"Value {t} is greater than the maximum value in the axis")
 
@@ -239,13 +259,13 @@ class Axis(DataSet):
         """
         return self.step_offset(step + 1) - self.step_offset(step)
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self.step_info is None:
             return len(self.data)
         else:
             return self.get_len()
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[np.generic]:
         assert (
             self.step_info is None
         ), "Iteration can't be used with stepped data. Use get_wave() method."
@@ -261,7 +281,13 @@ class TraceRead(DataSet):
     is available the get_wave() method will return a numpy array.
     """
 
-    def __init__(self, name, whattype, datalen, axis, numerical_type="real"):
+    def __init__(
+            self,
+            name: str,
+            whattype: str,
+            datalen: int,
+            axis: Optional[Axis],
+            numerical_type: str = "real") -> None:
         super().__init__(name, whattype, datalen, numerical_type)
         self.axis = axis
 
@@ -277,22 +303,27 @@ class TraceRead(DataSet):
         """
         if self.axis is None:
             if n != 0:
-                return self.data[n]
+                val = self.data[n]
             else:
-                return self.data[
-                    step
-                ]  # This is for the case of stepped operation point simulation.
+                # This is for the case of stepped operation point simulation.
+                val = self.data[step]
         else:
-            return self.data[self.axis.step_offset(step) + n]
+            val = self.data[self.axis.step_offset(step) + n]
+        if self.numerical_type == "complex":
+            return complex(val)
+        return float(val)
 
-    def __getitem__(self, item) -> Union[float, complex]:
+    def __getitem__(self, item: int) -> Union[float, complex]:
         """This is only here for compatibility with previous code."""
         assert (
             self.axis is None or self.axis.step_info is None
         ), "Indexing should not be used with stepped data. Use get_point() method"
-        return self.data.__getitem__(item)
+        val = self.data[item]
+        if self.numerical_type == "complex":
+            return complex(val)
+        return float(val)
 
-    def get_wave(self, step: int = 0) -> np.ndarray:
+    def get_wave(self, step: int = 0) -> NDArray[Any]:
         """Returns the data contained in this object. For stepped simulations an
         argument must be passed specifying the step number. If no steps exist, the
         argument must be left blank. To know whether stepped data exist, the user can
@@ -316,7 +347,7 @@ class TraceRead(DataSet):
                     self.axis.step_offset(step): self.axis.step_offset(step + 1)
                 ]
 
-    def get_point_at(self, t, step: int = 0) -> Union[float, complex]:
+    def get_point_at(self, t: float, step: int = 0) -> Union[float, complex]:
         """Get a point from the trace at the point specified by the /t/ argument. If the
         point doesn't exist on the axis, the data is interpolated using a linear
         regression between the two adjacent points.
@@ -326,21 +357,29 @@ class TraceRead(DataSet):
         :param step: step index
         :type step: int
         """
-        pos = self.axis.get_position(t, step)
+        assert self.axis is not None, "Axis is required for get_point_at"
+        axis = self.axis
+        pos = axis.get_position(t, step)
         # Use direct type names rather than parameterized generics
-        if isinstance(pos, (float, np.float32, np.float64)):
-            offset = self.axis.step_offset(step)
+        if isinstance(pos, float):
+            offset = axis.step_offset(step)
             i = int(pos)
             last_item = self.get_len(step) - 1
             if i < last_item:
                 f = pos - i
-                return self.data[offset + i] + f * (
+                val = self.data[offset + i] + f * (
                     self.data[offset + i + 1] - self.data[offset + i]
                 )
+                if self.numerical_type == "complex":
+                    return complex(val)
+                return float(val)
             elif (
                 pos == last_item
             ):  # This covers the case where a float is given containing the last position
-                return self.data[offset + i]
+                val = self.data[offset + i]
+                if self.numerical_type == "complex":
+                    return complex(val)
+                return float(val)
             else:
                 raise IndexError(f"The highest index is {last_item}. Received {pos}")
         else:
@@ -354,9 +393,10 @@ class TraceRead(DataSet):
         :return: The number of data points
         :rtype: int
         """
+        assert self.axis is not None, "Axis is required for get_len"
         return self.axis.step_offset(step + 1)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """..
 
         deprecated:: 1.0 This is only here for compatibility with previous code.
@@ -370,7 +410,12 @@ class TraceRead(DataSet):
 class DummyTrace(object):
     """Dummy Trace for bypassing traces while reading."""
 
-    def __init__(self, name, whattype, datalen, numerical_type="real"):
+    def __init__(
+            self,
+            name: str,
+            whattype: str,
+            datalen: int,
+            numerical_type: str = "real") -> None:
         """Base Class for both Axis and Trace Classes.
 
         Defines the common operations between both.
@@ -380,11 +425,9 @@ class DummyTrace(object):
         self.datalen = datalen
         self.numerical_type = numerical_type
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"name:'{self.name}'\ntype:'{self.whattype}'\nlen:{self.datalen}"
 
 
 class SpiceReadException(Exception):
     """Custom class for exception handling."""
-
-    ...

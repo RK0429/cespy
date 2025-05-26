@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
+from __future__ import annotations
+
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -18,11 +20,10 @@
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
-from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
-from ..sim_runner import AnyRunner, ProcessCallback
+from ..sim_runner import ProcessCallback
 from .tolerance_deviations import DeviationType, ToleranceDeviations
 
 _logger = logging.getLogger("cespy.SimAnalysis")
@@ -31,12 +32,7 @@ _logger = logging.getLogger("cespy.SimAnalysis")
 class QuickSensitivityAnalysis(ToleranceDeviations):
     """Class to automate Sensitivity simulations."""
 
-    def __init__(
-        self, circuit_file: Union[str, BaseEditor], runner: Optional[AnyRunner] = None
-    ):
-        super().__init__(circuit_file, runner)
-
-    def prepare_testbench(self, **kwargs):
+    def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepares the simulation by setting the tolerances for each component."""
         no = 0
         self.elements_analysed.clear()
@@ -51,7 +47,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 new_val = "{sammx(%s,%g,%d)}" % (val, used_value, no)
 
             if new_val != val:
-                self.set_component_value(comp, new_val)
+                self.set_component_value(comp, str(new_val))
                 self.elements_analysed.append(comp)
                 no += 1
 
@@ -132,18 +128,20 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
     def run_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
-        switches: Optional[Any] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
-    ):
+        measure: Optional[str] = None,
+    ) -> Optional[Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]]:
         self.clear_simulation_data()
         self.elements_analysed.clear()
+        del measure  # unused measure parameter
         # Calculate the number of runs
 
         worst_case_elements = {}
 
-        def check_and_add_component(ref1: str):
+        def check_and_add_component(ref1: str) -> None:
             val1, dev1 = self.get_component_value_deviation_type(
                 ref1
             )  # get there present value
@@ -172,7 +170,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 "The number of runs is too high. It will be limited to 4096\n"
                 "Consider limiting the number of components with deviation"
             )
-            return
+            return None
 
         self._reset_netlist()  # reset the netlist
         self.play_instructions()  # play the instructions
@@ -204,7 +202,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
             bit_setting = 2**run
             bit_updated = bit_setting ^ last_bit_setting
             bit_index = 0
-            print("bit updated: %d" % bit_updated)
+            _logger.debug("bit updated: %d", bit_updated)
             while bit_updated != 0:
                 if bit_updated & 1:
                     ref = self.elements_analysed[bit_index]
@@ -222,13 +220,13 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                         new_val = val
                     if typ == "component":
                         self.editor.set_component_value(
-                            ref, new_val
+                            ref, str(new_val)
                         )  # update the value
                     elif typ == "parameter":
                         self.editor.set_parameter(ref, new_val)
                     else:
                         _logger.warning("Unknown type")
-                    print(f"{ref} = {new_val}")
+                    _logger.debug("%s = %s", ref, new_val)
                 bit_updated >>= 1
                 bit_index += 1
             self.editor.set_parameter("run", run)
@@ -247,6 +245,8 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
         if callback is not None:
             callback_rets = []
             for rt in self.simulations:
+                if rt is None:
+                    continue
                 callback_rets.append(rt.get_results())
             self.simulation_results["callback_returns"] = callback_rets
         self.analysis_executed = True
@@ -275,3 +275,4 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 except (AttributeError, TypeError):
                     # Handle case where dataset doesn't behave like a dict
                     _logger.warning("Could not process dataset in expected way")
+        return None

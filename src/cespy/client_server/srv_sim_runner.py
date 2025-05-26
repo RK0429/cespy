@@ -32,7 +32,7 @@ from ..sim.sim_runner import SimRunner
 _logger = logging.getLogger("cespy.ServerSimRunner")
 
 
-def zip_files(raw_filename: Path, log_filename: Path):
+def zip_files(raw_filename: Path, log_filename: Path) -> Path:
     zip_filename = raw_filename.with_suffix(".zip")
     with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_file:
         zip_file.write(raw_filename)
@@ -55,10 +55,10 @@ class ServerSimRunner(threading.Thread):
         self,
         parallel_sims: int = 4,
         timeout: Optional[float] = None,
-        verbose=False,
+        verbose: bool = False,
         output_folder: Optional[str] = None,
-        simulator=None,
-    ):
+        simulator: Any = None,
+    ) -> None:
         super().__init__(name="SimManager")
         # SimRunner expects a float for timeout, so use 600.0 as default if None
         # is provided
@@ -128,9 +128,9 @@ class ServerSimRunner(threading.Thread):
             return -1
         else:
             _logger.info(f"Started task {netlist} with job_id{task.runno}")
-            return task.runno
+            return int(task.runno)
 
-    def _erase_files_and_info(self, pos):
+    def _erase_files_and_info(self, pos: int) -> None:
         task = self.completed_tasks[pos]
         for filename in ("circuit", "log", "raw", "zipfile"):
             f = task[filename]
@@ -139,7 +139,7 @@ class ServerSimRunner(threading.Thread):
                 f.unlink()
         del self.completed_tasks[pos]
 
-    def erase_files_of_runno(self, runno):
+    def erase_files_of_runno(self, runno: int) -> None:
         """Will delete all files related with a completed task.
 
         Will also delete information on the completed_tasks attribute.
@@ -149,13 +149,13 @@ class ServerSimRunner(threading.Thread):
                 self._erase_files_and_info(i)
                 break
 
-    def cleanup_completed(self):
+    def cleanup_completed(self) -> None:
         while len(self.completed_tasks):
             self._erase_files_and_info(0)
 
-    def stop(self):
+    def stop(self) -> None:
         _logger.info("stopping...ServerSimRunner")
         self._stop = True
 
-    def running(self):
+    def running(self) -> bool:
         return self._stop is False

@@ -24,7 +24,7 @@ import subprocess
 # -------------------------------------------------------------------------------
 import sys
 from pathlib import Path
-from typing import Union
+from typing import IO, Optional, Union
 
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
@@ -98,7 +98,7 @@ class LTspice(Simulator):
         )
 
     @classmethod
-    def valid_switch(cls, switch: str, path: str = "") -> list:
+    def valid_switch(cls, switch: str, switch_param: str = "") -> list[str]:
         """Validate a command line switch.
 
         Available options for Windows/wine LTspice:
@@ -147,7 +147,7 @@ class LTspice(Simulator):
 
         if switch in cls.ltspice_args:
             switches = cls.ltspice_args[switch]
-            switches = [switch.replace("<path>", path) for switch in switches]
+            switches = [s.replace("<path>", switch_param) for s in switches]
             return switches
         else:
             valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
@@ -160,10 +160,10 @@ class LTspice(Simulator):
     def run(
         cls,
         netlist_file: Union[str, Path],
-        cmd_line_switches: Union[list, None] = None,
+        cmd_line_switches: Optional[list[str]] = None,
         timeout: Union[float, None] = None,
-        stdout=None,
-        stderr=None,
+        stdout: Optional[Union[int, IO[bytes]]] = None,
+        stderr: Optional[Union[int, IO[bytes]]] = None,
         exe_log: bool = False,
     ) -> int:
         """Executes a LTspice simulation run.
@@ -268,10 +268,10 @@ class LTspice(Simulator):
     def create_netlist(
         cls,
         circuit_file: Union[str, Path],
-        cmd_line_switches: Union[list, None] = None,
+        cmd_line_switches: Optional[list[str]] = None,
         timeout: Union[float, None] = None,
-        stdout=None,
-        stderr=None,
+        stdout: Optional[Union[int, IO[bytes]]] = None,
+        stderr: Optional[Union[int, IO[bytes]]] = None,
         exe_log: bool = False,
     ) -> Path:
         """Create a netlist out of the circuit file.
@@ -347,7 +347,7 @@ class LTspice(Simulator):
         raise RuntimeError(msg)
 
     @classmethod
-    def _detect_executable(cls):
+    def detect_executable(cls) -> None:
         """Detect and set spice_exe and process_name based on platform."""
         if sys.platform in ("linux", "darwin"):
             cls._detect_unix_executable()
@@ -355,7 +355,7 @@ class LTspice(Simulator):
             cls._detect_windows_executable()
 
     @classmethod
-    def _detect_unix_executable(cls):
+    def _detect_unix_executable(cls) -> None:
         """Detect on Linux/Mac using wine and environment variables."""
         spice_folder = os.environ.get("LTSPICEFOLDER")
         spice_executable = os.environ.get("LTSPICEEXECUTABLE")
@@ -390,7 +390,7 @@ class LTspice(Simulator):
                 cls.process_name = cls.guess_process_name(exe)
 
     @classmethod
-    def _detect_windows_executable(cls):
+    def _detect_windows_executable(cls) -> None:
         """Detect on Windows using default executable paths."""
         for exe in cls._spice_exe_win_paths:
             path = exe
@@ -403,5 +403,5 @@ class LTspice(Simulator):
 
 
 # initialize LTspice executable detection
-LTspice._detect_executable()
+LTspice.detect_executable()
 _logger.debug(f"Found LTspice installed in: '{LTspice.spice_exe}'")

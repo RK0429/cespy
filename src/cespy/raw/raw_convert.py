@@ -37,13 +37,14 @@ with the I() qualifier.
 """
 
 from optparse import OptionParser
+from typing import List, Union
 
 import clipboard  # type: ignore
 
 from .raw_read import RawRead
 
 
-def main():
+def main() -> None:
     usage = "usage: %prog [options] <rawfile> <trace_list>"
     parser = OptionParser(usage=usage, version="%prog 0.1")
     parser.add_option(
@@ -80,6 +81,7 @@ def main():
 
     (options, args) = parser.parse_args()
 
+    traces: Union[str, List[str]]
     if len(args) < 1:
         print("Error: Missing arguments")
         parser.print_help()

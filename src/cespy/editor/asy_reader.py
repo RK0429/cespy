@@ -45,7 +45,8 @@ SCALE_Y = -6.25
 class AsyReader(object):
     """Symbol parser."""
 
-    def __init__(self, asy_file: Union[Path, str], encoding="autodetect"):
+    def __init__(self, asy_file: Union[Path, str],
+                 encoding: str = "autodetect") -> None:
         super().__init__()
         self.version: str = "4"  # Store version as string
         self.symbol_type = None
@@ -73,7 +74,7 @@ class AsyReader(object):
             _logger.info(f"Parsing ASY file {self._asy_file_path}")
             for line_text in asc_file:
                 if line_text.startswith("WINDOW"):
-                    tag, num_ref, posX, posY, alignment, size_str = line_text.split()
+                    _, num_ref, posX, posY, alignment, size_str = line_text.split()
                     coord = Point(int(posX), int(posY))
                     text_obj = Text(
                         coord=coord,
@@ -86,9 +87,9 @@ class AsyReader(object):
                 elif line_text.startswith("SYMATTR"):
                     tokens = line_text.split(maxsplit=2)
                     if len(tokens) == 3:
-                        tag, ref, attr_text = tokens
+                        _, ref, attr_text = tokens
                     elif len(tokens) == 2:
-                        tag, ref = tokens
+                        _, ref = tokens
                         attr_text = ""
                     else:
                         continue
@@ -98,7 +99,7 @@ class AsyReader(object):
                         attr_text = attr_text.upper()
                     self.attributes[ref] = attr_text
                 elif line_text.startswith("Version"):
-                    tag, version = line_text.split()
+                    _, version = line_text.split()
                     assert version in [
                         "4",
                         "4.0",
@@ -109,13 +110,13 @@ class AsyReader(object):
                     self.symbol_type = line_text[len("SymbolType "):].strip()
                 elif line_text.startswith("PINATTR"):
                     assert pin is not None, "A PIN was already created."
-                    tag, attribute, value = line_text.split(" ", maxsplit=3)
+                    _, attribute, value = line_text.split(" ", maxsplit=3)
                     value = value.strip()  # gets rid of the \n
                     pin.text += f"{attribute}={value};"
                 elif line_text.startswith("PIN"):
                     if pin is not None:
                         self.pins.append(pin)
-                    tag, x, y, justification, offset = line_text.split()
+                    _, x, y, justification, offset = line_text.split()
                     coord = Point(int(x), int(y))
                     angle = ERotation.R0
 
@@ -234,7 +235,7 @@ class AsyReader(object):
             if pin is not None:
                 self.pins.append(pin)
 
-    def to_qsch(self, *args):
+    def to_qsch(self, *args: str) -> QschTag:
         """Create a QschTag representing a component symbol."""
         spice_prefix = self.attributes["Prefix"]
         symbol = QschTag("symbol", spice_prefix[0])
@@ -264,22 +265,22 @@ class AsyReader(object):
                 # translate from 4 points style of ltspice to 3 points style of qsch
                 points = shape.points
 
-                x1 = points[0].X
-                x2 = points[1].X
-                x3 = points[2].X
-                x4 = points[3].X
-                y1 = points[0].Y
-                y2 = points[1].Y
-                y3 = points[2].Y
-                y4 = points[3].Y
+                px1 = points[0].X
+                px2 = points[1].X
+                px3 = points[2].X
+                px4 = points[3].X
 
-                center = Point((x1 + x2) // 2, (y1 + y2) // 2)
-                radius = (
-                    abs(x2 - x1) / 2
-                )  # Using only the X axis. Assuming a circle not an ellipse
-                start = Point((x3 - center.X) / radius, (y3 - center.Y) / radius)
-                stop = Point((x4 - center.X) / radius, (y4 - center.Y) / radius)
-                # overwriting the points with the new ones
+                py1 = points[0].Y
+                py2 = points[1].Y
+                py3 = points[2].Y
+                py4 = points[3].Y
+
+                center = Point((px1 + px2) // 2, (py1 + py2) // 2)
+                # Using only the X axis. Assuming a circle not an ellipse
+                radius = abs(px2 - px1) / 2
+                start = Point((px3 - center.X) / radius, (py3 - center.Y) / radius)
+                stop = Point((px4 - center.X) / radius, (py4 - center.Y) / radius)
+                # calculate new coordinates for drawing
                 x1 = int(center.X * SCALE_X)
                 y1 = int(center.Y * SCALE_Y)
                 x2 = int(start.X * SCALE_X)
@@ -326,7 +327,7 @@ class AsyReader(object):
 
         return symbol
 
-    def is_subcircuit(self):
+    def is_subcircuit(self) -> bool:
         # Prefix is guaranteed to be uppercase
         return self.symbol_type == "BLOCK" or self.attributes.get("Prefix") == "X"
 
@@ -387,7 +388,7 @@ class AsyReader(object):
             except ValueError:
                 return value.strip()  # Removes the leading trailing spaces
 
-    def get_schematic_file(self):
+    def get_schematic_file(self) -> Path:
         """Returns the file name of the component, if it were a .asc file."""
         assert self._asy_file_path.suffix == ".asy", "File is not an asy file"
         assert self.symbol_type == "BLOCK", "File is not a sub-circuit"

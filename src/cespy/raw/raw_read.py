@@ -192,13 +192,27 @@ plt.show()  # Creates the matplotlib's interactive window with the plots.
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2022, Fribourg Switzerland"
 
+import ast
 import logging
+import operator as _op
 import os
 import re
 from collections import OrderedDict
 from pathlib import Path
 from struct import unpack
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import (
+    IO,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from numpy import float32, float64, frombuffer
 from numpy.typing import NDArray
@@ -207,10 +221,38 @@ from ..log.logfile_data import try_convert_value
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .raw_classes import Axis, DummyTrace, SpiceReadException, TraceRead
 
+# Allowed operators for alias formulas
+_ALLOWED_OPS: Dict[Type[Any], Callable[..., Any]] = {
+    ast.Add: _op.add,
+    ast.Sub: _op.sub,
+    ast.Mult: _op.mul,
+    ast.Div: _op.truediv,
+    ast.Pow: _op.pow,
+    ast.USub: _op.neg,
+}
+
+
+def _safe_eval(expr: str, variables: Dict[str, Any]) -> Any:
+    """Safely evaluate simple arithmetic expressions using AST."""
+    node = ast.parse(expr, mode="eval").body
+
+    def _eval(n: ast.AST) -> Any:
+        if isinstance(n, ast.BinOp):
+            return _ALLOWED_OPS[type(n.op)](_eval(n.left), _eval(n.right))
+        if isinstance(n, ast.UnaryOp):
+            return _ALLOWED_OPS[type(n.op)](_eval(n.operand))
+        if isinstance(n, (ast.Constant, ast.Num)):
+            return getattr(n, 'value', n.n)
+        if isinstance(n, ast.Name):
+            return variables[n.id]
+        raise TypeError(f"Unsupported expression: {expr}")
+    return _eval(node)
+
+
 _logger = logging.getLogger("cespy.RawRead")
 
 
-def read_float64(f):
+def read_float64(f: IO[bytes]) -> float:
     """Reads a 64-bit float value, normally associated with the plot X axis. The
     codification is done as follows:
 
@@ -237,10 +279,10 @@ def read_float64(f):
     :rtype: float
     """
     s = f.read(8)
-    return unpack("d", s)[0]
+    return cast(float, unpack("d", s)[0])
 
 
-def read_complex(f):
+def read_complex(f: IO[bytes]) -> complex:
     """Used to convert a 16 byte stream into a complex data point. Usually used for the
     .AC simulations. The encoding is the same as for the set_pointB8() but two values
     are encoded. First one is the real part and the second is the complex part.
@@ -251,11 +293,11 @@ def read_complex(f):
     :rtype: complex
     """
     s = f.read(16)
-    (re, im) = unpack("dd", s)
-    return complex(re, im)
+    real_part, imag_part = unpack("dd", s)
+    return complex(cast(float, real_part), cast(float, imag_part))
 
 
-def read_float32(f):
+def read_float32(f: IO[bytes]) -> float:
     """Reads a 32bit float (single precision) from a stream. This is how most real
     values are stored in the RAW file. This codification uses 4 bytes as follows:
 
@@ -280,25 +322,25 @@ def read_float32(f):
     :rtype: float
     """
     s = f.read(4)
-    return unpack("f", s)[0]
+    return cast(float, unpack("f", s)[0])
 
 
-def consume4bytes(f):
+def consume4bytes(f: IO[bytes]) -> None:
     """Used to advance the file pointer 4 bytes."""
     f.read(4)
 
 
-def consume8bytes(f):
+def consume8bytes(f: IO[bytes]) -> None:
     """Used to advance the file pointer 8 bytes."""
     f.read(8)
 
 
-def consume16bytes(f):
+def consume16bytes(f: IO[bytes]) -> None:
     """Used to advance the file pointer 16 bytes."""
     f.read(16)
 
 
-def namify(spice_ref: str):
+def namify(spice_ref: str) -> str:
     """Translate from V(0,n01) to V__n01__ and I(R1) to I__R1__"""
     matchobj = re.match(r"(V|I|P)\((\w+)\)", spice_ref)
     if matchobj:
@@ -356,8 +398,8 @@ class RawRead(object):
         raw_filename: Union[str, Path],
         traces_to_read: Optional[Union[str, List[str], Tuple[str, ...]]] = "*",
         dialect: Optional[str] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         self.dialect: Optional[str] = None
         """The dialect of the spice file read.
 
@@ -611,9 +653,10 @@ class RawRead(object):
             self.block_size = (raw_file_size - binary_start) // self.nPoints
             self.data_size = self.block_size // len(self._traces)
 
-            scan_functions = []
+            scan_functions: List[Callable[[IO[bytes]], Any]] = []
             calc_block_size = 0
             for trace in self._traces:
+                fun: Callable[[IO[bytes]], Any]
                 if trace.numerical_type == "double":
                     calc_block_size += 8
                     if isinstance(trace, DummyTrace):
@@ -757,7 +800,8 @@ class RawRead(object):
                 # the Axis
                 self.axis._set_steps(self.steps)
 
-    def get_raw_property(self, property_name=None):
+    def get_raw_property(
+            self, property_name: Optional[str] = None) -> Any:
         """Get a property. By default, it returns all properties defined in the RAW
         file.
 
@@ -774,7 +818,7 @@ class RawRead(object):
         else:
             raise ValueError("Invalid property. Use %s" % str(self.raw_params.keys()))
 
-    def get_trace_names(self):
+    def get_trace_names(self) -> List[str]:
         """Returns a list of exiting trace names of the RAW file.
 
         :return: trace names
@@ -783,7 +827,7 @@ class RawRead(object):
         # parsing the aliases needs to be done before implementing this.
         return [trace.name for trace in self._traces] + list(self.aliases.keys())
 
-    def _compute_alias(self, alias: str):
+    def _compute_alias(self, alias: str) -> TraceRead:
         """Constants like mho need to be replaced and  V(ref1,ref2) need to be replaced
         by (V(ref1)-V(ref2)) and after that the aliases can be computed, using the
         eval() function."""
@@ -805,7 +849,7 @@ class RawRead(object):
         else:
             raise NotImplementedError(f'Unrecognized alias type for alias : "{alias}"')
         trace = TraceRead(alias, whattype, self.nPoints, self.axis, "double")
-        local_vars = {
+        local_vars: Dict[str, Any] = {
             "pi": 3.1415926536,
             "e": 2.7182818285,
         }  # This is the dictionary that will be used to compute the alias
@@ -820,14 +864,15 @@ class RawRead(object):
             }
         )
         try:
-            trace.data = eval(formula, local_vars)
+            trace.data = cast(NDArray[Any], _safe_eval(formula, local_vars))
         except Exception as err:
             raise RuntimeError(
                 f'Error computing alias "{alias}" with formula "{formula}"'
             ) from err
         return trace
 
-    def get_trace(self, trace_ref: Union[str, int]):
+    def get_trace(self, trace_ref: Union[str, int]
+                  ) -> Union[Axis, TraceRead, DummyTrace]:
         """Retrieves the trace with the requested name (trace_ref).
 
         :param trace_ref: Name of the trace or the index of the trace
@@ -853,7 +898,7 @@ class RawRead(object):
         else:
             return self._traces[trace_ref]
 
-    def get_wave(self, trace_ref: Union[str, int], step: int = 0):
+    def get_wave(self, trace_ref: Union[str, int], step: int = 0) -> NDArray[Any]:
         """Retrieves the trace data with the requested name (trace_ref), optionally
         providing the step number.
 
@@ -863,20 +908,25 @@ class RawRead(object):
         :type step: int
         :return: A numpy array containing the requested waveform.
         :rtype: numpy.array
-        :raises IndexError: When a trace is not found
+        :raises IndexError: When a trace is not found or is a dummy trace
         """
-        return self.get_trace(trace_ref).get_wave(step)
+        trace = self.get_trace(trace_ref)
+        if isinstance(trace, DummyTrace):
+            raise IndexError(f"Trace '{trace_ref}' contains no data")
+        return trace.get_wave(step)
 
-    def get_time_axis(self, step: int = 0):
+    def get_time_axis(self, step: int = 0) -> NDArray[Any]:
         """.. deprecated:: 1.0 Use `get_axis()` method instead.
 
         This function is equivalent to get_trace('time').get_time_axis(step)
         instruction. It's workaround on a LTSpice issue when using 2nd Order
         compression, where some values on the time trace have a negative value.
         """
-        return self.get_trace("time").get_time_axis(step)
+        trace = self.get_trace("time")
+        assert isinstance(trace, Axis), "This RAW file does not have a time axis."
+        return trace.get_time_axis(step)
 
-    def get_axis(self, step: int = 0) -> Union[NDArray, List[float]]:
+    def get_axis(self, step: int = 0) -> Union[NDArray[Any], List[float]]:
         """This function is equivalent to get_trace(0).get_wave(step) instruction. It
         also implements a workaround on a LTSpice issue when using 2nd Order
         compression, where some values on the time trace have a negative value.
@@ -906,7 +956,7 @@ class RawRead(object):
             raise RuntimeError("This RAW file does not have an axis.")
         return self.axis.get_len(step)
 
-    def _load_step_information(self, filename: Path):
+    def _load_step_information(self, filename: Path) -> None:
         if "Command" not in self.raw_params:
             # probably ngspice before v44 or xyce. And anyway, ngspice does not support the '.step' directive
             # FYI: ngspice can do something like .step via a control section with
@@ -928,12 +978,16 @@ class RawRead(object):
                     logfile, r"^((.*\n)?Circuit:|([\s\S]*)--- Expanded Netlist ---)"
                 )
                 log = open(logfile, "r", errors="replace", encoding=encoding)
-            except OSError:
-                raise SpiceReadException("Log file '%s' not found" % logfile)
-            except UnicodeError:
-                raise SpiceReadException("Unable to parse log file '%s'" % logfile)
-            except EncodingDetectError:
-                raise SpiceReadException("Unable to parse log file '%s'" % logfile)
+            except OSError as exc:
+                raise SpiceReadException("Log file '%s' not found" % logfile) from exc
+            except UnicodeError as exc:
+                raise SpiceReadException(
+                    "Unable to parse log file '%s'" %
+                    logfile) from exc
+            except EncodingDetectError as exc:
+                raise SpiceReadException(
+                    "Unable to parse log file '%s'" % logfile
+                ) from exc
 
             for line in log:
                 if line.startswith(".step"):
@@ -957,10 +1011,12 @@ class RawRead(object):
             logfile = filename.with_suffix(".log")
             try:
                 log = open(logfile, "r", errors="replace", encoding="utf-8")
-            except OSError:
-                raise SpiceReadException("Log file '%s' not found" % logfile)
-            except UnicodeError:
-                raise SpiceReadException("Unable to parse log file '%s'" % logfile)
+            except OSError as exc:
+                raise SpiceReadException("Log file '%s' not found" % logfile) from exc
+            except UnicodeError as exc:
+                raise SpiceReadException(
+                    "Unable to parse log file '%s'" %
+                    logfile) from exc
 
             step_regex = re.compile(r"^(\d+) of \d+ steps:\s+\.step (.*)$")
 
@@ -988,11 +1044,11 @@ class RawRead(object):
                 "Unsupported simulator. Only LTspice and QSPICE are supported."
             )
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[str, int]) -> Union[Axis, TraceRead, DummyTrace]:
         """Helper function to access traces by using the [ ] operator."""
         return self.get_trace(item)
 
-    def get_steps(self, **kwargs):
+    def get_steps(self, **kwargs: Any) -> Iterable[int]:
         """Returns the steps that correspond to the query set in the `**kwargs`
         parameters. Example: ::
 
@@ -1033,8 +1089,8 @@ class RawRead(object):
         self,
         columns: Optional[List[str]] = None,
         step: Union[int, List[int]] = -1,
-        **kwargs,
-    ) -> Dict[str, list]:
+        **kwargs: Any,
+    ) -> Dict[str, List[Any]]:
         """Returns a native python class structure with the requested trace data and
         steps. It consists of an ordered dictionary where the columns are the keys and
         the values are lists with the data.
@@ -1058,6 +1114,7 @@ class RawRead(object):
             ):  # If axis is not in the list, add it
                 columns.insert(0, self.axis.name)
 
+        steps_to_read: Iterable[int]
         if isinstance(step, list):
             steps_to_read = step  # If a list of steps is given, use it
         elif step == -1:
@@ -1093,8 +1150,8 @@ class RawRead(object):
         self,
         columns: Optional[List[str]] = None,
         step: Union[int, List[int]] = -1,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         """Returns a pandas DataFrame with the requested data.
 
         :param step: Step number to retrieve. If not given, it
@@ -1108,11 +1165,11 @@ class RawRead(object):
         """
         try:
             import pandas
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
                 "The 'pandas' module is required to use this function.\n"
                 "Use 'pip install pandas' to install it."
-            )
+            ) from exc
         data = self.export(columns=columns, step=step, **kwargs)
         return pandas.DataFrame(data, **kwargs)
 
@@ -1121,9 +1178,9 @@ class RawRead(object):
         filename: Union[str, Path],
         columns: Optional[List[str]] = None,
         step: Union[int, List[int]] = -1,
-        separator=",",
-        **kwargs,
-    ):
+        separator: str = ",",
+        **kwargs: Any,
+    ) -> None:
         """Saves the data to a CSV file.
 
         :param filename: Name of the file to save the data to
@@ -1147,7 +1204,7 @@ class RawRead(object):
         except ImportError:
             # Export to CSV using python built-in functions
             data = self.export(columns=columns, step=step)
-            with open(filename, "w") as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 f.write(separator.join(data.keys()) + "\n")
                 for i in range(
                     len(data[columns[0] if columns else self.get_trace_names()[0]])
@@ -1162,8 +1219,8 @@ class RawRead(object):
         filename: Union[str, Path],
         columns: Optional[List[str]] = None,
         step: Union[int, List[int]] = -1,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Saves the data to an Excel file.
 
         :param filename: Name of the file to save the data to
@@ -1184,8 +1241,8 @@ class RawRead(object):
 
             df = self.to_dataframe(columns=columns, step=step)
             pd.DataFrame.to_excel(df, filename, **kwargs)
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
                 "The 'pandas' module is required to use this function.\n"
                 "Use 'pip install pandas' to install it."
-            )
+            ) from exc
