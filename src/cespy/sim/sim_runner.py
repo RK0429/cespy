@@ -827,7 +827,7 @@ class SimRunner(AnyRunner):
 
     def create_netlist(
         self, asc_file: Union[str, Path], cmd_line_args: Optional[List[str]] = None
-    ) -> Any:
+    ) -> Optional[Path]:
         """Creates a .net from an .asc using the LTspice -netlist command line."""
         if not isinstance(asc_file, Path):
             asc_file = Path(asc_file)
@@ -839,9 +839,10 @@ class SimRunner(AnyRunner):
                     "Creating netlist on MacOS using LTspice at: %s",
                     getattr(self.simulator, "executable", "unknown"),
                 )
-            return self.simulator.create_netlist(  # type: ignore[attr-defined]
+            # Cast to Path to satisfy static type checker for dynamic create_netlist
+            return cast(Path, self.simulator.create_netlist(  # type: ignore[attr-defined]
                 asc_file, cmd_line_switches=cmd_line_args
-            )
+            ))
         else:
             _logger.warning(f"Unable to create the Netlist from {asc_file}")
             return None
