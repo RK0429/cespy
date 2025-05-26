@@ -128,7 +128,6 @@ from typing import (
     Tuple,
     Type,
     Union,
-    cast,
 )
 
 from ..editor.base_editor import BaseEditor
@@ -839,10 +838,9 @@ class SimRunner(AnyRunner):
                     "Creating netlist on MacOS using LTspice at: %s",
                     getattr(self.simulator, "executable", "unknown"),
                 )
-            # Cast to Path to satisfy static type checker for dynamic create_netlist
-            return cast(Path, self.simulator.create_netlist(  # type: ignore[attr-defined]
+            return self.simulator.create_netlist(
                 asc_file, cmd_line_switches=cmd_line_args
-            ))
+            )
         else:
             _logger.warning(f"Unable to create the Netlist from {asc_file}")
             return None
