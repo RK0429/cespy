@@ -797,7 +797,7 @@ class QschEditor(BaseSchematic):
                         sub_circuit_name, mydir
                     )
                     if sub_circuit_schematic_file:
-                        sub_schematic = QschEditor(sub_circuit_schematic_file)
+                        sub_schematic = type(self)(sub_circuit_schematic_file)
                         sch_comp.attributes["_SUBCKT"] = (
                             sub_schematic  # Store it for future use.
                         )
