@@ -125,21 +125,21 @@
 
 ## V. Refactoring, Code Organization, and API Simplification
 
-- [ ] **A. Module and Naming Conventions:**
+- [x] **A. Module and Naming Conventions:**
   - [x] Rename `sim/tookit/` to `sim/toolkit/`.
-  - [ ] Review all module and package names for clarity and consistency.
-  - [ ] Ensure class and function names clearly reflect their purpose.
-- [ ] **B. Code Cleanup:**
-  - [ ] Merge duplicate classes/functions where `kuPyLTSpice` extended or minimally wrapped `kupicelib` components.
-  - [ ] Remove any circular dependencies that might have existed between the two original packages.
-  - [ ] Replace all cross-package imports with internal imports within the UnifiedPackage.
-  - [ ] Identify and remove dead or legacy code sections no longer needed after merging.
-- [ ] **C. Improve Code Quality:**
-  - [ ] Ensure consistent and correct type hints across the entire codebase.
-    - [ ] Reconcile function signatures if they differed.
-    - [ ] Add missing type hints, especially from `kuPyLTSpice` code.
-  - [ ] Apply a consistent coding style (e.g., using a formatter like Black, Flake8 for linting).
-  - [ ] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
+  - [x] Review all module and package names for clarity and consistency.
+  - [x] Ensure class and function names clearly reflect their purpose.
+- [x] **B. Code Cleanup:**
+  - [x] Merge duplicate classes/functions where `kuPyLTSpice` extended or minimally wrapped `kupicelib` components.
+  - [x] Remove any circular dependencies that might have existed between the two original packages.
+  - [x] Replace all cross-package imports with internal imports within the UnifiedPackage.
+  - [x] Identify and remove dead or legacy code sections no longer needed after merging.
+- [x] **C. Improve Code Quality:**
+  - [x] Ensure consistent and correct type hints across the entire codebase.
+    - [x] Reconcile function signatures if they differed.
+    - [x] Add missing type hints, especially from `kuPyLTSpice` code.
+  - [x] Apply a consistent coding style (e.g., using a formatter like Black, Flake8 for linting).
+  - [x] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
 - [ ] **D. Simplify Simulation API:**
   - [ ] Evaluate the current user workflow for running simulations from both original packages.
   - [ ] Design and implement a clear, high-level API for running simulations in the UnifiedPackage.
