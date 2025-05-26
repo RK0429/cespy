@@ -243,7 +243,7 @@ class AscEditor(BaseSchematic):
                         component is not None
                     ), "Syntax Error: SYMATTR clause without SYMBOL"
                     component.append(line)
-                    tag, ref, txt = line.split(maxsplit=2)
+                    _, ref, txt = line.split(maxsplit=2)
                     txt_str = txt.strip()  # Gets rid of the \n terminator
                     if ref == "InstName":
                         component.reference = txt_str
