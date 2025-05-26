@@ -257,7 +257,7 @@ class Component(Primitive):
     def __init__(self, parent: BaseEditor, line: str) -> None:
         super().__init__(line)
         self.reference = ""
-        self.attributes: OrderedDict[str, str] = OrderedDict()
+        self.attributes: OrderedDict[str, Any] = OrderedDict()
         self.ports: List[str] = []
         self.parent = parent
 
@@ -353,10 +353,10 @@ class Component(Primitive):
     def __str__(self) -> str:
         return f"{self.reference} = {self.value}"
 
-    def __getitem__(self, item: str) -> str:
+    def __getitem__(self, item: str) -> Any:
         return self.attributes[item]
 
-    def __setitem__(self, key: str, value: str) -> None:
+    def __setitem__(self, key: str, value: Any) -> None:
         if self.parent.is_read_only():
             raise ValueError("Editor is read-only")
         self.attributes[key] = value
@@ -429,7 +429,7 @@ class BaseEditor(ABC):
     def __setitem__(self, key: str, value: Union[str, int, float]) -> None:
         self.set_component_value(key, value)
 
-    def get_component_attribute(self, reference: str, attribute: str) -> str:
+    def get_component_attribute(self, reference: str, attribute: str) -> Any:
         """Returns the value of the attribute of the component. Attributes are the
         values that are not related with SPICE parameters. For example, component
         manufacturer, footprint, schematic appearance, etc. User can define whatever
