@@ -45,7 +45,12 @@ if sys.version_info.major >= 3 and sys.version_info.minor >= 6:
         This function is used for python 3.6 and higher versions.
         """
         _logger.debug(f"Running command: {command}, with timeout: {timeout}")
-        result = subprocess.run(command, timeout=timeout, stdout=stdout, stderr=stderr)
+        result = subprocess.run(
+            command,
+            check=False,
+            timeout=timeout,
+            stdout=stdout,
+            stderr=stderr)
         return result.returncode
 
 else:
