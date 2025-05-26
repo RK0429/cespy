@@ -580,6 +580,8 @@ class SimRunner(AnyRunner):
 
         def dummy_callback(raw: Path, log: Path) -> None:
             """Dummy call back that does nothing."""
+            _ = raw
+            _ = log
             return None
 
         t = RunTask(
@@ -673,7 +675,7 @@ class SimRunner(AnyRunner):
         :rtype: float or None
         """
         alarm: Optional[float] = None
-        for task, future in self.active_tasks:
+        for task, _ in self.active_tasks:
             # Skip tasks without a start time
             if task.start_time is None:
                 continue
