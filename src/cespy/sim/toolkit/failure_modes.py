@@ -60,8 +60,8 @@ class FailureMode(SimAnalysis):
         self.mosfets = self.editor.get_components("M")
         self.subcircuits = self.editor.get_components("X")
         self.user_failure_modes: Dict[str, Dict[str, Any]] = OrderedDict()
-        # Override simulations to map failure names to RunTask instances
-        self.simulations: Dict[str, Optional[RunTask]] = {}
+        # Mapping of failure names to RunTask instances
+        self.failure_simulations: Dict[str, Optional[RunTask]] = {}
 
     def add_failure_circuit(self,
                             component: str,
@@ -90,10 +90,10 @@ class FailureMode(SimAnalysis):
         for resistor in self.resistors:
             # Short Circuit: set near-zero resistance
             self.editor.set_component_value(resistor, "1f")
-            self.simulations[f"{resistor}_S"] = self.run()
+            self.failure_simulations[f"{resistor}_S"] = self.run()
             # Open Circuit: remove component
             self.editor.remove_component(resistor)
-            self.simulations[f"{resistor}_O"] = self.run()
+            self.failure_simulations[f"{resistor}_O"] = self.run()
             self.editor.reset_netlist()
 
         for two_pin_comps in (self.capacitors, self.inductors, self.diodes):
@@ -101,10 +101,10 @@ class FailureMode(SimAnalysis):
                 cinfo = self.editor.get_component(two_pin_component)
                 # Open Circuit: remove component
                 self.editor.remove_component(two_pin_component)
-                self.simulations[f"{two_pin_component}_O"] = self.run()
+                self.failure_simulations[f"{two_pin_component}_O"] = self.run()
                 # Short Circuit: insert short resistor
                 netlist = getattr(self.editor, "netlist")
                 netlist[cinfo["line"]
                         ] = f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
-                self.simulations[f"{two_pin_component}_S"] = self.run()
+                self.failure_simulations[f"{two_pin_component}_S"] = self.run()
                 self.editor.reset_netlist()
