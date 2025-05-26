@@ -20,7 +20,7 @@
 
 import logging
 import random
-from typing import Callable, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 from ...log.logfile_data import LogfileData
 from ..process_callback import ProcessCallback
@@ -64,7 +64,7 @@ class Montecarlo(ToleranceDeviations):
     when it is prone to crashes and stalls.
     """
 
-    def prepare_testbench(self, **kwargs):
+    def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepares the simulation by setting the tolerances for the components :keyword
         num_runs: Number of runs to be performed.
 
@@ -105,6 +105,7 @@ class Montecarlo(ToleranceDeviations):
                     min_max_norm_func = True
 
             if new_val != val:  # Only update the value if it has changed
+                assert isinstance(new_val, str)
                 self.set_component_value(ref, new_val)  # update the value
                 self.elements_analysed.append(ref)
 
@@ -113,21 +114,21 @@ class Montecarlo(ToleranceDeviations):
             new_val = val
             if dev.typ == DeviationType.tolerance:
                 if dev.distribution == "uniform":
-                    new_val = "{utol(%s,%g)}" % (val, dev.max_val)
+                    new_val = "{utol(%s,%s)}" % (val, dev.max_val)
                     tol_uni_func = True
                 elif dev.distribution == "normal":
-                    new_val = "{ntol(%g,%g)}" % (val, dev.max_val)
+                    new_val = "{ntol(%s,%s)}" % (val, dev.max_val)
                     tol_norm_func = True
             elif dev.typ == DeviationType.minmax:
                 if dev.distribution == "uniform":
-                    new_val = "{urng(%s,%g,%g)}" % (
+                    new_val = "{urng(%s,%s,%s)}" % (
                         val,
                         (dev.max_val + dev.min_val) / 2,
                         (dev.max_val - dev.min_val) / 2,
                     )
                     min_max_uni_func = True
                 elif dev.distribution == "normal":
-                    new_val = "{nrng(%s,%g,%g)}" % (
+                    new_val = "{nrng(%s,%s,%s)}" % (
                         val,
                         (dev.max_val + dev.min_val) / 2,
                         (dev.max_val - dev.min_val) / 6,
@@ -138,7 +139,9 @@ class Montecarlo(ToleranceDeviations):
             self.editor.set_parameter(param, new_val)
             self.elements_analysed.append(param)
 
-        if self.runner.simulator.__name__ == "LTspice":
+        simulator = getattr(self.runner, "simulator", None)
+        sim_name = getattr(simulator, "__name__", None)
+        if sim_name == "LTspice":
             if tol_uni_func:
                 self.editor.add_instruction(
                     ".func utol(nom,tol) if(run<0, nom, mc(nom,tol))"
@@ -158,7 +161,7 @@ class Montecarlo(ToleranceDeviations):
                 self.editor.add_instruction(
                     ".func nrng(nom,mean,df6) if(run<0, nom, mean*(1+gauss(df6)))"
                 )
-        elif self.runner.simulator.__name__ == "Qspice":
+        elif sim_name == "Qspice":
             # if gauss function is needed
             #  => This is finally not needed because Qspice has a built-in gauss function (non-documented)
             # if tol_norm_func or min_max_norm_func:
@@ -220,13 +223,13 @@ class Montecarlo(ToleranceDeviations):
 
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable]] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
-        switches=None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[Any] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
         num_runs: int = 1000,
-    ):
+    ) -> None:
         """This method runs the analysis without updating the netlist.
 
         It will update component values and parameters according to their deviation type
@@ -241,18 +244,18 @@ class Montecarlo(ToleranceDeviations):
             self.play_instructions()  # play the instructions
             # Preparing the variation on components
             for ref in self.get_components("*"):
-                val, dev = self.get_component_value_deviation_type(
-                    ref
-                )  # get there present value
-                new_val = self._get_sim_value(val, dev)
-                if new_val != val:  # Only update the value if it has changed
-                    self.editor.set_component_value(ref, new_val)  # update the value
+                val, dev = self.get_component_value_deviation_type(ref)
+                if isinstance(val, float):
+                    new_val = self._get_sim_value(val, dev)
+                    if new_val != val:
+                        self.editor.set_component_value(ref, new_val)
             # Preparing the variation on parameters
             for param in self.parameter_deviations:
                 val, dev = self.get_parameter_value_deviation_type(param)
-                new_val = self._get_sim_value(val, dev)
-                if new_val != val:  # Only update the value if it has changed
-                    self.editor.set_parameter(param, new_val)
+                if isinstance(val, (int, float)):
+                    new_val = self._get_sim_value(val, dev)
+                    if new_val != val:
+                        self.editor.set_parameter(param, new_val)
             # Run the simulation
             # Handle optional parameters properly before passing to run
             actual_callback = (
@@ -279,7 +282,7 @@ class Montecarlo(ToleranceDeviations):
             self.simulation_results["callback_returns"] = callback_rets
         self.analysis_executed = True
 
-    def analyse_measurement(self, meas_name: str):
+    def analyse_measurement(self, meas_name: str) -> Optional[Any]:
         """Returns the measurement data for the given measurement name.
 
         If the measurement is not found, it returns None Note: It is up to the user to
