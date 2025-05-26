@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
+from __future__ import annotations
+
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -20,12 +22,25 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from ...editor.base_editor import BaseEditor, scan_eng
 from ...log.logfile_data import LogfileData, LTComplex
 from ..run_task import RunTask
-from .sim_analysis import AnyRunner, ProcessCallback, SimAnalysis
+from ..sim_runner import AnyRunner, ProcessCallback
+from .sim_analysis import SimAnalysis
 
 
 class DeviationType(Enum):
@@ -46,17 +61,20 @@ class ComponentDeviation:
     distribution: str = "uniform"
 
     @classmethod
-    def from_tolerance(cls, tolerance: float, distribution: str = "uniform"):
+    def from_tolerance(
+            cls,
+            tolerance: float,
+            distribution: str = "uniform") -> ComponentDeviation:
         return cls(tolerance, -tolerance, DeviationType.tolerance, distribution)
 
     @classmethod
     def from_min_max(
         cls, min_val: float, max_val: float, distribution: str = "uniform"
-    ):
+    ) -> ComponentDeviation:
         return cls(min_val, max_val, DeviationType.minmax, distribution)
 
     @classmethod
-    def none(cls):
+    def none(cls) -> ComponentDeviation:
         return cls(0.0, 0.0, DeviationType.none)
 
 
@@ -82,14 +100,14 @@ class ToleranceDeviations(SimAnalysis, ABC):
         self.simulation_results: Dict[str, Any] = {}
         self.elements_analysed: List[str] = []
 
-    def reset_tolerances(self):
+    def reset_tolerances(self) -> None:
         """Clears all the settings for the simulation."""
         self.device_deviations.clear()
         self.parameter_deviations.clear()
         self.testbench_prepared = False
         self.last_run_number = 0
 
-    def clear_simulation_data(self):
+    def clear_simulation_data(self) -> None:
         """Clears the data from the simulations."""
         super().clear_simulation_data()
         self.simulation_results.clear()
@@ -97,7 +115,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
     def set_tolerance(
         self, ref: str, new_tolerance: float, distribution: str = "uniform"
-    ):
+    ) -> None:
         """Sets the tolerance for a given component.
 
         If only the prefix is given, the tolerance is set for all. The valid prefixes
@@ -113,7 +131,10 @@ class ToleranceDeviations(SimAnalysis, ABC):
                     new_tolerance, distribution
                 )
 
-    def set_tolerances(self, new_tolerances: dict, distribution: str = "uniform"):
+    def set_tolerances(self,
+                       new_tolerances: Dict[str,
+                                            float],
+                       distribution: str = "uniform") -> None:
         """Sets the tolerances for a set of components.
 
         The dictionary keys are the references and the values are the tolerances. If
@@ -124,8 +145,8 @@ class ToleranceDeviations(SimAnalysis, ABC):
             self.set_tolerance(ref, tol, distribution)
 
     def set_deviation(
-        self, ref: str, min_val, max_val: float, distribution: str = "uniform"
-    ):
+        self, ref: str, min_val: float, max_val: float, distribution: str = "uniform"
+    ) -> None:
         """Sets the deviation for a given component.
 
         This establishes a min and max value for the component. Optionally a
@@ -136,7 +157,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
             min_val, max_val, distribution
         )
 
-    def get_components(self, prefix: str):
+    def get_components(self, prefix: str) -> Iterable[str]:
         if prefix == "*":
             return (
                 cmp
@@ -163,8 +184,8 @@ class ToleranceDeviations(SimAnalysis, ABC):
             return value, ComponentDeviation.none()
 
     def set_parameter_deviation(
-        self, ref: str, min_val, max_val: float, distribution: str = "uniform"
-    ):
+        self, ref: str, min_val: float, max_val: float, distribution: str = "uniform"
+    ) -> None:
         self.parameter_deviations[ref] = ComponentDeviation.from_min_max(
             min_val, max_val, distribution
         )
@@ -175,17 +196,17 @@ class ToleranceDeviations(SimAnalysis, ABC):
         value = self.editor.get_parameter(param)
         return value, self.parameter_deviations[param]
 
-    def save_netlist(self, filename: str):
+    def save_netlist(self, filename: str) -> None:
         if self.testbench_prepared is False:
             self.prepare_testbench()
         super().save_netlist(filename)
 
-    def _reset_netlist(self):
+    def _reset_netlist(self) -> None:
         super()._reset_netlist()
         self.testbench_prepared = False
 
     @abstractmethod
-    def prepare_testbench(self, **kwargs): ...
+    def prepare_testbench(self, **kwargs: Any) -> None: ...
 
     def run_testbench(
         self,
@@ -198,7 +219,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
-    ):
+    ) -> Optional[Iterator[Any]]:
         """Runs the simulations.
 
         :param runs_per_sim: Maximum number of runs per simulation. If the number of
@@ -342,13 +363,13 @@ class ToleranceDeviations(SimAnalysis, ABC):
         self.add_log_data(log_results)
         return log_results
 
-    def read_logfiles(self):
+    def read_logfiles(self) -> LogfileData:
         """Returns the logdata for the simulations."""
         if self.analysis_executed is False and self.testbench_executed is False:
             raise RuntimeError("The analysis has not been executed yet")
 
         if "log_data" in self.simulation_results:
-            return self.simulation_results["log_data"]
+            return cast(LogfileData, self.simulation_results["log_data"])
 
         super().read_logfiles()
         # The code below makes the run measure (if it exists) available on the stepset.
@@ -384,6 +405,5 @@ class ToleranceDeviations(SimAnalysis, ABC):
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
-    ):
+    ) -> None:
         """The override of this method should set the self.analysis_executed to True."""
-        ...
