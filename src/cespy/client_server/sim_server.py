@@ -7,29 +7,12 @@ import threading
 import uuid
 import zipfile
 from pathlib import Path
-
-# -------------------------------------------------------------------------------
-#
-#  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
-#  ██╔════╝██╔══██╗██║██╔════╝██╔════╝██║     ██║██╔══██╗
-#  ███████╗██████╔╝██║██║     █████╗  ██║     ██║██████╔╝
-#  ╚════██║██╔═══╝ ██║██║     ██╔══╝  ██║     ██║██╔══██╗
-#  ███████║██║     ██║╚██████╗███████╗███████╗██║██████╔╝
-#  ╚══════╝╚═╝     ╚═╝ ╚═════╝╚══════╝╚══════╝╚═╝╚═════╝
-#
-# Name:        sim_server.py
-# Purpose:     A simulation server that can execute simulations by request of a client located in a different machine.
-#
-# Author:      Nuno Brum (nuno.brum@gmail.com)
-#
-# Created:     23-02-2023
-# Licence:     refer to the LICENSE file
-# -------------------------------------------------------------------------------
-from typing import Tuple
+from typing import List, Tuple, Type
 from xmlrpc.client import Binary
 from xmlrpc.server import SimpleXMLRPCServer
 
 from cespy.client_server.srv_sim_runner import ServerSimRunner
+from cespy.sim.simulator import Simulator
 
 _logger = logging.getLogger("cespy.SimServer")
 
@@ -61,15 +44,15 @@ class SimServer(object):
 
     def __init__(
         self,
-        simulator,
-        parallel_sims=4,
-        output_folder="./temp",
+        simulator: Type[Simulator],
+        parallel_sims: int = 4,
+        output_folder: str = "./temp",
         timeout: float = 300,
-        port=9000,
-        host="localhost",
-    ):
+        port: int = 9000,
+        host: str = "localhost",
+    ) -> None:
         self.output_folder = output_folder
-        self.simulation_manager = ServerSimRunner(
+        self.simulation_manager: ServerSimRunner = ServerSimRunner(
             parallel_sims=parallel_sims,
             timeout=timeout,
             verbose=False,
@@ -91,7 +74,7 @@ class SimServer(object):
         )
         self.server_thread.start()
 
-    def add_sources(self, session_id, zip_data) -> bool:
+    def add_sources(self, session_id: str, zip_data: Binary) -> bool:
         """Add sources to the simulation.
 
         The sources are contained in a zip file will be added to the simulation folder.
@@ -113,19 +96,19 @@ class SimServer(object):
                 answer = True
         return answer
 
-    def run(self, session_id, circuit_name, zip_data):
+    def run(self, session_id: str, circuit_name: str, zip_data: Binary) -> int:
         _logger.info(f"Server: Run {session_id} : {circuit_name}")
         if not self.add_sources(session_id, zip_data):
             return -1
 
-        circuit_name = Path(self.output_folder) / circuit_name
-        _logger.info(f"Server: Running simulation of {circuit_name}")
-        runno = self.simulation_manager.add_simulation(circuit_name)
+        circuit_path = Path(self.output_folder) / circuit_name
+        _logger.info(f"Server: Running simulation of {circuit_path}")
+        runno = self.simulation_manager.add_simulation(circuit_path)
         if runno != -1:
             self.sessions[session_id].append(runno)
         return runno
 
-    def start_session(self):
+    def start_session(self) -> str:
         """Returns an unique key that represents the session.
 
         It will be later used to sort the sim_tasks belonging to the session.
@@ -137,7 +120,7 @@ class SimServer(object):
         self.sessions[session_id] = []
         return session_id
 
-    def status(self, session_id):
+    def status(self, session_id: str) -> List[int]:
         """Returns a dictionary with task information. The key for the dictionary is the
         simulation identifier returned by the simulation start command. The value
         associated with each simulation identifier is another dictionary containing the
@@ -162,7 +145,7 @@ class SimServer(object):
         _logger.debug(f"Server: Returning status {ret}")
         return ret
 
-    def get_files(self, session_id, runno) -> Tuple[str, Binary]:
+    def get_files(self, session_id: str, runno: int) -> Tuple[str, Binary]:
         if runno in self.sessions[session_id]:
 
             for task_info in self.simulation_manager.completed_tasks:
@@ -178,7 +161,7 @@ class SimServer(object):
 
         return "", Binary(b"")  # Returns and empty data
 
-    def close_session(self, session_id):
+    def close_session(self, session_id: str) -> bool:
         """Cleans all the pending sim_tasks with."""
         if session_id not in self.sessions:
             return False
@@ -188,12 +171,12 @@ class SimServer(object):
         del self.sessions[session_id]
         return True  # Needs to return always something. None is not supported
 
-    def stop_server(self):
+    def stop_server(self) -> bool:
         _logger.debug("Server: stopping...ServerInterface")
         self.simulation_manager.stop()
         self.server.shutdown()
         _logger.info("Server: stopped...ServerInterface")
         return True  # Needs to return always something. None is not supported
 
-    def running(self):
+    def running(self) -> bool:
         return self.simulation_manager.running()
