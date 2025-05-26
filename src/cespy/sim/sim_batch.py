@@ -99,7 +99,7 @@ __copyright__ = "Copyright 2020, Fribourg Switzerland"
 import logging
 import os
 from pathlib import Path
-from typing import Any, Callable, Optional, Type, Union
+from typing import Any, Callable, Optional, Type, Union, cast
 
 from ..editor.spice_editor import SpiceEditor
 from .process_callback import ProcessCallback
@@ -265,7 +265,8 @@ class SimCommander(SpiceEditor):
                 def adapted_callback_wrapper(
                         raw_file: Path, log_file: Path) -> Any:
                     # Convert Path objects to strings for legacy callbacks
-                    return callback(str(raw_file), str(log_file))
+                    func = cast(Callable[[str, str], Any], callback)
+                    return func(str(raw_file), str(log_file))
 
                 adapted_callback = adapted_callback_wrapper
 
