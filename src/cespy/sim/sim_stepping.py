@@ -251,8 +251,8 @@ if __name__ == "__main__":
 
     # Correct example for demonstration purposes
     netlist = SpiceEditor("../../tests/DC sweep.asc")
-    runner = SimRunner()
-    test = SimStepper(netlist, runner)
+    sim_runner = SimRunner()
+    test = SimStepper(netlist, sim_runner)
     # The set_parameter method is decorated with @wraps which causes type checking issues
     # in the test code, but it works correctly at runtime
     netlist.set_parameter("R1", 3)  # Set parameter on the netlist directly
