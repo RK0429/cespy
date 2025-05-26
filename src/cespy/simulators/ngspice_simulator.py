@@ -114,7 +114,7 @@ class NGspiceSimulator(Simulator):
     _compatibility_mode = "kiltpsa"
 
     @classmethod
-    def valid_switch(cls, switch: str, parameter: str = "") -> list:
+    def valid_switch(cls, switch: str, parameter: str = "") -> List[str]:
         """Validates a command line switch. The following options are available for
         NGSpice:
 
@@ -191,8 +191,8 @@ class NGspiceSimulator(Simulator):
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[List[Any]] = None,
         timeout: Optional[float] = None,
-        stdout=None,
-        stderr=None,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
         exe_log: bool = False,
     ) -> int:
         """Executes a NGspice simulation run.
@@ -274,7 +274,7 @@ class NGspiceSimulator(Simulator):
         return error
 
     @classmethod
-    def set_compatibility_mode(cls, mode: str = _compatibility_mode):
+    def set_compatibility_mode(cls, mode: str = _compatibility_mode) -> None:
         """Set the compatibility mode. It has become mandatory in recent ngspice
         versions, as the default 'all' is no longer valid.
 
