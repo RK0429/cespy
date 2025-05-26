@@ -98,7 +98,7 @@ class LTspice(Simulator):
         )
 
     @classmethod
-    def valid_switch(cls, switch: str, path: str = "") -> list[str]:
+    def valid_switch(cls, switch: str, switch_param: str = "") -> list[str]:
         """Validate a command line switch.
 
         Available options for Windows/wine LTspice:
@@ -147,7 +147,7 @@ class LTspice(Simulator):
 
         if switch in cls.ltspice_args:
             switches = cls.ltspice_args[switch]
-            switches = [switch.replace("<path>", path) for switch in switches]
+            switches = [s.replace("<path>", switch_param) for s in switches]
             return switches
         else:
             valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
@@ -347,7 +347,7 @@ class LTspice(Simulator):
         raise RuntimeError(msg)
 
     @classmethod
-    def _detect_executable(cls) -> None:
+    def detect_executable(cls) -> None:
         """Detect and set spice_exe and process_name based on platform."""
         if sys.platform in ("linux", "darwin"):
             cls._detect_unix_executable()
@@ -403,5 +403,5 @@ class LTspice(Simulator):
 
 
 # initialize LTspice executable detection
-LTspice._detect_executable()
+LTspice.detect_executable()
 _logger.debug(f"Found LTspice installed in: '{LTspice.spice_exe}'")
