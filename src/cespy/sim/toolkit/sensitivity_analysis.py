@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
+from __future__ import annotations
+
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -18,7 +20,7 @@
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
@@ -132,13 +134,15 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
     def run_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[Any] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
-    ) -> None:
+        measure: Optional[str] = None,
+    ) -> Optional[Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]]:
         self.clear_simulation_data()
         self.elements_analysed.clear()
+        del measure  # unused measure parameter
         # Calculate the number of runs
 
         worst_case_elements = {}
@@ -172,7 +176,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 "The number of runs is too high. It will be limited to 4096\n"
                 "Consider limiting the number of components with deviation"
             )
-            return
+            return None
 
         self._reset_netlist()  # reset the netlist
         self.play_instructions()  # play the instructions
@@ -204,7 +208,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
             bit_setting = 2**run
             bit_updated = bit_setting ^ last_bit_setting
             bit_index = 0
-            print("bit updated: %d" % bit_updated)
+            _logger.debug("bit updated: %d", bit_updated)
             while bit_updated != 0:
                 if bit_updated & 1:
                     ref = self.elements_analysed[bit_index]
@@ -228,7 +232,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                         self.editor.set_parameter(ref, new_val)
                     else:
                         _logger.warning("Unknown type")
-                    print(f"{ref} = {new_val}")
+                    _logger.debug("%s = %s", ref, new_val)
                 bit_updated >>= 1
                 bit_index += 1
             self.editor.set_parameter("run", run)
@@ -277,3 +281,4 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 except (AttributeError, TypeError):
                     # Handle case where dataset doesn't behave like a dict
                     _logger.warning("Could not process dataset in expected way")
+        return None
