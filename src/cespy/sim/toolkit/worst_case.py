@@ -19,7 +19,7 @@
 # -------------------------------------------------------------------------------
 
 import logging
-from typing import Callable, Dict, Tuple, Type, Union
+from typing import Any, Callable, Dict, Sequence, Tuple, Type, Union
 
 from ...log.logfile_data import LogfileData
 from ..process_callback import ProcessCallback
@@ -52,7 +52,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
     when it is prone to crashes and stalls.
     """
 
-    def _set_component_deviation(self, ref: str, index) -> bool:
+    def _set_component_deviation(self, ref: str, index: int) -> bool:
         """Sets the deviation of a component.
 
         Returns True if the component is valid and the deviation was set. Otherwise,
@@ -83,7 +83,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
             self.elements_analysed.append(ref)
         return True
 
-    def prepare_testbench(self, **kwargs):
+    def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepares the simulation by setting the tolerances for the components."""
         index = 0
         self.elements_analysed.clear()
@@ -130,10 +130,10 @@ class WorstCaseAnalysis(ToleranceDeviations):
         self,
         callback: Union[Type[ProcessCallback], Callable[..., object], None] = None,
         callback_args: Union[Tuple[object, ...], Dict[str, object], None] = None,
-        switches=None,
+        switches: Any = None,
         timeout: Union[float, None] = None,
         exe_log: bool = True,
-    ):
+    ) -> None:
         """This method runs the analysis without updating the netlist.
 
         It will update component values and parameters according to their deviation type
@@ -144,7 +144,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
         self.elements_analysed.clear()
         worst_case_elements = {}
 
-        def check_and_add_component(ref1: str):
+        def check_and_add_component(ref1: str) -> None:
             val1, dev1 = self.get_component_value_deviation_type(
                 ref1
             )  # get there present value
@@ -254,7 +254,8 @@ class WorstCaseAnalysis(ToleranceDeviations):
             self.simulation_results["callback_returns"] = callback_rets
         self.analysis_executed = True
 
-    def get_min_max_measure_value(self, meas_name: str):
+    def get_min_max_measure_value(
+            self, meas_name: str) -> Union[Tuple[float, float], None]:
         """Returns the minimum and maximum values of a measurement.
 
         See SPICE .MEAS primitive documentation.
@@ -276,6 +277,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
                 "  - Failed simulations.\n"
                 "  - Measurement couldn't be done in simulation results."
             )
+            return None
         else:
             return min(meas_data), max(meas_data)
 
@@ -313,7 +315,8 @@ class WorstCaseAnalysis(ToleranceDeviations):
                 for run in range(self.last_run_number + 1)
             ]
 
-            def diff_for_a_ref(wc_data, bit_index):
+            def diff_for_a_ref(wc_data: Sequence[Any],
+                               bit_index: int) -> Tuple[float, float]:
                 """Calculates the difference of the measurement for the toggle of a
                 given bit."""
                 bit_updated = 1 << bit_index
