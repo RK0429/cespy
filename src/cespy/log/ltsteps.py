@@ -51,13 +51,11 @@ command allows the user to run   predefined .MEAS commands which create a .mout 
 
 .. code-block:: text
 
-Measurement: Vout_rms step        RMS(V(OUT))     FROM    TO  1  1.41109 0       0.001 2
-1.40729 0       0.001
+Measurement: Vout_rms step RMS(V(OUT)) FROM TO 1 1.411090 0 0.001 2 1.40729 0 0.001
 
-Measurement: Vin_rms   step      RMS(V(IN))      FROM    TO      1      0.706221 0
-0.001      2      0.704738        0       0.001
+Measurement: Vin_rms step RMS(V(IN)) FROM TO 1 0.706221 0 0.001 2 0.704738 0 0.001
 
-Measurement: gain   step      Vout_rms/Vin_rms      1      1.99809      2      1.99689
+Measurement: gain step Vout_rms/Vin_rms FROM TO 1 1.99809 2 1.99689
 
  The ltsteps can be used directly from a command line if the Python's Scripts folder is
 included in the PATH environment variable.
@@ -473,9 +471,7 @@ class LTSpiceLogReader(LogfileData):
                         # store the info
                         if len(measurements):
                             _logger.debug(
-                                "Storing Measurement %s (count %d)"
-                                % (meas_name, len(measurements))
-                            )
+                                f"Storing Measurement {meas_name} (count {len(measurements)})")
                             self.measure_count += len(measurements)
                             for k, title in enumerate(headers):
                                 if title is None:
@@ -518,8 +514,7 @@ class LTSpiceLogReader(LogfileData):
             # storing the last data into the dataset
             if meas_name:
                 _logger.debug(
-                    "Storing Measurement %s (count %d)" % (meas_name, len(measurements))
-                )
+                    f"Storing Measurement {meas_name} (count {len(measurements)})")
             if len(measurements):
                 self.measure_count += len(measurements)
                 for k, title in enumerate(headers):
@@ -528,11 +523,8 @@ class LTSpiceLogReader(LogfileData):
                     key = title.lower()
                     self.dataset[key] = [measure[k] for measure in measurements]
 
-            _logger.debug("%d measurements" % len(self.dataset))
             _logger.info(
-                "Identified %d steps, read %d measurements"
-                % (self.step_count, self.measure_count)
-            )
+                f"Identified {self.step_count} steps, read {self.measure_count} measurements")
 
     def export_data(
         self,
