@@ -73,6 +73,7 @@ class FailureMode(SimAnalysis):
             )
         if component not in self.subcircuits:
             raise ComponentNotFoundError()
+        _ = sub_circuit
         raise NotImplementedError("TODO")  # TODO: Implement this
 
     def add_failure_mode(
@@ -84,6 +85,8 @@ class FailureMode(SimAnalysis):
             raise RuntimeError("The failure modes addition only works with subcircuits")
         if component not in self.subcircuits:
             raise ComponentNotFoundError()
+        _ = short_pins
+        _ = open_pins
         raise NotImplementedError("TODO")  # TODO: Implement this
 
     def run_all(self) -> None:
