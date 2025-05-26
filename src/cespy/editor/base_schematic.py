@@ -21,7 +21,7 @@ import dataclasses
 import enum
 import logging
 from collections import OrderedDict
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union, cast
 
 from .base_editor import SUBCKT_DIVIDER, BaseEditor, Component, ComponentNotFoundError
 
@@ -51,7 +51,7 @@ class ERotation(enum.IntEnum):
     M270 = 360 + 270  # Mirror 270 Rotation
     M315 = 360 + 315  # Mirror 315 Rotation
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.value == 0:
             return "0 Rotation"
         elif self.value == 45:
@@ -84,6 +84,7 @@ class ERotation(enum.IntEnum):
             return "Mirror 270 Rotation"
         elif self.value == 360 + 315:
             return "Mirror 315 Rotation"
+        return super().__str__()
 
     # def mirror_y_axis(self):
     #     if self == ERotation.R0:
@@ -287,13 +288,13 @@ class Port:
 class SchematicComponent(Component):
     """Holds component information."""
 
-    def __init__(self, parent, line):
+    def __init__(self, parent: BaseEditor, line: str) -> None:
         super().__init__(parent, line)
         self.position: Point = Point(0, 0)
         self.rotation: ERotation = ERotation.R0
         self.symbol = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.reference} {self.position.X} {self.position.Y} {self.rotation}"
 
 
@@ -301,7 +302,7 @@ class BaseSchematic(BaseEditor):
     """This defines the primitives (protocol) to be used for both SpiceEditor and
     AscEditor classes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.components: OrderedDict[str, SchematicComponent] = OrderedDict()
         self.wires: List[Line] = []
         self.labels: List[Text] = []
@@ -333,17 +334,19 @@ class BaseSchematic(BaseEditor):
         self.shapes = deepcopy(editor.shapes)
         self.updated = True
 
-    def _get_parent(self, reference) -> Tuple["BaseSchematic", str]:
+    def _get_parent(self, reference: str) -> Tuple["BaseSchematic", str]:
         if SUBCKT_DIVIDER in reference:
             sub_ref, sub_comp = reference.split(SUBCKT_DIVIDER, 1)
 
             subckt = self.get_component(sub_ref)
-            subcircuit = subckt.attributes["_SUBCKT"]
+            # The _SUBCKT attribute holds a BaseSchematic instance
+            subcircuit_any = subckt.attributes["_SUBCKT"]
+            subcircuit = cast(BaseSchematic, subcircuit_any)
             return subcircuit, sub_comp
         else:
             return self, reference
 
-    def set_updated(self, reference):
+    def set_updated(self, reference: str) -> None:
         """:meta private:"""
         sub_circuit, _ = self._get_parent(reference)
         sub_circuit.updated = True
@@ -390,7 +393,7 @@ class BaseSchematic(BaseEditor):
         comp.rotation = rotation
         self.set_updated(reference)
 
-    def add_component(self, component: Component, **kwargs) -> None:
+    def add_component(self, component: Component, **kwargs: Any) -> None:
         if not isinstance(component, SchematicComponent):
             schematic_component = SchematicComponent(self, component.line)
             schematic_component.reference = component.reference
@@ -409,9 +412,9 @@ class BaseSchematic(BaseEditor):
 
     def scale(
         self,
-        offset_x,
-        offset_y,
-        scale_x,
+        offset_x: float,
+        offset_y: float,
+        scale_x: float,
         scale_y: float,
         round_fun: Optional[Callable[[float], Union[int, float]]] = None,
     ) -> None:
