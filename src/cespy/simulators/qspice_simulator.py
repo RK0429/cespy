@@ -229,7 +229,7 @@ class Qspice(Simulator):
         # start execution
         if exe_log:
             log_exe_file = netlist_file.with_suffix(".exe.log")
-            with open(log_exe_file, "w") as outfile:
+            with open(log_exe_file, "w", encoding="utf-8") as outfile:
                 error = run_function(
                     cmd_run, timeout=timeout, stdout=outfile, stderr=subprocess.STDOUT
                 )
