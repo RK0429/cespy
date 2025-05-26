@@ -821,8 +821,8 @@ class QschEditor(BaseSchematic):
             else:
                 type_text = TextTypeEnum.NULL
 
-            # angle = text_tag.get_attr(QSCH_TEXT_ROTATION)  # TODO: Implement text
-            # Rotation
+            # angle = text_tag.get_attr(QSCH_TEXT_ROTATION)
+            # TODO: Implement text rotation
 
             text_obj = Text(
                 point,
@@ -1120,7 +1120,7 @@ class QschEditor(BaseSchematic):
         for tag in self.schematic.items:
             if tag.tag in ("component", "net", "text"):
                 x1, y1 = tag.get_attr(1)
-                x2, y2 = x1, y1  # todo: the whole component primitives
+                x2, y2 = x1, y1  # TODO: the whole component primitives
             elif tag.tag == "wire":
                 x1, y1 = tag.get_attr(1)
                 x2, y2 = tag.get_attr(2)
