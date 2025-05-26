@@ -19,7 +19,7 @@
 # -------------------------------------------------------------------------------
 
 import logging
-from typing import Any, Callable, Dict, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 from ...log.logfile_data import LogfileData
 from ..process_callback import ProcessCallback
@@ -128,12 +128,13 @@ class WorstCaseAnalysis(ToleranceDeviations):
 
     def run_analysis(
         self,
-        callback: Union[Type[ProcessCallback], Callable[..., object], None] = None,
-        callback_args: Union[Tuple[object, ...], Dict[str, object], None] = None,
-        switches: Any = None,
-        timeout: Union[float, None] = None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[List[str]] = None,
+        timeout: Optional[float] = None,
         exe_log: bool = True,
-    ) -> None:
+        measure: Optional[str] = None,
+    ) -> Optional[Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]]:
         """This method runs the analysis without updating the netlist.
 
         It will update component values and parameters according to their deviation type
@@ -182,7 +183,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
                 "The number of runs is too high. It will be limited to 4096\n"
                 "Consider limiting the number of components with deviation"
             )
-            return
+            return None
 
         self._reset_netlist()  # reset the netlist
         self.play_instructions()  # play the instructions
@@ -253,6 +254,8 @@ class WorstCaseAnalysis(ToleranceDeviations):
                     callback_rets.append(rt.get_results())
             self.simulation_results["callback_returns"] = callback_rets
         self.analysis_executed = True
+
+        return None
 
     def get_min_max_measure_value(
             self, meas_name: str) -> Union[Tuple[float, float], None]:
