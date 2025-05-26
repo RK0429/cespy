@@ -20,10 +20,11 @@
 
 import logging
 from enum import IntEnum
-from typing import Callable, Dict, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 from ..process_callback import ProcessCallback
-from .worst_case import DeviationType, WorstCaseAnalysis
+from .tolerance_deviations import ComponentDeviation, DeviationType
+from .worst_case import WorstCaseAnalysis
 
 _logger = logging.getLogger("cespy.SimAnalysis")
 
@@ -79,9 +80,9 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         *,
         runs_per_sim: Optional[int] = None,  # This parameter is ignored
         wait_resource: bool = True,  # This parameter is ignored
-        callback: Optional[Union[Type[ProcessCallback], Callable]] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
-        switches=None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
@@ -90,9 +91,9 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
 
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable]] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
-        switches=None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
         measure: Optional[str] = None,
@@ -105,7 +106,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         self.elements_analysed.clear()
         worst_case_elements = {}
 
-        def check_and_add_component(ref1: str):
+        def check_and_add_component(ref1: str) -> None:
             val1, dev1 = self.get_component_value_deviation_type(
                 ref1
             )  # get there present value
@@ -114,7 +115,10 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             worst_case_elements[ref1] = val1, dev1, "component"
             self.elements_analysed.append(ref1)
 
-        def value_change(val, dev, to: WorstCaseType):
+        def value_change(
+                val: Union[str, float],
+                dev: ComponentDeviation,
+                to: WorstCaseType) -> float:
             """Sets the reference component to the maximum value if set_max is True, or
             to the minimum value if set_max is False.
 
@@ -144,7 +148,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
                 new_val = val
             return new_val
 
-        def set_ref_to(ref, to: WorstCaseType):
+        def set_ref_to(ref: str, to: WorstCaseType) -> None:
             val, dev, typ = worst_case_elements[ref]
             new_val = value_change(val, dev, to)
             if typ == "component":
@@ -154,7 +158,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             else:
                 _logger.warning("Unknown type")
 
-        def run_and_get_measure():
+        def run_and_get_measure() -> float:
             # Run the simulation
             # Prepare callbacks and timeouts
             actual_callback = (
@@ -171,10 +175,12 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
                 timeout=actual_timeout,
                 exe_log=exe_log,
             )
+            assert task is not None
             self.wait_completion()
             # Get the results from the simulation
             log_data = self.add_log(task)
-            return log_data.get_measure_value(measure)
+            assert log_data is not None
+            return cast(float, log_data.get_measure_value(measure))
 
         for ref in self.device_deviations:
             check_and_add_component(ref)
@@ -234,13 +240,13 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         self.testbench_executed = True  # Idem
         # Get the results from the simulation
         log_data = self.read_logfiles()
-        nominal = log_data.get_measure_value(measure, 0)
+        nominal = cast(float, log_data.get_measure_value(measure, 0))
         _logger.info("Nominal value: %g", nominal)
         component_deltas = {}
         idx = 1
         new_measure = last_measure = nominal
         for ref in self.elements_analysed:
-            new_measure = log_data.get_measure_value(measure, idx)
+            new_measure = cast(float, log_data.get_measure_value(measure, idx))
             component_deltas[ref] = new_measure - last_measure
             last_measure = new_measure
             _logger.info("Component %s: %g", ref, component_deltas[ref])
