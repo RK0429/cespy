@@ -155,7 +155,7 @@ class XyceSimulator(Simulator):
     _default_run_switches = ["-l", "-r"]
 
     @classmethod
-    def valid_switch(cls, switch: str, parameter: str = "") -> list:
+    def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:
         """Validates a command line switch. The following options are available for
         Xyce:
 
@@ -265,8 +265,8 @@ class XyceSimulator(Simulator):
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[list[Any]] = None,
         timeout: Optional[float] = None,
-        stdout=None,
-        stderr=None,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
         exe_log: bool = False,
     ) -> int:
         """Executes a Xyce simulation run.
