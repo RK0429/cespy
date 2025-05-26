@@ -32,7 +32,7 @@ _GetShortPathNameW.restype = wintypes.DWORD
 # problem, the return value is still larger, keep trying until you've got it right. So:
 
 
-def get_short_path_name(long_name):
+def get_short_path_name(long_name: str) -> str:
     """Gets the short path name of a given long path.
 
     http://stackoverflow.com/a/23598461/200291
