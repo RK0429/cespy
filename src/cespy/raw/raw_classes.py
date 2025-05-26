@@ -21,7 +21,7 @@
 """Defines base classes for the RAW file data structures."""
 from __future__ import annotations
 
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, Union, cast
 
 import numpy as np
 from numpy import complex128, float32, float64, zeros
@@ -38,6 +38,8 @@ class DataSet(object):
     using the get_wave() method. The parameter whattype defines what is the trace
     representing in the simulation, Voltage, Current a Time or Frequency.
     """
+
+    data: NDArray[Any]
 
     def __init__(
             self,
@@ -168,7 +170,9 @@ class Axis(DataSet):
         if (
             self.name == "time"
         ):  # This is a bug in LTSpice, where the time axis values are sometimes negative
-            return np.abs(wave)
+            # Use typing.cast to inform the type checker that np.abs returns
+            # NDArray[Any]
+            return cast(NDArray[Any], np.abs(wave))
         else:
             return wave
 
@@ -282,7 +286,7 @@ class TraceRead(DataSet):
             name: str,
             whattype: str,
             datalen: int,
-            axis: Axis,
+            axis: Optional[Axis],
             numerical_type: str = "real") -> None:
         super().__init__(name, whattype, datalen, numerical_type)
         self.axis = axis
@@ -353,10 +357,12 @@ class TraceRead(DataSet):
         :param step: step index
         :type step: int
         """
-        pos = self.axis.get_position(t, step)
+        assert self.axis is not None, "Axis is required for get_point_at"
+        axis = self.axis
+        pos = axis.get_position(t, step)
         # Use direct type names rather than parameterized generics
         if isinstance(pos, float):
-            offset = self.axis.step_offset(step)
+            offset = axis.step_offset(step)
             i = int(pos)
             last_item = self.get_len(step) - 1
             if i < last_item:
@@ -387,6 +393,7 @@ class TraceRead(DataSet):
         :return: The number of data points
         :rtype: int
         """
+        assert self.axis is not None, "Axis is required for get_len"
         return self.axis.step_offset(step + 1)
 
     def __len__(self) -> int:
