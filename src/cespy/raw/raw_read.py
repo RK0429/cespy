@@ -192,13 +192,27 @@ plt.show()  # Creates the matplotlib's interactive window with the plots.
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2022, Fribourg Switzerland"
 
+import ast
 import logging
+import operator as _op
 import os
 import re
 from collections import OrderedDict
 from pathlib import Path
 from struct import unpack
-from typing import IO, Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import (
+    IO,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from numpy import float32, float64, frombuffer
 from numpy.typing import NDArray
@@ -206,6 +220,34 @@ from numpy.typing import NDArray
 from ..log.logfile_data import try_convert_value
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .raw_classes import Axis, DummyTrace, SpiceReadException, TraceRead
+
+# Allowed operators for alias formulas
+_ALLOWED_OPS: Dict[Type[Any], Callable[..., Any]] = {
+    ast.Add: _op.add,
+    ast.Sub: _op.sub,
+    ast.Mult: _op.mul,
+    ast.Div: _op.truediv,
+    ast.Pow: _op.pow,
+    ast.USub: _op.neg,
+}
+
+
+def _safe_eval(expr: str, vars: Dict[str, Any]) -> Any:
+    """Safely evaluate simple arithmetic expressions using AST."""
+    node = ast.parse(expr, mode="eval").body
+
+    def _eval(n: ast.AST) -> Any:
+        if isinstance(n, ast.BinOp):
+            return _ALLOWED_OPS[type(n.op)](_eval(n.left), _eval(n.right))
+        if isinstance(n, ast.UnaryOp):
+            return _ALLOWED_OPS[type(n.op)](_eval(n.operand))
+        if isinstance(n, (ast.Constant, ast.Num)):
+            return getattr(n, 'value', n.n)
+        if isinstance(n, ast.Name):
+            return vars[n.id]
+        raise TypeError(f"Unsupported expression: {expr}")
+    return _eval(node)
+
 
 _logger = logging.getLogger("cespy.RawRead")
 
@@ -822,7 +864,7 @@ class RawRead(object):
             }
         )
         try:
-            trace.data = eval(formula, local_vars)
+            trace.data = cast(NDArray[Any], _safe_eval(formula, local_vars))
         except Exception as err:
             raise RuntimeError(
                 f'Error computing alias "{alias}" with formula "{formula}"'
@@ -936,12 +978,16 @@ class RawRead(object):
                     logfile, r"^((.*\n)?Circuit:|([\s\S]*)--- Expanded Netlist ---)"
                 )
                 log = open(logfile, "r", errors="replace", encoding=encoding)
-            except OSError:
-                raise SpiceReadException("Log file '%s' not found" % logfile)
-            except UnicodeError:
-                raise SpiceReadException("Unable to parse log file '%s'" % logfile)
-            except EncodingDetectError:
-                raise SpiceReadException("Unable to parse log file '%s'" % logfile)
+            except OSError as exc:
+                raise SpiceReadException("Log file '%s' not found" % logfile) from exc
+            except UnicodeError as exc:
+                raise SpiceReadException(
+                    "Unable to parse log file '%s'" %
+                    logfile) from exc
+            except EncodingDetectError as exc:
+                raise SpiceReadException(
+                    "Unable to parse log file '%s'" % logfile
+                ) from exc
 
             for line in log:
                 if line.startswith(".step"):
@@ -965,10 +1011,12 @@ class RawRead(object):
             logfile = filename.with_suffix(".log")
             try:
                 log = open(logfile, "r", errors="replace", encoding="utf-8")
-            except OSError:
-                raise SpiceReadException("Log file '%s' not found" % logfile)
-            except UnicodeError:
-                raise SpiceReadException("Unable to parse log file '%s'" % logfile)
+            except OSError as exc:
+                raise SpiceReadException("Log file '%s' not found" % logfile) from exc
+            except UnicodeError as exc:
+                raise SpiceReadException(
+                    "Unable to parse log file '%s'" %
+                    logfile) from exc
 
             step_regex = re.compile(r"^(\d+) of \d+ steps:\s+\.step (.*)$")
 
@@ -1117,11 +1165,11 @@ class RawRead(object):
         """
         try:
             import pandas
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
                 "The 'pandas' module is required to use this function.\n"
                 "Use 'pip install pandas' to install it."
-            )
+            ) from exc
         data = self.export(columns=columns, step=step, **kwargs)
         return pandas.DataFrame(data, **kwargs)
 
@@ -1156,7 +1204,7 @@ class RawRead(object):
         except ImportError:
             # Export to CSV using python built-in functions
             data = self.export(columns=columns, step=step)
-            with open(filename, "w") as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 f.write(separator.join(data.keys()) + "\n")
                 for i in range(
                     len(data[columns[0] if columns else self.get_trace_names()[0]])
@@ -1193,8 +1241,8 @@ class RawRead(object):
 
             df = self.to_dataframe(columns=columns, step=step)
             pd.DataFrame.to_excel(df, filename, **kwargs)
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
                 "The 'pandas' module is required to use this function.\n"
                 "Use 'pip install pandas' to install it."
-            )
+            ) from exc
