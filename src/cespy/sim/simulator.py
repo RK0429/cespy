@@ -224,7 +224,7 @@ class Simulator(ABC):
 
     @classmethod
     @abstractmethod
-    def valid_switch(cls, switch: Any, switch_param: Any) -> List[Any]:
+    def valid_switch(cls, switch: Any, parameter: Any) -> List[Any]:
         """This method validates that a switch exist and is valid.
 
         This should be overriden by its subclass.
