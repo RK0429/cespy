@@ -22,9 +22,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
-from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
-from ..sim_runner import AnyRunner, ProcessCallback
+from ..sim_runner import ProcessCallback
 from .tolerance_deviations import DeviationType, ToleranceDeviations
 
 _logger = logging.getLogger("cespy.SimAnalysis")
@@ -32,11 +31,6 @@ _logger = logging.getLogger("cespy.SimAnalysis")
 
 class QuickSensitivityAnalysis(ToleranceDeviations):
     """Class to automate Sensitivity simulations."""
-
-    def __init__(
-        self, circuit_file: Union[str, BaseEditor], runner: Optional[AnyRunner] = None
-    ):
-        super().__init__(circuit_file, runner)
 
     def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepares the simulation by setting the tolerances for each component."""
