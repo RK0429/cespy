@@ -38,8 +38,6 @@ _logger = logging.getLogger("cespy.SimClient")
 class SimClientInvalidRunId(LookupError):
     """Raised when asking for a run_no that doesn't exist."""
 
-    ...
-
 
 @dataclass
 class JobInformation:
