@@ -220,9 +220,9 @@ class RunTask:
                             proc.join()
                         else:
                             self.callback_return = return_or_process
-                    except Exception:
-                        # Log exception with full traceback
-                        self.logger.exception("Exception during callback execution")
+                    except (ValueError, TypeError, RuntimeError) as exc:
+                        self.logger.exception(
+                            "Exception during callback execution: %s", exc)
                     else:
                         callback_start_time = self.stop_time
                         self.stop_time = clock_function()
