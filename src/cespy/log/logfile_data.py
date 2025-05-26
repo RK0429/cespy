@@ -520,7 +520,7 @@ class LogfileData:
                 data_size = len(values)
             else:
                 if len(values) != data_size:
-                    raise Exception(
+                    raise ValueError(
                         "Data size mismatch. Not all measurements have the same length."
                     )
 
@@ -627,7 +627,7 @@ class LogfileData:
         if mx > axisXmax:
             axisXmax = mx
 
-        counts, bin_edges, patches = plt.hist(
+        counts, bin_edges, _ = plt.hist(
             x,
             bins,
             density=normalized,
