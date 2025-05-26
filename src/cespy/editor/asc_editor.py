@@ -283,20 +283,20 @@ class AscEditor(BaseSchematic):
                         self.directives.append(text_obj)
 
                 elif line.startswith("WIRE"):
-                    tag, x1, y1, x2, y2 = line.split()
+                    _, x1, y1, x2, y2 = line.split()
                     v1 = Point(int(x1), int(y1))
                     v2 = Point(int(x2), int(y2))
                     wire = Line(v1, v2)
                     self.wires.append(wire)
                 elif line.startswith("FLAG"):
-                    tag, posX, posY, text_str = line.split(maxsplit=3)
+                    _, posX, posY, text_str = line.split(maxsplit=3)
                     coord = Point(int(posX), int(posY))
                     flag = Text(
                         coord=coord, text=text_str.strip(), type=TextTypeEnum.LABEL
                     )
                     self.labels.append(flag)
                 elif line.startswith("Version"):
-                    tag, version_val = line.split()
+                    _, version_val = line.split()
                     assert version_val in [
                         "4",
                         "4.0",
@@ -306,7 +306,7 @@ class AscEditor(BaseSchematic):
                 elif line.startswith("SHEET "):
                     self.sheet = line[len("SHEET "):].strip()
                 elif line.startswith("IOPIN "):
-                    tag, posX, posY, direction = line.split()
+                    _, posX, posY, direction = line.split()
                     text = self.labels[-1]  # Assuming it is the last FLAG parsed
                     assert text.coord.X == int(posX) and text.coord.Y == int(
                         posY
