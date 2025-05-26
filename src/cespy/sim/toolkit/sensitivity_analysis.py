@@ -36,7 +36,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
     ):
         super().__init__(circuit_file, runner)
 
-    def prepare_testbench(self, **kwargs):
+    def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepares the simulation by setting the tolerances for each component."""
         no = 0
         self.elements_analysed.clear()
@@ -51,7 +51,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 new_val = "{sammx(%s,%g,%d)}" % (val, used_value, no)
 
             if new_val != val:
-                self.set_component_value(comp, new_val)
+                self.set_component_value(comp, str(new_val))
                 self.elements_analysed.append(comp)
                 no += 1
 
@@ -132,18 +132,18 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
     def run_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[tuple, dict]] = None,
+        callback_args: Optional[Union[tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[Any] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
-    ):
+    ) -> None:
         self.clear_simulation_data()
         self.elements_analysed.clear()
         # Calculate the number of runs
 
         worst_case_elements = {}
 
-        def check_and_add_component(ref1: str):
+        def check_and_add_component(ref1: str) -> None:
             val1, dev1 = self.get_component_value_deviation_type(
                 ref1
             )  # get there present value
@@ -222,7 +222,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                         new_val = val
                     if typ == "component":
                         self.editor.set_component_value(
-                            ref, new_val
+                            ref, str(new_val)
                         )  # update the value
                     elif typ == "parameter":
                         self.editor.set_parameter(ref, new_val)
@@ -247,6 +247,8 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
         if callback is not None:
             callback_rets = []
             for rt in self.simulations:
+                if rt is None:
+                    continue
                 callback_rets.append(rt.get_results())
             self.simulation_results["callback_returns"] = callback_rets
         self.analysis_executed = True
