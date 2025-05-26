@@ -12,3 +12,76 @@ __all__ = [
     "Qspice",
     "XyceSimulator",
 ]
+
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
+
+# High-level simplified simulation API
+from .sim import SimRunner
+
+
+def simulate(
+    circuit: Union[str, Path, Any],
+    engine: str = "ltspice",
+    *,
+    parallel_sims: int = 4,
+    timeout: float = 600.0,
+    verbose: bool = False,
+    output_folder: Optional[str] = None,
+    wait_resource: bool = True,
+    callback: Optional[Callable[..., Any]] = None,
+    callback_args: Optional[Union[tuple[Any, ...], Dict[str, Any]]] = None,
+    switches: Optional[List[str]] = None,
+    run_filename: Optional[str] = None,
+    exe_log: bool = False,
+) -> SimRunner:
+    """Run a simulation for a given circuit file or editor using the specified engine.
+
+    :param circuit: Path to the circuit file or a SpiceEditor instance.
+    :param engine: The simulation engine to use: 'ltspice', 'ngspice', 'qspice', or 'xyce'.
+    :param parallel_sims: Number of parallel simulations to run.
+    :param timeout: Timeout in seconds for each simulation.
+    :param verbose: Enable verbose logging.
+    :param output_folder: Folder to store simulation outputs.
+    :param wait_resource: Whether to wait for resource availability.
+    :param callback: Optional callback function or ProcessCallback class.
+    :param callback_args: Arguments for the callback.
+    :param switches: Command-line switches for the simulator.
+    :param run_filename: Custom filename for output files.
+    :param exe_log: Log simulator console output to a file.
+    :return: A SimRunner instance after completion.
+    """
+    engines = {
+        "ltspice": LTspice,
+        "ngspice": NGspiceSimulator,
+        "qspice": Qspice,
+        "xyce": XyceSimulator,
+    }
+    sim_key = engine.lower()
+    if sim_key not in engines:
+        raise ValueError(
+            f"Unsupported engine '{engine}'. Choose from {list(engines.keys())}.")
+    sim_cls = engines[sim_key]
+    runner = SimRunner(
+        simulator=sim_cls,
+        parallel_sims=parallel_sims,
+        timeout=timeout,
+        verbose=verbose,
+        output_folder=output_folder,
+    )
+    runner.run(
+        circuit,
+        wait_resource=wait_resource,
+        callback=callback,
+        callback_args=callback_args,
+        switches=switches,
+        timeout=timeout,
+        run_filename=run_filename,
+        exe_log=exe_log,
+    )
+    runner.wait_completion()
+    return runner
+
+
+# Expose the high-level API
+__all__.append("simulate")
