@@ -1,35 +1,37 @@
 @ECHO OFF
-
 pushd %~dp0
 
-REM Command file for Sphinx documentation
+REM ——————————————————————————————————————————
+REM  Command file for Sphinx documentation
+REM ——————————————————————————————————————————
 
 if "%SPHINXBUILD%" == "" (
-	set SPHINXBUILD=sphinx-build
+    set "SPHINXBUILD=sphinx-build"
 )
-set SOURCEDIR=source
-set BUILDDIR=build
 
-%SPHINXBUILD% >NUL 2>NUL
+set "SOURCEDIR=source"
+set "BUILDDIR=build"
+
+REM 1) Verify that sphinx-build exists (quietly)
+"%SPHINXBUILD%" --version >NUL 2>&1
 if errorlevel 9009 (
-	echo.
-	echo.The 'sphinx-build' command was not found. Make sure you have Sphinx
-	echo.installed, then set the SPHINXBUILD environment variable to point
-	echo.to the full path of the 'sphinx-build' executable. Alternatively you
-	echo.may add the Sphinx directory to PATH.
-	echo.
-	echo.If you don't have Sphinx installed, grab it from
-	echo.https://www.sphinx-doc.org/
-	exit /b 1
+    echo.
+    echo The 'sphinx-build' command was not found. Make sure you have Sphinx installed,
+    echo then set SPHINXBUILD to the full path of the executable, or add it to your PATH.
+    echo For installation instructions see https://www.sphinx-doc.org/
+    echo.
+    exit /b 1
 )
 
-if "%1" == "" goto help
+REM 2) If no target is given, show help
+if "%~1" == "" goto help
 
-%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+REM 3) Run the requested build target and let all output (including errors) go to the console
+call "%SPHINXBUILD%" -M %~1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 
 :help
-%SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+call "%SPHINXBUILD%" -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 
 :end
 popd
