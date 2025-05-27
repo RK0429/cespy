@@ -30,6 +30,18 @@ This User Guide provides step-by-step instructions and examples for using `cespy
 
 ---
 
+## Architecture Overview
+
+```text
+ .---------------.     .-----------.     .--------------.     .---------------.
+ |  ASC Editor   | --> | SimRunner | --> | RawRead/Log  | --> | Analysis     |
+ | (AscEditor,   |     | (run/run_now)   | (RawRead,     | Toolkit)      |
+ |  QschEditor)  |     |             )  |  LTSpiceLog)  | (MonteCarlo,  |
+ '---------------'     '-----------'     '--------------'     '---------------'
+```
+
+*Figure: High-level workflow of `cespy`.*
+
 ## 1. Installation
 
 Install via PyPI or Poetry:
@@ -79,6 +91,14 @@ asc = AscEditor("examples/oscillator.asc")
 asc.set_component_value("R1", "10k")
 # Save modified schematic
 asc.save_netlist("build/oscillator_mod.asc")
+```
+
+### Converting to Qschematics
+
+Use the `cespy-asc-to-qsch` CLI to convert an LTSpice `.asc` file to a QSpice `.qsch` file:
+
+```bash
+cespy-asc-to-qsch examples/oscillator.asc converted.qsch
 ```
 
 ### Modifying Components and Parameters
@@ -141,6 +161,16 @@ mc = MonteCarlo(asc_file, sim, runs=1000)
 results = mc.run()
 ```
 
+### Worst-Case and Sensitivity Analysis
+
+```python
+from cespy.sim.toolkit import WorstCase, SensitivityAnalysis
+wc = WorstCase(asc_file, sim, parameters={'R1': (1e3, 10e3)})
+wc_results = wc.run()
+sa = SensitivityAnalysis(asc_file, sim, parameter='C1', step=1e-12)
+sa_results = sa.run()
+```
+
 ## 7. Client-Server Mode
 
 ### Starting the Server
@@ -166,4 +196,4 @@ result = sim_client.submit(
 
 ---
 
-_For more details, refer to the full documentation at_ <https://github.com/RK0429/cespy/docs>
+*For more details, refer to the full documentation at* <https://github.com/RK0429/cespy/docs>
