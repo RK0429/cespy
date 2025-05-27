@@ -133,7 +133,6 @@ from typing import (
 from ..editor.base_editor import BaseEditor
 from ..sim.run_task import RunTask, clock_function
 from ..sim.simulator import Simulator
-from ..simulators.ltspice_simulator import LTspice as CustomLTspice
 from .process_callback import ProcessCallback
 
 _logger = logging.getLogger("cespy.SimRunner")
@@ -243,6 +242,7 @@ class SimRunner(AnyRunner):
         # parameter sets
 
         # Gets a simulator.
+        from ..simulators.ltspice_simulator import LTspice as CustomLTspice
         if simulator is None:
             simulator = CustomLTspice
         elif isinstance(simulator, (str, Path)):
