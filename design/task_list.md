@@ -165,9 +165,9 @@
     - [x] List its key features (covering combined capabilities).
     - [x] Provide basic installation and usage examples.
     - [x] Clearly state the license (GPL-3.0).
-- [ ] **B. API Documentation:**
-  - [ ] Ensure all public APIs (classes, functions, methods) have clear docstrings.
-  - [ ] Update all documentation to reflect any API changes due to refactoring or renaming.
+- [x] **B. API Documentation:**
+  - [x] Ensure all public APIs (classes, functions, methods) have clear docstrings.
+  - [x] Update all documentation to reflect any API changes due to refactoring or renaming.
 - [ ] **C. User Guide / Reference Manual (Recommended):**
   - [ ] Consider creating a more detailed User Guide or reference manual.
   - [ ] Topics could include: setup, circuit modification, running sweeps, result parsing, analysis tools.
