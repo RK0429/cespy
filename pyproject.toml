@@ -19,6 +19,7 @@ dependencies = [
   "types-psutil>=7.0.0.20250516",
   "pandas>=2.2.3",
   "pandas-stubs>=2.2.3.241126",
+  "python-json-logger (>=3.3.0,<4.0.0)",
 ]
 
 # Project URLs
@@ -51,3 +52,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 cespy-asc-to-qsch = "cespy.editor.asc_to_qsch:main"
 cespy-run-server = "cespy.client_server.run_server:main"
+cespy-raw-convert = "cespy.raw.raw_convert:main"
+cespy-sim-client = "cespy.client_server.sim_client:main"
