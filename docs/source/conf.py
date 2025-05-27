@@ -20,8 +20,6 @@ sys.path.insert(0, os.path.abspath(".."))
 project = 'cespy'
 copyright = '2025, Ryota Kobayashi'
 author = 'Ryota Kobayashi'
-
-version = '0.1.0'
 release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
@@ -29,16 +27,16 @@ release = '0.1.0'
 
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
     'myst_parser'
 ]
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = []
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'alabaster'
 html_static_path = ['_static']
