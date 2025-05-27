@@ -22,7 +22,6 @@
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2023, Fribourg Switzerland"
 
-import importlib
 import logging
 import sys
 import time
@@ -37,9 +36,9 @@ _logger = logging.getLogger("cespy.RunTask")
 
 # Configure structured logging formatter if python-json-logger is installed
 try:
-    _pjlogger = importlib.import_module("pythonjsonlogger")
+    from pythonjsonlogger.json import JsonFormatter
     handler = logging.StreamHandler()
-    json_formatter = _pjlogger.jsonlogger.JsonFormatter(
+    json_formatter = JsonFormatter(
         '%(asctime)s %(name)s %(levelname)s '
         '[runno=%(runno)s netlist=%(netlist)s] %(message)s'
     )
