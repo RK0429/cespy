@@ -1,14 +1,16 @@
 # cespy
 
-A unified Python toolkit for automating SPICE circuit simulators, merging functionality from **kupicelib** and **kuPyLTSpice**. It supports LTSpice, NGSpice, QSpice, and Xyce, providing schematic editing, simulation control, and result analysis.
+A Python toolkit for automating SPICE circuit simulators (LTSpice, NGSpice, QSpice, Xyce), providing schematic editing, simulation control, result parsing, and analysis tools.
 
 ## Features
 
-- Schematic editing for LTSpice `.asc` and QSpice `.qsch` files
-- Simulation orchestration across multiple SPICE engines (LTSpice, NGSpice, QSpice, Xyce)
-- Parsing `.raw` waveform files and `.log` log files
-- Analysis tools: Monte Carlo, worst-case, sensitivity, and tolerance deviation analyses
-- Client-server mode for remote or parallel simulation execution
+- Schematic editing: modify LTSpice `.asc` and QSpice `.qsch` files programmatically.
+- Simulation execution: run simulations headlessly with LTSpice, NGSpice, QSpice, and Xyce.
+- Result parsing: parse `.raw` waveform files and `.log` files for step data and operating points.
+- Analysis toolkit: Monte Carlo, worst-case, sensitivity, tolerance deviation, and failure mode analysis.
+- Multi-engine support: switch between simulators easily through a unified API.
+- Client-server mode: run simulations remotely via a server-client architecture.
+- Command-line tools: convert schematics, plot raw data, run simulation server, and more.
 
 ## Installation
 
@@ -18,44 +20,34 @@ Install via pip:
 pip install cespy
 ```
 
-Or using Poetry:
+Or with Poetry:
 
 ```bash
 poetry add cespy
 ```
 
-## Quickstart
-
-### Editing a Schematic
+## Quick Start
 
 ```python
-from cespy.editor.asc_editor import AscEditor
+from cespy.simulators import LTSpiceSimulator
+from cespy.sim import SimRunner
 
-# Load an LTSpice schematic
-editor = AscEditor("circuit.asc")
-# Update a component value
-editor.set_component_value("R1", 10e3)
-# Save changes
-editor.save_netlist("circuit_modified.asc")
+# Initialize an LTSpice simulator
+sim = LTSpiceSimulator(executable_path="C:\\Program Files\\LTspiceXVII\\XVIIx64.exe")
+
+# Run a simulation job
+runner = SimRunner(simulator=sim)
+result = runner.run("circuit.asc")
+
+# Parse raw waveform data
+raw_data = sim.parse_raw("circuit.raw")
+
+# Analyze results (e.g., get voltage at node 'V(out)')
+voltage_out = raw_data["V(out)"]
 ```
 
-### Running a Simulation
-
-```python
-from cespy.simulators import LTspice
-
-lt = LTspice()  # choose the LTSpice engine
-lt.run("circuit_modified.asc")
-# Parse results
-from cespy.raw.raw_read import RawRead
-raw = RawRead("circuit_modified.raw")
-data = raw.get_data()
-```
-
-## Contributing
-
-Contributions are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+For more examples and detailed usage, see the [documentation](https://github.com/username/cespy).
 
 ## License
 
-This project is licensed under the **GPL-3.0** License. See [LICENSE](LICENSE) for details.
+This project is licensed under the GNU GPL v3.0. See the [LICENSE](LICENSE) file for details.
