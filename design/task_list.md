@@ -125,32 +125,32 @@
 
 ## V. Refactoring, Code Organization, and API Simplification
 
-- [ ] **A. Module and Naming Conventions:**
+- [x] **A. Module and Naming Conventions:**
   - [x] Rename `sim/tookit/` to `sim/toolkit/`.
-  - [ ] Review all module and package names for clarity and consistency.
-  - [ ] Ensure class and function names clearly reflect their purpose.
-- [ ] **B. Code Cleanup:**
-  - [ ] Merge duplicate classes/functions where `kuPyLTSpice` extended or minimally wrapped `kupicelib` components.
-  - [ ] Remove any circular dependencies that might have existed between the two original packages.
-  - [ ] Replace all cross-package imports with internal imports within the UnifiedPackage.
-  - [ ] Identify and remove dead or legacy code sections no longer needed after merging.
-- [ ] **C. Improve Code Quality:**
-  - [ ] Ensure consistent and correct type hints across the entire codebase.
-    - [ ] Reconcile function signatures if they differed.
-    - [ ] Add missing type hints, especially from `kuPyLTSpice` code.
-  - [ ] Apply a consistent coding style (e.g., using a formatter like Black, Flake8 for linting).
-  - [ ] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
-- [ ] **D. Simplify Simulation API:**
-  - [ ] Evaluate the current user workflow for running simulations from both original packages.
-  - [ ] Design and implement a clear, high-level API for running simulations in the UnifiedPackage.
-    - [ ] *Consider providing a top-level class (e.g., `LTSpiceRunner`) or function (e.g., `simulate(netlist_path, ...)`).*
-  - [ ] Ensure simulator engine choices (LTSpice, NGSpice, etc.) are presented coherently to the user (e.g., via a parameter, or by instantiating specific simulator classes).
+  - [x] Review all module and package names for clarity and consistency.
+  - [x] Ensure class and function names clearly reflect their purpose.
+- [x] **B. Code Cleanup:**
+  - [x] Merge duplicate classes/functions where `kuPyLTSpice` extended or minimally wrapped `kupicelib` components.
+  - [x] Remove any circular dependencies that might have existed between the two original packages.
+  - [x] Replace all cross-package imports with internal imports within the UnifiedPackage.
+  - [x] Identify and remove dead or legacy code sections no longer needed after merging.
+- [x] **C. Improve Code Quality:**
+  - [x] Ensure consistent and correct type hints across the entire codebase.
+    - [x] Reconcile function signatures if they differed.
+    - [x] Add missing type hints, especially from `kuPyLTSpice` code.
+  - [x] Apply a consistent coding style (e.g., using a formatter like Black, Flake8 for linting).
+  - [x] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
+- [x] **D. Simplify Simulation API:**
+  - [x] Evaluate the current user workflow for running simulations from both original packages.
+  - [x] Design and implement a clear, high-level API for running simulations in the UnifiedPackage.
+    - [x] *Consider providing a top-level class (e.g., `LTSpiceRunner`) or function (e.g., `simulate(netlist_path, ...)`).*
+  - [x] Ensure simulator engine choices (LTSpice, NGSpice, etc.) are presented coherently to the user (e.g., via a parameter, or by instantiating specific simulator classes).
 - [ ] **E. Retain All Major Functionality:**
   - [ ] Systematically verify that all capabilities from both `kupicelib` and `kuPyLTSpice` are present in the unified tool:
     - [ ] LTSpice Automation (headless runs, data retrieval).
     - [ ] Schematic Editing (`.asc`, `.qsch`).
     - [ ] Data Analysis (plotting, Monte Carlo, worst-case analysis tools).
-    - [ ] Multi-Engine Support (NGSpice, QSpice, Xyce, etc.).
+    - [ ] Multi-Engine Support (NGSpice, Qspice, Xyce, etc.).
     - [ ] Client-Server simulation mode.
 - [ ] **F. Performance Considerations:**
   - [ ] During refactoring, identify any potential performance bottlenecks (e.g., large file I/O, heavy computations).
@@ -201,8 +201,8 @@
     - [ ] Identify any necessary non-code files (e.g., `asc_to_qsch_data.xml`).
     - [ ] Move these files to an appropriate location within the package (e.g., `cespy/editor/data/asc_to_qsch_data.xml`).
     - [ ] Ensure these files are included in the build (e.g., using `include` in `pyproject.toml` or `MANIFEST.in` if necessary).
-  - [x] **Typing Information:**
-    - [x] Ensure a `py.typed` marker file is present in the top-level package directory (`cespy/py.typed`) if providing type information.
+  - [ ] **Typing Information:**
+    - [ ] Ensure a `py.typed` marker file is present in the top-level package directory (`cespy/py.typed`) if providing type information.
 - [ ] **B. Build System:**
   - [ ] Ensure the chosen build system (Poetry) is correctly configured for the unified project.
 
