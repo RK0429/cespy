@@ -168,12 +168,12 @@
 - [x] **B. API Documentation:**
   - [x] Ensure all public APIs (classes, functions, methods) have clear docstrings.
   - [x] Update all documentation to reflect any API changes due to refactoring or renaming.
-- [ ] **C. User Guide / Reference Manual (Recommended):**
-  - [ ] Consider creating a more detailed User Guide or reference manual.
-  - [ ] Topics could include: setup, circuit modification, running sweeps, result parsing, analysis tools.
-- [ ] **D. Migration Guide (Optional but Recommended):**
-  - [ ] Prepare a short guide for users transitioning from `kupicelib` or `kuPyLTSpice`.
-  - [ ] Example: "If you used `kuPyLTSpice.LTSpiceSimulation(...)`, now use `cespy.simulators.LTSpiceSimulator(...)`."
+- [x] **C. User Guide / Reference Manual (Recommended):**
+  - [x] Consider creating a more detailed User Guide or reference manual.
+  - [x] Topics could include: setup, circuit modification, running sweeps, result parsing, analysis tools.
+- [x] **D. Migration Guide (Optional but Recommended):**
+  - [x] Prepare a short guide for users transitioning from `kupicelib` or `kuPyLTSpice`.
+  - [x] Example: "If you used `kuPyLTSpice.LTSpiceSimulation(...)`, now use `cespy.simulators.LTSpiceSimulator(...)`."
 
 ## VII. Unified Packaging and Build Configuration
 
