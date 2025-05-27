@@ -32,12 +32,11 @@ This User Guide provides step-by-step instructions and examples for using `cespy
 
 ## Architecture Overview
 
-```text
- .---------------.     .-----------.     .--------------.     .---------------.
- |  ASC Editor   | --> | SimRunner | --> | RawRead/Log  | --> | Analysis     |
- | (AscEditor,   |     | (run/run_now)   | (RawRead,     | Toolkit)      |
- |  QschEditor)  |     |             )  |  LTSpiceLog)  | (MonteCarlo,  |
- '---------------'     '-----------'     '--------------'     '---------------'
+```mermaid
+flowchart LR
+    ASC["ASC Editor<br/>(AscEditor, QschEditor)"] --> SIM["SimRunner<br/>(run/run_now)"]
+    SIM --> RAW["RawRead/Log<br/>(RawRead, LTSpiceLog)"]
+    RAW --> ANALYSIS["Analysis Toolkit<br/>(MonteCarlo)"]
 ```
 
 *Figure: High-level workflow of `cespy`.*
