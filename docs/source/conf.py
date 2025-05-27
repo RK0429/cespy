@@ -12,7 +12,18 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(".."))
+# Add the project's src directory so Sphinx autodoc can import the cespy package
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..',  # up from source/
+            '..',  # up from docs/
+            'src',
+        )
+    )
+)
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -31,8 +42,8 @@ extensions = [
     'myst_parser'
 ]
 
-templates_path = ['_templates']
-exclude_patterns = []
+templates_path: list[str] = ['_templates']
+exclude_patterns: list[str] = []
 
 
 # -- Options for HTML output -------------------------------------------------
