@@ -10,15 +10,14 @@ from typing import Type
 import keyboard
 
 from cespy.client_server.sim_server import SimServer
-from cespy.sim.simulator import Simulator
 from cespy.simulators.ltspice_simulator import LTspice
 from cespy.simulators.ngspice_simulator import NGspiceSimulator
 from cespy.simulators.xyce_simulator import XyceSimulator
 
 
 def main() -> None:
-    # declare simulator variable as a Simulator type with default
-    simulator: Type[Simulator] = LTspice
+    # declare simulator variable with default
+    simulator: Type[LTspice] | Type[NGspiceSimulator] | Type[XyceSimulator] = LTspice
     parser = argparse.ArgumentParser(
         description="Run the SPICE server with specified simulator (LTSpice, NGSpice, XYCE).")
     parser.add_argument(
