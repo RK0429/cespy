@@ -6,9 +6,9 @@
 cespy documentation
 ===================
 
-.. image:: _static/images/architecture_overview.png
-   :width: 600
-   :alt: Architecture Overview Diagram
+.. .. image:: _static/images/architecture_overview.png
+..    :width: 600
+..    :alt: Architecture Overview Diagram
 
 Add your content using ``reStructuredText`` syntax. See the
 `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
