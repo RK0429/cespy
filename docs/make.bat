@@ -26,6 +26,9 @@ if errorlevel 9009 (
 REM 2) If no target is given, show help
 if "%1" == "" goto help
 
+REM 2a) Generate API docs for cespy modules
+call python -m sphinx.apidoc -f -o %SOURCEDIR% ..\src\cespy
+
 REM 3) Run the requested build target and let all output (including errors) go to the console
 call %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
