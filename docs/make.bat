@@ -6,14 +6,14 @@ REM  Command file for Sphinx documentation
 REM ——————————————————————————————————————————
 
 if "%SPHINXBUILD%" == "" (
-    set "SPHINXBUILD=sphinx-build"
+    set SPHINXBUILD=sphinx-build
 )
 
-set "SOURCEDIR=source"
-set "BUILDDIR=build"
+set SOURCEDIR=source
+set BUILDDIR=build
 
 REM 1) Verify that sphinx-build exists (quietly)
-"%SPHINXBUILD%" --version >NUL 2>&1
+%SPHINXBUILD% --version >NUL 2>NUL
 if errorlevel 9009 (
     echo.
     echo The 'sphinx-build' command was not found. Make sure you have Sphinx installed,
@@ -24,14 +24,14 @@ if errorlevel 9009 (
 )
 
 REM 2) If no target is given, show help
-if "%~1" == "" goto help
+if "%1" == "" goto help
 
 REM 3) Run the requested build target and let all output (including errors) go to the console
-call "%SPHINXBUILD%" -M %~1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 
 :help
-call "%SPHINXBUILD%" -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+%SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 
 :end
 popd
