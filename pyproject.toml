@@ -1,7 +1,8 @@
 [project]
 name = "cespy"
 version = "0.1.0"
-description = ""
+description = "A unified Python toolkit for automating SPICE circuit simulators, merging functionality from kupicelib and kuPyLTSpice."
+license = "GPL-3.0"
 authors = [
     {name = "Ryota Kobayashi",email = "s.woods.m.29@gmail.com"}
 ]
@@ -20,8 +21,14 @@ dependencies = [
   "pandas-stubs>=2.2.3.241126",
 ]
 
+# Project URLs
+[project.urls]
+Homepage = "https://github.com/RK0429/cespy"
+Repository = "https://github.com/RK0429/cespy.git"
+
 [tool.poetry]
 packages = [{include = "cespy", from = "src"}]
+include = ["src/cespy/editor/data/asc_to_qsch_data.xml"]
 
 [tool.poetry.dev-dependencies]
 black = "^23.1.0"
@@ -40,3 +47,7 @@ extend-ignore = ['E203', 'W503']
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+cespy-asc-to-qsch = "cespy.editor.asc_to_qsch:main"
+cespy-run-server = "cespy.client_server.run_server:main"
