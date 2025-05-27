@@ -1,6 +1,17 @@
 # Add top-level version and imports for key simulator classes
 __version__ = "0.1.0"
 
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
+
+from cespy.editor.asc_editor import AscEditor
+from cespy.editor.spice_editor import SpiceCircuit, SpiceEditor
+from cespy.log.ltsteps import LTSpiceLogReader
+from cespy.raw.raw_read import RawRead, SpiceReadException
+from cespy.raw.raw_write import RawWrite, Trace
+
+# High-level simplified simulation API
+from .sim import SimRunner
 from .simulators.ltspice_simulator import LTspice
 from .simulators.ngspice_simulator import NGspiceSimulator
 from .simulators.qspice_simulator import Qspice
@@ -11,13 +22,15 @@ __all__ = [
     "NGspiceSimulator",
     "Qspice",
     "XyceSimulator",
+    "AscEditor",
+    "SpiceEditor",
+    "SpiceCircuit",
+    "LTSpiceLogReader",
+    "RawRead",
+    "SpiceReadException",
+    "RawWrite",
+    "Trace",
 ]
-
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
-
-# High-level simplified simulation API
-from .sim import SimRunner
 
 
 def simulate(
