@@ -246,6 +246,8 @@ from ..log.logfile_data import try_convert_value
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .raw_classes import Axis, DummyTrace, SpiceReadException, TraceRead
 
+__all__ = ["RawRead", "SpiceReadException"]
+
 # Allowed operators for alias formulas
 _ALLOWED_OPS: Dict[Type[Any], Callable[..., Any]] = {
     ast.Add: _op.add,
