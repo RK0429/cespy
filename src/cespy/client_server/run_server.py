@@ -5,18 +5,19 @@ import argparse
 import logging
 import sys
 import time
-from typing import Type
-
-try:
-    import keyboard
-except ImportError:
-    # keyboard module is optional and only needed for interactive server control
-    keyboard = None
+from typing import Any, Optional, Type
 
 from cespy.client_server.sim_server import SimServer
 from cespy.simulators.ltspice_simulator import LTspice
 from cespy.simulators.ngspice_simulator import NGspiceSimulator
 from cespy.simulators.xyce_simulator import XyceSimulator
+
+keyboard: Optional[Any] = None
+try:
+    import keyboard
+except ImportError:
+    # keyboard module is optional and only needed for interactive server control
+    pass
 
 
 def main() -> None:
