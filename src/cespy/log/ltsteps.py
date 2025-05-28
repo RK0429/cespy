@@ -78,15 +78,14 @@ def reformat_LTSpice_export(export_file: str, tabular_file: str) -> None:
     :return: Nothing
     """
     encoding = detect_encoding(export_file)
-    with open(export_file, "r", encoding=encoding) as fin, open(
-        tabular_file, "w", encoding=encoding
-    ) as fout:
+    with (
+        open(export_file, "r", encoding=encoding) as fin,
+        open(tabular_file, "w", encoding=encoding) as fout,
+    ):
         headers = fin.readline()
         # writing header
         go_header = True
-        run_no = (
-            "0"  # Changed from int to str as the regex will return a string
-        )
+        run_no = "0"  # Changed from int to str as the regex will return a string
         param_values = ""
         regx = re.compile(
             r"Step Information: ([\w=\d\. \-]+) +\((?:Run|Step): (\d*)/\d*\)\n"
@@ -150,9 +149,7 @@ class LTSpiceExport:
             curr_dic: Dict[str, Any] = {}
             self.dataset: Dict[str, List[Any]] = {}
 
-            regx = re.compile(
-                r"Step Information: ([\w=\d\. -]+) +\(Run: (\d*)/\d*\)\n"
-            )
+            regx = re.compile(r"Step Information: ([\w=\d\. -]+) +\(Run: (\d*)/\d*\)\n")
             for line in fin:
                 if line.startswith("Step Information:"):
                     match = regx.match(line)
@@ -372,11 +369,7 @@ class LTSpiceLogReader(LogfileData):
                         else:
                             harmonics.append(HarmonicData.from_line(line))
 
-                    if (
-                        signal is not None
-                        and phd is not None
-                        and thd is not None
-                    ):
+                    if signal is not None and phd is not None and thd is not None:
                         fourier_data = FourierData(
                             signal,
                             (
@@ -515,9 +508,7 @@ class LTSpiceLogReader(LogfileData):
                     if title is None:
                         continue
                     key = title.lower()
-                    self.dataset[key] = [
-                        measure[k] for measure in measurements
-                    ]
+                    self.dataset[key] = [measure[k] for measure in measurements]
 
             _logger.info(
                 "Identified %d steps, read %d measurements",
@@ -530,6 +521,7 @@ class LTSpiceLogReader(LogfileData):
         export_file: str,
         encoding: Optional[str] = None,
         append_with_line_prefix: Optional[str] = None,
+        *,
         value_separator: str = "\t",
         line_terminator: str = "\n",
     ) -> None:
@@ -605,9 +597,7 @@ class LTSpiceLogReader(LogfileData):
                                         for step in self.stepset
                                     ]
                                     for harmonic in analysis:
-                                        fout.write(
-                                            "\t".join(step_values) + "\t"
-                                        )
+                                        fout.write("\t".join(step_values) + "\t")
                                         fout.write(
                                             f"{signal}\t"
                                             f"{analysis.n_periods}\t"
@@ -673,16 +663,12 @@ def main() -> None:
 
     if filename is None:
         print("File not found")
-        print(
-            "This tool only supports the following extensions: .txt, .log, .mout"
-        )
+        print("This tool only supports the following extensions: .txt, .log, .mout")
         sys.exit(1)
 
     if not valid_extension(filename):
         print(f"Invalid extension in filename '{filename}'")
-        print(
-            "This tool only supports the following extensions: .txt, .log, .mout"
-        )
+        print("This tool only supports the following extensions: .txt, .log, .mout")
         sys.exit(1)
 
     # Determine output filename

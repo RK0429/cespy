@@ -514,6 +514,7 @@ class LogfileData:
         export_file: str,
         encoding: Optional[str] = None,
         append_with_line_prefix: Optional[str] = None,
+        *,
         value_separator: str = "\t",
         line_terminator: str = "\n",
     ) -> None:
