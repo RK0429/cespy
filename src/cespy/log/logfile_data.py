@@ -6,17 +6,7 @@ import logging
 import math
 import re
 from collections import OrderedDict
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Protocol,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Dict, Iterable, List, Optional, Protocol, TypeVar, Union, cast
 
 # -------------------------------------------------------------------------------
 # Name:        logfile_data.py
@@ -167,7 +157,7 @@ def split_line_into_values(line: str) -> List[ValueType]:
                 parenthesis.pop(0)
                 if len(parenthesis) == 0:
                     value_list = split_line_into_values(
-                        line[value_start + 1 : i]
+                        line[value_start + 1: i]
                     )  # Excludes the parenthesis
                     values.append(value_list)
                     value_start = i + 1
@@ -182,7 +172,7 @@ def split_line_into_values(line: str) -> List[ValueType]:
                 values.append(cast(ValueType, None))
             value_start = i + 1
     if value_start < i + 1:
-        values.append(try_convert_value(line[value_start : i + 1]))
+        values.append(try_convert_value(line[value_start: i + 1]))
     parenthesis_balanced = len(parenthesis) == 0
     if not parenthesis_balanced:
         raise ValueError("Parenthesis are not balanced")
