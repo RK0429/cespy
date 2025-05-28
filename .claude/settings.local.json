@@ -6,7 +6,8 @@
       "Bash(ls:*)",
       "Bash(source:*)",
       "Bash(.venv/Scripts/python:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(poetry run flake8:*)"
     ],
     "deny": []
   }

@@ -510,7 +510,8 @@ class RawRead(object):
         self.nVariables = int(self.raw_params["No. Variables"], 10)
         if self.nPoints == 0 or self.nVariables == 0:
             raise RuntimeError(
-                f"Invalid RAW file. No points or variables found: Points: {self.nPoints}, Variables: {self.nVariables}."
+                "Invalid RAW file. No points or variables found: Points:"
+                f" {self.nPoints}, Variables: {self.nVariables}."
             )
 
         has_axis = self.raw_params["Plotname"] not in (
@@ -527,7 +528,8 @@ class RawRead(object):
                 # given info is correct?
                 if dialect not in ("ltspice", "qspice", "ngspice", "xyce"):
                     raise ValueError(
-                        f"Invalid RAW file dialect: '{dialect}', must be one of 'ltspice', 'qspice', 'ngspice', 'xyce'."
+                        f"Invalid RAW file dialect: '{dialect}', must be one of"
+                        " 'ltspice', 'qspice', 'ngspice', 'xyce'."
                     )
 
         # autodetect the dialect. This is not always possible
@@ -543,7 +545,8 @@ class RawRead(object):
                 # see if I already saw an autodetected dialect
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
-                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using qspice."
+                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using"
+                        " qspice."
                     )
                 autodetected_dialect = "qspice"
             if "ngspice" in self.raw_params["Command"].lower():
@@ -552,7 +555,8 @@ class RawRead(object):
                 # see if I already saw an autodetected dialect
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
-                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using ngspice."
+                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using"
+                        " ngspice."
                     )
                 autodetected_dialect = "ngspice"
             if "xyce" in self.raw_params["Command"].lower():
@@ -563,7 +567,8 @@ class RawRead(object):
                 # see if I already saw an autodetected dialect
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
-                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using xyce."
+                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using"
+                        " xyce."
                     )
                 autodetected_dialect = "xyce"
 
@@ -571,7 +576,8 @@ class RawRead(object):
             if autodetected_dialect is not None:
                 if dialect != autodetected_dialect:
                     _logger.warning(
-                        f"Dialect specified as {dialect}, but the file seems to be from {autodetected_dialect}. Trying to read it anyway."
+                        f"Dialect specified as {dialect}, but the file seems to be from"
+                        f" {autodetected_dialect}. Trying to read it anyway."
                     )
         else:
             # no dialect given. Take the autodetected version
@@ -629,12 +635,12 @@ class RawRead(object):
             if ivar == 0:  # If it has an axis, it should be always read
                 if numerical_type == "real":
                     # only ltspice gets here, in non AC
-                    axis_numerical_type = (
-                        "double"  # LTSpice uses double for the first variable in .OP
+                    axis_numerical_type = (  # LTSpice uses double for the first variable in .OP
+                        "double"
                     )
                 elif numerical_type == "complex" and frequency_double:
-                    axis_numerical_type = (
-                        "double"  # QSPICE uses double for frequency for .AC files
+                    axis_numerical_type = (  # QSPICE uses double for frequency for .AC files
+                        "double"
                     )
                 else:
                     axis_numerical_type = numerical_type
@@ -670,7 +676,8 @@ class RawRead(object):
 
         if self.verbose:
             _logger.info(
-                f"File contains {ivar} traces, reading {len([trace for trace in self._traces if not isinstance(trace, DummyTrace)])}."
+                f"File contains {ivar} traces, reading"
+                f" {len([trace for trace in self._traces if not isinstance(trace, DummyTrace)])}."
             )
 
         if self.raw_type == "Binary:":
@@ -704,13 +711,15 @@ class RawRead(object):
 
                 else:
                     raise RuntimeError(
-                        f"Invalid data type {trace.numerical_type} for trace {trace.name}"
+                        f"Invalid data type {trace.numerical_type} for trace"
+                        f" {trace.name}"
                     )
                 scan_functions.append(fun)
 
             if check_raw_size and calc_block_size != self.block_size:
                 raise RuntimeError(
-                    f"Error in calculating the block size. Expected {calc_block_size} bytes, but found {self.block_size} bytes. "
+                    "Error in calculating the block size. Expected"
+                    f" {calc_block_size} bytes, but found {self.block_size} bytes. "
                 )
 
             if "fastaccess" in self.raw_params["Flags"]:
@@ -733,7 +742,8 @@ class RawRead(object):
                             var.data = frombuffer(s, dtype=float32)
                         else:
                             raise RuntimeError(
-                                f"Invalid data type {var.numerical_type} for trace {var.name}"
+                                f"Invalid data type {var.numerical_type} for trace"
+                                f" {var.name}"
                             )
 
             else:
@@ -768,7 +778,8 @@ class RawRead(object):
 
                         if point != int(s_point):
                             raise RuntimeError(
-                                f"Invalid data: point is not in sequence ({point} != {int(s_point)})"
+                                f"Invalid data: point is not in sequence ({point} !="
+                                f" {int(s_point)})"
                             )
                         value = line[len(s_point) : -1]
                     else:
@@ -780,7 +791,8 @@ class RawRead(object):
                             v = value.split(",")
                             if len(v) != 2:
                                 raise RuntimeError(
-                                    f"Invalid data for trace {var.name}: {value} is not a complex value"
+                                    f"Invalid data for trace {var.name}: {value} is not"
+                                    " a complex value"
                                 )
                             var.data[point] = complex(float(v[0]), float(v[1]))
                         else:
@@ -810,7 +822,8 @@ class RawRead(object):
                 self._load_step_information(raw_filename_path)
             except SpiceReadException as err:
                 _logger.warning(
-                    f"{str(err)}\nError in auto-detecting steps in '{raw_filename_path}'"
+                    f"{str(err)}\nError in auto-detecting steps in"
+                    f" '{raw_filename_path}'"
                 )
                 if has_axis and self.axis is not None:
                     number_of_steps = 0
@@ -881,13 +894,11 @@ class RawRead(object):
         local_vars.update(
             {name: float(value) for name, value in self.spice_params.items()}
         )
-        local_vars.update(
-            {
-                namify(trace.name): trace.data
-                for trace in self._traces
-                if not isinstance(trace, DummyTrace)
-            }
-        )
+        local_vars.update({
+            namify(trace.name): trace.data
+            for trace in self._traces
+            if not isinstance(trace, DummyTrace)
+        })
         try:
             trace.data = cast(NDArray[Any], _safe_eval(formula, local_vars))
         except Exception as err:
@@ -1001,7 +1012,8 @@ class RawRead(object):
             logfile = filename.with_suffix(".log")
             try:
                 encoding = detect_encoding(
-                    logfile, r"^((.*\n)?Circuit:|([\s\S]*)--- Expanded Netlist ---)"
+                    logfile,
+                    r"^((.*\n)?Circuit:|([\s\S]*)--- Expanded Netlist ---)",
                 )
                 log = open(logfile, "r", errors="replace", encoding=encoding)
             except OSError as exc:

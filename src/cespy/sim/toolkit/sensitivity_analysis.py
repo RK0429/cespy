@@ -122,8 +122,8 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 return error_data[idx] / total_error * 100 if total_error != 0 else 0
         else:
             _logger.warning(
-                "The analysis was not executed. Please run the run_analysis(...) or run_testbench(...)"
-                " before calling this method"
+                "The analysis was not executed. Please run the run_analysis(...) or"
+                " run_testbench(...) before calling this method"
             )
             return None
 

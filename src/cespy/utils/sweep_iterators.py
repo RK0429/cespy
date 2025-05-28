@@ -185,7 +185,10 @@ class sweep_log_n(BaseIterator):
     """
 
     def __init__(
-        self, start: Union[int, float], stop: Union[int, float], number_of_elements: int
+        self,
+        start: Union[int, float],
+        stop: Union[int, float],
+        number_of_elements: int,
     ):
         # Ensure stop is not None before using it in division
         if stop is None or start is None:

@@ -75,7 +75,14 @@ class AsyReader(object):
             _logger.info(f"Parsing ASY file {self._asy_file_path}")
             for line_text in asc_file:
                 if line_text.startswith("WINDOW"):
-                    _, num_ref, posX, posY, alignment, size_str = line_text.split()
+                    (
+                        _,
+                        num_ref,
+                        posX,
+                        posY,
+                        alignment,
+                        size_str,
+                    ) = line_text.split()
                     coord = Point(int(posX), int(posY))
                     text_obj = Text(
                         coord=coord,
@@ -224,15 +231,15 @@ class AsyReader(object):
                         # Text in asy not supported however non-critical and not
                         # neccesary to crash the program.
                         _logger.warning(
-                            f"Cosmetic text in ASY format not supported, text skipped. ASY file: {self._asy_file_path}"
+                            "Cosmetic text in ASY format not supported, text skipped."
+                            f" ASY file: {self._asy_file_path}"
                         )
                 else:
                     # In order to avoid crashing the program, 1) add the missing if statement above and
                     # 2) ontact the author to add support for the missing primitive.
                     raise NotImplementedError(
-                        f"Primitive not supported for ASY file \n"
-                        f'"{line_text}"'
-                        f"in file: {self._asy_file_path}. Contact the author to add support."
+                        f'Primitive not supported for ASY file \n"{line_text}"in file:'
+                        f" {self._asy_file_path}. Contact the author to add support."
                     )
             if pin is not None:
                 self.pins.append(pin)
@@ -309,7 +316,7 @@ class AsyReader(object):
             x = coord.X * SCALE_X
             y = coord.Y * SCALE_Y
             text, _ = QschTag.parse(
-                f"«text ({x:.0f},{y:.0f})" f' 1 7 0 0x1000000 -1 -1 "{args[i]}"»'
+                f'«text ({x:.0f},{y:.0f}) 1 7 0 0x1000000 -1 -1 "{args[i]}"»'
             )
             symbol.items.append(text)
 
@@ -323,7 +330,7 @@ class AsyReader(object):
 
             pin_tag, _ = QschTag.parse(
                 f"«pin ({coord.X * SCALE_X:.0f},{coord.Y * SCALE_Y:.0f}) (0,0)"
-                f' 1 0 0 0x1000000 -1 "{attr_dict["PinName"]}"»'
+                f" 1 0 0 0x1000000 -1 \"{attr_dict['PinName']}\"»"
             )
             symbol.items.append(pin_tag)
 

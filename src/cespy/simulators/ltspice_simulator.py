@@ -151,7 +151,7 @@ class LTspice(Simulator):
         else:
             valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
             raise ValueError(
-                f"Invalid switch '{switch}'. " f"Valid switches are: {valid_keys}"
+                f"Invalid switch '{switch}'. Valid switches are: {valid_keys}"
             )
 
     @classmethod
@@ -256,7 +256,10 @@ class LTspice(Simulator):
             log_exe_file = netlist_file.with_suffix(".exe.log")
             with open(log_exe_file, "wb") as outfile:
                 error = run_function(
-                    cmd_run, timeout=timeout, stdout=outfile, stderr=subprocess.STDOUT
+                    cmd_run,
+                    timeout=timeout,
+                    stdout=outfile,
+                    stderr=subprocess.STDOUT,
                 )
         else:
             error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
@@ -358,18 +361,27 @@ class LTspice(Simulator):
         spice_folder = os.environ.get("LTSPICEFOLDER")
         spice_executable = os.environ.get("LTSPICEEXECUTABLE")
         if spice_folder and spice_executable:
-            cls.spice_exe = ["wine", os.path.join(spice_folder, spice_executable)]
+            cls.spice_exe = [
+                "wine",
+                os.path.join(spice_folder, spice_executable),
+            ]
             cls.process_name = spice_executable
             return
         if spice_folder:
-            cls.spice_exe = ["wine", os.path.join(spice_folder, "/XVIIx64.exe")]
+            cls.spice_exe = [
+                "wine",
+                os.path.join(spice_folder, "/XVIIx64.exe"),
+            ]
             cls.process_name = "XVIIx64.exe"
             return
         if spice_executable:
             default_folder = os.path.expanduser(
                 "~/.wine/drive_c/Program Files/LTC/LTspiceXVII"
             )
-            cls.spice_exe = ["wine", os.path.join(default_folder, spice_executable)]
+            cls.spice_exe = [
+                "wine",
+                os.path.join(default_folder, spice_executable),
+            ]
             cls.process_name = spice_executable
             return
         for exe in cls._spice_exe_win_paths:

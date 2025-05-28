@@ -177,7 +177,8 @@ class RawWrite:
                 flag_numtype = "real"
             else:
                 raise ValueError(
-                    "First Trace needs to be either 'time', 'frequency', 'param', 'voltage' or '...'"
+                    "First Trace needs to be either 'time', 'frequency', 'param',"
+                    " 'voltage' or '...'"
                 )
 
             if self.flag_numtype == "auto":
@@ -259,7 +260,10 @@ class RawWrite:
             if name.endswith(")") and (name.startswith("V(") or name.startswith("I(")):
                 new_name = (
                     name[:2]
-                    + cast(str, kwargs["rename_format"].format(name[2:-1], **kwargs))
+                    + cast(
+                        str,
+                        kwargs["rename_format"].format(name[2:-1], **kwargs),
+                    )
                     + name[-1]
                 )
             else:
@@ -328,13 +332,14 @@ class RawWrite:
         if len(self._traces):  # there are already traces
             if self.flag_numtype != other_flag_num_type:
                 raise ValueError(
-                    "The two instances should have the same type:\n"
-                    f"Source is {other_flag_num_type} and Destination is {self.flag_numtype}"
+                    "The two instances should have the same type:\nSource is"
+                    f" {other_flag_num_type} and Destination is {self.flag_numtype}"
                 )
             if self._traces[0].whattype != other.get_trace(0).whattype:
                 raise ValueError(
-                    "The two instances should have the same axis type:\n"
-                    f"Source is {other.get_trace(0).whattype} and Destination is {self._traces[0].whattype}"
+                    "The two instances should have the same axis type:\nSource is"
+                    f" {other.get_trace(0).whattype} and Destination is"
+                    f" {self._traces[0].whattype}"
                 )
             if len(trace_filter) == 0:
                 return  # There is nothing to add stop here
@@ -393,9 +398,10 @@ class RawWrite:
                     imported_trace.name = new_name
                     self._imported_data.append(imported_trace)
         else:
-            assert len(self._traces[0]) == len(
-                other.get_axis(from_step)
-            ), "The two instances should have the same size. To avoid this use force_axis_alignment=True option"
+            assert len(self._traces[0]) == len(other.get_axis(from_step)), (
+                "The two instances should have the same size. To avoid this use"
+                " force_axis_alignment=True option"
+            )
             for trace_name in trace_filter:
                 trace = other.get_trace(trace_name)
                 new_name = self._rename_netlabel(trace_name, **kwargs)
@@ -413,7 +419,9 @@ class RawWrite:
 
     @staticmethod
     def _interpolate(
-        trace_data: NDArray[Any], trace_axis: NDArray[Any], new_axis: Sequence[float]
+        trace_data: NDArray[Any],
+        trace_axis: NDArray[Any],
+        new_axis: Sequence[float],
     ) -> NDArray[Any]:
         """Interpolate trace data to align with a new axis.
 
@@ -467,7 +475,10 @@ class RawWrite:
                 )
                 self._traces.append(new_trace)
             self._traces[0] = Trace(
-                old_axis.name, new_axis, old_axis.whattype, old_axis.numerical_type
+                old_axis.name,
+                new_axis,
+                old_axis.whattype,
+                old_axis.numerical_type,
             )  # Replaces with the new axis
             self._new_axis = None
             self._imported_data.clear()

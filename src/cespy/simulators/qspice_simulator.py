@@ -97,7 +97,10 @@ class Qspice(Simulator):
         "-Meyer": [
             "-Meyer"
         ],  # Use the Meyer Capacitance model for MOS1, MOS2, and MOS3.
-        "-o": ["-o", "<path>"],  # Specify the name of a file for the console output.
+        "-o": [
+            "-o",
+            "<path>",
+        ],  # Specify the name of a file for the console output.
         # '-p'         : ['-p'],  # Take the netlist piped from stdin. >> Not used in this implementation.
         "-ProtectSelections": [
             "-ProtectSelections",
@@ -107,7 +110,10 @@ class Qspice(Simulator):
             "-ProtectSubcircuits",
             "<path>",
         ],  # Protect the body of subcircuits with encryption.
-        "-r": ["-r", "<path>"],  # Specify the name of the output data(.qraw) file.
+        "-r": [
+            "-r",
+            "<path>",
+        ],  # Specify the name of the output data(.qraw) file.
     }
     """:meta private:"""
 
@@ -231,7 +237,10 @@ class Qspice(Simulator):
             log_exe_file = netlist_file.with_suffix(".exe.log")
             with open(log_exe_file, "w", encoding="utf-8") as outfile:
                 error = run_function(
-                    cmd_run, timeout=timeout, stdout=outfile, stderr=subprocess.STDOUT
+                    cmd_run,
+                    timeout=timeout,
+                    stdout=outfile,
+                    stderr=subprocess.STDOUT,
                 )
         else:
             error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)

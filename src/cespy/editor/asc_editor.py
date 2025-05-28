@@ -66,7 +66,13 @@ from .spice_editor import SpiceCircuit, SpiceEditor
 _logger = logging.getLogger("cespy.AscEditor")
 
 
-LTSPICE_PARAMETERS = ("Value", "Value2", "SpiceModel", "SpiceLine", "SpiceLine2")
+LTSPICE_PARAMETERS = (
+    "Value",
+    "Value2",
+    "SpiceModel",
+    "SpiceLine",
+    "SpiceLine2",
+)
 LTSPICE_PARAMETERS_REDUCED = ("SpiceLine", "SpiceLine2")
 LTSPICE_ATTRIBUTES = ("InstName", "Def_Sub")
 
@@ -74,9 +80,9 @@ LTSPICE_ATTRIBUTES = ("InstName", "Def_Sub")
 class AscEditor(BaseSchematic):
     """Class made to update directly the LTspice ASC files."""
 
-    symbol_cache: Dict[
-        str, str
-    ] = {}  # This is a class variable, so it can be shared between all instances.
+    symbol_cache: Dict[str, str] = (
+        {}
+    )  # This is a class variable, so it can be shared between all instances.
     """:meta private:"""
 
     simulator_lib_paths: List[str] = LTspice.get_default_library_paths()
@@ -178,7 +184,8 @@ class AscEditor(BaseSchematic):
                 else:
                     directive_type = ";"  # Otherwise assume it is a comment
                 asc.write(
-                    f"TEXT {posX} {posY} {alignment} {size} {directive_type}{directive.text}"
+                    "TEXT"
+                    f" {posX} {posY} {alignment} {size} {directive_type}{directive.text}"
                     + END_LINE_TERM
                 )
             for line in self.lines:
@@ -187,7 +194,8 @@ class AscEditor(BaseSchematic):
                     f" {line_style_obj.pattern}" if line_style_obj.pattern != "" else ""
                 )
                 asc.write(
-                    f"LINE Normal {line.V1.X} {line.V1.Y} {line.V2.X} {line.V2.Y}{line_style}"
+                    "LINE Normal"
+                    f" {line.V1.X} {line.V1.Y} {line.V2.X} {line.V2.Y}{line_style}"
                     + END_LINE_TERM
                 )
             for shape in self.shapes:
@@ -282,7 +290,10 @@ class AscEditor(BaseSchematic):
                             ttype = TextTypeEnum.COMMENT
                         alignment = match.group(TEXT_REGEX_ALIGN)
                         text_obj = Text(
-                            coord=coord, text=txt_str.strip(), size=size_int, type=ttype
+                            coord=coord,
+                            text=txt_str.strip(),
+                            size=size_int,
+                            type=ttype,
                         )
                         text_obj = asc_text_align_set(text_obj, alignment)
                         self.directives.append(text_obj)
@@ -297,7 +308,9 @@ class AscEditor(BaseSchematic):
                     _, posX, posY, text_str = line.split(maxsplit=3)
                     coord = Point(int(posX), int(posY))
                     flag = Text(
-                        coord=coord, text=text_str.strip(), type=TextTypeEnum.LABEL
+                        coord=coord,
+                        text=text_str.strip(),
+                        type=TextTypeEnum.LABEL,
                     )
                     self.labels.append(flag)
                 elif line.startswith("Version"):
@@ -377,7 +390,7 @@ class AscEditor(BaseSchematic):
                     pass  # DATAFLAG is the placeholder to show simulation information. It is ignored by AscEditor
                 else:
                     raise NotImplementedError(
-                        "Primitive not supported for ASC file\n" f'"{line}"'
+                        f'Primitive not supported for ASC file\n"{line}"'
                     )
             if component is not None:
                 assert (
@@ -558,7 +571,7 @@ class AscEditor(BaseSchematic):
             if isinstance(sub_circuit, SpiceCircuit):
                 _logger.warning(
                     f"Component {device} is in an Spice subcircuit. "
-                    f"This function may not work as expected."
+                    "This function may not work as expected."
                 )
             return sub_circuit.set_component_value(ref, value)
         else:
@@ -701,14 +714,13 @@ class AscEditor(BaseSchematic):
                             else:
                                 params[param_key][key] = value_str
                             # and make the line out of the dict
-                            component.attributes[param_key] = " ".join(
-                                [
-                                    f"{p_key}={p_value}"
-                                    for p_key, p_value in params[param_key].items()
-                                ]
-                            )
+                            component.attributes[param_key] = " ".join([
+                                f"{p_key}={p_value}"
+                                for p_key, p_value in params[param_key].items()
+                            ])
                             _logger.info(
-                                f"Component {element} updated with parameter {key}:{value_str}"
+                                f"Component {element} updated with parameter"
+                                f" {key}:{value_str}"
                             )
                             foundme = True
                 if not foundme:
@@ -718,7 +730,8 @@ class AscEditor(BaseSchematic):
                             # known parameter, set the value
                             component.attributes[key] = value_str
                             _logger.info(
-                                f"Component {element} updated with parameter {key}:{value_str}"
+                                f"Component {element} updated with parameter"
+                                f" {key}:{value_str}"
                             )
                         else:
                             # nothing found, and not a known parameter, put it in
@@ -728,17 +741,16 @@ class AscEditor(BaseSchematic):
                                 # if SpiceLine exists: add to the dict
                                 params[param_key][key] = value_str
                                 # and make the line out of the dict
-                                component.attributes[param_key] = " ".join(
-                                    [
-                                        f"{p_key}={p_value}"
-                                        for p_key, p_value in params[param_key].items()
-                                    ]
-                                )
+                                component.attributes[param_key] = " ".join([
+                                    f"{p_key}={p_value}"
+                                    for p_key, p_value in params[param_key].items()
+                                ])
                             else:
                                 # if SpiceLine does not exist: create the line
                                 component.attributes[param_key] = f"{key}={value_str}"
                             _logger.info(
-                                f"Component {element} updated with parameter {key}:{value_str}"
+                                f"Component {element} updated with parameter"
+                                f" {key}:{value_str}"
                             )
         self.set_updated(element)
 
@@ -859,7 +871,8 @@ class AscEditor(BaseSchematic):
                 i += 1
         elif set_command.startswith(".PARAM"):
             raise RuntimeError(
-                'The .PARAM instruction should be added using the "set_parameter" method'
+                'The .PARAM instruction should be added using the "set_parameter"'
+                " method"
             )
         # If we get here, then the instruction was not found, so we need to add it
         x, y = self._get_text_space()

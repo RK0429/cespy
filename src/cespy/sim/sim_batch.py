@@ -202,7 +202,8 @@ class SimCommander(SpiceEditor):
         # For backward compatibility, we'll issue a warning and attempt to create
         # a new runner with the specified simulator
         _logger.warning(
-            "setLTspiceRunCommand is deprecated. Use SimRunner directly with the simulator parameter."
+            "setLTspiceRunCommand is deprecated. Use SimRunner directly with the"
+            " simulator parameter."
         )
 
         output_folder = getattr(self.runner, "output_folder", None)
@@ -253,9 +254,9 @@ class SimCommander(SpiceEditor):
         :return: A RunTask object
         """
         # Adapt callback if necessary
-        adapted_callback: Optional[
-            Union[Type[ProcessCallback], Callable[..., Any]]
-        ] = None
+        adapted_callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = (
+            None
+        )
 
         if callback is not None:
             if isinstance(callback, type) and issubclass(callback, ProcessCallback):

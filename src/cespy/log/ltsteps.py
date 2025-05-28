@@ -323,7 +323,8 @@ class LTSpiceLogReader(LogfileData):
         self.fourier: Dict[str, List[FourierData]] = {}
         if encoding is None:
             self.encoding = detect_encoding(
-                log_filename, r"^((.*\n)?Circuit:|([\s\S]*)--- Expanded Netlist ---)"
+                log_filename,
+                r"^((.*\n)?Circuit:|([\s\S]*)--- Expanded Netlist ---)",
             )
         else:
             self.encoding = encoding
@@ -339,7 +340,8 @@ class LTSpiceLogReader(LogfileData):
         # fcutac=8.18166e+006 FROM 1.81834e+006 TO 1e+007 => AC Find Computation
         regx = re.compile(
             # r"^(?P<name>\w+)(:\s+.*)?=(?P<value>[\d(inf)\.E+\-\(\)dB,°]+)(( FROM (?P<from>[\d\.E+-]*) TO (?P<to>[\d\.E+-]*))|( at (?P<at>[\d\.E+-]*)))?",
-            r"^(?P<name>\w+)(:\s+.*)?=(?P<value>[\d(inf)E+\-\(\)dB,°(-/\w]+)( FROM (?P<from>[\d\.E+-]*) TO (?P<to>[\d\.E+-]*)|( at (?P<at>[\d\.E+-]*)))?",
+            r"^(?P<name>\w+)(:\s+.*)?=(?P<value>[\d(inf)E+\-\(\)dB,°(-/\w]+)( FROM"
+            r" (?P<from>[\d\.E+-]*) TO (?P<to>[\d\.E+-]*)|( at (?P<at>[\d\.E+-]*)))?",
             re.IGNORECASE,
         )
 
@@ -442,7 +444,11 @@ class LTSpiceLogReader(LogfileData):
                         # Get the data
                         dataname = match.group("name")
                         if match.group("from"):
-                            headers = [dataname, dataname + "_FROM", dataname + "_TO"]
+                            headers = [
+                                dataname,
+                                dataname + "_FROM",
+                                dataname + "_TO",
+                            ]
                             measurements = [
                                 match.group("value"),
                                 match.group("from"),
@@ -450,7 +456,10 @@ class LTSpiceLogReader(LogfileData):
                             ]
                         elif match.group("at"):
                             headers = [dataname, dataname + "_at"]
-                            measurements = [match.group("value"), match.group("at")]
+                            measurements = [
+                                match.group("value"),
+                                match.group("at"),
+                            ]
                         else:
                             headers = [dataname]
                             measurements = [match.group("value")]
@@ -472,7 +481,8 @@ class LTSpiceLogReader(LogfileData):
                         # store the info
                         if len(measurements):
                             _logger.debug(
-                                f"Storing Measurement {meas_name} (count {len(measurements)})"
+                                f"Storing Measurement {meas_name} (count"
+                                f" {len(measurements)})"
                             )
                             self.measure_count += len(measurements)
                             for k, title in enumerate(headers):
@@ -528,7 +538,8 @@ class LTSpiceLogReader(LogfileData):
                     self.dataset[key] = [measure[k] for measure in measurements]
 
             _logger.info(
-                f"Identified {self.step_count} steps, read {self.measure_count} measurements"
+                f"Identified {self.step_count} steps, read"
+                f" {self.measure_count} measurements"
             )
 
     def export_data(
@@ -554,7 +565,8 @@ class LTSpiceLogReader(LogfileData):
                 if self.step_count > 0:
                     fout.write("\t".join(self.stepset.keys()) + "\t")
                 fout.write(
-                    "Signal\tN-Periods\tDC Component\tFundamental\tN-Harmonics\tPHD\tTHD\n"
+                    "Signal\tN-Periods\tDC"
+                    " Component\tFundamental\tN-Harmonics\tPHD\tTHD\n"
                 )
                 for signal in self.fourier:
                     if self.step_count > 0:

@@ -24,7 +24,11 @@ from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 from ...log.logfile_data import LogfileData
 from ..process_callback import ProcessCallback
-from .tolerance_deviations import ComponentDeviation, DeviationType, ToleranceDeviations
+from .tolerance_deviations import (
+    ComponentDeviation,
+    DeviationType,
+    ToleranceDeviations,
+)
 
 _logger = logging.getLogger("cespy.SimAnalysis")
 
@@ -101,7 +105,11 @@ class Montecarlo(ToleranceDeviations):
                     )  # calculate expression for new value
                     min_max_uni_func = True
                 elif dev.distribution == "normal":
-                    new_val = "{nrng(%s,%s,%s)}" % (val, dev.min_val, dev.max_val)
+                    new_val = "{nrng(%s,%s,%s)}" % (
+                        val,
+                        dev.min_val,
+                        dev.max_val,
+                    )
                     min_max_norm_func = True
 
             if new_val != val:  # Only update the value if it has changed
@@ -191,7 +199,8 @@ class Montecarlo(ToleranceDeviations):
             raise NotImplementedError("Simulator not supported for this method")
 
         self.last_run_number = kwargs.get(
-            "num_runs", self.last_run_number if self.last_run_number != 0 else 1000
+            "num_runs",
+            self.last_run_number if self.last_run_number != 0 else 1000,
         )
         self.editor.add_instruction(".step param run -1 %d 1" % self.last_run_number)
         self.editor.set_parameter("run", -1)
@@ -213,7 +222,8 @@ class Montecarlo(ToleranceDeviations):
                 new_val = random.Random().uniform(dev.min_val, dev.max_val)
             elif dev.distribution == "normal":
                 new_val = random.Random().gauss(
-                    (dev.max_val + dev.min_val) / 2, (dev.max_val - dev.min_val) / 6
+                    (dev.max_val + dev.min_val) / 2,
+                    (dev.max_val - dev.min_val) / 6,
                 )
         elif dev.typ == DeviationType.none:
             pass
@@ -293,7 +303,8 @@ class Montecarlo(ToleranceDeviations):
         """
         if not self.analysis_executed:
             _logger.warning(
-                "The analysis was not executed. Please run the analysis before calling this method"
+                "The analysis was not executed. Please run the analysis before calling"
+                " this method"
             )
             return None
         log_data: LogfileData = self.read_logfiles()

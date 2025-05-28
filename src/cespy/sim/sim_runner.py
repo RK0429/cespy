@@ -170,21 +170,19 @@ class AnyRunner(Protocol):
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
-    ) -> Optional[RunTask]:
-        ...
+    ) -> Optional[RunTask]: ...
 
     def wait_completion(
-        self, timeout: Optional[float] = None, abort_all_on_timeout: bool = False
-    ) -> bool:
-        ...
+        self,
+        timeout: Optional[float] = None,
+        abort_all_on_timeout: bool = False,
+    ) -> bool: ...
 
     @property
-    def okSim(self) -> int:
-        ...
+    def okSim(self) -> int: ...
 
     @property
-    def runno(self) -> int:
-        ...
+    def runno(self) -> int: ...
 
 
 class SimRunner(AnyRunner):
@@ -353,7 +351,9 @@ class SimRunner(AnyRunner):
         return f"{netlist.stem}_{self.run_count}{netlist.suffix}"
 
     def _prepare_sim(
-        self, netlist: Union[str, Path, BaseEditor], run_filename: Optional[str]
+        self,
+        netlist: Union[str, Path, BaseEditor],
+        run_filename: Optional[str],
     ) -> Path:
         """Internal function."""
         # update number of simulation
@@ -714,7 +714,9 @@ class SimRunner(AnyRunner):
         return alarm
 
     def wait_completion(
-        self, timeout: Optional[float] = None, abort_all_on_timeout: bool = False
+        self,
+        timeout: Optional[float] = None,
+        abort_all_on_timeout: bool = False,
     ) -> bool:
         """This function will wait for the execution of all scheduled simulations to
         complete.
@@ -857,7 +859,9 @@ class SimRunner(AnyRunner):
             sleep(0.2)  # Go asleep for a while
 
     def create_netlist(
-        self, asc_file: Union[str, Path], cmd_line_args: Optional[List[str]] = None
+        self,
+        asc_file: Union[str, Path],
+        cmd_line_args: Optional[List[str]] = None,
     ) -> Optional[Path]:
         """Creates a .net from an .asc using the LTspice -netlist command line."""
         if not isinstance(asc_file, Path):

@@ -38,7 +38,14 @@ _logger = logging.getLogger("cespy.BaseEditor")
 SUBCKT_DIVIDER = ":"
 # Ex: Editor.set_component_value('XU1:R1', '1k')
 
-UNIQUE_SIMULATION_DOT_INSTRUCTIONS = (".AC", ".DC", ".TRAN", ".NOISE", ".DC", ".TF")
+UNIQUE_SIMULATION_DOT_INSTRUCTIONS = (
+    ".AC",
+    ".DC",
+    ".TRAN",
+    ".NOISE",
+    ".DC",
+    ".TF",
+)
 SPICE_DOT_INSTRUCTIONS = (
     ".BACKANNO",
     ".END",
@@ -844,7 +851,8 @@ class BaseEditor(ABC):
             cls.custom_lib_paths.append(path)
         else:
             _logger.warning(
-                f"Cannot add path '{path}' to the custom library path list, as it does not exist"
+                f"Cannot add path '{path}' to the custom library path list, as it does"
+                " not exist"
             )
 
     @classmethod

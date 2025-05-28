@@ -80,13 +80,17 @@ REPLACE_REGEXS = {
     "A": r"",  # LTspice Only : Special Functions, Parameter substitution not supported
     # Behavioral source
     "B": r"^(?P<designator>B§?[VI]?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$",
-    "C": r"^(?P<designator>C§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
-    + VALUE_RGX(FLOAT_RGX + r"[muµnpfgt]?F?")
-    + PARAM_RGX
-    + r".*?$",  # Capacitor
-    "D": r"^(?P<designator>D§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)"
-    + PARAM_RGX
-    + ".*?$",  # Diode
+    "C": (
+        r"^(?P<designator>C§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
+        + VALUE_RGX(FLOAT_RGX + r"[muµnpfgt]?F?")
+        + PARAM_RGX
+        + r".*?$"
+    ),  # Capacitor
+    "D": (
+        r"^(?P<designator>D§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # Diode
     # Voltage Dependent Voltage Source
     "E": r"^(?P<designator>E§?\w+)(?P<nodes>(\s+\S+){2,4})\s+(?P<value>.*)$",
     # this only supports changing gain values
@@ -99,49 +103,63 @@ REPLACE_REGEXS = {
     # Voltage Dependent Current Source
     "H": r"^(?P<designator>H§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$",
     # This implementation replaces everything after the 2 first nets
-    "I": r"^(?P<designator>I§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*?)"
-    # Independent Current Source
-    r"(?P<params>(\s+\w+\s*=\s*[\w\{\}\(\)\-\+\*\/%\.]+)*)$",
+    "I": (
+        r"^(?P<designator>I§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*?)"
+        # Independent Current Source
+        r"(?P<params>(\s+\w+\s*=\s*[\w\{\}\(\)\-\+\*\/%\.]+)*)$"
+    ),
     # This implementation replaces everything after the 2 first nets
-    "J": r"^(?P<designator>J§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>\w+)"
-    + PARAM_RGX
-    + ".*?$",  # JFET
+    "J": (
+        r"^(?P<designator>J§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>\w+)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # JFET
     # Mutual Inductance
     "K": r"^(?P<designator>K§?\w+)(?P<nodes>(\s+\S+){2,4})\s+(?P<value>[\+\-]?[0-9\.E+-]+[kmuµnpgt]?).*$",
     # Inductance
     "L": r"^(?P<designator>L§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>({)?(?(5).*}|([0-9\.E+-]+(Meg|[kmuµnpgt])?H?))).*$",
-    "M": r"^(?P<designator>M§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>\w+)"
-    + PARAM_RGX
-    + ".*?$",  # MOSFET
-    "O": r"^(?P<designator>O§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>\w+)"
-    + PARAM_RGX
-    + ".*?$",  # Lossy Transmission Line
-    "Q": r"^(?P<designator>Q§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>\w+)"
-    + PARAM_RGX
-    + ".*?$",  # Bipolar
-    "R": r"^(?P<designator>R§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
-    + "(R=)?"
-    + VALUE_RGX(FLOAT_RGX + r"(Meg|[kRmuµnpfgt])?\d*")
-    + PARAM_RGX
-    + ".*?$",  # Resistor
+    "M": (
+        r"^(?P<designator>M§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>\w+)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # MOSFET
+    "O": (
+        r"^(?P<designator>O§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>\w+)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # Lossy Transmission Line
+    "Q": (
+        r"^(?P<designator>Q§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>\w+)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # Bipolar
+    "R": (
+        r"^(?P<designator>R§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
+        + "(R=)?"
+        + VALUE_RGX(FLOAT_RGX + r"(Meg|[kRmuµnpfgt])?\d*")
+        + PARAM_RGX
+        + ".*?$"
+    ),  # Resistor
     # Voltage Controlled Switch
     "S": r"^(?P<designator>S§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>.*)$",
     # Lossless Transmission
     "T": r"^(?P<designator>T§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>.*)$",
     # Uniform RC-line
     "U": r"^(?P<designator>U§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>.*)$",
-    "V": r"^(?P<designator>V§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*?)"
-    # Independent Voltage Source
-    r"(?P<params>(\s+\w+\s*=\s*[\w\{\}\(\)\-\+\*\/%\.]+)*)$",
+    "V": (
+        r"^(?P<designator>V§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*?)"
+        # Independent Voltage Source
+        r"(?P<params>(\s+\w+\s*=\s*[\w\{\}\(\)\-\+\*\/%\.]+)*)$"
+    ),
     # ex: V1 NC_08 NC_09 PWL(1u 0 +2n 1 +1m 1 +2n 0 +1m 0 +2n -1 +1m -1 +2n 0)
     # AC 1 2 Rser=3 Cpar=4
     # Current Controlled Switch
     "W": r"^(?P<designator>W§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$",
     # This implementation replaces everything after the 2 first nets
-    "X": r"^(?P<designator>X§?\w+)(?P<nodes>(\s+\S+){1,99})\s+(?P<value>[\w\.]+)"
-    r"(\s+params:)?"
-    + PARAM_RGX
-    + r"\\?$",  # Sub-circuit. The value is the last before any key-value parameters
+    "X": (
+        r"^(?P<designator>X§?\w+)(?P<nodes>(\s+\S+){1,99})\s+(?P<value>[\w\.]+)"
+        r"(\s+params:)?" + PARAM_RGX + r"\\?$"
+    ),  # Sub-circuit. The value is the last before any key-value parameters
     # This is structured differently than the others as it will accept any number of nodes.
     # But it only supports 1 value without any spaces in it (unlike V for example).
     # ex: XU1 NC_01 NC_02 NC_03 NC_04 NC_05 level2 Avol=1Meg GBW=10Meg Slew=10Meg Ilimit=25m Rail=0 Vos=0 En=0 Enk=0 In=0 Ink=0 Rin=500Meg
@@ -155,23 +173,35 @@ REPLACE_REGEXS = {
     # r'(?:\s+fend=(\d+\w+))?(?:\s+oct=(\d+))?(?:\s+fcoarse=(\d+\w+))?(?:\s+nmax=(\d+\w+))?'
     # r'\s+(\d+)\s+(\d+\w+)\s+(\d+)(?:\s+pp0=(\d+\.\d+))?(?:\s+pp1=(\d+\.\d+))?(?:\s+f0=(\d+\w+))?'
     # r'(?:\s+f1=(\d+\w+))?(?:\s+tavgmin=(\d+\w+))?(?:\s+tsettle=(\d+\w+))?(?:\s+acmag=(\d+))?$'
-    "Ã": r"^(?P<designator>Ã\w+)(?P<nodes>(\s+\S+){16})\s+(?P<value>.*)"
-    + PARAM_RGX
-    + ".*?$",  # QSPICE Unique component Ã
-    "¥": r"^(?P<designator>¥\w+)(?P<nodes>(\s+\S+){16})\s+(?P<value>.*)"
-    + PARAM_RGX
-    + ".*?$",  # QSPICE Unique component ¥
-    "€": r"^(?P<designator>€\w+)(?P<nodes>(\s+\S+){32})\s+(?P<value>.*)"
-    + PARAM_RGX
-    + ".*?$",  # QSPICE Unique component €
-    "£": r"^(?P<designator>£\w+)(?P<nodes>(\s+\S+){64})\s+(?P<value>.*)"
-    + PARAM_RGX
-    + ".*?$",  # QSPICE Unique component £
-    "Ø": r"^(?P<designator>Ø\w+)(?P<nodes>(\s+\S+){1,99})\s+(?P<value>.*)"
-    + PARAM_RGX
-    + ".*?$",  # QSPICE Unique component Ø
+    "Ã": (
+        r"^(?P<designator>Ã\w+)(?P<nodes>(\s+\S+){16})\s+(?P<value>.*)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # QSPICE Unique component Ã
+    "¥": (
+        r"^(?P<designator>¥\w+)(?P<nodes>(\s+\S+){16})\s+(?P<value>.*)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # QSPICE Unique component ¥
+    "€": (
+        r"^(?P<designator>€\w+)(?P<nodes>(\s+\S+){32})\s+(?P<value>.*)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # QSPICE Unique component €
+    "£": (
+        r"^(?P<designator>£\w+)(?P<nodes>(\s+\S+){64})\s+(?P<value>.*)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # QSPICE Unique component £
+    "Ø": (
+        r"^(?P<designator>Ø\w+)(?P<nodes>(\s+\S+){1,99})\s+(?P<value>.*)"
+        + PARAM_RGX
+        + ".*?$"
+    ),  # QSPICE Unique component Ø
     "×": r"^(?P<designator>×\w+)(?P<nodes>(\s+\S+){4,16})\s+(?P<value>.*)(?P<params>(\w+\s+){1,8})\s*\\?$",  # QSPICE proprietaty component ×
-    "Ö": r"^(?P<designator>Ö\w+)(?P<nodes>(\s+\S+){5})\s+(?P<params>.*)\s*\\?$",  # LTspice proprietary component Ö
+    "Ö": (
+        r"^(?P<designator>Ö\w+)(?P<nodes>(\s+\S+){5})\s+(?P<params>.*)\s*\\?$"
+    ),  # LTspice proprietary component Ö
 }
 
 SUBCKT_CLAUSE_FIND = r"^.SUBCKT\s+"
@@ -303,8 +333,8 @@ class SpiceComponent(Component):
         regex = component_replace_regexs.get(prefix, None)
         if regex is None:
             error_msg = (
-                f"Component must start with one of these letters: {','.join(REPLACE_REGEXS.keys())}\n"
-                f"Got {self.line}"
+                "Component must start with one of these letters:"
+                f" {','.join(REPLACE_REGEXS.keys())}\nGot {self.line}"
             )
             _logger.error(error_msg)
             raise NotImplementedError(error_msg)
@@ -492,7 +522,10 @@ class SpiceCircuit(BaseEditor):
                     if match.group("name").upper() == param_name_upped:
                         return line_no, match
             line_no += 1
-        return -1, None  # If it fails, it returns an invalid line number and No match
+        return (
+            -1,
+            None,
+        )  # If it fails, it returns an invalid line number and No match
 
     def get_all_parameter_names(self, param: str = "") -> List[str]:
         # docstring inherited from BaseEditor
@@ -599,8 +632,8 @@ class SpiceCircuit(BaseEditor):
         regex = component_replace_regexs.get(prefix, None)
         if regex is None:
             error_msg = (
-                f"Component must start with one of these letters: {','.join(REPLACE_REGEXS.keys())}\n"
-                f"Got {reference}"
+                "Component must start with one of these letters:"
+                f" {','.join(REPLACE_REGEXS.keys())}\nGot {reference}"
             )
             _logger.error(error_msg)
             raise NotImplementedError(error_msg)
@@ -710,7 +743,10 @@ class SpiceCircuit(BaseEditor):
                 raise SyntaxError("Netlist with missing .END or .ENDS statements")
         elif hasattr(self, "netlist_file") and self.netlist_file.exists():
             with open(
-                self.netlist_file, "r", encoding=self.encoding, errors="replace"
+                self.netlist_file,
+                "r",
+                encoding=self.encoding,
+                errors="replace",
             ) as f:
                 # Creates an iterator object to consume the file
                 finished = self._add_lines(f)
@@ -734,7 +770,8 @@ class SpiceCircuit(BaseEditor):
         clone = SpiceCircuit(self)
         clone.netlist = self.netlist.copy()
         clone.netlist.insert(
-            0, "***** SpiceEditor Manipulated this sub-circuit ****" + END_LINE_TERM
+            0,
+            "***** SpiceEditor Manipulated this sub-circuit ****" + END_LINE_TERM,
         )
         clone.netlist.append("***** ENDS SpiceEditor ****" + END_LINE_TERM)
         new_name = kwargs.get("new_name", None)
@@ -1227,7 +1264,8 @@ class SpiceCircuit(BaseEditor):
                     i += 1
         elif get_line_command(instruction) == ".PARAM":
             raise RuntimeError(
-                'The .PARAM instruction should be added using the "set_parameter" method'
+                'The .PARAM instruction should be added using the "set_parameter"'
+                " method"
             )
 
         # check whether the instruction is already there (dummy proofing)
@@ -1449,7 +1487,8 @@ class SpiceEditor(SpiceCircuit):
                     i += 1
         elif get_line_command(instruction) == ".PARAM":
             raise RuntimeError(
-                'The .PARAM instruction should be added using the "set_parameter" method'
+                'The .PARAM instruction should be added using the "set_parameter"'
+                " method"
             )
 
         # check whether the instruction is already there (dummy proofing)
@@ -1535,7 +1574,10 @@ class SpiceEditor(SpiceCircuit):
                 raise SyntaxError("Netlist with missing .END or .ENDS statements")
         elif hasattr(self, "netlist_file") and self.netlist_file.exists():
             with open(
-                self.netlist_file, "r", encoding=self.encoding, errors="replace"
+                self.netlist_file,
+                "r",
+                encoding=self.encoding,
+                errors="replace",
             ) as f:
                 # Creates an iterator object to consume the file
                 finished = self._add_lines(f)

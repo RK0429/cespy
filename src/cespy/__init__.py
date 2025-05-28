@@ -48,10 +48,12 @@ def simulate(
     run_filename: Optional[str] = None,
     exe_log: bool = False,
 ) -> SimRunner:
-    """Run a simulation for a given circuit file or editor using the specified engine.
+    """Run a simulation for a given circuit file or editor using the
+    specified engine.
 
     :param circuit: Path to the circuit file or a SpiceEditor instance.
-    :param engine: The simulation engine to use: 'ltspice', 'ngspice', 'qspice', or 'xyce'.
+    :param engine: The simulation engine to use: 'ltspice', 'ngspice',
+        'qspice', or 'xyce'.
     :param parallel_sims: Number of parallel simulations to run.
     :param timeout: Timeout in seconds for each simulation.
     :param verbose: Enable verbose logging.

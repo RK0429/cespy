@@ -169,17 +169,16 @@ class RunTask:
             if self.raw_file.exists() and self.log_file.exists():
                 # simulation successful
                 self.print_info(
-                    _logger.info, "Simulation Successful. Time elapsed: %s" % sim_time
+                    _logger.info,
+                    "Simulation Successful. Time elapsed: %s" % sim_time,
                 )
 
                 if self.callback:
                     if self.callback_args is not None:
-                        callback_print = ", ".join(
-                            [
-                                f"{key}={value}"
-                                for key, value in self.callback_args.items()
-                            ]
-                        )
+                        callback_print = ", ".join([
+                            f"{key}={value}"
+                            for key, value in self.callback_args.items()
+                        ])
                     else:
                         callback_print = ""
                     self.print_info(
@@ -206,7 +205,9 @@ class RunTask:
                         # Function callback uses Path parameters
                         if self.callback_args is not None:
                             return_or_process = self.callback(
-                                self.raw_file, self.log_file, **self.callback_args
+                                self.raw_file,
+                                self.log_file,
+                                **self.callback_args,
                             )
                         else:
                             return_or_process = self.callback(
@@ -236,11 +237,13 @@ class RunTask:
                         )
                 else:
                     self.print_info(
-                        _logger.info, "Simulation Finished. No Callback function given"
+                        _logger.info,
+                        "Simulation Finished. No Callback function given",
                     )
             else:
                 self.print_info(
-                    _logger.error, "Simulation Raw file or Log file were not found"
+                    _logger.error,
+                    "Simulation Raw file or Log file were not found",
                 )
         else:
             # Simulation failed

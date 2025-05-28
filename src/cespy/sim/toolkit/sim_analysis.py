@@ -22,7 +22,17 @@
 
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
@@ -45,7 +55,9 @@ class SimAnalysis(object):
     """
 
     def __init__(
-        self, circuit_file: Union[str, BaseEditor], runner: Optional[AnyRunner] = None
+        self,
+        circuit_file: Union[str, BaseEditor],
+        runner: Optional[AnyRunner] = None,
     ):
         from ...editor.spice_editor import SpiceEditor
 

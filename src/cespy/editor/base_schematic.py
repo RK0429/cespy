@@ -23,7 +23,12 @@ import logging
 from collections import OrderedDict
 from typing import Any, Callable, List, Optional, Tuple, Union, cast
 
-from .base_editor import SUBCKT_DIVIDER, BaseEditor, Component, ComponentNotFoundError
+from .base_editor import (
+    SUBCKT_DIVIDER,
+    BaseEditor,
+    Component,
+    ComponentNotFoundError,
+)
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
@@ -161,7 +166,11 @@ class Line:
     """X1, Y1, X2, Y2 coordinates."""
 
     def __init__(
-        self, v1: Point, v2: Point, style: Optional[LineStyle] = None, net: str = ""
+        self,
+        v1: Point,
+        v2: Point,
+        style: Optional[LineStyle] = None,
+        net: str = "",
     ):
         self.V1 = v1
         self.V2 = v2

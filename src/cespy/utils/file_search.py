@@ -94,7 +94,8 @@ def search_file_in_containers(filename: str, *containers: str) -> Optional[str]:
                             if not os.path.exists(temp_dir):
                                 os.makedirs(temp_dir)
                             _logger.debug(
-                                f"Found. Extracting '{filefound}' from the zip file to '{temp_dir}'"
+                                f"Found. Extracting '{filefound}' from the zip file to"
+                                f" '{temp_dir}'"
                             )
                             return zip_ref.extract(filefound, path=temp_dir)
             else:

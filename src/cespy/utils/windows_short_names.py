@@ -24,7 +24,11 @@ import ctypes
 from ctypes import wintypes
 
 _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
-_GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+_GetShortPathNameW.argtypes = [
+    wintypes.LPCWSTR,
+    wintypes.LPWSTR,
+    wintypes.DWORD,
+]
 _GetShortPathNameW.restype = wintypes.DWORD
 
 # GetShortPathName is used by first calling it without a destination buffer. It will return the number of characters

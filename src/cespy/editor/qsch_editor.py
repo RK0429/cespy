@@ -179,7 +179,8 @@ QSCH_ZIGZAG_UNKNOWN2 = 8
 
 def decap(s: str) -> str:
     """Take the leading < and ending > from the parameter value on a string with the
-    format "param=<value>" If they are not there, the string is returned unchanged."""
+    format "param=<value>" If they are not there, the string is returned unchanged.
+    """
     regex = re.compile(r"(\w+)=<(.*)>")
     return regex.sub(r"\1=\2", s)
 
@@ -586,7 +587,9 @@ class QschEditor(BaseSchematic):
                 netlist_file.write(f".lib {library}\n")
             else:
                 if sys.platform.startswith("win"):
-                    from cespy.utils.windows_short_names import get_short_path_name
+                    from cespy.utils.windows_short_names import (
+                        get_short_path_name,
+                    )
 
                     netlist_file.write(
                         f".lib {get_short_path_name(os.path.abspath(library_path))}\n"
@@ -738,7 +741,8 @@ class QschEditor(BaseSchematic):
             texts = symbol.get_items("text")
             if len(texts) < 2:
                 raise RuntimeError(
-                    f"Missing texts in component at coordinates {component_tag.get_attr(1)}"
+                    "Missing texts in component at coordinates"
+                    f" {component_tag.get_attr(1)}"
                 )
             refdes = texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(QSCH_TEXT_STR_ATTR)
             value = texts[QSCH_SYMBOL_TEXT_VALUE].get_attr(QSCH_TEXT_STR_ATTR)
@@ -779,7 +783,10 @@ class QschEditor(BaseSchematic):
                         _logger.info(
                             f"Unconnected pin at {x},{y} in component {refdes}:{pin}"
                         )
-                        if refdes[0] in ("¥", "Ã"):  # Behavioral pins are not connected
+                        if refdes[0] in (
+                            "¥",
+                            "Ã",
+                        ):  # Behavioral pins are not connected
                             net_name = f"¥{behavior_pin_counter:d}"
                             behavior_pin_counter += 1
                         else:
@@ -798,12 +805,13 @@ class QschEditor(BaseSchematic):
                     )
                     if sub_circuit_schematic_file:
                         sub_schematic = type(self)(sub_circuit_schematic_file)
-                        sch_comp.attributes[
-                            "_SUBCKT"
-                        ] = sub_schematic  # Store it for future use.
+                        sch_comp.attributes["_SUBCKT"] = (
+                            sub_schematic  # Store it for future use.
+                        )
                     else:
                         _logger.warning(
-                            f"Subcircuit '{sub_circuit_name}' not found. Have you set the correct search paths?"
+                            f"Subcircuit '{sub_circuit_name}' not found. Have you set"
+                            " the correct search paths?"
                         )
 
         for text_tag in self.schematic.get_items("text"):
@@ -939,13 +947,15 @@ class QschEditor(BaseSchematic):
             _logger.debug(f"Parameter {param} not found in QSCH file, adding it")
             x, y = self._get_text_space()
             new_tag, _ = QschTag.parse(
-                f'«text ({x},{y}) 1 0 0 0x1000000 -1 -1 "{QSCH_TEXT_INSTR_QUALIFIER}.param {param}={value}"»'
+                f"«text ({x},{y}) 1 0 0 0x1000000 -1 -1"
+                f' "{QSCH_TEXT_INSTR_QUALIFIER}.param {param}={value}"»'
             )
             if self.schematic is not None:
                 self.schematic.items.append(new_tag)
                 _logger.info(f"Parameter {param} added with value {value}")
                 _logger.debug(
-                    f"Text added to {new_tag.get_attr(QSCH_TEXT_POS)} Added: {new_tag.get_attr(QSCH_TEXT_STR_ATTR)}"
+                    f"Text added to {new_tag.get_attr(QSCH_TEXT_POS)} Added:"
+                    f" {new_tag.get_attr(QSCH_TEXT_STR_ATTR)}"
                 )
         self.updated = True
 
@@ -1175,12 +1185,14 @@ class QschEditor(BaseSchematic):
 
         elif command.startswith(".PARAM"):
             raise RuntimeError(
-                'The .PARAM instruction should be added using the "set_parameter" method'
+                'The .PARAM instruction should be added using the "set_parameter"'
+                " method"
             )
         # If we get here, then the instruction was not found, so we need to add it
         x, y = self._get_text_space()
         tag, _ = QschTag.parse(
-            f'«text ({x},{y}) 1 0 0 0x1000000 -1 -1 "{QSCH_TEXT_INSTR_QUALIFIER}{instruction}"»'
+            f"«text ({x},{y}) 1 0 0 0x1000000 -1 -1"
+            f' "{QSCH_TEXT_INSTR_QUALIFIER}{instruction}"»'
         )
         if self.schematic is not None:
             self.schematic.items.append(tag)

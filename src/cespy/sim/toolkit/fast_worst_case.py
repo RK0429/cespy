@@ -20,7 +20,17 @@
 
 import logging
 from enum import IntEnum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from ..process_callback import ProcessCallback
 from .tolerance_deviations import ComponentDeviation, DeviationType
@@ -98,7 +108,11 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         exe_log: bool = True,
         measure: Optional[str] = None,
     ) -> Tuple[
-        float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]
+        float,
+        float,
+        Dict[str, Union[str, float]],
+        float,
+        Dict[str, Union[str, float]],
     ]:
         """As described in the class description, this method will perform a worst case
         analysis using a faster algorithm."""

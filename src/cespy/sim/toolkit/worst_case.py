@@ -19,7 +19,17 @@
 # -------------------------------------------------------------------------------
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+)
 
 from ...log.logfile_data import LogfileData
 from ..process_callback import ProcessCallback
@@ -100,7 +110,12 @@ class WorstCaseAnalysis(ToleranceDeviations):
                     index,
                 )  # calculate expression for new value
             elif dev.typ == DeviationType.minmax:
-                new_val = "{wc1(%s,%g,%g,%d)}" % (val, dev.min_val, dev.max_val, index)
+                new_val = "{wc1(%s,%g,%g,%d)}" % (
+                    val,
+                    dev.min_val,
+                    dev.max_val,
+                    index,
+                )
             if new_val != val:
                 self.editor.set_parameter(ref, new_val)
             index += 1
@@ -274,7 +289,8 @@ class WorstCaseAnalysis(ToleranceDeviations):
         """
         if not self.analysis_executed:
             _logger.warning(
-                "The analysis was not executed. Please run the analysis before calling this method"
+                "The analysis was not executed. Please run the analysis before calling"
+                " this method"
             )
             return None
 
@@ -364,7 +380,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
                 return sens / total * 100, sigma / total * 100
         else:
             _logger.warning(
-                "The analysis was not executed. Please run the run_analysis(...) or run_testbench(...)"
-                " before calling this method"
+                "The analysis was not executed. Please run the run_analysis(...) or"
+                " run_testbench(...) before calling this method"
             )
             return None

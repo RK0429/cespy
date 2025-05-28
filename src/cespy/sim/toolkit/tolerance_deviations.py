@@ -83,7 +83,9 @@ class ToleranceDeviations(SimAnalysis, ABC):
     devices_with_deviation_allowed = ("R", "C", "L", "V", "I")
 
     def __init__(
-        self, circuit_file: Union[str, BaseEditor], runner: Optional[AnyRunner] = None
+        self,
+        circuit_file: Union[str, BaseEditor],
+        runner: Optional[AnyRunner] = None,
     ):
         super().__init__(circuit_file, runner)
         self.default_tolerance = {
@@ -143,7 +145,11 @@ class ToleranceDeviations(SimAnalysis, ABC):
             self.set_tolerance(ref, tol, distribution)
 
     def set_deviation(
-        self, ref: str, min_val: float, max_val: float, distribution: str = "uniform"
+        self,
+        ref: str,
+        min_val: float,
+        max_val: float,
+        distribution: str = "uniform",
     ) -> None:
         """Sets the deviation for a given component.
 
@@ -176,13 +182,18 @@ class ToleranceDeviations(SimAnalysis, ABC):
         try:
             value_float = scan_eng(value)
             return value_float, self.device_deviations.get(
-                ref, self.default_tolerance.get(ref[0], ComponentDeviation.none())
+                ref,
+                self.default_tolerance.get(ref[0], ComponentDeviation.none()),
             )
         except ValueError:
             return value, ComponentDeviation.none()
 
     def set_parameter_deviation(
-        self, ref: str, min_val: float, max_val: float, distribution: str = "uniform"
+        self,
+        ref: str,
+        min_val: float,
+        max_val: float,
+        distribution: str = "uniform",
     ) -> None:
         self.parameter_deviations[ref] = ComponentDeviation.from_min_max(
             min_val, max_val, distribution
@@ -204,8 +215,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
         self.testbench_prepared = False
 
     @abstractmethod
-    def prepare_testbench(self, **kwargs: Any) -> None:
-        ...
+    def prepare_testbench(self, **kwargs: Any) -> None: ...
 
     def run_testbench(
         self,

@@ -26,7 +26,11 @@ from typing import Any, Dict, Optional, Union
 
 from ..sim.simulator import run_function
 from ..simulators.qspice_simulator import Qspice
-from .logfile_data import LogfileData, split_line_into_values, try_convert_value
+from .logfile_data import (
+    LogfileData,
+    split_line_into_values,
+    try_convert_value,
+)
 
 _logger = logging.getLogger("cespy.qspice_log_reader")
 
@@ -137,7 +141,8 @@ class QspiceLogReader(LogfileData):
             _logger.error("using the create_from(<location>) class method")
             _logger.error("==============================================")
             raise RuntimeError(
-                "QSPICE not found in the usual locations. Please install it and try again."
+                "QSPICE not found in the usual locations. Please install it and try"
+                " again."
             )
 
         # Get the QPOST location, which is the same as the QSPICE location
@@ -181,7 +186,8 @@ class QspiceLogReader(LogfileData):
                         meas_name = token1
                     meas_expr = match.group(3)
                     _logger.debug(
-                        f"Found measure {meas_name} of type {sim_type} with expression {meas_expr}"
+                        f"Found measure {meas_name} of type {sim_type} with expression"
+                        f" {meas_expr}"
                     )
                 else:
                     if meas_name:
@@ -192,16 +198,16 @@ class QspiceLogReader(LogfileData):
                                     meas_name + "_" + str(i)
                                     for i in range(len(values) - 1)
                                 ]
-                                headers[
-                                    1
-                                ] = meas_name  # first column is the measure name without _0
+                                headers[1] = (
+                                    meas_name  # first column is the measure name without _0
+                                )
                             else:
                                 headers = [
                                     meas_name + "_" + str(i) for i in range(len(values))
                                 ]
-                                headers[
-                                    0
-                                ] = meas_name  # first column is the measure name without _0
+                                headers[0] = (
+                                    meas_name  # first column is the measure name without _0
+                                )
 
                             for title in headers:
                                 self.dataset[title.lower()] = []

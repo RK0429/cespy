@@ -52,7 +52,7 @@ def main() -> None:
         "--output",
         dest="output",
         default=None,
-        help="Output file name.\n" "Use .csv for CSV output, .xlsx for Excel output",
+        help="Output file name.\nUse .csv for CSV output, .xlsx for Excel output",
         metavar="FILE",
     )
     parser.add_option(
@@ -76,7 +76,7 @@ def main() -> None:
         "--sep",
         dest="separator",
         default="\t",
-        help='Value separator for CSV output. Default: "\\t" <TAB>\n' 'Example: -d ";"',
+        help='Value separator for CSV output. Default: "\\t" <TAB>\nExample: -d ";"',
     )
 
     (options, args) = parser.parse_args()

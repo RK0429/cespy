@@ -70,9 +70,7 @@ class ServerSimRunner(threading.Thread):
             verbose=verbose,
             output_folder=output_folder,
         )
-        self.completed_tasks: List[
-            Dict[str, Any]
-        ] = (
+        self.completed_tasks: List[Dict[str, Any]] = (
             []
         )  # This is a list of dictionaries with the information of the completed tasks
         self._stop = False
@@ -87,18 +85,16 @@ class ServerSimRunner(threading.Thread):
             while len(self.runner.completed_tasks) > 0:
                 task = self.runner.completed_tasks.pop(0)
                 zip_filename = task.callback_return
-                self.completed_tasks.append(
-                    {
-                        "runno": task.runno,
-                        "retcode": task.retcode,
-                        "circuit": task.netlist_file,
-                        "raw": task.raw_file,
-                        "log": task.log_file,
-                        "zipfile": zip_filename,
-                        "start": task.start_time,
-                        "stop": task.stop_time,
-                    }
-                )
+                self.completed_tasks.append({
+                    "runno": task.runno,
+                    "retcode": task.retcode,
+                    "circuit": task.netlist_file,
+                    "raw": task.raw_file,
+                    "log": task.log_file,
+                    "zipfile": zip_filename,
+                    "start": task.start_time,
+                    "stop": task.stop_time,
+                })
                 _logger.debug(f"Task {task} is finished")
                 _logger.debug(self.completed_tasks[-1])
                 _logger.debug(len(self.completed_tasks))
@@ -110,7 +106,10 @@ class ServerSimRunner(threading.Thread):
         self.runner.cleanup_files()  # Delete things that have been left behind
 
     def add_simulation(
-        self, netlist: Union[str, Path, BaseEditor], *, timeout: Optional[float] = None
+        self,
+        netlist: Union[str, Path, BaseEditor],
+        *,
+        timeout: Optional[float] = None,
     ) -> int:
         """Adding a simulation to the list of simulations to be run. The function will
         return the runno of the simulation or -1 if the simulation could not be started.

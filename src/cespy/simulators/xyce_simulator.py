@@ -233,7 +233,13 @@ class XyceSimulator(Simulator):
                 elif param_token == "<hsext_options>":
                     ret = [switch_list[0], parameter]
                 elif param_token == "<redef_param_option>":
-                    if parameter in ("ignore", "uselast", "usefirst", "warn", "error"):
+                    if parameter in (
+                        "ignore",
+                        "uselast",
+                        "usefirst",
+                        "warn",
+                        "error",
+                    ):
                         ret = [switch_list[0], parameter]
                 elif param_token == "<truefalse_option>":
                     if parameter.lower() in ("true", "false"):
@@ -336,7 +342,10 @@ class XyceSimulator(Simulator):
             log_exe_file = netlist_file.with_suffix(".exe.log")
             with open(log_exe_file, "w", encoding="utf-8") as outfile:
                 error = run_function(
-                    cmd_run, timeout=timeout, stdout=outfile, stderr=subprocess.STDOUT
+                    cmd_run,
+                    timeout=timeout,
+                    stdout=outfile,
+                    stderr=subprocess.STDOUT,
                 )
         else:
             error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)

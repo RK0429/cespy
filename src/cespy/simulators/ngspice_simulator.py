@@ -83,7 +83,10 @@ class NGspiceSimulator(Simulator):
         "-c": ["-c", "<FILE>"],  #
         "--circuitfile": ["--circuitfile", "<FILE>"],  # set the circuitfile
         "-D": ["-D", "var_value"],  #
-        "--define": ["--define", "var_value"],  # define variable to true/[value]
+        "--define": [
+            "--define",
+            "var_value",
+        ],  # define variable to true/[value]
         "-i": ["-i"],  #
         "--interactive": ["--interactive"],  # run in interactive mode
         "-n": ["-n"],  #
@@ -98,7 +101,10 @@ class NGspiceSimulator(Simulator):
         "--completion": ["--completion"],  # activate command completion
         # '-r'            : ['-r'],  #
         # '--rawfile'     : ['--rawfile', '<FILE>'],  # set the rawfile output
-        "--soa-log": ["--soa-log", "<FILE>"],  # set the outputfile for SOA warnings
+        "--soa-log": [
+            "--soa-log",
+            "<FILE>",
+        ],  # set the outputfile for SOA warnings
         "-s": ["-s"],  #
         "--server": ["--server"],  # run spice as a server process
         "-t": ["-t", "<TERM>"],  #
@@ -165,7 +171,8 @@ class NGspiceSimulator(Simulator):
                 and parameter.lower().startswith("ngbehavior")
             ):
                 _logger.info(
-                    f"Switch {switch} {parameter} is already in the default switches, use 'set_compatibility_mode' instead"
+                    f"Switch {switch} {parameter} is already in the default switches,"
+                    " use 'set_compatibility_mode' instead"
                 )
                 return ret
             switch_list = cls.ngspice_args[switch]
@@ -269,7 +276,10 @@ class NGspiceSimulator(Simulator):
             log_exe_file = netlist_file.with_suffix(".exe.log")
             with open(log_exe_file, "w", encoding="utf-8") as outfile:
                 error = run_function(
-                    cmd_run, timeout=timeout, stdout=outfile, stderr=subprocess.STDOUT
+                    cmd_run,
+                    timeout=timeout,
+                    stdout=outfile,
+                    stderr=subprocess.STDOUT,
                 )
         else:
             error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)

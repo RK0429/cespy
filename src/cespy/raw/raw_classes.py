@@ -42,7 +42,11 @@ class DataSet(object):
     data: NDArray[Any]
 
     def __init__(
-        self, name: str, whattype: str, datalen: int, numerical_type: str = "real"
+        self,
+        name: str,
+        whattype: str,
+        datalen: int,
+        numerical_type: str = "real",
     ) -> None:
         """Base Class for both Axis and Trace Classes.
 
@@ -99,7 +103,11 @@ class Axis(DataSet):
     """
 
     def __init__(
-        self, name: str, whattype: str, datalen: int, numerical_type: str = "double"
+        self,
+        name: str,
+        whattype: str,
+        datalen: int,
+        numerical_type: str = "double",
     ) -> None:
         super().__init__(name, whattype, datalen, numerical_type)
         self.step_info: Optional[List[Dict[str, Any]]] = None
@@ -187,9 +195,10 @@ class Axis(DataSet):
         :return: time axis
         :rtype: numpy.array
         """
-        assert (
-            self.name == "time"
-        ), "This function is only applicable to transient analysis, where a bug exists on the time signal"
+        assert self.name == "time", (
+            "This function is only applicable to transient analysis, where a bug exists"
+            " on the time signal"
+        )
         return self.get_wave(step)
 
     def get_point(self, n: int, step: int = 0) -> Union[float, complex]:
@@ -400,9 +409,10 @@ class TraceRead(DataSet):
 
         deprecated:: 1.0 This is only here for compatibility with previous code.
         """
-        assert (
-            self.axis is None or self.axis.step_info is None
-        ), "len() should not be used with stepped data. Use get_len() method passing the step index"
+        assert self.axis is None or self.axis.step_info is None, (
+            "len() should not be used with stepped data. Use get_len() method passing"
+            " the step index"
+        )
         return len(self.data)
 
 
@@ -410,7 +420,11 @@ class DummyTrace(object):
     """Dummy Trace for bypassing traces while reading."""
 
     def __init__(
-        self, name: str, whattype: str, datalen: int, numerical_type: str = "real"
+        self,
+        name: str,
+        whattype: str,
+        datalen: int,
+        numerical_type: str = "real",
     ) -> None:
         """Base Class for both Axis and Trace Classes.
 

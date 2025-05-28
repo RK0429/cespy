@@ -28,7 +28,9 @@ from typing import Dict, List, Union
 from ..utils.detect_encoding import detect_encoding
 
 
-def opLogReader(filename: str) -> Dict[str, Dict[str, Dict[str, Union[float, str]]]]:
+def opLogReader(
+    filename: str,
+) -> Dict[str, Dict[str, Dict[str, Union[float, str]]]]:
     """This function is exclusively dedicated to retrieving operation point parameters
     of Semiconductor Devices. This is handled separately from the main LogReader class
     because of its specialization and therefore not judged to be of interest to the
@@ -153,9 +155,9 @@ def opLogReader(filename: str) -> Dict[str, Dict[str, Dict[str, Union[float, str
             if match is not None:
                 where = match.group(1)
                 if where is not None:  # Ensure where is not None before using lower()
-                    dataset[
-                        where.lower()
-                    ] = {}  # Creates a dictionary for each component type
+                    dataset[where.lower()] = (
+                        {}
+                    )  # Creates a dictionary for each component type
             else:
                 cols = re.split(r"\s+", line.rstrip("\r\n"))
                 if len(cols) > 1 and (

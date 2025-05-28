@@ -34,7 +34,8 @@ def main() -> None:
     from optparse import OptionParser
 
     opts = OptionParser(
-        usage="usage: %prog [options] ASC_FILE [QSCH_FILE]", version="%prog 0.1"
+        usage="usage: %prog [options] ASC_FILE [QSCH_FILE]",
+        version="%prog 0.1",
     )
 
     opts.add_option(
