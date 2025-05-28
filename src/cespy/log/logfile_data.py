@@ -56,8 +56,7 @@ class LTComplex(complex):
                 mag * math.cos(math.pi * ph / 180),
                 mag * math.sin(math.pi * ph / 180),
             )
-        else:
-            raise ValueError("Invalid complex value format")
+        raise ValueError("Invalid complex value format")
 
     def __init__(self, strvalue: str) -> None:
         self.strvalue = strvalue
@@ -248,7 +247,7 @@ class LogfileData:
                 key
             ]  # This will raise an Index Error if not found here.
         raise IndexError(
-            "'%s' is not a valid step variable or measurement name" % key
+            f"'{key}' is not a valid step variable or measurement name"
         )
 
     def has_steps(self) -> bool:
@@ -277,7 +276,7 @@ class LogfileData:
             condition_set = self.dataset[param]
         else:
             raise IndexError(
-                "'%s' is not a valid step variable or measurement name" % param
+                f"'{param}' is not a valid step variable or measurement name"
             )
         # tries to convert the value to integer or float, for consistency with
         # data loading implementation
@@ -349,35 +348,31 @@ class LogfileData:
                         Union[float, int, str, LTComplex],
                         self.dataset[measure][steps[0]],
                     )
-                else:
-                    raise IndexError(
-                        "Not sufficient conditions to identify a single step"
-                    )
-            elif len(self.dataset[measure]) == 1:
+                raise IndexError(
+                    "Not sufficient conditions to identify a single step"
+                )
+            if len(self.dataset[measure]) == 1:
                 # Explicitly cast to the expected return type
                 return cast(
                     Union[float, int, str, LTComplex], self.dataset[measure][0]
                 )
-            elif len(self.dataset[measure]) == 0:
+            if len(self.dataset[measure]) == 0:
                 _logger.error(
                     'No measurements found for measure "%s"', measure
                 )
                 raise IndexError(
                     f'No measurements found for measure "{measure}"'
                 )
-            else:
-                raise IndexError(
-                    "In stepped data, the step number needs to be provided"
-                )
-        else:
-            if isinstance(step, (slice, int)):
-                # Explicitly cast to the expected return type
-                return cast(
-                    Union[float, int, str, LTComplex],
-                    self.dataset[measure][step],
-                )
-            else:
-                raise TypeError("Step must be an integer or a slice")
+            raise IndexError(
+                "In stepped data, the step number needs to be provided"
+            )
+        if isinstance(step, (slice, int)):
+            # Explicitly cast to the expected return type
+            return cast(
+                Union[float, int, str, LTComplex],
+                self.dataset[measure][step],
+            )
+        raise TypeError("Step must be an integer or a slice")
 
     def get_measure_values_at_steps(
         self, measure: str, steps: Union[None, int, Iterable[int]]
@@ -396,7 +391,7 @@ class LogfileData:
         if steps is None:
             # Return a copy to avoid modifying original data
             return list(self.dataset[measure])
-        elif isinstance(steps, int):
+        if isinstance(steps, int):
             # Return as a list for consistency
             return [self.dataset[measure][steps]]
         else:  # Assuming it is an iterable
@@ -573,7 +568,7 @@ class LogfileData:
 
             if isinstance(values[0], list) and len(values[0]) > 1:
                 for n in range(len(values[0])):
-                    fout.write(value_separator + "%s_%d" % (title, n))
+                    fout.write(value_separator + f"{title}_{n}")
                     columns_per_line += 1
             else:
                 fout.write(value_separator + title)
@@ -594,7 +589,7 @@ class LogfileData:
 
             if isinstance(values[0], list) and len(values[0]) > 1:
                 for n in range(len(values[0])):
-                    fout.write(value_separator + "%s_%d" % (title, n))
+                    fout.write(value_separator + f"{title}_{n}")
                     columns_per_line += 1
             else:
                 fout.write(value_separator + title)
@@ -620,24 +615,24 @@ class LogfileData:
                 append_with_line_prefix is not None
             ):  # if appending a file it must write the user info
                 fout.write(append_with_line_prefix + value_separator)
-            fout.write("%d" % (index + 1))
+            fout.write(f"{index + 1}")
             columns_writen = 1
             for s in step_data:
                 if isinstance(s, list):
                     for x in s:
-                        fout.write(value_separator + "%s" % x)
+                        fout.write(value_separator + f"{x}")
                         columns_writen += 1
                 else:
-                    fout.write(value_separator + "%s" % s)
+                    fout.write(value_separator + f"{s}")
                     columns_writen += 1
 
             for tok in meas_data:
                 if isinstance(tok, list):
                     for x in tok:
-                        fout.write(value_separator + "%s" % x)
+                        fout.write(value_separator + f"{x}")
                         columns_writen += 1
                 else:
-                    fout.write(value_separator + "%s" % tok)
+                    fout.write(value_separator + f"{tok}")
                     columns_writen += 1
             if columns_writen != columns_per_line:
                 logging.error(
@@ -678,11 +673,9 @@ class LogfileData:
         axis_x_min: float = mu - (sigma + 1) * sd
         axis_x_max: float = mu + (sigma + 1) * sd
 
-        if mn < axis_x_min:
-            axis_x_min = mn
+        axis_x_min = min(axis_x_min, mn)
 
-        if mx > axis_x_max:
-            axis_x_max = mx
+        axis_x_max = max(axis_x_max, mx)
 
         counts, bin_edges, _ = plt.hist(
             x,
