@@ -140,18 +140,18 @@
     - [ ] Add missing type hints, especially from `kuPyLTSpice` code.
   - [ ] Apply a consistent coding style (e.g., using a formatter like Black, Flake8 for linting).
   - [ ] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
-- [ ] **D. Simplify Simulation API:**
-  - [ ] Evaluate the current user workflow for running simulations from both original packages.
-  - [ ] Design and implement a clear, high-level API for running simulations in the UnifiedPackage.
-    - [ ] *Consider providing a top-level class (e.g., `LTSpiceRunner`) or function (e.g., `simulate(netlist_path, ...)`).*
-  - [ ] Ensure simulator engine choices (LTSpice, NGSpice, etc.) are presented coherently to the user (e.g., via a parameter, or by instantiating specific simulator classes).
-- [ ] **E. Retain All Major Functionality:**
-  - [ ] Systematically verify that all capabilities from both `kupicelib` and `kuPyLTSpice` are present in the unified tool:
-    - [ ] LTSpice Automation (headless runs, data retrieval).
-    - [ ] Schematic Editing (`.asc`, `.qsch`).
-    - [ ] Data Analysis (plotting, Monte Carlo, worst-case analysis tools).
-    - [ ] Multi-Engine Support (NGSpice, Qspice, Xyce, etc.).
-    - [ ] Client-Server simulation mode.
+- [x] **D. Simplify Simulation API:**
+  - [x] Evaluate the current user workflow for running simulations from both original packages.
+  - [x] Design and implement a clear, high-level API for running simulations in the UnifiedPackage.
+    - [x] *Consider providing a top-level class (e.g., `LTSpiceRunner`) or function (e.g., `simulate(netlist_path, ...)`).*
+  - [x] Ensure simulator engine choices (LTSpice, NGSpice, etc.) are presented coherently to the user (e.g., via a parameter, or by instantiating specific simulator classes).
+- [x] **E. Retain All Major Functionality:**
+  - [x] Systematically verify that all capabilities from both `kupicelib` and `kuPyLTSpice` are present in the unified tool:
+    - [x] LTSpice Automation (headless runs, data retrieval).
+    - [x] Schematic Editing (`.asc`, `.qsch`).
+    - [x] Data Analysis (plotting, Monte Carlo, worst-case analysis tools).
+    - [x] Multi-Engine Support (NGSpice, Qspice, Xyce, etc.).
+    - [x] Client-Server simulation mode.
 - [ ] **F. Performance Considerations:**
   - [ ] During refactoring, identify any potential performance bottlenecks (e.g., large file I/O, heavy computations).
   - [ ] Note opportunities for optimization, even if not implemented immediately.
