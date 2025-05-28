@@ -481,7 +481,7 @@ class QschEditor(BaseSchematic):
                     # This is an embedded subcircuit, print it here, not at the end. It
                     # must be printed before the component
                     sub_circuit_content = library_name[
-                        len(marker):
+                        len(marker) :
                     ].strip()  # The section after "|.subckt"
                     sub_circuit_content = sub_circuit_content.replace("\\n", "\n")
                     netlist_file.write(f".subckt {refdes}•{sub_circuit_content}\n")
@@ -798,9 +798,9 @@ class QschEditor(BaseSchematic):
                     )
                     if sub_circuit_schematic_file:
                         sub_schematic = type(self)(sub_circuit_schematic_file)
-                        sch_comp.attributes["_SUBCKT"] = (
-                            sub_schematic  # Store it for future use.
-                        )
+                        sch_comp.attributes[
+                            "_SUBCKT"
+                        ] = sub_schematic  # Store it for future use.
                     else:
                         _logger.warning(
                             f"Subcircuit '{sub_circuit_name}' not found. Have you set the correct search paths?"
@@ -846,7 +846,8 @@ class QschEditor(BaseSchematic):
             self.lines.append(line)
 
     def _get_param_named(
-            self, param_name: str) -> Tuple[Optional[QschTag], Optional[re.Match[str]]]:
+        self, param_name: str
+    ) -> Tuple[Optional[QschTag], Optional[re.Match[str]]]:
         param_regex = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
         param_name_upped = param_name.upper()
         if self.schematic is None:
@@ -1014,7 +1015,8 @@ class QschEditor(BaseSchematic):
         return parameters
 
     def set_component_parameters(
-            self, element: str, **kwargs: Union[str, int, float]) -> None:
+        self, element: str, **kwargs: Union[str, int, float]
+    ) -> None:
         """Sets the parameters of the component.
 
         If key parameters that are integers, they represent the line number where the

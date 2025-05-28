@@ -329,11 +329,13 @@ class RawWrite:
             if self.flag_numtype != other_flag_num_type:
                 raise ValueError(
                     "The two instances should have the same type:\n"
-                    f"Source is {other_flag_num_type} and Destination is {self.flag_numtype}")
+                    f"Source is {other_flag_num_type} and Destination is {self.flag_numtype}"
+                )
             if self._traces[0].whattype != other.get_trace(0).whattype:
                 raise ValueError(
                     "The two instances should have the same axis type:\n"
-                    f"Source is {other.get_trace(0).whattype} and Destination is {self._traces[0].whattype}")
+                    f"Source is {other.get_trace(0).whattype} and Destination is {self._traces[0].whattype}"
+                )
             if len(trace_filter) == 0:
                 return  # There is nothing to add stop here
 

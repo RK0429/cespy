@@ -97,7 +97,9 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         timeout: Optional[float] = None,
         exe_log: bool = True,
         measure: Optional[str] = None,
-    ) -> Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]:
+    ) -> Tuple[
+        float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]
+    ]:
         """As described in the class description, this method will perform a worst case
         analysis using a faster algorithm."""
         assert measure is not None, "The measure argument must be defined"
@@ -116,9 +118,8 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             self.elements_analysed.append(ref1)
 
         def value_change(
-                val: Union[str, float],
-                dev: ComponentDeviation,
-                to: WorstCaseType) -> Union[str, float]:
+            val: Union[str, float], dev: ComponentDeviation, to: WorstCaseType
+        ) -> Union[str, float]:
             """Sets the reference component to the maximum or minimum based on deviation type."""
             if isinstance(val, str):
                 return val

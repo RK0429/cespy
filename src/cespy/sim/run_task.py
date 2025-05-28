@@ -37,10 +37,11 @@ _logger = logging.getLogger("cespy.RunTask")
 # Configure structured logging formatter if python-json-logger is installed
 try:
     from pythonjsonlogger.json import JsonFormatter
+
     handler = logging.StreamHandler()
     json_formatter = JsonFormatter(
-        '%(asctime)s %(name)s %(levelname)s '
-        '[runno=%(runno)s netlist=%(netlist)s] %(message)s'
+        "%(asctime)s %(name)s %(levelname)s "
+        "[runno=%(runno)s netlist=%(netlist)s] %(message)s"
     )
     handler.setFormatter(json_formatter)
     if not _logger.handlers:
@@ -125,9 +126,8 @@ class RunTask:
         self.exe_log = exe_log
         # Create a LoggerAdapter to include run number and netlist in logs
         self.logger = logging.LoggerAdapter(
-            _logger, {
-                "runno": self.runno, "netlist": str(
-                    self.netlist_file)})
+            _logger, {"runno": self.runno, "netlist": str(self.netlist_file)}
+        )
 
     def print_info(self, logger_fun: Callable[[str], Any], message: str) -> None:
         # Use contextual logger for info/error messages
@@ -190,27 +190,28 @@ class RunTask:
                     )
                     # Invoke callback: ProcessCallback subclass or function
                     assert self.raw_file is not None and self.log_file is not None
-                    if isinstance(
-                            self.callback,
-                            type) and issubclass(
-                            self.callback,
-                            ProcessCallback):
+                    if isinstance(self.callback, type) and issubclass(
+                        self.callback, ProcessCallback
+                    ):
                         # ProcessCallback uses str parameters
                         raw_str = self.raw_file.as_posix()
                         log_str = self.log_file.as_posix()
                         if self.callback_args is not None:
                             return_or_process = self.callback(
-                                raw_str, log_str, **self.callback_args)
+                                raw_str, log_str, **self.callback_args
+                            )
                         else:
                             return_or_process = self.callback(raw_str, log_str)
                     else:
                         # Function callback uses Path parameters
                         if self.callback_args is not None:
                             return_or_process = self.callback(
-                                self.raw_file, self.log_file, **self.callback_args)
+                                self.raw_file, self.log_file, **self.callback_args
+                            )
                         else:
                             return_or_process = self.callback(
-                                self.raw_file, self.log_file)
+                                self.raw_file, self.log_file
+                            )
                     try:
                         if isinstance(return_or_process, ProcessCallback):
                             proc = return_or_process
@@ -221,7 +222,8 @@ class RunTask:
                             self.callback_return = return_or_process
                     except (ValueError, TypeError, RuntimeError) as exc:
                         self.logger.exception(
-                            "Exception during callback execution: %s", exc)
+                            "Exception during callback execution: %s", exc
+                        )
                     else:
                         callback_start_time = self.stop_time
                         self.stop_time = clock_function()

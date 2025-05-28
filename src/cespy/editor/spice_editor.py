@@ -274,12 +274,14 @@ class SpiceComponent(Component):
 
     It allows the manipulation of the parameters and the value of the component.
     """
+
     parent: SpiceCircuit
 
     def __init__(self, parent: SpiceCircuit, line_no: int) -> None:
         raw_line = parent.netlist[line_no]
         assert isinstance(
-            raw_line, str), f"Expected str netlist line, got {type(raw_line)}"
+            raw_line, str
+        ), f"Expected str netlist line, got {type(raw_line)}"
         line = raw_line
         super().__init__(parent, line)
         self.parent = parent
@@ -302,7 +304,8 @@ class SpiceComponent(Component):
         if regex is None:
             error_msg = (
                 f"Component must start with one of these letters: {','.join(REPLACE_REGEXS.keys())}\n"
-                f"Got {self.line}")
+                f"Got {self.line}"
+            )
             _logger.error(error_msg)
             raise NotImplementedError(error_msg)
         match = regex.match(self.line)
@@ -597,7 +600,8 @@ class SpiceCircuit(BaseEditor):
         if regex is None:
             error_msg = (
                 f"Component must start with one of these letters: {','.join(REPLACE_REGEXS.keys())}\n"
-                f"Got {reference}")
+                f"Got {reference}"
+            )
             _logger.error(error_msg)
             raise NotImplementedError(error_msg)
         line_no = self.get_line_starting_with(reference)
@@ -608,10 +612,8 @@ class SpiceCircuit(BaseEditor):
         return line_no, match
 
     def _set_component_attribute(
-            self,
-            reference: str,
-            attribute: str,
-            value: Any) -> None:
+        self, reference: str, attribute: str, value: Any
+    ) -> None:
         """Internal method to set the model and value of a component."""
 
         # Using the first letter of the component to identify what is it
@@ -919,7 +921,8 @@ class SpiceCircuit(BaseEditor):
             return {}
 
     def set_component_parameters(
-            self, element: str, **kwargs: Union[str, int, float]) -> None:
+        self, element: str, **kwargs: Union[str, int, float]
+    ) -> None:
         # docstring inherited from BaseEditor
         if self.is_read_only():
             raise ValueError("Editor is read-only")
@@ -1292,9 +1295,7 @@ class SpiceCircuit(BaseEditor):
         return self._readonly
 
     @staticmethod
-    def find_subckt_in_lib(
-        library: str, subckt_name: str
-    ) -> Optional["SpiceCircuit"]:
+    def find_subckt_in_lib(library: str, subckt_name: str) -> Optional["SpiceCircuit"]:
         """Finds a sub-circuit in a library. The search is case-insensitive.
 
         :param library: path to the library to search
@@ -1389,11 +1390,12 @@ class SpiceEditor(SpiceCircuit):
     :type create_blank: bool, optional
     """
 
-    def __init__(self,
-                 netlist_file: Union[str,
-                                     Path],
-                 encoding: str = "autodetect",
-                 create_blank: bool = False) -> None:
+    def __init__(
+        self,
+        netlist_file: Union[str, Path],
+        encoding: str = "autodetect",
+        create_blank: bool = False,
+    ) -> None:
         super().__init__()
         self.netlist_file = Path(netlist_file)
         if create_blank:

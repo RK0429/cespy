@@ -165,18 +165,21 @@ class AnyRunner(Protocol):
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
-    ) -> Optional[RunTask]: ...
+    ) -> Optional[RunTask]:
+        ...
 
     def wait_completion(
-        self,
-        timeout: Optional[float] = None,
-        abort_all_on_timeout: bool = False) -> bool: ...
+        self, timeout: Optional[float] = None, abort_all_on_timeout: bool = False
+    ) -> bool:
+        ...
 
     @property
-    def okSim(self) -> int: ...
+    def okSim(self) -> int:
+        ...
 
     @property
-    def runno(self) -> int: ...
+    def runno(self) -> int:
+        ...
 
 
 class SimRunner(AnyRunner):
@@ -237,12 +240,15 @@ class SimRunner(AnyRunner):
 
         self.run_count: int = 0  # number of total runs
         self.failed_simulations: int = 0  # number of failed simulations
-        self.successful_simulations: int = 0  # number of successful completed simulations
+        self.successful_simulations: int = (
+            0  # number of successful completed simulations
+        )
         # self.failParam = []  # collects for later user investigation of failed
         # parameter sets
 
         # Gets a simulator.
         from ..simulators.ltspice_simulator import LTspice as CustomLTspice
+
         if simulator is None:
             simulator = CustomLTspice
         elif isinstance(simulator, (str, Path)):
@@ -259,7 +265,8 @@ class SimRunner(AnyRunner):
             # also set RunTask logger level to DEBUG
             logging.getLogger("cespy.RunTask").setLevel(logging.DEBUG)
             logging.getLogger("cespy.RunTask").debug(
-                "RunTask logger level set to DEBUG")
+                "RunTask logger level set to DEBUG"
+            )
 
     def __del__(self) -> None:
         """Class Destructor : Closes Everything."""
@@ -488,7 +495,12 @@ class SimRunner(AnyRunner):
         _logger.debug(
             "run called: netlist=%s, wait_resource=%s, switches=%s,"
             " timeout=%s, run_filename=%s, exe_log=%s",
-            netlist, wait_resource, switches, timeout, run_filename, exe_log,
+            netlist,
+            wait_resource,
+            switches,
+            timeout,
+            run_filename,
+            exe_log,
         )
         callback_kwargs = self.validate_callback_args(callback, callback_args)
         if switches is None:
@@ -566,7 +578,11 @@ class SimRunner(AnyRunner):
         _logger.debug(
             "run_now called: netlist=%s, switches=%s,"
             " run_filename=%s, timeout=%s, exe_log=%s",
-            netlist, switches, run_filename, timeout, exe_log,
+            netlist,
+            switches,
+            run_filename,
+            timeout,
+            exe_log,
         )
         run_netlist_file = self._prepare_sim(netlist, run_filename)
 
@@ -599,7 +615,9 @@ class SimRunner(AnyRunner):
         t()
         _logger.debug(
             "RunTask (run_now) completed: retcode=%d, raw_file=%s, log_file=%s",
-            t.retcode, t.raw_file, t.log_file,
+            t.retcode,
+            t.raw_file,
+            t.log_file,
         )
         self.completed_tasks.append(t)
         if t.retcode == 0:
@@ -622,9 +640,10 @@ class SimRunner(AnyRunner):
         :returns: Nothing
         """
         _logger.debug(
-            "update_completed: active=%d, completed=%d", len(
-                self.active_tasks), len(
-                self.completed_tasks))
+            "update_completed: active=%d, completed=%d",
+            len(self.active_tasks),
+            len(self.completed_tasks),
+        )
         i = 0
         while i < len(self.active_tasks):
             task, future = self.active_tasks[i]
@@ -690,9 +709,8 @@ class SimRunner(AnyRunner):
         return alarm
 
     def wait_completion(
-            self,
-            timeout: Optional[float] = None,
-            abort_all_on_timeout: bool = False) -> bool:
+        self, timeout: Optional[float] = None, abort_all_on_timeout: bool = False
+    ) -> bool:
         """This function will wait for the execution of all scheduled simulations to
         complete.
 
@@ -711,7 +729,8 @@ class SimRunner(AnyRunner):
         _logger.debug(
             "wait_completion called: timeout=%s, abort_all_on_timeout=%s",
             timeout,
-            abort_all_on_timeout)
+            abort_all_on_timeout,
+        )
         self.update_completed()
         stop_time: Optional[float] = None
         if timeout is not None:

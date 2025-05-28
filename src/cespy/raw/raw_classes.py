@@ -42,11 +42,8 @@ class DataSet(object):
     data: NDArray[Any]
 
     def __init__(
-            self,
-            name: str,
-            whattype: str,
-            datalen: int,
-            numerical_type: str = "real") -> None:
+        self, name: str, whattype: str, datalen: int, numerical_type: str = "real"
+    ) -> None:
         """Base Class for both Axis and Trace Classes.
 
         Defines the common operations between both.
@@ -101,8 +98,9 @@ class Axis(DataSet):
     store the axis values. QSpice uses doubles for all variables.
     """
 
-    def __init__(self, name: str, whattype: str, datalen: int,
-                 numerical_type: str = "double") -> None:
+    def __init__(
+        self, name: str, whattype: str, datalen: int, numerical_type: str = "double"
+    ) -> None:
         super().__init__(name, whattype, datalen, numerical_type)
         self.step_info: Optional[List[Dict[str, Any]]] = None
         self.step_offsets: List[Optional[int]] = []
@@ -166,7 +164,7 @@ class Axis(DataSet):
         if step == 0:
             wave = self.data[: self.step_offset(1)]
         else:
-            wave = self.data[self.step_offset(step): self.step_offset(step + 1)]
+            wave = self.data[self.step_offset(step) : self.step_offset(step + 1)]
         if (
             self.name == "time"
         ):  # This is a bug in LTSpice, where the time axis values are sometimes negative
@@ -282,12 +280,13 @@ class TraceRead(DataSet):
     """
 
     def __init__(
-            self,
-            name: str,
-            whattype: str,
-            datalen: int,
-            axis: Optional[Axis],
-            numerical_type: str = "real") -> None:
+        self,
+        name: str,
+        whattype: str,
+        datalen: int,
+        axis: Optional[Axis],
+        numerical_type: str = "real",
+    ) -> None:
         super().__init__(name, whattype, datalen, numerical_type)
         self.axis = axis
 
@@ -344,7 +343,7 @@ class TraceRead(DataSet):
                 return self.data[: self.axis.step_offset(1)]
             else:
                 return self.data[
-                    self.axis.step_offset(step): self.axis.step_offset(step + 1)
+                    self.axis.step_offset(step) : self.axis.step_offset(step + 1)
                 ]
 
     def get_point_at(self, t: float, step: int = 0) -> Union[float, complex]:
@@ -411,11 +410,8 @@ class DummyTrace(object):
     """Dummy Trace for bypassing traces while reading."""
 
     def __init__(
-            self,
-            name: str,
-            whattype: str,
-            datalen: int,
-            numerical_type: str = "real") -> None:
+        self, name: str, whattype: str, datalen: int, numerical_type: str = "real"
+    ) -> None:
         """Base Class for both Axis and Trace Classes.
 
         Defines the common operations between both.

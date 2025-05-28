@@ -169,8 +169,11 @@ class SimClient:
             )
             return False
 
-    def run(self, circuit: str | pathlib.Path,
-            dependencies: list[str | pathlib.Path] | None = None) -> int:
+    def run(
+        self,
+        circuit: str | pathlib.Path,
+        dependencies: list[str | pathlib.Path] | None = None,
+    ) -> int:
         """Sends the netlist identified with the argument "circuit" to the server, and
         it receives a run identifier (runno). Since the server can receive requests from
         different machines, this identifier is not guaranteed to be sequential.

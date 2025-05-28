@@ -122,7 +122,8 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
         else:
             _logger.warning(
                 "The analysis was not executed. Please run the run_analysis(...) or run_testbench(...)"
-                " before calling this method")
+                " before calling this method"
+            )
             return None
 
     def run_analysis(
@@ -133,7 +134,15 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
         timeout: Optional[float] = None,
         exe_log: bool = True,
         measure: Optional[str] = None,
-    ) -> Optional[Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]]:
+    ) -> Optional[
+        Tuple[
+            float,
+            float,
+            Dict[str, Union[str, float]],
+            float,
+            Dict[str, Union[str, float]],
+        ]
+    ]:
         self.clear_simulation_data()
         self.elements_analysed.clear()
         del measure  # unused measure parameter

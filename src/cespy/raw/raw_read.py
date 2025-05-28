@@ -267,10 +267,11 @@ def _safe_eval(expr: str, variables: Dict[str, Any]) -> Any:
         if isinstance(n, ast.UnaryOp):
             return _ALLOWED_OPS[type(n.op)](_eval(n.operand))
         if isinstance(n, (ast.Constant, ast.Num)):
-            return getattr(n, 'value', n.n)
+            return getattr(n, "value", n.n)
         if isinstance(n, ast.Name):
             return variables[n.id]
         raise TypeError(f"Unsupported expression: {expr}")
+
     return _eval(node)
 
 
@@ -481,10 +482,10 @@ class RawRead(object):
                 line += ch_str
         # QSpice defines aliases for some of the traces that can be computed from
         # other traces.
-        self.aliases: Dict[str, str] = ({})
+        self.aliases: Dict[str, str] = {}
         # QSpice stores param values in the .raw file. They may have some usage
         # later for
-        self.spice_params: Dict[str, str] = ({})
+        self.spice_params: Dict[str, str] = {}
         # computing the aliases.
         for line in header:
             if line.startswith("."):  # This is either a .param or a .alias
@@ -588,7 +589,7 @@ class RawRead(object):
         # set the specifics per dialect
         # Older xyce files can have a text section that follows the data section
         # (be it ascii or binary). We need to ignore it.
-        check_raw_size = (dialect != "xyce")
+        check_raw_size = dialect != "xyce"
         always_double = (
             dialect != "ltspice"
         )  # qspice, ngspice and xyce use doubles for everything outside of AC files
@@ -619,7 +620,7 @@ class RawRead(object):
                 numerical_type = "real"
         i = header.index("Variables:")
         ivar = 0
-        for line in header[i + 1: -1]:  # Parse the variable names
+        for line in header[i + 1 : -1]:  # Parse the variable names
             line_elmts = line.lstrip().split("\t")
             if len(line_elmts) < 3:
                 raise RuntimeError(f"Invalid line in the Variables section: {line}")
@@ -769,7 +770,7 @@ class RawRead(object):
                             raise RuntimeError(
                                 f"Invalid data: point is not in sequence ({point} != {int(s_point)})"
                             )
-                        value = line[len(s_point): -1]
+                        value = line[len(s_point) : -1]
                     else:
                         value = line[:-1]
 
@@ -825,8 +826,7 @@ class RawRead(object):
                 # the Axis
                 self.axis._set_steps(self.steps)
 
-    def get_raw_property(
-            self, property_name: Optional[str] = None) -> Any:
+    def get_raw_property(self, property_name: Optional[str] = None) -> Any:
         """Get a property. By default, it returns all properties defined in the RAW
         file.
 
@@ -896,8 +896,9 @@ class RawRead(object):
             ) from err
         return trace
 
-    def get_trace(self, trace_ref: Union[str, int]
-                  ) -> Union[Axis, TraceRead, DummyTrace]:
+    def get_trace(
+        self, trace_ref: Union[str, int]
+    ) -> Union[Axis, TraceRead, DummyTrace]:
         """Retrieves the trace with the requested name (trace_ref).
 
         :param trace_ref: Name of the trace or the index of the trace
@@ -1007,8 +1008,8 @@ class RawRead(object):
                 raise SpiceReadException("Log file '%s' not found" % logfile) from exc
             except UnicodeError as exc:
                 raise SpiceReadException(
-                    "Unable to parse log file '%s'" %
-                    logfile) from exc
+                    "Unable to parse log file '%s'" % logfile
+                ) from exc
             except EncodingDetectError as exc:
                 raise SpiceReadException(
                     "Unable to parse log file '%s'" % logfile
@@ -1040,8 +1041,8 @@ class RawRead(object):
                 raise SpiceReadException("Log file '%s' not found" % logfile) from exc
             except UnicodeError as exc:
                 raise SpiceReadException(
-                    "Unable to parse log file '%s'" %
-                    logfile) from exc
+                    "Unable to parse log file '%s'" % logfile
+                ) from exc
 
             step_regex = re.compile(r"^(\d+) of \d+ steps:\s+\.step (.*)$")
 

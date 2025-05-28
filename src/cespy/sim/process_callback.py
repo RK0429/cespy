@@ -30,14 +30,15 @@ class ProcessCallback(Process):
     """Wrapper for the callback function."""
 
     def __init__(
-            self,
-            raw: str,
-            log: str,
-            group: Any = None,
-            name: str | None = None,
-            *,
-            daemon: bool | None = None,
-            **kwargs: Any) -> None:
+        self,
+        raw: str,
+        log: str,
+        group: Any = None,
+        name: str | None = None,
+        *,
+        daemon: bool | None = None,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(group=group, name=name, daemon=daemon)
         self.queue: MPQueue[Any] = MPQueue(ctx=get_context())
         self.raw_file = raw

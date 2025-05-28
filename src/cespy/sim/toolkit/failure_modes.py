@@ -63,10 +63,9 @@ class FailureMode(SimAnalysis):
         # Mapping of failure names to RunTask instances
         self.failure_simulations: Dict[str, Optional[RunTask]] = {}
 
-    def add_failure_circuit(self,
-                            component: str,
-                            sub_circuit: Union[str,
-                                               BaseEditor]) -> None:
+    def add_failure_circuit(
+        self, component: str, sub_circuit: Union[str, BaseEditor]
+    ) -> None:
         if not component.startswith("X"):
             raise RuntimeError(
                 "The failure modes addition only works with sub circuits"
@@ -77,10 +76,8 @@ class FailureMode(SimAnalysis):
         raise NotImplementedError("TODO")  # TODO: Implement this
 
     def add_failure_mode(
-            self,
-            component: str,
-            short_pins: Iterable[str],
-            open_pins: Iterable[str]) -> None:
+        self, component: str, short_pins: Iterable[str], open_pins: Iterable[str]
+    ) -> None:
         if not component.startswith("X"):
             raise RuntimeError("The failure modes addition only works with subcircuits")
         if component not in self.subcircuits:
@@ -107,7 +104,8 @@ class FailureMode(SimAnalysis):
                 self.failure_simulations[f"{two_pin_component}_O"] = self.run()
                 # Short Circuit: insert short resistor
                 netlist = getattr(self.editor, "netlist")
-                netlist[cinfo["line"]
-                        ] = f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
+                netlist[
+                    cinfo["line"]
+                ] = f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
                 self.failure_simulations[f"{two_pin_component}_S"] = self.run()
                 self.editor.reset_netlist()

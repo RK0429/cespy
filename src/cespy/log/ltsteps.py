@@ -472,14 +472,16 @@ class LTSpiceLogReader(LogfileData):
                         # store the info
                         if len(measurements):
                             _logger.debug(
-                                f"Storing Measurement {meas_name} (count {len(measurements)})")
+                                f"Storing Measurement {meas_name} (count {len(measurements)})"
+                            )
                             self.measure_count += len(measurements)
                             for k, title in enumerate(headers):
                                 if title is None:
                                     continue
                                 key = title.lower()
-                                self.dataset[key] = [measure[k]
-                                                     for measure in measurements]
+                                self.dataset[key] = [
+                                    measure[k] for measure in measurements
+                                ]
                         headers = []
                         measurements = []
                     meas_name = line[
@@ -515,7 +517,8 @@ class LTSpiceLogReader(LogfileData):
             # storing the last data into the dataset
             if meas_name:
                 _logger.debug(
-                    f"Storing Measurement {meas_name} (count {len(measurements)})")
+                    f"Storing Measurement {meas_name} (count {len(measurements)})"
+                )
             if len(measurements):
                 self.measure_count += len(measurements)
                 for k, title in enumerate(headers):
@@ -525,7 +528,8 @@ class LTSpiceLogReader(LogfileData):
                     self.dataset[key] = [measure[k] for measure in measurements]
 
             _logger.info(
-                f"Identified {self.step_count} steps, read {self.measure_count} measurements")
+                f"Identified {self.step_count} steps, read {self.measure_count} measurements"
+            )
 
     def export_data(
         self,

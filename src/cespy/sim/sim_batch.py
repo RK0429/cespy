@@ -172,8 +172,7 @@ class SimCommander(SpiceEditor):
             output_folder=output_folder,
         )
 
-    def setLTspiceRunCommand(
-            self, spice_tool: Union[str, Type[Simulator]]) -> None:
+    def setLTspiceRunCommand(self, spice_tool: Union[str, Type[Simulator]]) -> None:
         """*(Deprecated)* Manually setting the LTSpice run command.
 
         :param spice_tool: String containing the path to the spice tool to be used, or
@@ -204,8 +203,7 @@ class SimCommander(SpiceEditor):
 
         output_folder = getattr(self.runner, "output_folder", None)
         timeout_val = getattr(self.runner, "timeout", None)
-        timeout_float = float(
-            timeout_val) if timeout_val is not None else 600.0
+        timeout_float = float(timeout_val) if timeout_val is not None else 600.0
 
         self.runner = SimRunner(
             simulator=actual_simulator,
@@ -251,19 +249,18 @@ class SimCommander(SpiceEditor):
         :return: A RunTask object
         """
         # Adapt callback if necessary
-        adapted_callback: Optional[Union[Type[ProcessCallback],
-                                         Callable[..., Any]]] = None
+        adapted_callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None
 
         if callback is not None:
-            if isinstance(callback, type) and issubclass(
-                    callback, ProcessCallback):
+            if isinstance(callback, type) and issubclass(callback, ProcessCallback):
                 adapted_callback = callback
             elif callable(callback):
                 # Create a wrapper function that adapts the callback to the expected
                 # signature
                 # For backward compatibility, convert Path objects to strings
-                def adapted_callback_wrapper(
-                        raw_file: Path, log_file: Path) -> Any:
+                def adapted_callback_wrapper(raw_file: Path, log_file: Path) -> Any:
                     # Convert Path objects to strings for legacy callbacks
                     func = cast(Callable[[str, str], Any], callback)
                     return func(str(raw_file), str(log_file))
@@ -346,20 +343,15 @@ if __name__ == "__main__":
         _logger.debug("Raw file '%s' | Log File '%s'" % (raw, log))
     # Sim Statistics
     _logger.info(
-        "Successful/Total Simulations: " +
-        str(LTC.okSim) + "/" + str(LTC.runno)
+        "Successful/Total Simulations: " + str(LTC.okSim) + "/" + str(LTC.runno)
     )
 
     def callback_function(raw_file: str, log_file: str) -> None:
         _logger.debug(
-            "Handling the simulation data of %s, log file %s" % (
-                raw_file, log_file)
+            "Handling the simulation data of %s, log file %s" % (raw_file, log_file)
         )
 
-    LTC = SimCommander(
-        meAbsPath +
-        "\\test_files\\testfile.asc",
-        parallel_sims=1)
+    LTC = SimCommander(meAbsPath + "\\test_files\\testfile.asc", parallel_sims=1)
     tstart = 0
     bias_file = None  # Initialize bias_file to prevent undefined variable error
     for tstop in (2, 5, 8, 10):

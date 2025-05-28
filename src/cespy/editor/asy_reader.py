@@ -45,8 +45,9 @@ SCALE_Y = -6.25
 class AsyReader(object):
     """Symbol parser."""
 
-    def __init__(self, asy_file: Union[Path, str],
-                 encoding: str = "autodetect") -> None:
+    def __init__(
+        self, asy_file: Union[Path, str], encoding: str = "autodetect"
+    ) -> None:
         super().__init__()
         self.version: str = "4"  # Store version as string
         self.symbol_type = None
@@ -107,7 +108,7 @@ class AsyReader(object):
                     ], f"Unsupported version : {version}"
                     self.version = version  # Store version as string
                 elif line_text.startswith("SymbolType "):
-                    self.symbol_type = line_text[len("SymbolType "):].strip()
+                    self.symbol_type = line_text[len("SymbolType ") :].strip()
                 elif line_text.startswith("PINATTR"):
                     assert pin is not None, "A PIN was already created."
                     _, attribute, value = line_text.split(" ", maxsplit=3)
@@ -231,7 +232,8 @@ class AsyReader(object):
                     raise NotImplementedError(
                         f"Primitive not supported for ASY file \n"
                         f'"{line_text}"'
-                        f"in file: {self._asy_file_path}. Contact the author to add support.")
+                        f"in file: {self._asy_file_path}. Contact the author to add support."
+                    )
             if pin is not None:
                 self.pins.append(pin)
 

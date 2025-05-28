@@ -226,7 +226,10 @@ class XyceSimulator(Simulator):
                 elif param_token == "<param_options>":
                     # Check for [device [level [<inst|mod>]]] syntax ??
                     # TODO: this will probably not work, need to separate the parameters
-                    ret = [switch_list[0], parameter, ]
+                    ret = [
+                        switch_list[0],
+                        parameter,
+                    ]
                 elif param_token == "<hsext_options>":
                     ret = [switch_list[0], parameter]
                 elif param_token == "<redef_param_option>":

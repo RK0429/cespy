@@ -86,7 +86,8 @@ NumericType = Union[int, float, complex, LTComplex]
 
 # Create a protocol for types that can be compared
 class Comparable(Protocol):
-    def __lt__(self, other: Any) -> bool: ...
+    def __lt__(self, other: Any) -> bool:
+        ...
 
 
 T = TypeVar("T", bound=Comparable)
@@ -157,7 +158,7 @@ def split_line_into_values(line: str) -> List[ValueType]:
                 parenthesis.pop(0)
                 if len(parenthesis) == 0:
                     value_list = split_line_into_values(
-                        line[value_start + 1: i]
+                        line[value_start + 1 : i]
                     )  # Excludes the parenthesis
                     values.append(value_list)
                     value_start = i + 1
@@ -172,7 +173,7 @@ def split_line_into_values(line: str) -> List[ValueType]:
                 values.append(cast(ValueType, None))
             value_start = i + 1
     if value_start < i + 1:
-        values.append(try_convert_value(line[value_start: i + 1]))
+        values.append(try_convert_value(line[value_start : i + 1]))
     parenthesis_balanced = len(parenthesis) == 0
     if not parenthesis_balanced:
         raise ValueError("Parenthesis are not balanced")
@@ -200,9 +201,9 @@ class LogfileData:
             # Changes in step_set would be propagated to object on the call
 
         if dataset is None:
-            self.dataset: Dict[str, List[Any]] = (
-                OrderedDict()
-            )  # Dictionary in which the order of the keys is kept
+            self.dataset: Dict[
+                str, List[Any]
+            ] = OrderedDict()  # Dictionary in which the order of the keys is kept
         else:
             self.dataset = (
                 dataset.copy()
@@ -303,7 +304,10 @@ class LogfileData:
         return list(self.dataset.keys())
 
     def get_measure_value(
-        self, measure: str, step: Optional[Union[int, slice]] = None, **kwargs: Union[str, int, float]
+        self,
+        measure: str,
+        step: Optional[Union[int, slice]] = None,
+        **kwargs: Union[str, int, float],
     ) -> Union[float, int, str, LTComplex]:
         """Returns a measure value on a given step.
 
@@ -539,7 +543,8 @@ class LogfileData:
                 if len(values) != data_size:
                     logging.error(
                         f"Data size mismatch. Not all measurements have the same length."
-                        f' Expected {data_size}. "{title}" has {len(values)}')
+                        f' Expected {data_size}. "{title}" has {len(values)}'
+                    )
 
             if isinstance(values[0], list) and len(values[0]) > 1:
                 for n in range(len(values[0])):
@@ -645,8 +650,9 @@ class LogfileData:
         if normalized:
             # add a 'best fit' line
             # Normal distribution PDF: 1/(σ√(2π)) * exp(-(x-μ)^2/(2σ^2))
-            y = (1 / (sd * np.sqrt(2 * np.pi))) * \
-                np.exp(-(bin_edges - mu)**2 / (2 * sd**2))
+            y = (1 / (sd * np.sqrt(2 * np.pi))) * np.exp(
+                -((bin_edges - mu) ** 2) / (2 * sd**2)
+            )
             plt.plot(bin_edges, y, "r--", linewidth=1)
             plt.axvspan(mu - sigma * sd, mu + sigma * sd, alpha=0.2, color="cyan")
             plt.ylabel("Distribution [Normalised]")

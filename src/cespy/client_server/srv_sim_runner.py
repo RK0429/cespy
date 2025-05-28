@@ -70,7 +70,9 @@ class ServerSimRunner(threading.Thread):
             verbose=verbose,
             output_folder=output_folder,
         )
-        self.completed_tasks: List[Dict[str, Any]] = (
+        self.completed_tasks: List[
+            Dict[str, Any]
+        ] = (
             []
         )  # This is a list of dictionaries with the information of the completed tasks
         self._stop = False

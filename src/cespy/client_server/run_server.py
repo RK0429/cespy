@@ -23,24 +23,41 @@ def main() -> None:
     # declare simulator variable with default
     simulator: Type[LTspice] | Type[NGspiceSimulator] | Type[XyceSimulator] = LTspice
     parser = argparse.ArgumentParser(
-        description="Run the SPICE server with specified simulator (LTSpice, NGSpice, XYCE).")
+        description="Run the SPICE server with specified simulator (LTSpice, NGSpice, XYCE)."
+    )
     parser.add_argument(
         "simulator",
         type=str,
         help="Simulator to be used ('LTSpice', 'NGSpice', 'XYCE')",
     )
-    parser.add_argument("-p", "--port", type=int, default=9000,
-                        help="Port to run the server. Default is 9000")
+    parser.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=9000,
+        help="Port to run the server. Default is 9000",
+    )
     parser.add_argument(
         "-o",
         "--output",
         type=str,
         default=".",
-        help="Output folder for the results. Default is current folder")
-    parser.add_argument("-l", "--parallel", type=int, default=4,
-                        help="Maximum number of parallel simulations. Default is 4")
-    parser.add_argument("-t", "--timeout", type=int, default=300,
-                        help="Timeout for the simulations in seconds. Default is 300")
+        help="Output folder for the results. Default is current folder",
+    )
+    parser.add_argument(
+        "-l",
+        "--parallel",
+        type=int,
+        default=4,
+        help="Maximum number of parallel simulations. Default is 4",
+    )
+    parser.add_argument(
+        "-t",
+        "--timeout",
+        type=int,
+        default=300,
+        help="Timeout for the simulations in seconds. Default is 300",
+    )
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)

@@ -74,9 +74,9 @@ LTSPICE_ATTRIBUTES = ("InstName", "Def_Sub")
 class AscEditor(BaseSchematic):
     """Class made to update directly the LTspice ASC files."""
 
-    symbol_cache: Dict[str, str] = (
-        {}
-    )  # This is a class variable, so it can be shared between all instances.
+    symbol_cache: Dict[
+        str, str
+    ] = {}  # This is a class variable, so it can be shared between all instances.
     """:meta private:"""
 
     simulator_lib_paths: List[str] = LTspice.get_default_library_paths()
@@ -88,8 +88,9 @@ class AscEditor(BaseSchematic):
     :meta hide-value:
     """
 
-    def __init__(self, asc_file: Union[str, Path],
-                 encoding: str = "autodetect") -> None:
+    def __init__(
+        self, asc_file: Union[str, Path], encoding: str = "autodetect"
+    ) -> None:
         super().__init__()
         self.version: str = "4"
         self.sheet = "1 0 0"  # Three values are present on the SHEET clause
@@ -144,7 +145,7 @@ class AscEditor(BaseSchematic):
                 asc.write(f"SYMBOL {symbol} {posX} {posY} {rotation}" + END_LINE_TERM)
                 for attr, value in component.attributes.items():
                     if attr.startswith("_WINDOW") and isinstance(value, Text):
-                        num_ref = attr[len("_WINDOW_"):]
+                        num_ref = attr[len("_WINDOW_") :]
                         posX = value.coord.X
                         posY = value.coord.Y
                         alignment = asc_text_align_get(value)
@@ -177,16 +178,18 @@ class AscEditor(BaseSchematic):
                 else:
                     directive_type = ";"  # Otherwise assume it is a comment
                 asc.write(
-                    f"TEXT {posX} {posY} {alignment} {size} {directive_type}{directive.text}" +
-                    END_LINE_TERM)
+                    f"TEXT {posX} {posY} {alignment} {size} {directive_type}{directive.text}"
+                    + END_LINE_TERM
+                )
             for line in self.lines:
                 line_style_obj: LineStyle = line.style
                 line_style = (
                     f" {line_style_obj.pattern}" if line_style_obj.pattern != "" else ""
                 )
                 asc.write(
-                    f"LINE Normal {line.V1.X} {line.V1.Y} {line.V2.X} {line.V2.Y}{line_style}" +
-                    END_LINE_TERM)
+                    f"LINE Normal {line.V1.X} {line.V1.Y} {line.V2.X} {line.V2.Y}{line_style}"
+                    + END_LINE_TERM
+                )
             for shape in self.shapes:
                 shape_style: LineStyle = shape.line_style
                 line_style = (
@@ -247,7 +250,9 @@ class AscEditor(BaseSchematic):
                     txt_str = txt.strip()  # Gets rid of the \n terminator
                     if ref == "InstName":
                         component.reference = txt_str
-                        assert component.symbol is not None, "Symbol must be set before lookup"
+                        assert (
+                            component.symbol is not None
+                        ), "Symbol must be set before lookup"
                         symbol_obj = self._get_symbol(component.symbol)
                         if (
                             component.reference.startswith("X")
@@ -304,7 +309,7 @@ class AscEditor(BaseSchematic):
                     ], f"Unsupported version : {version_val}"
                     self.version = version_val
                 elif line.startswith("SHEET "):
-                    self.sheet = line[len("SHEET "):].strip()
+                    self.sheet = line[len("SHEET ") :].strip()
                 elif line.startswith("IOPIN "):
                     _, posX, posY, direction = line.split()
                     text = self.labels[-1]  # Assuming it is the last FLAG parsed
@@ -471,7 +476,8 @@ class AscEditor(BaseSchematic):
         component.rotation = rotation
 
     def _get_param_named(
-            self, param_name: str) -> Tuple[Optional[Match[str]], Optional[Text]]:
+        self, param_name: str
+    ) -> Tuple[Optional[Match[str]], Optional[Text]]:
         param_name_uppercase = param_name.upper()
         search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
         for directive in self.directives:
@@ -518,7 +524,9 @@ class AscEditor(BaseSchematic):
         else:
             value_str = value
         if match:
-            assert directive is not None, "Directive should not be None when match is found"
+            assert (
+                directive is not None
+            ), "Directive should not be None when match is found"
             _logger.debug(f"Parameter {param} found in ASC file, updating it")
             start, stop = match.span("value")
             directive.text = (
@@ -599,7 +607,8 @@ class AscEditor(BaseSchematic):
         return " ".join(values)
 
     def get_component_parameters(
-            self, element: str, as_dicts: bool = False) -> Dict[str, Any]:
+        self, element: str, as_dicts: bool = False
+    ) -> Dict[str, Any]:
         """Returns the parameters of a component that are related with Spice operation.
         That is: Value, Value2, SpiceModel, SpiceLine, SpiceLine2, plus all contents of
         SpiceLine, SpiceLine2.
@@ -639,7 +648,8 @@ class AscEditor(BaseSchematic):
         return parameters
 
     def set_component_parameters(
-            self, element: str, **kwargs: Union[str, int, float]) -> None:
+        self, element: str, **kwargs: Union[str, int, float]
+    ) -> None:
         """Sets the parameters of a component that are related with Spice operation.
         That is: Value, Value2, SpiceModel, SpiceLine, SpiceLine2, or any parameters are
         or could be in SpiceLine, SpiceLine2. Unknown parameters will be added to

@@ -37,6 +37,7 @@ class LTspice(Simulator):
 
     Searches on the any usual locations for a simulator.
     """
+
     # windows paths (that are also valid for wine)
     # Please note that os.path.expanduser and os.path.join are sensitive to the style
     # of slash.
@@ -127,9 +128,7 @@ class LTspice(Simulator):
         # See if the MacOS simulator is used. If so, check if I use the native simulator
         if cls.using_macos_native_sim():
             # native LTspice has only '-b' switch
-            raise ValueError(
-                "MacOS native LTspice supports only batch mode ('-b')."
-            )
+            raise ValueError("MacOS native LTspice supports only batch mode ('-b').")
 
         # format check
         if switch is None:
@@ -152,8 +151,7 @@ class LTspice(Simulator):
         else:
             valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
             raise ValueError(
-                f"Invalid switch '{switch}'. "
-                f"Valid switches are: {valid_keys}"
+                f"Invalid switch '{switch}'. " f"Valid switches are: {valid_keys}"
             )
 
     @classmethod

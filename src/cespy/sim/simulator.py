@@ -36,30 +36,29 @@ _logger = logging.getLogger("cespy.Simulator")
 if sys.version_info.major >= 3 and sys.version_info.minor >= 6:
 
     def run_function(
-            command: List[str],
-            timeout: Optional[float] = None,
-            stdout: Optional[Any] = None,
-            stderr: Optional[Any] = None) -> int:
+        command: List[str],
+        timeout: Optional[float] = None,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+    ) -> int:
         """Normalizing OS subprocess function calls between different platforms.
 
         This function is used for python 3.6 and higher versions.
         """
         _logger.debug(f"Running command: {command}, with timeout: {timeout}")
         result = subprocess.run(
-            command,
-            check=False,
-            timeout=timeout,
-            stdout=stdout,
-            stderr=stderr)
+            command, check=False, timeout=timeout, stdout=stdout, stderr=stderr
+        )
         return result.returncode
 
 else:
 
     def run_function(
-            command: List[str],
-            timeout: Optional[float] = None,
-            stdout: Optional[Any] = None,
-            stderr: Optional[Any] = None) -> int:
+        command: List[str],
+        timeout: Optional[float] = None,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+    ) -> int:
         """Normalizing OS subprocess function calls between different platforms.
 
         This is the old function that was used for python version prior to 3.6
@@ -136,10 +135,9 @@ class Simulator(ABC):
     _default_lib_paths: List[str] = []
 
     @classmethod
-    def create_from(cls,
-                    path_to_exe: Union[str,
-                                       Path],
-                    process_name: Optional[str] = None) -> Type[Simulator]:
+    def create_from(
+        cls, path_to_exe: Union[str, Path], process_name: Optional[str] = None
+    ) -> Type[Simulator]:
         """Creates a simulator class from a path to the simulator executable.
 
         :param path_to_exe:
@@ -160,9 +158,7 @@ class Simulator(ABC):
                 plib_path_to_exe = Path(path_to_exe)
             exe_parts = [plib_path_to_exe.as_posix()]
         else:
-            if (
-                "\\" in path_to_exe
-            ):  # Windows path detected.
+            if "\\" in path_to_exe:  # Windows path detected.
                 # Convert Windows path to posix format.
                 # Use Path and PureWindowsPath for conversion.
                 # I do not support multiple sections here, as it is not likely needed.
@@ -176,8 +172,7 @@ class Simulator(ABC):
                     exe_parts[0] = plib_path_to_exe.as_posix()
 
         if plib_path_to_exe is not None and (
-            plib_path_to_exe.exists()
-            or shutil.which(str(plib_path_to_exe))
+            plib_path_to_exe.exists() or shutil.which(str(plib_path_to_exe))
         ):
             if process_name is None:
                 cls.process_name = cls.guess_process_name(exe_parts[0])
@@ -186,9 +181,7 @@ class Simulator(ABC):
             cls.spice_exe = exe_parts
             return cls
         else:
-            raise FileNotFoundError(
-                f"Provided exe file was not found '{path_to_exe}'"
-            )
+            raise FileNotFoundError(f"Provided exe file was not found '{path_to_exe}'")
 
     @staticmethod
     def guess_process_name(exe: str) -> str:

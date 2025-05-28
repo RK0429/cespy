@@ -67,7 +67,7 @@ class SimServer(object):
         self.server.register_instance(self)
         # this will contain the session_id ids hashing their respective list of
         # sim_tasks
-        self.sessions: dict[str, list[int]] = ({})
+        self.sessions: dict[str, list[int]] = {}
         self.simulation_manager.start()
         self.server_thread = threading.Thread(
             target=self.server.serve_forever, name="ServerThread"
@@ -147,7 +147,6 @@ class SimServer(object):
 
     def get_files(self, session_id: str, runno: int) -> Tuple[str, Binary]:
         if runno in self.sessions[session_id]:
-
             for task_info in self.simulation_manager.completed_tasks:
                 if runno == task_info["runno"]:
                     # Create a buffer to store the zip file in memory

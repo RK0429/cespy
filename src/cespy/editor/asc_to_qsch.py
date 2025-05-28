@@ -65,9 +65,8 @@ def main() -> None:
 
 
 def convert_asc_to_qsch(
-        asc_file: str,
-        qsch_file: str,
-        search_paths: list[str] = []) -> None:
+    asc_file: str, qsch_file: str, search_paths: list[str] = []
+) -> None:
     """Converts an ASC file to a QSCH schematic."""
     symbol_stock: dict[str, QschTag] = {}
     # Open the ASC file
@@ -113,9 +112,7 @@ def convert_asc_to_qsch(
                 print(f"   {os.path.abspath(sym_root)}")
                 if not os.path.exists(sym_root):
                     continue
-                symbol_asc_file = find_file_in_directory(
-                    sym_root, comp.symbol + ".asy"
-                )
+                symbol_asc_file = find_file_in_directory(sym_root, comp.symbol + ".asy")
                 if symbol_asc_file is not None:
                     print(f"Found {symbol_asc_file}")
                     symbol_asc = AsyReader(symbol_asc_file)

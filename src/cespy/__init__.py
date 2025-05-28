@@ -73,7 +73,8 @@ def simulate(
     sim_key = engine.lower()
     if sim_key not in engines:
         raise ValueError(
-            f"Unsupported engine '{engine}'. Choose from {list(engines.keys())}.")
+            f"Unsupported engine '{engine}'. Choose from {list(engines.keys())}."
+        )
     sim_cls = engines[sim_key]
     runner = SimRunner(
         simulator=sim_cls,

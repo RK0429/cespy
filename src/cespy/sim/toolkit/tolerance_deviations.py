@@ -62,9 +62,8 @@ class ComponentDeviation:
 
     @classmethod
     def from_tolerance(
-            cls,
-            tolerance: float,
-            distribution: str = "uniform") -> ComponentDeviation:
+        cls, tolerance: float, distribution: str = "uniform"
+    ) -> ComponentDeviation:
         return cls(tolerance, -tolerance, DeviationType.tolerance, distribution)
 
     @classmethod
@@ -131,10 +130,9 @@ class ToleranceDeviations(SimAnalysis, ABC):
                     new_tolerance, distribution
                 )
 
-    def set_tolerances(self,
-                       new_tolerances: Dict[str,
-                                            float],
-                       distribution: str = "uniform") -> None:
+    def set_tolerances(
+        self, new_tolerances: Dict[str, float], distribution: str = "uniform"
+    ) -> None:
         """Sets the tolerances for a set of components.
 
         The dictionary keys are the references and the values are the tolerances. If
@@ -206,7 +204,8 @@ class ToleranceDeviations(SimAnalysis, ABC):
         self.testbench_prepared = False
 
     @abstractmethod
-    def prepare_testbench(self, **kwargs: Any) -> None: ...
+    def prepare_testbench(self, **kwargs: Any) -> None:
+        ...
 
     def run_testbench(
         self,
@@ -406,5 +405,13 @@ class ToleranceDeviations(SimAnalysis, ABC):
         timeout: Optional[float] = None,
         exe_log: bool = True,
         measure: Optional[str] = None,
-    ) -> Optional[Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]]:
+    ) -> Optional[
+        Tuple[
+            float,
+            float,
+            Dict[str, Union[str, float]],
+            float,
+            Dict[str, Union[str, float]],
+        ]
+    ]:
         """The override of this method should set the self.analysis_executed to True."""

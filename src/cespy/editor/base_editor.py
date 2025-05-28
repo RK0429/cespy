@@ -172,9 +172,26 @@ def scan_eng(value: str) -> float:
 
 def to_float(value: str, accept_invalid: bool = True) -> Union[float, str]:
     _MULT = {
-        "f": 1e-15, "p": 1e-12, "n": 1e-9, "µ": 1e-6, "u": 1e-6, "U": 1e-6,
-        "m": 1e-3, "M": 1e-3, "k": 1e3, "K": 1e3, "Meg": 1e6, "g": 1e9,
-        "t": 1e12, "Ω": 1, "R": 1, "V": 1, "A": 1, "F": 1, "H": 1, "%": 0.01,
+        "f": 1e-15,
+        "p": 1e-12,
+        "n": 1e-9,
+        "µ": 1e-6,
+        "u": 1e-6,
+        "U": 1e-6,
+        "m": 1e-3,
+        "M": 1e-3,
+        "k": 1e3,
+        "K": 1e3,
+        "Meg": 1e6,
+        "g": 1e9,
+        "t": 1e12,
+        "Ω": 1,
+        "R": 1,
+        "V": 1,
+        "A": 1,
+        "F": 1,
+        "H": 1,
+        "%": 0.01,
     }
 
     trimmed = value.strip()
@@ -562,7 +579,8 @@ class BaseEditor(ABC):
 
     @abstractmethod
     def set_component_parameters(
-            self, element: str, **kwargs: Union[str, int, float]) -> None:
+        self, element: str, **kwargs: Union[str, int, float]
+    ) -> None:
         """Adds one or more parameters to the component on the netlist. The argument is
         in the form of a key-value pair where each parameter is the key and the value is
         value to be set in the netlist.
@@ -860,10 +878,8 @@ class HierarchicalComponent(object):
     """Helper class to allow setting parameters when using object oriented access."""
 
     def __init__(
-            self,
-            component: Component,
-            parent: BaseEditor,
-            reference: str) -> None:
+        self, component: Component, parent: BaseEditor, reference: str
+    ) -> None:
         self._component = component
         self._parent = parent
         self._reference = reference

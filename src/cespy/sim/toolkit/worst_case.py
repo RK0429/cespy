@@ -134,7 +134,15 @@ class WorstCaseAnalysis(ToleranceDeviations):
         timeout: Optional[float] = None,
         exe_log: bool = True,
         measure: Optional[str] = None,
-    ) -> Optional[Tuple[float, float, Dict[str, Union[str, float]], float, Dict[str, Union[str, float]]]]:
+    ) -> Optional[
+        Tuple[
+            float,
+            float,
+            Dict[str, Union[str, float]],
+            float,
+            Dict[str, Union[str, float]],
+        ]
+    ]:
         """This method runs the analysis without updating the netlist.
 
         It will update component values and parameters according to their deviation type
@@ -258,7 +266,8 @@ class WorstCaseAnalysis(ToleranceDeviations):
         return None
 
     def get_min_max_measure_value(
-            self, meas_name: str) -> Union[Tuple[float, float], None]:
+        self, meas_name: str
+    ) -> Union[Tuple[float, float], None]:
         """Returns the minimum and maximum values of a measurement.
 
         See SPICE .MEAS primitive documentation.
@@ -318,8 +327,9 @@ class WorstCaseAnalysis(ToleranceDeviations):
                 for run in range(self.last_run_number + 1)
             ]
 
-            def diff_for_a_ref(wc_data: Sequence[Any],
-                               bit_index: int) -> Tuple[float, float]:
+            def diff_for_a_ref(
+                wc_data: Sequence[Any], bit_index: int
+            ) -> Tuple[float, float]:
                 """Calculates the difference of the measurement for the toggle of a
                 given bit."""
                 bit_updated = 1 << bit_index
@@ -355,5 +365,6 @@ class WorstCaseAnalysis(ToleranceDeviations):
         else:
             _logger.warning(
                 "The analysis was not executed. Please run the run_analysis(...) or run_testbench(...)"
-                " before calling this method")
+                " before calling this method"
+            )
             return None
