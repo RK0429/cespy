@@ -367,8 +367,8 @@ class LogfileData:
         if isinstance(steps, int):
             # Return as a list for consistency
             return [self.dataset[measure][steps]]
-        else:  # Assuming it is an iterable
-            return [self.dataset[measure][step] for step in steps]
+        # Assuming it is an iterable
+        return [self.dataset[measure][step] for step in steps]
 
     def max_measure_value(
         self, measure: str, steps: Union[None, int, Iterable[int]] = None
@@ -553,7 +553,7 @@ class LogfileData:
                 fout.write(value_separator + title)
                 columns_per_line += 1
 
-        fout.write("\n")  # Finished to write the headers
+        fout.write(line_terminator)  # Finished to write the headers
 
         if data_size is None:
             data_size = 0  # Skips writing data in the loop below
@@ -592,12 +592,12 @@ class LogfileData:
                     columns_writen += 1
             if columns_writen != columns_per_line:
                 logging.error(
-                    "Line with wrong number of values." " Expected:%d Index %d has %d",
+                    "Line with wrong number of values. Expected:%d Index %d has %d",
                     columns_per_line,
                     index + 1,
                     columns_writen,
                 )
-            fout.write("\n")
+            fout.write(line_terminator)
 
         fout.close()
 
@@ -616,6 +616,7 @@ class LogfileData:
         """Plots a histogram of the parameter."""
         import matplotlib.pyplot as plt
         import numpy as np
+        del kwargs  # Unused but kept for API compatibility
 
         values = self.get_measure_values_at_steps(param, steps)
         x = np.array(values, dtype=float)

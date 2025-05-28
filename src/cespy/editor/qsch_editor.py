@@ -200,8 +200,6 @@ def smart_split(s: str) -> List[str]:
 class QschReadingError(IOError):
     """Exception raised when reading QSCH files fails."""
 
-    pass
-
 
 class QschTag:
     """Class to represent a tag in a QSCH file.
@@ -274,7 +272,7 @@ class QschTag:
         :return: A string representation of the tag
         """
         spaces = "  " * level
-        if len(self.items):
+        if self.items:
             return (
                 f"{spaces}«{' '.join(self.tokens)}\n"
                 f"{''.join(tag.out(level + 1) for tag in self.items)}"

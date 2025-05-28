@@ -58,7 +58,8 @@ class RunnerProtocol(AnyRunner, Protocol):
     def runno(self) -> int: ...
 
 
-class StepInfo(object):
+class StepInfo:
+    """Container for simulation step information."""
     def __init__(self, what: str, elem: str, iterable: Iterable[Any]) -> None:
         self.what = what
         self.elem = elem
@@ -71,7 +72,7 @@ class StepInfo(object):
         return f"Iteration on {self.what} {self.elem} : {self.iter}"
 
 
-class SimStepper(object):
+class SimStepper:
     """This class is intended to be used for simulations with many parameter sweeps.
     This provides a more user-friendly interface than the SpiceEditor/SimRunner class
     when there are many parameters to be stepped.

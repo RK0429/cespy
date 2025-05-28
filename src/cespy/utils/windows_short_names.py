@@ -47,7 +47,7 @@ def get_short_path_name(long_name: str) -> str:
     from ctypes import wintypes  # pylint: disable=import-outside-toplevel
 
     # Get the Windows API function
-    _GetShortPathNameW = (
+    _GetShortPathNameW = (  # noqa: N806
         ctypes.windll.kernel32.GetShortPathNameW
     )  # pyright: ignore[reportAttributeAccessIssue]
     _GetShortPathNameW.argtypes = [

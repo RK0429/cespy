@@ -52,7 +52,7 @@ _logger = logging.getLogger("cespy.LTSteps")
 T = TypeVar("T")
 
 
-def reformat_LTSpice_export(export_file: str, tabular_file: str) -> None:
+def reformat_LTSpice_export(export_file: str, tabular_file: str) -> None:  # noqa: N802
     """Reads an LTSpice File Export file and writes it back in a format that is more
     convenient for data treatment.
 
@@ -491,7 +491,7 @@ class LTSpiceLogReader(LogfileData):
                             headers = [meas_name] + tokens[2:]
                             measurements = []
                     else:
-                        _logger.debug("->" + line)
+                        _logger.debug("->%s", line)
 
                 line = fin.readline()  # advance to the next line
 
@@ -531,7 +531,6 @@ class LTSpiceLogReader(LogfileData):
             encoding,
             append_with_line_prefix,
             value_separator,
-            line_terminator,
         )
 
         fourier_export_file = os.path.splitext(export_file)[0] + "_fourier.txt"
@@ -548,7 +547,7 @@ class LTSpiceLogReader(LogfileData):
                         for step_no in range(self.step_count):
                             step_values = [
                                 f"{values[step_no]}"
-                                for step, values in self.stepset.items()
+                                for values in self.stepset.values()
                             ]
                             for analysis in self.fourier[signal]:
                                 if analysis.step == step_no:
