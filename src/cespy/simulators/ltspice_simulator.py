@@ -99,7 +99,7 @@ class LTspice(Simulator):
         )
 
     @classmethod
-    def valid_switch(cls, switch: str, switch_param: str = "") -> list[str]:
+    def valid_switch(cls, switch_param: str, parameter: str = "") -> list[str]:
         """Validate a command line switch.
 
         Available options for Windows/wine LTspice:
@@ -131,9 +131,9 @@ class LTspice(Simulator):
             raise ValueError("MacOS native LTspice supports only batch mode ('-b').")
 
         # format check
-        if switch is None:
+        if switch_param is None:
             return []
-        switch = switch.strip()
+        switch = switch_param.strip()
         if len(switch) == 0:
             return []
         if switch[0] != "-":
@@ -141,18 +141,17 @@ class LTspice(Simulator):
 
         # default run switches
         if switch in cls._default_run_switches:
-            _logger.info(f"Switch {switch} is already in the default switches")
+            _logger.info("Switch %s is already in the default switches", switch)
             return []
 
         if switch in cls.ltspice_args:
             switches = cls.ltspice_args[switch]
-            switches = [s.replace("<path>", switch_param) for s in switches]
+            switches = [s.replace("<path>", parameter) for s in switches]
             return switches
-        else:
-            valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
-            raise ValueError(
-                f"Invalid switch '{switch}'. Valid switches are: {valid_keys}"
-            )
+        valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
+        raise ValueError(
+            f"Invalid switch '{switch}'. Valid switches are: {valid_keys}"
+        )
 
     @classmethod
     def run(
@@ -214,7 +213,7 @@ class LTspice(Simulator):
         # cannot set raw and log file names or extensions. They are always
         # '<netlist_file>.raw' and '<netlist_file>.log'
 
-        if sys.platform == "linux" or sys.platform == "darwin":
+        if sys.platform in ("linux", "darwin"):
             if cls.using_macos_native_sim():
                 # native MacOS simulator, which has its limitations
                 if netlist_file.suffix.lower().endswith(".asc"):
@@ -414,4 +413,4 @@ class LTspice(Simulator):
 
 # initialize LTspice executable detection
 LTspice.detect_executable()
-_logger.debug(f"Found LTspice installed in: '{LTspice.spice_exe}'")
+_logger.debug("Found LTspice installed in: '%s'", LTspice.spice_exe)
