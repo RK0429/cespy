@@ -127,13 +127,13 @@
 
 - [x] **A. Module and Naming Conventions:**
   - [x] Rename `sim/tookit/` to `sim/toolkit/`.
-  - [ ] Review all module and package names for clarity and consistency.
-  - [ ] Ensure class and function names clearly reflect their purpose.
-- [ ] **B. Code Cleanup:**
-  - [ ] Merge duplicate classes/functions where `kuPyLTSpice` extended or minimally wrapped `kupicelib` components.
-  - [ ] Remove any circular dependencies that might have existed between the two original packages.
-  - [ ] Replace all cross-package imports with internal imports within the UnifiedPackage.
-  - [ ] Identify and remove dead or legacy code sections no longer needed after merging.
+  - [x] Review all module and package names for clarity and consistency.
+  - [x] Ensure class and function names clearly reflect their purpose.
+- [x] **B. Code Cleanup:**
+  - [x] Merge duplicate classes/functions where `kuPyLTSpice` extended or minimally wrapped `kupicelib` components.
+  - [x] Remove any circular dependencies that might have existed between the two original packages.
+  - [x] Replace all cross-package imports with internal imports within the UnifiedPackage.
+  - [x] Identify and remove dead or legacy code sections no longer needed after merging.
 - [ ] **C. Improve Code Quality:**
   - [ ] Ensure consistent and correct type hints across the entire codebase.
     - [ ] Reconcile function signatures if they differed.
