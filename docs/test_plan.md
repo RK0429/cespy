@@ -17,6 +17,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
 ### 1. Unit Tests
 
 #### 1.1 Editor Module Tests
+
 - **test_asc_editor.py**
   - Test opening/reading LTSpice .asc files
   - Test modifying component values
@@ -37,6 +38,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
   - Test directive parsing
 
 #### 1.2 Raw Module Tests
+
 - **test_raw_read.py**
   - Test binary raw file reading (LTSpice, NGSpice, QSpice, Xyce)
   - Test ASCII raw file reading
@@ -55,6 +57,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
   - Test data access patterns
 
 #### 1.3 Simulator Module Tests
+
 - **test_ltspice_simulator.py**
   - Test executable detection
   - Test command line switch validation
@@ -76,6 +79,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
   - Test parallel simulation support
 
 #### 1.4 Sim Module Tests
+
 - **test_sim_runner.py**
   - Test simulation job management
   - Test parallel execution
@@ -93,6 +97,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
   - Test multi-dimensional sweeps
 
 #### 1.5 Toolkit Tests
+
 - **test_montecarlo.py**
   - Test Monte Carlo analysis
   - Test statistical distributions
@@ -109,6 +114,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
   - Test visualization
 
 #### 1.6 Utility Tests
+
 - **test_detect_encoding.py**
   - Test encoding detection
   - Test various file encodings
@@ -122,6 +128,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
 ### 2. Integration Tests
 
 #### 2.1 End-to-End Simulation Tests
+
 - **test_simulation_workflow.py**
   - Test complete simulation workflow:
     1. Open schematic
@@ -132,12 +139,14 @@ This document outlines the comprehensive testing strategy for the cespy project,
     6. Analyze data
 
 #### 2.2 Multi-Simulator Tests
+
 - **test_simulator_compatibility.py**
   - Test same circuit across different simulators
   - Verify result consistency
   - Test simulator-specific features
 
 #### 2.3 Client-Server Tests
+
 - **test_client_server_integration.py**
   - Test server startup/shutdown
   - Test client-server communication
@@ -145,6 +154,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
   - Test error handling
 
 #### 2.4 Analysis Pipeline Tests
+
 - **test_analysis_pipeline.py**
   - Test Monte Carlo → Statistical Analysis
   - Test Worst-Case → Report Generation
@@ -153,6 +163,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
 ### 3. Compatibility Tests
 
 #### 3.1 Legacy API Tests
+
 - **test_kupicelib_compatibility.py**
   - Test that kupicelib API still works
   - Test deprecated function warnings
@@ -162,6 +173,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
   - Test migration paths
 
 #### 3.2 File Format Tests
+
 - **test_file_formats.py**
   - Test various LTSpice file versions
   - Test QSpice format variations
@@ -170,6 +182,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
 ### 4. Performance Tests
 
 #### 4.1 Benchmark Tests
+
 - **test_performance.py**
   - Test large file parsing speed
   - Test simulation execution time
@@ -179,6 +192,7 @@ This document outlines the comprehensive testing strategy for the cespy project,
 ### 5. Platform Tests
 
 #### 5.1 OS-Specific Tests
+
 - **test_windows_specific.py**
   - Test Windows path handling
   - Test executable detection on Windows
@@ -194,7 +208,9 @@ This document outlines the comprehensive testing strategy for the cespy project,
 ## Test Data
 
 ### Required Test Files
+
 Located in `tests/testfiles/`:
+
 - Sample .asc files (various versions)
 - Sample .qsch files
 - Sample .net files
@@ -203,6 +219,7 @@ Located in `tests/testfiles/`:
 - Invalid/corrupted files for error testing
 
 ### Test Circuits
+
 - Simple RC circuit
 - Op-amp circuit
 - Digital circuit
@@ -212,6 +229,7 @@ Located in `tests/testfiles/`:
 ## Test Execution
 
 ### Local Testing
+
 ```bash
 # Run all tests
 poetry run pytest
@@ -231,6 +249,7 @@ poetry run pytest tests/unit/test_asc_editor.py
 ```
 
 ### Type Checking
+
 ```bash
 # Run mypy type checking
 poetry run mypy src/
@@ -240,6 +259,7 @@ poetry run mypy src/cespy/editor/
 ```
 
 ### Style Checking
+
 ```bash
 # Check code formatting
 poetry run black --check src/ tests/
@@ -251,6 +271,7 @@ poetry run flake8 src/ tests/
 ## Continuous Integration
 
 ### GitHub Actions Workflow
+
 ```yaml
 name: Tests
 

@@ -281,7 +281,7 @@ class SimClient:
         self.server.close_session(self.session_id)
 
 
-def main() -> None:
+def main() -> None:  # pylint: disable=too-many-nested-blocks
     """Command-line interface for the simulation client."""
 
     parser = argparse.ArgumentParser(

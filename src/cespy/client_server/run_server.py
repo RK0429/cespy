@@ -69,8 +69,7 @@ def main() -> None:
         sys.exit(1)
 
     args = parser.parse_args()
-    if args.parallel < 1:
-        args.parallel = 1
+    args.parallel = max(args.parallel, 1)
 
     sim_key = args.simulator.lower()
     if sim_key == "ltspice":
@@ -80,7 +79,7 @@ def main() -> None:
     elif sim_key == "xyce":
         simulator = XyceSimulator
     else:
-        parser.error("Unsupported simulator '%s'" % args.simulator)
+        parser.error(f"Unsupported simulator '{args.simulator}'")
 
     print("Starting Server")
     server = SimServer(

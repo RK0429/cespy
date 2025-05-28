@@ -93,7 +93,10 @@ def create_histogram(
 
     # Add statistics text box if requested
     if show_stats:
-        stats_text = f"Count: {len(data)}\nMean: {mean_val:.3e}\nStd: {std_val:.3e}\nMin: {min(data):.3e}\nMax: {max(data):.3e}"
+        stats_text = (
+            f"Count: {len(data)}\nMean: {mean_val:.3e}\nStd: {std_val:.3e}\n"
+            f"Min: {min(data):.3e}\nMax: {max(data):.3e}"
+        )
         ax.text(
             0.7,
             0.95,

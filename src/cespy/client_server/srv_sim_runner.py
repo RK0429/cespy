@@ -66,7 +66,7 @@ class ServerSimRunner(threading.Thread):
     the SimRunner are overriden by this class.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         parallel_sims: int = 4,
         timeout: Optional[float] = None,
@@ -170,7 +170,7 @@ class ServerSimRunner(threading.Thread):
 
     def cleanup_completed(self) -> None:
         """Clean up all completed tasks and their associated files."""
-        while len(self.completed_tasks):
+        while self.completed_tasks:
             self._erase_files_and_info(0)
 
     def stop(self) -> None:

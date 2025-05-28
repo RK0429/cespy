@@ -40,7 +40,7 @@ __all__ = [
 ]
 
 
-def simulate(
+def simulate(  # pylint: disable=too-many-arguments,too-many-locals
     circuit: Union[str, Path, Any],
     engine: str = "ltspice",
     *,

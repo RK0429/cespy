@@ -48,7 +48,7 @@ class SimServer:
     :param port: The port where the server will listen for requests. Default is 9000
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         simulator: Type[Simulator],
         parallel_sims: int = 4,
@@ -163,11 +163,11 @@ class SimServer:
 
     def get_files(self, session_id: str, runno: int) -> Tuple[str, Binary]:
         """Retrieve simulation results for a given run number.
-        
+
         Args:
             session_id: The session identifier
             runno: The run number to retrieve files for
-            
+
         Returns:
             Tuple of (filename, binary_data) or empty values if not found
         """
@@ -197,7 +197,7 @@ class SimServer:
 
     def stop_server(self) -> bool:
         """Stop the server and clean up resources.
-        
+
         Returns:
             True always (for XML-RPC compatibility)
         """
@@ -209,7 +209,7 @@ class SimServer:
 
     def running(self) -> bool:
         """Check if the server is still running.
-        
+
         Returns:
             True if the server is running, False otherwise
         """

@@ -61,11 +61,10 @@ class XyceSimulator(Simulator):
         if os.path.exists(exe):
             spice_exe = [exe]
             break
-        else:
-            # check if file in path
-            if shutil.which(exe):
-                spice_exe = [exe]
-                break
+        # check if file in path
+        if shutil.which(exe):
+            spice_exe = [exe]
+            break
 
     # The following variables are not needed anymore. This also makes sphinx
     # not mention them in the documentation.
@@ -117,7 +116,7 @@ class XyceSimulator(Simulator):
             "<delim_option>",
         ],  # <TAB|COMMA|string>   set the output file field delimiter
         "-o": ["-o", "<basename>"],  # <basename> for the output file(s)
-        # '-l'                : ['-l', '<path>'],  # place the log output into <path>, "cout" to log to stdout
+        # '-l': ['-l', '<path>'],  # place log output into <path>, "cout" to stdout
         "-per-processor": [
             "-per-processor"
         ],  # create log file for each processor, add .<n>.<r> to log path
@@ -147,7 +146,7 @@ class XyceSimulator(Simulator):
             "-rsf",
             "<path>",
         ],  # specify a file to save simulation responses functions.
-        # '-r'                : ['-r', '<path>'],  # <file>   generate a rawfile named <file> in binary format
+        # '-r': ['-r', '<path>'],  # generate rawfile named <file> in binary format
         "-a": ["-a"],  # use with -r <file> to output in ascii format
         "-randseed": ["-randseed", "<int_option>"],
         # <number>          seed random number generator used by expressions and sampling methods
@@ -161,15 +160,15 @@ class XyceSimulator(Simulator):
     _default_run_switches = ["-l", "-r"]
 
     @classmethod
-    def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:
+    def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:  # pylint: disable=too-many-branches
         """Validates a command line switch. The following options are available for
         Xyce:
 
         * `-capabilities`: print compiled-in options and exit
         * `-license`: print license and exit
-        * `-param [device [level [<inst|mod>]]]`: print a terse summary of model and/or device parameters
-        * `-doc [device [level [<inst|mod>]]]`: output latex tables of model and device parameters to files
-        * `-doc_cat [device [level [<inst|mod>]]]`: output latex tables of model and device parameters to files
+        * `-param [device [level [<inst|mod>]]]`: print terse summary of model/device parameters
+        * `-doc [device [level [<inst|mod>]]]`: output latex tables of model/device parameters
+        * `-doc_cat [device [level [<inst|mod>]]]`: output latex tables of model/device parameters
         * `-count`: device count without netlist syntax or topology check
         * `-syntax`: check netlist syntax and exit
         * `-norun`: netlist syntax and topology and exit
@@ -177,10 +176,10 @@ class XyceSimulator(Simulator):
         * `-noise_names_file <path>`: output noise source names file to <path> and exit
         * `-quiet`: suppress some of the simulation-progress messages sent to stdout
         * `-jacobian_test`: jacobian matrix diagnostic
-        * `-hspice-ext  <option>`: apply hspice compatibility features during parsing.  option=all applies them all
-        * `-redefined_params <option>`: set option for redefined .params as ignore (use last), usefirst, warn or error
-        * `-subckt_multiplier <option>`: set option to true(default) or false to apply implicit subcircuit multipliers
-        * `-local_variation <option>`: set option to true(default) or false to enable local variation in UQ analysis
+        * `-hspice-ext <option>`: apply hspice compatibility features during parsing
+        * `-redefined_params <option>`: set option for redefined .params (ignore, usefirst, warn, error)
+        * `-subckt_multiplier <option>`: enable/disable implicit subcircuit multipliers
+        * `-local_variation <option>`: enable/disable local variation in UQ analysis
         * `-delim <TAB|COMMA|string>`: set the output file field delimiter
         * `-o <basename>`: <basename> for the output file(s)
         * `-per-processor`: create log file for each procesor, add .<n>.<r> to log path
@@ -192,7 +191,7 @@ class XyceSimulator(Simulator):
         * `-prf <param file name>`: specify a file with simulation parameters
         * `-rsf <response file name>`: specify a file to save simulation responses functions.
         * `-a`: output in ascii format
-        * `-randseed <number>`: seed random number generator used by expressions and sampling methods
+        * `-randseed <number>`: seed random number generator for expressions and sampling
         * `-plugin <plugin list>`: load device plugin libraries (comma-separated list)
 
         The following parameters will already be filled in by cespy, and cannot be set:
@@ -275,7 +274,7 @@ class XyceSimulator(Simulator):
         return ret
 
     @classmethod
-    def run(
+    def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[list[Any]] = None,

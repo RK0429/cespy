@@ -126,7 +126,7 @@ class Qspice(Simulator):
     _default_run_switches = ["-o"]
 
     @classmethod
-    def valid_switch(cls, path: str, parameter: str = "") -> list[str]:
+    def valid_switch(cls, path: str, parameter: str = "") -> list[str]:  # pylint: disable=arguments-renamed
         """Validates a command line switch. The following options are available for
         QSPICE:
 
@@ -172,7 +172,7 @@ class Qspice(Simulator):
         raise ValueError(f"Invalid Switch '{switch}'")
 
     @classmethod
-    def run(
+    def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[list[Any]] = None,

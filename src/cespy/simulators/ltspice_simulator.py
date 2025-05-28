@@ -105,7 +105,7 @@ class LTspice(Simulator):
         )
 
     @classmethod
-    def valid_switch(cls, switch_param: str, parameter: str = "") -> List[str]:
+    def valid_switch(cls, switch_param: str, parameter: str = "") -> List[str]:  # pylint: disable=arguments-renamed
         """Validate a command line switch.
 
         Available options for Windows/wine LTspice:
@@ -158,7 +158,7 @@ class LTspice(Simulator):
         raise ValueError(f"Invalid switch '{switch}'. Valid switches are: {valid_keys}")
 
     @classmethod
-    def run(
+    def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[List[str]] = None,
@@ -269,7 +269,7 @@ class LTspice(Simulator):
         return error
 
     @classmethod
-    def create_netlist(
+    def create_netlist(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         circuit_file: Union[str, Path],
         cmd_line_switches: Optional[List[str]] = None,

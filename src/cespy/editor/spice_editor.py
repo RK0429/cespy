@@ -39,7 +39,6 @@ from typing import (
 )
 
 from ..log.logfile_data import try_convert_value
-from ..sim.simulator import Simulator
 from ..simulators.ltspice_simulator import LTspice
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from ..utils.file_search import search_file_in_containers

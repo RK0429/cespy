@@ -63,11 +63,10 @@ class NGspiceSimulator(Simulator):
         if os.path.exists(exe):
             spice_exe = [exe]
             break
-        else:
-            # check if file in path
-            if shutil.which(exe):
-                spice_exe = [exe]
-                break
+        # check if file in path
+        if shutil.which(exe):
+            spice_exe = [exe]
+            break
 
     # The following variables are not needed anymore. This also makes sphinx
     # not mention them in the documentation.
@@ -203,7 +202,7 @@ class NGspiceSimulator(Simulator):
         return ret
 
     @classmethod
-    def run(
+    def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[List[Any]] = None,

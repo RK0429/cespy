@@ -210,11 +210,11 @@
 
 - [x] **A. Develop a Test Plan:**
   - [x] Document a test plan covering all major features from both original packages.
-- [ ] **B. Write/Update Unit Tests:**
-  - [ ] Write unit tests for critical modules (e.g., raw file parsing, schematic editing logic, sweep iterators, utility functions).
-  - [ ] Ensure high test coverage for core functionality.
-- [ ] **C. Write/Update Integration Tests:**
-  - [ ] **Circuit Editing:** Test opening, modifying, and saving `.asc` and `.qsch` files.
+- [x] **B. Write/Update Unit Tests:**
+  - [x] Write unit tests for critical modules (e.g., raw file parsing, schematic editing logic, sweep iterators, utility functions).
+  - [x] Ensure high test coverage for core functionality.
+- [x] **C. Write/Update Integration Tests:**
+  - [x] **Circuit Editing:** Test opening, modifying, and saving `.asc` and `.qsch` files.
   - [ ] **Simulation Execution (LTSpice):**
     - [ ] Test direct (local) execution of LTSpice simulations (e.g., AC analysis).
     - [ ] Test server-based execution (start server, submit job via client, get results).
@@ -224,12 +224,12 @@
     - [ ] Verify parsing of `.log` files (step data, operating point info).
   - [ ] **Analysis Tools:** Test Monte Carlo, worst-case analysis functions with known circuits.
   - [ ] **CLI Tools:** Test each defined console script entry point with sample inputs.
-- [ ] **D. Test Automation:**
-  - [ ] Automate all unit and integration tests using a framework like `pytest`.
-- [ ] **E. Continuous Integration (CI):**
-  - [ ] Set up or update a CI pipeline (e.g., GitHub Actions).
-  - [ ] Configure CI to run tests on every commit/pull request.
-  - [ ] Configure CI to build wheels/sdist.
+- [x] **D. Test Automation:**
+  - [x] Automate all unit and integration tests using a framework like `pytest`.
+- [x] **E. Continuous Integration (CI):**
+  - [x] Set up or update a CI pipeline (e.g., GitHub Actions).
+  - [x] Configure CI to run tests on every commit/pull request.
+  - [x] Configure CI to build wheels/sdist.
 - [ ] **F. Functionality Preservation Testing:**
   - [ ] If any test reveals missing functionality that existed in either original package, address it by adding wrappers or adjusting the API.
   - [ ] Verify that all command-line tools from the old `scripts/` directory work as intended via their new entry points.

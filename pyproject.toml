@@ -37,6 +37,8 @@ black = "^23.1.0"
 flake8 = "^6.0.0"
 mypy = "^1.5.1"
 pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.11.0"
 sphinx = "^7.2.0"
 sphinx-rtd-theme = "^3.0.2"
 myst-parser = "^4.0.1"
@@ -46,11 +48,11 @@ line-length = 88
 target-version = ['py310']
 
 [tool.flake8]
-max-line-length = 88
+max-line-length = 100
 extend-ignore = ['E203', 'W503']
 
 [tool.pylint]
-max-line-length = 88
+max-line-length = 100
 disable = [
     "R0801",  # Similar lines in files (duplicate-code)
     "C0103",  # Invalid name (we have some legacy naming)
@@ -73,6 +75,28 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
