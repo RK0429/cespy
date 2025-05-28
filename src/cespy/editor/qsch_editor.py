@@ -1,4 +1,7 @@
 # coding=utf-8
+
+"""QSpice schematic editor for modifying QSCH files programmatically."""
+
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -194,6 +197,7 @@ def smart_split(s: str) -> List[str]:
 
 
 class QschReadingError(IOError):
+    """Exception raised when reading QSCH files fails."""
     pass
 
 
@@ -512,7 +516,7 @@ class QschEditor(BaseSchematic):
                 model = texts[1].get_text_attr(QSCH_TEXT_STR_ATTR)
                 if have_embedded_subcircuit:
                     model = f"{refdes}•{model}"
-                if symbol == "NPNS" or symbol == "PNPS" or symbol == "LPNP":
+                if symbol in ("NPNS", "PNPS", "LPNP"):
                     ports[3] = "[" + ports[3] + "]"
                     nets = " ".join(ports)
                     hack = "PNP" if "PNP" in symbol else "NPN"

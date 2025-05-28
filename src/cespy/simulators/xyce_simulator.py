@@ -235,6 +235,8 @@ class XyceSimulator(Simulator):
                 elif param_token == "<param_options>":
                     # Check for [device [level [<inst|mod>]]] syntax ??
                     # TODO: this will probably not work, need to separate the parameters
+                    # The current implementation passes the parameter as-is, but Xyce might
+                    # expect separate arguments for device, level, and inst/mod options
                     ret = [
                         switch_list[0],
                         parameter,

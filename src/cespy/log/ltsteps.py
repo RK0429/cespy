@@ -14,10 +14,13 @@ License: GPL-3.0
 # Enable postponed evaluation of annotations for forward references
 from __future__ import annotations
 
+import argparse
 import dataclasses
 import logging
+import os
 import os.path
 import re
+import sys
 from typing import Any, Dict, Iterator, List, Optional, TypeVar, Union
 
 from ..utils.detect_encoding import detect_encoding
@@ -166,17 +169,18 @@ class LTSpiceExport:
                 else:
                     values = line.split("\t")
 
-                    for key in curr_dic:
-                        self.dataset[key.lower()].append(curr_dic[key])
+                    for key, value in curr_dic.items():
+                        self.dataset[key.lower()].append(value)
 
-                    for i in range(len(values)):
+                    for i, val in enumerate(values):
                         self.dataset[self.headers[i].lower()].append(
-                            try_convert_value(values[i])
+                            try_convert_value(val)
                         )
 
 
 @dataclasses.dataclass
 class HarmonicData:
+    """Container for harmonic analysis data from Fourier decomposition."""
     harmonic_number: int
     frequency: float
     fourier_component: float
@@ -214,6 +218,7 @@ class HarmonicData:
 
 @dataclasses.dataclass
 class FourierData:
+    """Container for Fourier analysis results from signal decomposition."""
     signal: str
     n_periods: int
     dc_component: float
@@ -435,7 +440,7 @@ class LTSpiceLogReader(LogfileData):
                 if line.startswith("Measurement: "):
                     if meas_name:  # If previous measurement was saved
                         # store the info
-                        if len(measurements):
+                        if measurements:
                             _logger.debug(
                                 "Storing Measurement %s (count %d)",
                                 meas_name, len(measurements)
@@ -486,7 +491,7 @@ class LTSpiceLogReader(LogfileData):
                     "Storing Measurement %s (count %d)",
                     meas_name, len(measurements)
                 )
-            if len(measurements):
+            if measurements:
                 self.measure_count += len(measurements)
                 for k, title in enumerate(headers):
                     if title is None:
@@ -529,8 +534,8 @@ class LTSpiceLogReader(LogfileData):
                     if self.step_count > 0:
                         for step_no in range(self.step_count):
                             step_values = [
-                                f"{self.stepset[step][step_no]}"
-                                for step in self.stepset
+                                f"{values[step_no]}"
+                                for step, values in self.stepset.items()
                             ]
                             for analysis in self.fourier[signal]:
                                 if analysis.step == step_no:
@@ -569,8 +574,8 @@ class LTSpiceLogReader(LogfileData):
                     "Signal\tN-Periods\tHarmonic\tFrequency\t"
                     "Fourier\tNormalized\tPhase\tNormalized\n"
                 )
-                for signal in self.fourier:
-                    for analysis in self.fourier[signal]:
+                for signal, analyses in self.fourier.items():
+                    for analysis in analyses:
                         if self.step_count > 0:
                             for step_no in range(self.step_count):
                                 if analysis.step == step_no:
@@ -607,10 +612,6 @@ class LTSpiceLogReader(LogfileData):
 
 def main() -> None:
     """Command-line interface for processing LTSpice log files."""
-    import argparse
-    import os
-    import sys
-
     def valid_extension(filename: str) -> bool:
         """Check if the filename has a valid extension."""
         return filename.endswith((".txt", ".log", ".mout"))
@@ -680,7 +681,7 @@ def main() -> None:
         else:
             print("No step data found in log file")
 
-    except Exception as e:
+    except (OSError, IOError, ValueError) as e:
         print(f"Error processing file: {e}")
         sys.exit(1)
 

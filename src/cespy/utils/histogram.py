@@ -39,7 +39,7 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
 
         return measurements
 
-    except (OSError, IOError, Exception) as e:
+    except (OSError, IOError) as e:
         print(f"Error reading log file: {e}")
         return {}
 

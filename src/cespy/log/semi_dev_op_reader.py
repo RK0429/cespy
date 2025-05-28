@@ -139,52 +139,53 @@ def opLogReader(
     dataset: Dict[str, Dict[str, Dict[str, Union[float, str]]]] = {}
     is_title = re.compile(r"^\s*--- (.*) ---\s*$")
     encoding = detect_encoding(filename)
-    log = open(filename, "r", encoding=encoding)
-    where: Union[str, None] = None
-    n_devices = 0
-    line = None
-    devices: List[str] = []
 
-    for line in log:
-        if line.startswith("Semiconductor Device Operating Points:"):
-            break
+    with open(filename, "r", encoding=encoding) as log:
+        where: Union[str, None] = None
+        n_devices = 0
+        line = None
+        devices: List[str] = []
 
-    if line is not None and line.startswith("Semiconductor Device Operating Points:"):
         for line in log:
-            match = is_title.search(line)
-            if match is not None:
-                where = match.group(1)
-                if where is not None:  # Ensure where is not None before using lower()
-                    dataset[
-                        where.lower()
-                    ] = {}  # Creates a dictionary for each component type
-            else:
-                cols = re.split(r"\s+", line.rstrip("\r\n"))
-                if len(cols) > 1 and (
-                    cols[0].endswith(":") or cols[0] == "Gmb"
-                ):  # The last 'or condition solves an
-                    # LTSpice bug where the Gmb parameter is not suffixed by :  - Thanks
-                    # to Amitkumar for finding this.
-                    if cols[0] == "Name:":
-                        devices = cols[1:]
-                        n_devices = len(devices)
-                        if (
-                            where is not None
-                        ):  # Ensure where is not None before using lower()
-                            for dev in cols[1:]:
-                                dataset[where.lower()][dev] = {}
-                    else:
-                        if (
-                            n_devices > 0
-                            and len(cols) == (n_devices + 1)
-                            and where is not None
-                        ):
-                            param = cols[0].rstrip(":")
-                            for i, val in enumerate(cols[1:]):
-                                try:
-                                    value: Union[float, str] = float(val)
-                                except ValueError:
-                                    value = val
-                                dataset[where.lower()][devices[i]][param] = value
-    log.close()
+            if line.startswith("Semiconductor Device Operating Points:"):
+                break
+
+        if line is not None and line.startswith("Semiconductor Device Operating Points:"):
+            for line in log:
+                match = is_title.search(line)
+                if match is not None:
+                    where = match.group(1)
+                    if where is not None:  # Ensure where is not None before using lower()
+                        dataset[
+                            where.lower()
+                        ] = {}  # Creates a dictionary for each component type
+                else:
+                    cols = re.split(r"\s+", line.rstrip("\r\n"))
+                    if len(cols) > 1 and (
+                        cols[0].endswith(":") or cols[0] == "Gmb"
+                    ):  # The last 'or condition solves an
+                        # LTSpice bug where the Gmb parameter is not suffixed by :  - Thanks
+                        # to Amitkumar for finding this.
+                        if cols[0] == "Name:":
+                            devices = cols[1:]
+                            n_devices = len(devices)
+                            if (
+                                where is not None
+                            ):  # Ensure where is not None before using lower()
+                                for dev in cols[1:]:
+                                    dataset[where.lower()][dev] = {}
+                        else:
+                            if (
+                                n_devices > 0
+                                and len(cols) == (n_devices + 1)
+                                and where is not None
+                            ):
+                                param = cols[0].rstrip(":")
+                                for i, val in enumerate(cols[1:]):
+                                    try:
+                                        value: Union[float, str] = float(val)
+                                    except ValueError:
+                                        value = val
+                                    dataset[where.lower()][devices[i]][param] = value
+
     return dataset

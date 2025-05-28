@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
 
+"""ASC to QSCH schematic converter."""
+
 # -------------------------------------------------------------------------------
 #    ____        _   _____ ____        _
 #   |  _ \ _   _| | |_   _/ ___| _ __ (_) ___ ___
@@ -19,7 +21,10 @@
 # -------------------------------------------------------------------------------
 import logging
 import os
+import os.path
+import sys
 import xml.etree.ElementTree as ET
+from optparse import OptionParser
 
 from cespy.editor.asc_editor import AscEditor
 from cespy.editor.asy_reader import AsyReader
@@ -30,8 +35,7 @@ _logger = logging.getLogger("cespy.AscToQsch")
 
 
 def main() -> None:
-    import os.path
-    from optparse import OptionParser
+    """Command-line interface for converting ASC files to QSCH format."""
 
     opts = OptionParser(
         usage="usage: %prog [options] ASC_FILE [QSCH_FILE]",
@@ -51,7 +55,7 @@ def main() -> None:
 
     if len(args) < 1:
         opts.print_help()
-        exit(-1)
+        sys.exit(-1)
 
     asc_file = args[0]
     if len(args) > 1:
@@ -66,9 +70,11 @@ def main() -> None:
 
 
 def convert_asc_to_qsch(
-    asc_file: str, qsch_file: str, search_paths: list[str] = []
+    asc_file: str, qsch_file: str, search_paths: list[str] = None
 ) -> None:
     """Converts an ASC file to a QSCH schematic."""
+    if search_paths is None:
+        search_paths = []
     symbol_stock: dict[str, QschTag] = {}
     # Open the ASC file
     asc_editor = AscEditor(asc_file)
@@ -137,4 +143,4 @@ def convert_asc_to_qsch(
 
 if __name__ == "__main__":
     main()
-    exit(0)
+    sys.exit(0)

@@ -73,17 +73,17 @@ def asc_text_align_set(text: Text, alignment: str) -> Text:
     # Default
     text.textAlignment = HorAlign.CENTER
     text.verticalAlignment = VerAlign.CENTER
-    if alignment == "Left" or alignment == "VLeft":
+    if alignment in ("Left", "VLeft"):
         text.textAlignment = HorAlign.LEFT
-    elif alignment == "Center" or alignment == "VCenter":
+    elif alignment in ("Center", "VCenter"):
         pass
-    elif alignment == "Right" or alignment == "VRight":
+    elif alignment in ("Right", "VRight"):
         text.textAlignment = HorAlign.RIGHT
-    elif alignment == "Top" or alignment == "VTop":
+    elif alignment in ("Top", "VTop"):
         text.verticalAlignment = VerAlign.TOP
-    elif alignment == "Bottom" or alignment == "VBottom":
+    elif alignment in ("Bottom", "VBottom"):
         text.verticalAlignment = VerAlign.BOTTOM
-    elif alignment == "Invisible" or alignment == "VInvisible":
+    elif alignment in ("Invisible", "VInvisible"):
         text.visible = False
     else:
         raise ValueError(f"Invalid alignment {alignment}")

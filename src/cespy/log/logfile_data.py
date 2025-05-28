@@ -37,15 +37,15 @@ class LTComplex(complex):
             if match.group("degrees") is None:
                 # This is the cartesian format
                 return super().__new__(cls, mag, ph)
-            else:
-                if match.group("dB") is not None:
-                    # This is the polar format
-                    mag = 10 ** (mag / 20)
-                return super().__new__(
-                    cls,
-                    mag * math.cos(math.pi * ph / 180),
-                    mag * math.sin(math.pi * ph / 180),
-                )
+
+            if match.group("dB") is not None:
+                # This is the polar format
+                mag = 10 ** (mag / 20)
+            return super().__new__(
+                cls,
+                mag * math.cos(math.pi * ph / 180),
+                mag * math.sin(math.pi * ph / 180),
+            )
         else:
             raise ValueError("Invalid complex value format")
 
@@ -70,10 +70,12 @@ class LTComplex(complex):
         return 20 * math.log10(self.mag)
 
     def ph_rad(self) -> float:
+        """Return the phase angle in radians."""
         return math.atan2(self.imag, self.real)
 
     @property
     def unit(self) -> Optional[str]:
+        """Return the unit of the complex value if present."""
         _unit = None
         match = self.complex_match.match(self.strvalue)
         if match:
@@ -87,6 +89,7 @@ NumericType = Union[int, float, complex, LTComplex]
 
 # Create a protocol for types that can be compared
 class Comparable(Protocol):
+    """Protocol for types that support less-than comparison."""
     def __lt__(self, other: Any) -> bool:
         ...
 
@@ -105,9 +108,9 @@ def try_convert_value(value: Union[str, int, float, List[Any], bytes]) -> ValueT
     """
     if isinstance(value, (int, float)):
         return value
-    elif isinstance(value, list):
+    if isinstance(value, list):
         return [try_convert_value(v) for v in value]
-    elif isinstance(value, bytes):
+    if isinstance(value, bytes):
         value = value.decode("utf-8")
 
     # Initialize ans with a default type to satisfy the type checker

@@ -43,8 +43,8 @@ def get_short_path_name(long_name: str) -> str:
         return long_name
 
     # Import Windows-specific modules
-    import ctypes
-    from ctypes import wintypes
+    import ctypes  # pylint: disable=import-outside-toplevel
+    from ctypes import wintypes  # pylint: disable=import-outside-toplevel
 
     # Get the Windows API function
     _GetShortPathNameW = (

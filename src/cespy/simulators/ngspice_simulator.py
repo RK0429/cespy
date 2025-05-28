@@ -267,6 +267,8 @@ class NGspiceSimulator(Simulator):
             extra_switches = ["-D", f"ngbehavior={cls._compatibility_mode}"]
         # TODO: -a seems useless with -b, however it is still defined in the
         # default switches. Need to check if it is really needed.
+        # The -a flag is for interactive mode, while -b is for batch mode.
+        # This combination might be redundant.
         cmd_run = (
             cls.spice_exe
             + cmd_line_switches

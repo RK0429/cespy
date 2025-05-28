@@ -69,8 +69,8 @@ class Qspice(Simulator):
         # status mid 2024: Qspice has limited support for running under
         # linux+wine, and none for MacOS+wine
         # TODO: when the situation gets more mature, add support for wine.
-        # See
-        # LTspice for an example.
+        # See LTspice for an example of Wine support implementation.
+        # Track QSpice Wine compatibility at: https://www.qspice.com/
         spice_exe = []
         process_name = ""
     else:  # Windows (well, also aix, wasi, emscripten,... where it will fail.)
