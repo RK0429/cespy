@@ -10,7 +10,10 @@
       "Bash(poetry run flake8:*)",
       "Bash(poetry run mypy:*)",
       "Bash(python:*)",
-      "Bash(mypy:*)"
+      "Bash(mypy:*)",
+      "Bash(mypy:*)",
+      "Bash(poetry run mypy:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
