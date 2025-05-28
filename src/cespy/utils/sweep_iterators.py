@@ -63,6 +63,7 @@ class sweep(BaseIterator):
     - Supports floating point arguments
     - Supports both up and down sweeps
     Usage:
+
         >>> list(sweep(0.3, 1.1, 0.2))
         [0.3, 0.5, 0.7, 0.9000000000000001, 1.1]
         >>> list(sweep(15, -15, 2.5))
@@ -110,6 +111,7 @@ def sweep_n(
     - Supports floating point arguments
     - Supports both up and down sweeps-
     Usage:
+
         >>> list(sweep_n(0.3, 1.1, 5))
         [0.3, 0.5, 0.7, 0.9000000000000001, 1.1]
         >>> list(sweep_n(15, -15, 13))
@@ -121,10 +123,11 @@ def sweep_n(
 class sweep_log(BaseIterator):
     """Generator function to be used in logarithmic sweeps.
 
-    Advantages towards the range python built-in functions_
+    Advantages towards the range python built-in functions
     - Supports floating point arguments
     - Supports both up and down sweeps.
     Usage:
+
         >>> list(sweep_log(0.1, 11e3, 10))
         [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
         >>> list(sweep_log(1000, 1, 2))
@@ -177,6 +180,7 @@ class sweep_log_n(BaseIterator):
     - Supports floating point arguments
     - Supports both up and down sweeps
     Usage:
+
         >>> list(sweep_log_n(1, 10, 6))  # e.g., [1.0, ..., 10.0]
     """
 

@@ -950,11 +950,11 @@ class SpiceCircuit(BaseEditor):
 
         Usage: ::
 
-        runner.set_parameter("TEMP", 80)
+            runner.set_parameter("TEMP", 80)
 
         This adds onto the netlist the following line: ::
 
-        .PARAM TEMP=80
+            .PARAM TEMP=80
 
         This is an alternative to the set_parameters which is more pythonic in its usage
         and allows setting more than one parameter at once.

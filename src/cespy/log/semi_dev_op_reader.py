@@ -38,40 +38,95 @@ def opLogReader(filename: str) -> Dict[str, Dict[str, Dict[str, Union[float, str
 
     .. code-block:: text
 
-    Semiconductor Device Operating Points:
+        Semiconductor Device Operating Points:
 
-                            --- Diodes --- Name:         d:m6:1:para2:1 d:m4:1:para2:1
-    d:m3:1:para2:1         d:m6:1:para1:2 Model: m6:1:para2:dpar_5v_psubnburd
-    m4:1:para2:dpar_5v_psubnburd m3:1:para2:dpar_5v_psubnburd dpar_pburdnburdsw Id:
-    3.45e-19 3.45e-19                     3.45e-19                1.11e-13 Vd: 3.27e-07
-    3.27e-07                     3.27e-07 9.27e-02 ... CAP:             3.15e-14
-    3.15e-14 3.15e-14                5.20e-14
+                                --- Diodes --- Name:         d:m6:1:para2:1 d:m4:1:para2:1
+        d:m3:1:para2:1         d:m6:1:para1:2 Model: m6:1:para2:dpar_5v_psubnburd
+        m4:1:para2:dpar_5v_psubnburd m3:1:para2:dpar_5v_psubnburd dpar_pburdnburdsw Id:
+        3.45e-19 3.45e-19                     3.45e-19                1.11e-13 Vd: 3.27e-07
+        3.27e-07                     3.27e-07 9.27e-02 ... CAP:             3.15e-14
+        3.15e-14 3.15e-14                5.20e-14
 
-                        --- Bipolar Transistors --- Name:     q:q2:1:2    q:q2:1:1
-    q:q1:1:2    q:q1:1:1     q:q7:3 Model:  q2:1:qnl_pnp q2:1:qnl_m  q1:1:qnl_pnp
-    q1:1:qnl_m   qpl_parc Ib:       3.94e-12     4.69e-08    7.43e-13     4.70e-08
-    3.75e-12 Ic:      -2.34e-12     4.57e-06   -7.44e-13     4.50e-06   -2.35e-12 Vbe:
-    1.60e+00     7.40e-01   -7.88e-04     7.40e-01    1.40e+00
+                            --- Bipolar Transistors --- Name:     q:q2:1:2    q:q2:1:1
+        q:q1:1:2    q:q1:1:1     q:q7:3 Model:  q2:1:qnl_pnp q2:1:qnl_m  q1:1:qnl_pnp
+        q1:1:qnl_m   qpl_parc Ib:       3.94e-12     4.69e-08    7.43e-13     4.70e-08
+        3.75e-12 Ic:      -2.34e-12     4.57e-06   -7.44e-13     4.50e-06   -2.35e-12 Vbe:
+        1.60e+00     7.40e-01   -7.88e-04     7.40e-01    1.40e+00
 
-     This function will parse the log file and will produce a dictionary that contains
+    This function will parse the log file and will produce a dictionary that contains
     all the information retrieved with the following format:
 
     .. code-block:: python
 
-    semi_ops = {     'Diodes': {         'd:m6:1:para2:1': {             'Model':
-    'm6:1:para2:dpar_5v_psubnburd', 'Id': 3.45e-19, 'Vd': 3.27e-07, ... 'CAP': 3.15e-14
-    },         'd:m4:1:para2:1': {             'Model': 'm4:1:para2:dpar_5v_psubnburd',
-    'Id': 3.45e-19, 'Vd': 3.27e-07, ..., 'CAP': 3.15e-14 },         'd:m3:1:para2:1': {
-    'Model': 'm3:1:para2:dpar_5v_psubnburd', 'Id': 3.45e-19, 'Vd': 3.27e-07, ..., 'CAP':
-    3.15e-14 },         'd:m6:1:para1:2': {             'Model': 'dpar_pburdnburdsw',
-    'Id': 1.11e-13, 'Vd': 0.0927, ..., 'CAP': 5.2e-14 },     },     'Bipolar
-    Transistors': {         'q:q2:1:2': {             'Model': 'q2:1:qnl_pnp', 'Ib':
-    3.94e-12, 'Ic': -2.34e-12, 'Vbe': 160, ... },         'q:q2:1:1': { 'Model':
-    'q2:1:qnl_m', 'Ib': 4.69e-08, 'Ic': 4.57e-06, 'Vbe': 0.074, ... }, 'q:q1:1:2': {
-    'Model': 'q1:1:qnl_pnp', 'Ib': 7.43e-13, 'Ic': -7.44e-13, 'Vbe': -0.000788, ... },
-    'q:q1:1:1': {             'Model': 'q1:1:qnl_m', 'Ib': 4.7e-08, 'Ic': 4.5e-06,
-    'Vbe': 0.74, ... },         'q:q7:3': { 'Model': 'qpl_parc', 'Ib': 3.75e-12, 'Ic':
-    -2.35e-12, 'Vbe': 1.4, ... },     }, }
+        semi_ops = {
+            'Diodes': {
+                'd:m6:1:para2:1': {
+                    'Model': 'm6:1:para2:dpar_5v_psubnburd',
+                    'Id': 3.45e-19,
+                    'Vd': 3.27e-07,
+                    ...
+                    'CAP': 3.15e-14
+                },
+                'd:m4:1:para2:1': {
+                    'Model': 'm4:1:para2:dpar_5v_psubnburd',
+                    'Id': 3.45e-19,
+                    'Vd': 3.27e-07,
+                    ...,
+                    'CAP': 3.15e-14
+                },
+                'd:m3:1:para2:1': {
+                    'Model': 'm3:1:para2:dpar_5v_psubnburd',
+                    'Id': 3.45e-19,
+                    'Vd': 3.27e-07,
+                    ...,
+                    'CAP': 3.15e-14
+                },
+                'd:m6:1:para1:2': {
+                    'Model': 'dpar_pburdnburdsw',
+                    'Id': 1.11e-13,
+                    'Vd': 0.0927,
+                    ...,
+                    'CAP': 5.2e-14
+                },
+            },
+            'Bipolar Transistors': {
+                'q:q2:1:2': {
+                    'Model': 'q2:1:qnl_pnp',
+                    'Ib': 3.94e-12,
+                    'Ic': -2.34e-12,
+                    'Vbe': 160,
+                    ...
+                },
+                'q:q2:1:1': {
+                    'Model': 'q2:1:qnl_m',
+                    'Ib': 4.69e-08,
+                    'Ic': 4.57e-06,
+                    'Vbe': 0.074,
+                    ...
+                },
+                'q:q1:1:2': {
+                    'Model': 'q1:1:qnl_pnp',
+                    'Ib': 7.43e-13,
+                    'Ic': -7.44e-13,
+                    'Vbe': -0.000788,
+                    ...
+                },
+                'q:q1:1:1': {
+                    'Model': 'q1:1:qnl_m',
+                    'Ib': 4.7e-08,
+                    'Ic': 4.5e-06,
+                    'Vbe': 0.74,
+                    ...
+                },
+                'q:q7:3': {
+                    'Model': 'qpl_parc',
+                    'Ib': 3.75e-12,
+                    'Ic': -2.35e-12,
+                    'Vbe': 1.4,
+                    ...
+                },
+            },
+        }
 
     :param filename: path to the log file containing the Semiconductor Device Operating
         Points

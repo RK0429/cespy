@@ -91,9 +91,14 @@ def format_eng(value: float) -> str:
     """Helper function for formatting value with the SI qualifiers.  That is, it will
     use.
 
-    * p for pico (10E-12) * n for nano (10E-9) * u for micro (10E-6) * m for mili
-    (10E-3) * k for kilo (10E+3) * Meg for Mega (10E+6) * g for giga (10E+9) * t for
-    tera (10E+12)
+    * p for pico (10E-12)
+    * n for nano (10E-9)
+    * u for micro (10E-6)
+    * m for mili (10E-3)
+    * k for kilo (10E+3)
+    * Meg for Mega (10E+6)
+    * g for giga (10E+9)
+    * t for tera (10E+12)
 
     :param value: float value to format
     :type value: float
@@ -125,9 +130,15 @@ def format_eng(value: float) -> str:
 def scan_eng(value: str) -> float:
     """Converts a string to a float, considering SI multipliers.
 
-    * f for femto (10E-15) * p for pico (10E-12) * n for nano (10E-9) * u or µ for
-    micro (10E-6) * m for mili (10E-3) * k for kilo (10E+3) * meg for Mega (10E+6) * g
-    for giga (10E+9) * t for tera (10E+12)
+    * f for femto (10E-15)
+    * p for pico (10E-12)
+    * n for nano (10E-9)
+    * u or µ for micro (10E-6)
+    * m for mili (10E-3)
+    * k for kilo (10E+3)
+    * meg for Mega (10E+6)
+    * g for giga (10E+9)
+    * t for tera (10E+12)
 
     The extra unit qualifiers such as V for volts or F for Farads are ignored.
 
@@ -282,9 +293,8 @@ class Component(Primitive):
     def value_str(self) -> str:
         """The Value as a string.
 
-        :getter: Returns the value as a string :setter: Sets the value. This behaves
-        like the `set_component_value()` method of the editor, but it is more convenient
-        to use when dealing with a single component.
+        :getter: Returns the value as a string
+        :setter: Sets the value. This behaves like the `set_component_value()` method of the editor, but it is more convenient to use when dealing with a single component.
         """
         return self.parent.get_component_value(self.reference)
 
@@ -337,8 +347,8 @@ class Component(Primitive):
     def value(self) -> Union[float, int, str]:
         """The Value.
 
-        :getter: Returns the value as a number. If the value is not a number, it will
-        return a string. :setter: Sets the value.
+        :getter: Returns the value as a number. If the value is not a number, it will return a string.
+        :setter: Sets the value.
         """
         return to_float(self.value_str, accept_invalid=True)
 
@@ -355,9 +365,8 @@ class Component(Primitive):
     def model(self) -> str:
         """The model of the component.
 
-        :getter: Returns the model of the component :setter: Sets the model. This
-        behaves like the `set_element_model()` method of the editor, but it is more
-        convenient to use when dealing with a single component.
+        :getter: Returns the model of the component
+        :setter: Sets the model. This behaves like the `set_element_model()` method of the editor, but it is more convenient to use when dealing with a single component.
         """
         return self.parent.get_element_value(self.reference)
 
@@ -500,11 +509,11 @@ class BaseEditor(ABC):
 
         Usage: ::
 
-        editor.set_parameter("TEMP", 80)
+            editor.set_parameter("TEMP", 80)
 
         This adds onto the netlist the following line: ::
 
-        .PARAM TEMP=80
+            .PARAM TEMP=80
 
         This is an alternative to the set_parameters which is more pythonic in it's
         usage, and allows setting more than one parameter at once.

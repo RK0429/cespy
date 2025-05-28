@@ -80,27 +80,29 @@ class Simulator(ABC):
 
     .. code-block:: python
 
-    class MySpiceWindowsInstallation(Simulator):     spice_exe = ['<path to the spice
-    executable>']     process_name = "<name of the process on Windows Task Manager>"
+        class MySpiceWindowsInstallation(Simulator):
+            spice_exe = ['<path to the spice executable>']
+            process_name = "<name of the process on Windows Task Manager>"
 
     or on a Linux distribution:
 
     .. code-block:: python
 
-    class MySpiceLinuxInstallation(Simulator):     spice_exe = ['<wine_command>', '<path
-    to the spice executable>']     process_name = "<name of the process within the
-    system>"
+        class MySpiceLinuxInstallation(Simulator):
+            spice_exe = ['<wine_command>', '<path to the spice executable>']
+            process_name = "<name of the process within the system>"
 
-     If you use MacOS, you can choose either one of the 2 above. If you are on Intel,
+    If you use MacOS, you can choose either one of the 2 above. If you are on Intel,
     running LTSpice under wine (therefore: like under Linux) is preferred.
 
     The subclasses should then implement at least the run() function as a classmethod.
 
     .. code-block:: python
 
-    @classmethod def run(
-    cls,
-    netlist_file: Union[str, Path],
+        @classmethod
+        def run(
+            cls,
+            netlist_file: Union[str, Path],
     cmd_line_switches: list = None,
     timeout: float = None,
     stdout=None,

@@ -26,23 +26,26 @@ models.
 The code snipped below will simulate a circuit with two different diode models, set the
 simulation temperature to 80 degrees, and update the values of R1 and R2 to 3.3k. ::
 
-from cespy.sim.sim_runner import SimRunner from cespy.sim.sweep import sweep
-from cespy.editor.spice_editor import SpiceEditor from
-cespy.sim.ltspice_simulator import LTspice
+    from cespy.sim.sim_runner import SimRunner
+    from cespy.sim.sweep import sweep
+    from cespy.editor.spice_editor import SpiceEditor
+    from cespy.sim.ltspice_simulator import LTspice
 
-runner = SimRunner(simulator=LTspice, parallel_sims=4) editor =
-SpiceEditor("my_circuit.net") editor.set_parameters(temp=80)  # Sets the simulation
-temperature to be 80 degrees editor.set_component_value('R2', '3.3k')  #  Updates the
-resistor R2 value to be 3.3k for dmodel in ("BAT54", "BAT46WJ"):
-editor.set_element_model("D1", model)  # Sets the Diode D1 model     for res_value in
-sweep(2.2, 2,4, 0.2):  # Steps from 2.2 to 2.4 with 0.2 increments
-editor.set_component_value('R1', res_value)  #  Updates the resistor R1 value to be 3.3k
-runner.run()
+    runner = SimRunner(simulator=LTspice, parallel_sims=4)
+    editor = SpiceEditor("my_circuit.net")
+    editor.set_parameters(temp=80)  # Sets the simulation temperature to be 80 degrees
+    editor.set_component_value('R2', '3.3k')  #  Updates the resistor R2 value to be 3.3k
+    for dmodel in ("BAT54", "BAT46WJ"):
+        editor.set_element_model("D1", model)  # Sets the Diode D1 model
+        for res_value in sweep(2.2, 2.4, 0.2):  # Steps from 2.2 to 2.4 with 0.2 increments
+            editor.set_component_value('R1', res_value)  #  Updates the resistor R1 value
+            runner.run()
 
-runner.wait_completion()  # Waits for the LTSpice simulations to complete
+    runner.wait_completion()  # Waits for the LTSpice simulations to complete
 
-print("Total Simulations: {}".format(runner.runno)) print("Successful Simulations:
-{}".format(runner.okSim)) print("Failed Simulations: {}".format(runner.failSim))
+    print("Total Simulations: {}".format(runner.runno))
+    print("Successful Simulations: {}".format(runner.okSim))
+    print("Failed Simulations: {}".format(runner.failSim))
 
 The first line will create a python class instance that represents the LTSpice file or
 netlist that is to be simulated. This object implements methods that are used to
@@ -60,12 +63,12 @@ in two ways. Either using the class constructor argument ``parallel_sims`` or by
 the allocation of more processes in the run() call by setting ``wait_resource=False``.
 ::
 
-`runner.run(wait_resource=False)`
+    runner.run(wait_resource=False)
 
 The recommended way is to set the parameter ``parallel_sims`` in the class constructor.
 ::
 
-`runner = SimRunner(simulator=LTspice, parallel_sims=8)`
+    runner = SimRunner(simulator=LTspice, parallel_sims=8)
 
 The user then can launch a simulation with the updates done to the netlist by calling
 the run() method. Since the processes are not executed right away, but rather just
@@ -86,11 +89,13 @@ The callback function is called when the simulation has finished directly by the
 that has handling the simulation. A function callback receives two arguments. The RAW
 file and the LOG file names. Below is an example of a callback function::
 
-def processing_data(raw_filename, log_filename):     '''This is a call back function
-that just prints the filenames'''     print("Simulation Raw file is %s. The log is %s" %
-(raw_filename, log_filename)     # Other code below either using ltsteps.py or
-raw_read.py     log_info = LTSpiceLogReader(log_filename)     log_info.read_measures()
-rise, measures = log_info.dataset["rise_time"]
+    def processing_data(raw_filename, log_filename):
+        '''This is a call back function that just prints the filenames'''
+        print("Simulation Raw file is %s. The log is %s" % (raw_filename, log_filename))
+        # Other code below either using ltsteps.py or raw_read.py
+        log_info = LTSpiceLogReader(log_filename)
+        log_info.read_measures()
+        rise, measures = log_info.dataset["rise_time"]
 
 The callback function is optional. If  no callback function is given, the thread is
 terminated just after the simulation is finished.
@@ -453,7 +458,7 @@ class SimRunner(AnyRunner):
 
         :param netlist: The name of the netlist can be optionally overridden if the user
             wants to have a better control of how the simulations files are generated.
-        :type netlist: SpiceEditor or a path to the file
+        :type netlist: :class:`~cespy.editor.spice_editor.SpiceEditor` or a path to the file
         :param wait_resource: Setting this parameter to False will force the simulation
             to start immediately, irrespective of the number of simulations already
             active. By default, the SimRunner class uses only four processors. This
@@ -558,7 +563,7 @@ class SimRunner(AnyRunner):
 
         :param netlist: The name of the netlist can be optionally overridden if the user
             wants to have a better control of how the simulations files are generated.
-        :type netlist: SpiceEditor or a path to the file
+        :type netlist: :class:`~cespy.editor.spice_editor.SpiceEditor` or a path to the file
         :param switches: Command line switches override
         :type switches: list
         :param run_filename: Name to be used for the log and raw file.

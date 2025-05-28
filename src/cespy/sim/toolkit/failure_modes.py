@@ -34,14 +34,18 @@ class FailureMode(SimAnalysis):
 
     The following failure modes are built-in:
 
-    * Resistors, Capacitors, Inductors and Diodes     # Open Circuit     # Short Circuit
+    * Resistors, Capacitors, Inductors and Diodes
+        # Open Circuit
+        # Short Circuit
 
-    * Transistors     # Open Circuit (All pins)     # Short Circuit (All pins)     #
-    Short Circuit Base-Emitter (Bipolar) / Gate-Source (MOS)     # Short Circuit
-    Collector-Emitter (Bipolar) / Drain-Source (MOS)
+    * Transistors
+        # Open Circuit (All pins)
+        # Short Circuit (All pins)
+        # Short Circuit Base-Emitter (Bipolar) / Gate-Source (MOS)
+        # Short Circuit Collector-Emitter (Bipolar) / Drain-Source (MOS)
 
-    * Integrated Circuits     # The failure modes are defined by the user by using the
-    add_failure_mode() method
+    * Integrated Circuits
+        # The failure modes are defined by the user by using the add_failure_mode() method
     """
 
     def __init__(

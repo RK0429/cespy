@@ -41,15 +41,15 @@ class QspiceLogReader(LogfileData):
     measures are needed, then the user should call the get_measures() method.
 
     :property stepset: dictionary in which the keys are the variables that were STEP'ed
-    during the simulation and     the associated value is a list representing the
-    sequence of assigned values during simulation.
+        during the simulation and the associated value is a list representing the
+        sequence of assigned values during simulation.
 
     :property headers: list containing the headers on the exported data. This is only
-    populated when the *read_measures*     optional parameter is set to False.
+        populated when the *read_measures* optional parameter is set to False.
 
     :property dataset: dictionary in which the keys are the the headers and the export
-    file and the values are      lists. This is information is only populated when the
-    *read_measures* optional parameter is set to False.
+        file and the values are lists. This is information is only populated when the
+        *read_measures* optional parameter is set to False.
 
     :param log_filename: path to the Export file.
     :type log_filename: str

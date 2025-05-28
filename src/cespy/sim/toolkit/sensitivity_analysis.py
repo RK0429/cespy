@@ -79,6 +79,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
         to start with the quick analysis and then use the Worst Case Analysis to refine
         the results with only the components that have a significant contribution to the
         error.
+
         :param ref: The reference component, or '*' to return a dictionary with all the
             components
         :param measure: The measurement to be analysed
