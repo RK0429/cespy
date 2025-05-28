@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""QSpice log file reader for parsing measurement data from QSpice simulations."""
 
 import logging
 
@@ -80,7 +81,7 @@ class QspiceLogReader(LogfileData):
 
         step_regex = re.compile(r"^\s*(\d+) of \d+ steps:\s+\.step (.*)$")
 
-        _logger.debug(f"Processing LOG file:{log_filename}")
+        _logger.debug("Processing LOG file:%s", log_filename)
         with open(log_filename, "r", encoding=self.encoding) as fin:
             line = fin.readline()
             while line:
@@ -92,7 +93,7 @@ class QspiceLogReader(LogfileData):
                     assert (
                         self.step_count == step
                     ), f"Step count mismatch: {self.step_count} != {step}"
-                    _logger.debug(f"Found step {step} with stepset {stepset}")
+                    _logger.debug("Found step %s with stepset %s", step, stepset)
 
                     tokens = stepset.strip("\r\n").split(" ")
                     for tok in tokens:
@@ -154,7 +155,7 @@ class QspiceLogReader(LogfileData):
 
         # Run the QPOST command
         cmd_run = qpost + [str(netlist), "-o", str(meas_filename.absolute())]
-        _logger.debug(f"Running QPOST command: {cmd_run}")
+        _logger.debug("Running QPOST command: %s", cmd_run)
         run_function(cmd_run)
         return meas_filename
 
@@ -186,8 +187,8 @@ class QspiceLogReader(LogfileData):
                         meas_name = token1
                     meas_expr = match.group(3)
                     _logger.debug(
-                        f"Found measure {meas_name} of type {sim_type} with expression"
-                        f" {meas_expr}"
+                        "Found measure %s of type %s with expression %s",
+                        meas_name, sim_type, meas_expr
                     )
                 else:
                     if meas_name:

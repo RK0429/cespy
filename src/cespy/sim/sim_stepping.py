@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Module for managing stepped simulations with parameter sweeps."""
 
 # flake8: noqa
 
@@ -178,7 +179,7 @@ class SimStepper(object):
             if step_length:
                 total *= step_length
             else:
-                _logger.debug(f"'{step}' is empty.")
+                _logger.debug("'%s' is empty.", step)
         return total
 
     def run_all(

@@ -75,41 +75,37 @@ def reformat_LTSpice_export(export_file: str, tabular_file: str) -> None:
     :return: Nothing
     """
     encoding = detect_encoding(export_file)
-    fin = open(export_file, "r", encoding=encoding)
-    fout = open(tabular_file, "w", encoding=encoding)
-
-    headers = fin.readline()
-    # writing header
-    go_header = True
-    run_no = "0"  # Changed from int to str as the regex will return a string
-    param_values = ""
-    regx = re.compile(
-        r"Step Information: ([\w=\d\. \-]+) +\((?:Run|Step): (\d*)/\d*\)\n"
-    )
-    for line in fin:
-        if line.startswith("Step Information:"):
-            match = regx.match(line)
-            if match:
-                step, run_no = match.groups()
-                params = []
-                for param in step.split():
-                    params.append(param.split("=")[1])
-                param_values = "\t".join(params)
-
-                if go_header:
-                    header_keys = []
+    with open(export_file, "r", encoding=encoding) as fin, \
+         open(tabular_file, "w", encoding=encoding) as fout:
+        headers = fin.readline()
+        # writing header
+        go_header = True
+        run_no = "0"  # Changed from int to str as the regex will return a string
+        param_values = ""
+        regx = re.compile(
+            r"Step Information: ([\w=\d\. \-]+) +\((?:Run|Step): (\d*)/\d*\)\n"
+        )
+        for line in fin:
+            if line.startswith("Step Information:"):
+                match = regx.match(line)
+                if match:
+                    step, run_no = match.groups()
+                    params = []
                     for param in step.split():
-                        header_keys.append(param.split("=")[0])
-                    param_header = "\t".join(header_keys)
-                    msg = f"Run\t{param_header}\t{headers}"
-                    fout.write(msg)
-                    _logger.debug(msg)
-                    go_header = False
-        else:
-            fout.write(f"{run_no}\t{param_values}\t{line}")
+                        params.append(param.split("=")[1])
+                    param_values = "\t".join(params)
 
-    fin.close()
-    fout.close()
+                    if go_header:
+                        header_keys = []
+                        for param in step.split():
+                            header_keys.append(param.split("=")[0])
+                        param_header = "\t".join(header_keys)
+                        msg = f"Run\t{param_header}\t{headers}"
+                        fout.write(msg)
+                        _logger.debug(msg)
+                        go_header = False
+            else:
+                fout.write(f"{run_no}\t{param_values}\t{line}")
 
 
 class LTSpiceExport:
@@ -138,47 +134,45 @@ class LTSpiceExport:
 
     def __init__(self, export_filename: str):
         self.encoding = detect_encoding(export_filename)
-        fin = open(export_filename, "r", encoding=self.encoding)
-        file_header = fin.readline()
+        with open(export_filename, "r", encoding=self.encoding) as fin:
+            file_header = fin.readline()
 
-        self.headers = file_header.split("\t")
-        # Set to read header
-        go_header = True
+            self.headers = file_header.split("\t")
+            # Set to read header
+            go_header = True
 
-        curr_dic: Dict[str, Any] = {}
-        self.dataset: Dict[str, List[Any]] = {}
+            curr_dic: Dict[str, Any] = {}
+            self.dataset: Dict[str, List[Any]] = {}
 
-        regx = re.compile(r"Step Information: ([\w=\d\. -]+) +\(Run: (\d*)/\d*\)\n")
-        for line in fin:
-            if line.startswith("Step Information:"):
-                match = regx.match(line)
-                if match:
-                    step, run_no = match.groups()
-                    curr_dic["runno"] = run_no
-                    for param in step.split():
-                        key, value = param.split("=")
-                        curr_dic[key] = try_convert_value(value)
+            regx = re.compile(r"Step Information: ([\w=\d\. -]+) +\(Run: (\d*)/\d*\)\n")
+            for line in fin:
+                if line.startswith("Step Information:"):
+                    match = regx.match(line)
+                    if match:
+                        step, run_no = match.groups()
+                        curr_dic["runno"] = run_no
+                        for param in step.split():
+                            key, value = param.split("=")
+                            curr_dic[key] = try_convert_value(value)
 
-                    if go_header:
-                        go_header = False  # This is executed only once
-                        for key in self.headers:
-                            self.dataset[key.lower()] = []  # Initializes an empty list
+                        if go_header:
+                            go_header = False  # This is executed only once
+                            for key in self.headers:
+                                self.dataset[key.lower()] = []  # Initializes an empty list
 
-                        for key in curr_dic:
-                            self.dataset[key.lower()] = []  # Initializes an empty list
+                            for key in curr_dic:
+                                self.dataset[key.lower()] = []  # Initializes an empty list
 
-            else:
-                values = line.split("\t")
+                else:
+                    values = line.split("\t")
 
-                for key in curr_dic:
-                    self.dataset[key.lower()].append(curr_dic[key])
+                    for key in curr_dic:
+                        self.dataset[key.lower()].append(curr_dic[key])
 
-                for i in range(len(values)):
-                    self.dataset[self.headers[i].lower()].append(
-                        try_convert_value(values[i])
-                    )
-
-        fin.close()
+                    for i in range(len(values)):
+                        self.dataset[self.headers[i].lower()].append(
+                            try_convert_value(values[i])
+                        )
 
 
 @dataclasses.dataclass

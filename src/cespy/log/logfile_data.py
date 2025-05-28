@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Module for handling LTSpice log file data parsing and analysis."""
 from __future__ import annotations
 
 import logging

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Base simulator interface for running SPICE simulations."""
 from __future__ import annotations
 
 import logging
@@ -45,7 +46,7 @@ if sys.version_info.major >= 3 and sys.version_info.minor >= 6:
 
         This function is used for python 3.6 and higher versions.
         """
-        _logger.debug(f"Running command: {command}, with timeout: {timeout}")
+        _logger.debug("Running command: %s, with timeout: %s", command, timeout)
         result = subprocess.run(
             command, check=False, timeout=timeout, stdout=stdout, stderr=stderr
         )
@@ -63,7 +64,7 @@ else:
 
         This is the old function that was used for python version prior to 3.6
         """
-        _logger.debug(f"Running command: {command}, with timeout: {timeout}")
+        _logger.debug("Running command: %s, with timeout: %s", command, timeout)
         return subprocess.call(command, timeout=timeout, stdout=stdout, stderr=stderr)
 
 
@@ -278,17 +279,17 @@ class Simulator(ABC):
             if os.path.exists(cls.spice_exe[-1]):
                 myexe = cls.spice_exe[-1]
         _logger.debug(
-            f"Using Spice executable path '{myexe}' "
-            "to determine the correct library paths."
+            "Using Spice executable path '%s' to determine the correct library paths.",
+            myexe
         )
         for path in cls._default_lib_paths:
-            _logger.debug(f"Checking if library path '{path}' exists.")
+            _logger.debug("Checking if library path '%s' exists.", path)
             if myexe is not None:
                 p = cls.expand_and_check_local_dir(path, myexe)
             else:
                 p = cls.expand_and_check_local_dir(path)
             if p is not None:
-                _logger.debug(f"Adding path '{p}' to the library path list")
+                _logger.debug("Adding path '%s' to the library path list", p)
                 paths.append(p)
         return paths
 

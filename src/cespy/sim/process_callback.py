@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Process callback utilities for handling simulator subprocess output and events."""
+from __future__ import annotations
+
+from multiprocessing import Process, get_context
+from multiprocessing.queues import Queue as MPQueue
+from typing import Any
 
 # -------------------------------------------------------------------------------
 #
@@ -18,12 +24,6 @@
 # Created:     23-04-2023
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
-""""""
-from __future__ import annotations
-
-from multiprocessing import Process, get_context
-from multiprocessing.queues import Queue as MPQueue
-from typing import Any
 
 
 class ProcessCallback(Process):

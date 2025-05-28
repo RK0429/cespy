@@ -345,15 +345,15 @@ if __name__ == "__main__":
         if task is None:
             raise RuntimeError("Runner.run() returned None, which is unexpected.")
         raw, log = task.wait_results()
-        _logger.debug("Raw file '%s' | Log File '%s'" % (raw, log))
+        _logger.debug("Raw file '%s' | Log File '%s'", raw, log)
     # Sim Statistics
     _logger.info(
-        "Successful/Total Simulations: " + str(LTC.okSim) + "/" + str(LTC.runno)
+        "Successful/Total Simulations: %s/%s", LTC.okSim, LTC.runno
     )
 
     def callback_function(raw_file: str, log_file: str) -> None:
         _logger.debug(
-            "Handling the simulation data of %s, log file %s" % (raw_file, log_file)
+            "Handling the simulation data of %s, log file %s", raw_file, log_file
         )
 
     LTC = SimCommander(meAbsPath + "\\test_files\\testfile.asc", parallel_sims=1)
@@ -362,15 +362,15 @@ if __name__ == "__main__":
     for tstop in (2, 5, 8, 10):
         tduration = tstop - tstart
         LTC.add_instruction(
-            ".tran {}".format(tduration),
+            f".tran {tduration}",
         )
         if tstart != 0 and bias_file is not None:  # Check that bias_file is defined
-            LTC.add_instruction(".loadbias {}".format(bias_file))
+            LTC.add_instruction(f".loadbias {bias_file}")
             # Put here your parameter modifications
             # LTC.set_parameters(param1=1, param2=2, param3=3)
-        bias_file = "sim_loadbias_%d.txt" % tstop
+        bias_file = f"sim_loadbias_{tstop}.txt"
         LTC.add_instruction(
-            ".savebias {} internal time={}".format(bias_file, tduration)
+            f".savebias {bias_file} internal time={tduration}"
         )
         tstart = tstop
         LTC.run(callback=callback_function)

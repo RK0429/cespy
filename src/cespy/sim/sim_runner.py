@@ -442,7 +442,7 @@ class SimRunner(AnyRunner):
             if not wait_resource or (self.active_threads() < self.parallel_sims):
                 return True
             sleep(0.1)
-        _logger.error(f"Timeout waiting for resources for simulation {self.run_count}")
+        _logger.error("Timeout waiting for resources for simulation %s", self.run_count)
         return False
 
     def run(
@@ -522,7 +522,7 @@ class SimRunner(AnyRunner):
         # Wait for an available resource slot or timeout
         if not self._wait_for_resources(wait_resource, timeout):
             if self.verbose:
-                _logger.warning(f"Timeout on launching simulation {self.run_count}.")
+                _logger.warning("Timeout on launching simulation %s.", self.run_count)
             return None
 
         # Prepare command-line switches
@@ -696,7 +696,7 @@ class SimRunner(AnyRunner):
         for proc in psutil.process_iter():
             # check whether the process name matches
             if proc.name() == process_name:
-                _logger.info(f"killing Spice {proc.pid}")
+                _logger.info("killing Spice %s", proc.pid)
                 proc.kill()
 
     def _maximum_stop_time(self) -> Optional[float]:
@@ -774,7 +774,7 @@ class SimRunner(AnyRunner):
         :return: Nothing
         """
         if workfile is not None and workfile.exists():
-            _logger.info("Deleting..." + workfile.name)
+            _logger.info("Deleting...%s", workfile.name)
             workfile.unlink()
 
     @staticmethod
@@ -867,7 +867,7 @@ class SimRunner(AnyRunner):
                 if ret.retcode == 0:
                     return ret.get_results()
                 else:
-                    _logger.error(f"Skipping {ret.runno} because simulation failed.")
+                    _logger.error("Skipping %s because simulation failed.", ret.runno)
 
             # Then check if there are any active tasks
             if len(self.active_tasks) == 0:
@@ -906,7 +906,7 @@ class SimRunner(AnyRunner):
                 asc_file, cmd_line_switches=cmd_line_args
             )
         else:
-            _logger.warning(f"Unable to create the Netlist from {asc_file}")
+            _logger.warning("Unable to create the Netlist from %s", asc_file)
             return None
 
     @property
