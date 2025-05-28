@@ -658,7 +658,7 @@ class SpiceCircuit(BaseEditor):
         # Search for the sub-circuit in the netlist
         sub_circuit = self.get_subcircuit_named(subcircuit_name)
         if sub_circuit is not None:
-            if SUBCKT_DIVIDER in instance_name and sub_subckts is not None:
+            if SUBCKT_DIVIDER in reference and sub_subckts is not None:
                 return sub_circuit.get_subcircuit(sub_subckts)
             else:
                 return sub_circuit
@@ -668,7 +668,7 @@ class SpiceCircuit(BaseEditor):
         sub_circuit = self.find_subckt_in_included_libs(subcircuit_name)
 
         if sub_circuit:
-            if SUBCKT_DIVIDER in instance_name and sub_subckts is not None:
+            if SUBCKT_DIVIDER in reference and sub_subckts is not None:
                 return sub_circuit.get_subcircuit(sub_subckts)
             else:
                 return sub_circuit

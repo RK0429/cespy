@@ -6,7 +6,7 @@ import numpy as np
 from cespy.raw.raw_read import RawRead
 from cespy.raw.raw_write import RawWrite, Trace
 from cespy.log.ltsteps import LTSpiceLogReader
-from cespy.log.semi_dev_op_reader import SemiDevOpReader
+from cespy.log.semi_dev_op_reader import opLogReader
 from cespy.log.qspice_log_reader import QspiceLogReader
 
 

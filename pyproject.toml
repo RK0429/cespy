@@ -102,7 +102,7 @@ exclude_lines = [
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.scripts]
+[project.scripts]
 cespy-asc-to-qsch = "cespy.editor.asc_to_qsch:main"
 cespy-run-server = "cespy.client_server.run_server:main"
 cespy-raw-convert = "cespy.raw.raw_convert:main"

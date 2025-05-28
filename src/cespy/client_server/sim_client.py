@@ -321,26 +321,30 @@ def main() -> None:  # pylint: disable=too-many-nested-blocks
         print(f"Connected to server at {args.host}:{args.port}")
         print(f"Session ID: {client.session_id}")
 
-        if args.run:
-            # Run a simulation if circuit file was provided
-            run_id = client.run(args.run, args.dependencies)
-            if run_id >= 0:
-                print(f"Started simulation with run ID: {run_id}")
-
-                # Wait for completion and download results
-                for completed_id in client:
-                    if completed_id == run_id:
-                        result_path = client.get_runno_data(completed_id)
-                        if result_path:
-                            print(f"Results saved to: {result_path}")
-                        else:
-                            print("Simulation failed or no results available")
-                        break
-            else:
-                print("Failed to start simulation")
-                sys.exit(1)
-        else:
+        if not args.run:
             print("Connected successfully. Use -r option to run a simulation.")
+            client.close_session()
+            return
+
+        # Run a simulation if circuit file was provided
+        run_id = client.run(args.run, args.dependencies)
+        if run_id < 0:
+            print("Failed to start simulation")
+            sys.exit(1)
+
+        print(f"Started simulation with run ID: {run_id}")
+
+        # Wait for completion and download results
+        for completed_id in client:
+            if completed_id != run_id:
+                continue
+                
+            result_path = client.get_runno_data(completed_id)
+            if result_path:
+                print(f"Results saved to: {result_path}")
+            else:
+                print("Simulation failed or no results available")
+            break
 
         client.close_session()
 

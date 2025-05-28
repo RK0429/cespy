@@ -240,13 +240,13 @@
 
 ## IX. User Migration Strategy and Repository Transition
 
-- [ ] **A. GitHub Repository Merge/Transition:**
-  - [ ] Choose a strategy for the GitHub repositories:
-    - [ ] Option 1: Designate one existing repository (e.g., `kupicelib`'s) as the primary and merge `kuPyLTSpice` code into it.
-    - [ ] Option 2: Create a new repository for the UnifiedPackage and migrate code from both.
-  - [ ] If migrating history, use `git subtree` or history import tools (optional, but good for record-keeping).
-  - [ ] Update the chosen repository's README to reflect the unified project.
-  - [ ] Update CI workflows, issue trackers, and other repository settings.
+- [x] **A. GitHub Repository Merge/Transition:**
+  - [x] Choose a strategy for the GitHub repositories:
+    - [x] Option 1: Designate one existing repository (e.g., `kupicelib`'s) as the primary and merge `kuPyLTSpice` code into it.
+    - [x] Option 2: Create a new repository for the UnifiedPackage and migrate code from both.
+  - [x] If migrating history, use `git subtree` or history import tools (optional, but good for record-keeping).
+  - [x] Update the chosen repository's README to reflect the unified project.
+  - [x] Update CI workflows, issue trackers, and other repository settings.
 - [ ] **B. `kuPyLTSpice` User Migration:**
   - [ ] In the `kuPyLTSpice` repository: Update README to state it has been merged into the UnifiedPackage, providing the new name and version, and link to the new repository/PyPI page.
   - [ ] On PyPI for `kuPyLTSpice`:

@@ -6,12 +6,13 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from cespy.log.ltsteps import LTSpiceLogReader
+from cespy.log.semi_dev_op_reader import MeasureReadingError
 
 
 def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
@@ -24,8 +25,8 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
         log_reader = LTSpiceLogReader(log_file)
         measurements = {}
 
-        # Extract measurement data
-        for meas_name, meas_data in log_reader.measurements.items():
+        # Extract measurement data from dataset
+        for meas_name, meas_data in log_reader.dataset.items():
             values = []
             for step_data in meas_data:
                 try:
@@ -39,7 +40,7 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
 
         return measurements
 
-    except Exception as e:
+    except (OSError, IOError, MeasureReadingError) as e:
         print(f"Error reading log file: {e}")
         return {}
 
@@ -116,6 +117,73 @@ def create_histogram(
         plt.show()
 
 
+def plot_single_measurement(
+    measurements: Dict[str, List[float]], 
+    measurement_name: str, 
+    args: argparse.Namespace
+) -> None:
+    """Plot a single measurement histogram."""
+    create_histogram(
+        measurements[measurement_name],
+        f"Histogram: {measurement_name}",
+        bins=args.bins,
+        output=args.output,
+        show_stats=not args.no_stats,
+    )
+
+
+def plot_multiple_measurements(
+    measurements: Dict[str, List[float]], 
+    args: argparse.Namespace
+) -> None:
+    """Plot multiple measurements in subplots."""
+    n_meas = len(measurements)
+    n_cols = min(3, n_meas)
+    n_rows = (n_meas + n_cols - 1) // n_cols
+
+    _, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
+    if n_meas == 1:
+        axes = [axes]
+    else:
+        axes = axes.flatten()
+
+    for idx, (name, values) in enumerate(measurements.items()):
+        if idx < len(axes):
+            ax = axes[idx]
+            ax.hist(values, bins=args.bins, edgecolor="black", alpha=0.7)
+            ax.set_title(name)
+            ax.set_xlabel("Value")
+            ax.set_ylabel("Frequency")
+            ax.grid(True, alpha=0.3)
+            
+            if args.no_stats:
+                continue
+                
+            # Add statistics
+            mean_val = np.mean(values)
+            std_val = np.std(values)
+            ax.axvline(mean_val, color="red", linestyle="--", linewidth=2)
+            ax.text(
+                0.02, 0.98, 
+                f"μ={mean_val:.3g}\nσ={std_val:.3g}",
+                transform=ax.transAxes, 
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                verticalalignment="top",
+                fontsize=10,
+            )
+
+    # Hide extra subplots
+    for idx in range(n_meas, len(axes)):
+        axes[idx].set_visible(False)
+
+    plt.tight_layout()
+    if args.output:
+        plt.savefig(args.output, dpi=150, bbox_inches="tight")
+        print(f"Histograms saved to: {args.output}")
+    else:
+        plt.show()
+
+
 def main() -> None:
     """Command-line interface for creating histograms."""
     parser = argparse.ArgumentParser(
@@ -170,61 +238,18 @@ def main() -> None:
 
     # Plot specific measurement or all
     if args.measurement:
-        if args.measurement in measurements:
-            create_histogram(
-                measurements[args.measurement],
-                f"Histogram: {args.measurement}",
-                bins=args.bins,
-                output=args.output,
-                show_stats=not args.no_stats,
-            )
-        else:
+        if args.measurement not in measurements:
             print(f"Error: Measurement '{args.measurement}' not found in log file")
             print(f"Available measurements: {', '.join(measurements.keys())}")
             sys.exit(1)
+        plot_single_measurement(measurements, args.measurement, args)
+    elif len(measurements) == 1:
+        # Single measurement - plot directly
+        name = list(measurements.keys())[0]
+        plot_single_measurement(measurements, name, args)
     else:
-        # Plot all measurements
-        if len(measurements) == 1:
-            # Single measurement - plot directly
-            name = list(measurements.keys())[0]
-            create_histogram(
-                measurements[name],
-                f"Histogram: {name}",
-                bins=args.bins,
-                output=args.output,
-                show_stats=not args.no_stats,
-            )
-        else:
-            # Multiple measurements - create subplots
-            n_meas = len(measurements)
-            n_cols = min(3, n_meas)
-            n_rows = (n_meas + n_cols - 1) // n_cols
-
-            _, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
-            if n_meas == 1:
-                axes = [axes]
-            else:
-                axes = axes.flatten()
-
-            for i, (name, values) in enumerate(measurements.items()):
-                ax = axes[i]
-                ax.hist(values, bins=args.bins, alpha=0.7, edgecolor="black")
-                ax.set_title(name)
-                ax.set_xlabel("Value")
-                ax.set_ylabel("Count")
-                ax.grid(True, alpha=0.3)
-
-            # Hide unused subplots
-            for i in range(n_meas, len(axes)):
-                axes[i].set_visible(False)
-
-            plt.tight_layout()
-
-            if args.output:
-                plt.savefig(args.output, dpi=150, bbox_inches="tight")
-                print(f"Histograms saved to: {args.output}")
-            else:
-                plt.show()
+        # Multiple measurements - create subplots
+        plot_multiple_measurements(measurements, args)
 
 
 if __name__ == "__main__":
