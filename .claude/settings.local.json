@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(poetry run make:*)",
+      "Bash(ls:*)",
+      "Bash(source:*)",
+      "Bash(.venv/Scripts/python:*)",
+      "Bash(grep:*)"
+    ],
+    "deny": []
+  }
+}
