@@ -167,17 +167,18 @@ class LTSpiceExport(object):
     The data is then accessible by using the following attributes implemented in this
     class.
 
-    :property headers: list containing the headers on the exported data :property
-    dataset: dictionary in which the keys are the the headers and the export file and
-    the values are     lists. When reading STEPed data, a new key called 'runno' is
-    added to the dataset.
+    :property headers: list containing the headers on the exported data
+    :property dataset: dictionary in which the keys are the the headers and the export file and
+        the values are lists. When reading STEPed data, a new key called 'runno' is
+        added to the dataset.
 
     **Examples**
 
     ::
 
-    export_data = LTSpiceExport("export_data_file.txt") for value in
-    export_data.dataset['i(v1)']:     print(f"Do something with this value {value}")
+        export_data = LTSpiceExport("export_data_file.txt")
+        for value in export_data.dataset['i(v1)']:
+            print(f"Do something with this value {value}")
 
     :param export_filename: path to the Export file.
     :type export_filename: str
@@ -291,15 +292,15 @@ class LTSpiceLogReader(LogfileData):
     measures are needed, then the user should call the get_measures() method.
 
     :property stepset: dictionary in which the keys are the variables that were STEP'ed
-    during the simulation and     the associated value is a list representing the
-    sequence of assigned values during simulation.
+        during the simulation and the associated value is a list representing the
+        sequence of assigned values during simulation.
 
     :property headers: list containing the headers on the exported data. This is only
-    populated when the *read_measures*     optional parameter is set to False.
+        populated when the *read_measures* optional parameter is set to False.
 
     :property dataset: dictionary in which the keys are the headers and the export file
-    and the values are      lists. This is information is only populated when the
-    *read_measures* optional parameter is set to False.
+        and the values are lists. This is information is only populated when the
+        *read_measures* optional parameter is set to False.
 
     :param log_filename: path to the Export file.
     :type log_filename: str

@@ -118,13 +118,13 @@ class Qspice(Simulator):
         """Validates a command line switch. The following options are available for
         QSPICE:
 
-        * `-ASCII`: Use ASCII file format for the output data(.qraw) file. * `-binary`:
-        Use binary file format for the output data(.qraw) file. * `-BSIM1`: Use the
-        charge-conserving BSIM1 charge model for MOS1, MOS2, and MOS3. * `-Meyer`: Use
-        the Meyer Capacitance model for MOS1, MOS2, and MOS3. * `-ProtectSelections
-        <path>`: Protect sections marked with .prot/.unprot with encryption. *
-        `-ProtectSubcircuits <path>`: Protect the body of subcircuits with encryption. *
-        `-r <path>`: Specify the name of the output data(.qraw) file.
+        * `-ASCII`: Use ASCII file format for the output data(.qraw) file.
+        * `-binary`: Use binary file format for the output data(.qraw) file.
+        * `-BSIM1`: Use the charge-conserving BSIM1 charge model for MOS1, MOS2, and MOS3.
+        * `-Meyer`: Use the Meyer Capacitance model for MOS1, MOS2, and MOS3.
+        * `-ProtectSelections <path>`: Protect sections marked with .prot/.unprot with encryption.
+        * `-ProtectSubcircuits <path>`: Protect the body of subcircuits with encryption.
+        * `-r <path>`: Specify the name of the output data(.qraw) file.
 
         The following parameters will already be filled in by cespy, and cannot be
         set:

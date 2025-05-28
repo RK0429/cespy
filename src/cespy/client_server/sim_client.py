@@ -79,9 +79,8 @@ class SimClient:
     Two lists are kept by this class:
 
     * A list of started jobs (started_jobs) and,
-
     * a list with finished jobs on the server, but, which haven't been yet transferred
-    to the client (stored_jobs).
+      to the client (stored_jobs).
 
     This distinction is important because the data is erased on the server side when the
     data is transferred.
@@ -95,22 +94,21 @@ class SimClient:
 
     .. code-block:: python
 
-    import zipfile from PySpice.sim.sim_client import SimClient
+        import zipfile
+        from PySpice.sim.sim_client import SimClient
 
-    server = SimClient(
-    'http://localhost',
-    9000)  # Use another computer address.
-    print(server.session_id)
-    runid = server.run("../../tests/testfile.net")
-    print("Got Job id", runid)
+        server = SimClient('http://localhost', 9000)  # Use another computer address.
+        print(server.session_id)
+        runid = server.run("../../tests/testfile.net")
+        print("Got Job id", runid)
 
-    for runid in server:   # may not arrive in the same order as runids were launched
-    zip_filename = server.get_runno_data(runid)
-    print(f"Received {zip_filename} from runid {runid}")
+        for runid in server:   # may not arrive in the same order as runids were launched
+            zip_filename = server.get_runno_data(runid)
+            print(f"Received {zip_filename} from runid {runid}")
 
-    with zipfile.ZipFile(zip_filename, 'r') as zipf:  # Extract the contents of the zip file
-    print(zipf.namelist())  # Debug printing the contents of the zip file
-    zipf.extract(zipf.namelist()[0])  # Normally the raw file comes first
+            with zipfile.ZipFile(zip_filename, 'r') as zipf:  # Extract the contents of the zip file
+                print(zipf.namelist())  # Debug printing the contents of the zip file
+                zipf.extract(zipf.namelist()[0])  # Normally the raw file comes first
 
     NOTE: More elaborate algorithms such as managing multiple servers will be done on another class.
     """

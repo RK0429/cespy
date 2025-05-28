@@ -991,10 +991,12 @@ class SpiceCircuit(BaseEditor):
     ) -> None:
         """Changes the value of a component, such as a Resistor, Capacitor or Inductor.
         For components inside sub-circuits, use the sub-circuit designator prefix with
-        ':' as separator (Example X1:R1) Usage: ::
+        ':' as separator (Example X1:R1).
 
-        runner.set_component_value('R1', '3.3k') runner.set_component_value('X1:C1',
-        '10u')
+        Usage::
+
+            runner.set_component_value('R1', '3.3k')
+            runner.set_component_value('X1:C1', '10u')
 
         :param reference: Reference of the circuit element to be updated.
         :type reference: str
@@ -1002,9 +1004,9 @@ class SpiceCircuit(BaseEditor):
             values will be automatically formatted as per the engineering notations 'k'
             for kilo, 'm', for mili and so on.
         :type value: str, int or float
-        :raises: ComponentNotFoundError - In case the component is not found ValueError
-            - In case the value doesn't correspond to the expected format
-            NotImplementedError - In case the circuit element is defined in a format
+        :raises ComponentNotFoundError: In case the component is not found
+        :raises ValueError: In case the value doesn't correspond to the expected format
+        :raises NotImplementedError: In case the circuit element is defined in a format
             which is not supported by this version. If this is the case, use GitHub to
             start a ticket. https://github.com/nunobrum/kupicelib
         """
@@ -1014,18 +1016,20 @@ class SpiceCircuit(BaseEditor):
 
     def set_element_model(self, reference: str, model: str) -> None:
         """Changes the value of a circuit element, such as a diode model or a voltage
-        supply. Usage: ::
+        supply.
 
-        runner.set_element_model('D1', '1N4148') runner.set_element_model('V1' "SINE(0 1
-        3k 0 0 0)")
+        Usage::
+
+            runner.set_element_model('D1', '1N4148')
+            runner.set_element_model('V1', "SINE(0 1 3k 0 0 0)")
 
         :param reference: Reference of the circuit element to be updated.
         :type reference: str
         :param model: model name of the device to be updated
         :type model: str
-        :raises: ComponentNotFoundError - In case the component is not found ValueError
-            - In case the model format contains irregular characters NotImplementedError
-            - In case the circuit element is defined in a format which is not supported
+        :raises ComponentNotFoundError: In case the component is not found
+        :raises ValueError: In case the model format contains irregular characters
+        :raises NotImplementedError: In case the circuit element is defined in a format which is not supported
             by this version. If this is the case, use GitHub to start a ticket.
             https://github.com/nunobrum/kupicelib
         """
@@ -1151,8 +1155,8 @@ class SpiceCircuit(BaseEditor):
 
     @staticmethod
     def add_library_search_paths(*paths: str) -> None:
-        """.. deprecated:: 1.1.4 Use the class method `set_custom_library_paths()`
-        instead.
+        """.. deprecated:: 1.1.4
+            Use the class method `set_custom_library_paths()` instead.
 
         Adds search paths for libraries. By default, the local directory and the
         ~username/"Documents/LTspiceXVII/lib/sub will be searched forehand. Only when a

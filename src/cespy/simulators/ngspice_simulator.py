@@ -118,19 +118,21 @@ class NGspiceSimulator(Simulator):
         """Validates a command line switch. The following options are available for
         NGSpice:
 
-        * `-c, --circuitfile=FILE`: set the circuitfile * `-D,
-        --define=variable[=value]`: define variable to true/[value] * `-n, --no-
-        spiceinit`: don't load the local or user's config file * `-q, --completion`:
-        activate command completion * `--soa-log=FILE`: set the outputfile for SOA
-        warnings * `-s, --server`: run spice as a server process * `-t, --term=TERM`:
-        set the terminal type
+        * `-c, --circuitfile=FILE`: set the circuitfile
+        * `-D, --define=variable[=value]`: define variable to true/[value]
+        * `-n, --no-spiceinit`: don't load the local or user's config file
+        * `-q, --completion`: activate command completion
+        * `--soa-log=FILE`: set the outputfile for SOA warnings
+        * `-s, --server`: run spice as a server process
+        * `-t, --term=TERM`: set the terminal type
 
         The following parameters will already be filled in by cespy, and cannot be
         set:
 
-        * `-a  --autorun`: run the loaded netlist * `-b, --batch`: process FILE in batch
-        mode * `-o, --output=FILE`: set the outputfile * `-r, --rawfile=FILE`: set the
-        rawfile output
+        * `-a  --autorun`: run the loaded netlist
+        * `-b, --batch`: process FILE in batch mode
+        * `-o, --output=FILE`: set the outputfile
+        * `-r, --rawfile=FILE`: set the rawfile output
 
         :param switch: switch to be added.
         :type switch: str
@@ -282,11 +284,16 @@ class NGspiceSimulator(Simulator):
 
         The following compatibility modes are available (as of end 2024, ngspice v44):
 
-        * `a : complete netlist transformed` * `ps : PSPICE compatibility` * `hs :
-        HSPICE compatibility` * `spe : Spectre compatibility` * `lt : LTSPICE
-        compatibility` * `s3 : Spice3 compatibility` * `ll : all (currently not used)` *
-        `ki : KiCad compatibility` * `eg : EAGLE compatibility` * `mc : for 'make
-        check'`
+        * `a : complete netlist transformed`
+        * `ps : PSPICE compatibility`
+        * `hs : HSPICE compatibility`
+        * `spe : Spectre compatibility`
+        * `lt : LTSPICE compatibility`
+        * `s3 : Spice3 compatibility`
+        * `ll : all (currently not used)`
+        * `ki : KiCad compatibility`
+        * `eg : EAGLE compatibility`
+        * `mc : for 'make check'`
 
         :param mode: the compatibility mode to be set. Set to None to remove the
             compatibility setting.

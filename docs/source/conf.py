@@ -44,6 +44,10 @@ extensions = [
 templates_path: list[str] = ['_templates']
 exclude_patterns: list[str] = []
 
+# -- Mock imports to avoid autodoc import errors for missing dependencies
+autodoc_mock_imports = ["numpy", "clipboard"]
+# # -- Suppress warnings: autodoc import failures, docutils misc formatting warnings, and duplicate cross-reference warnings
+# suppress_warnings = ["autodoc.import_object", "misc", "ref.python"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

@@ -503,6 +503,15 @@ class AscEditor(BaseSchematic):
             raise ParameterNotFoundError(f"Parameter {param} not found in ASC file")
 
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
+        """Sets a parameter value in the ASC file.
+
+        :param param: The parameter name to set
+        :type param: str
+        :param value: The value to set for the parameter
+        :type value: Union[str, int, float]
+        :return: Nothing
+        :raises: ParameterNotFoundError - If the parameter cannot be found or set
+        """
         match, directive = self._get_param_named(param)
         if isinstance(value, (int, float)):
             value_str = format_eng(value)
@@ -561,6 +570,15 @@ class AscEditor(BaseSchematic):
                 )
 
     def set_element_model(self, element: str, model: str) -> None:
+        """Sets the model of a circuit element.
+
+        :param element: The reference of the circuit element
+        :type element: str
+        :param model: The model name to set
+        :type model: str
+        :return: Nothing
+        :raises: ComponentNotFoundError - If the component is not found
+        """
         component = self.get_component(element)
         component.symbol = model  # type: ignore[assignment]
         _logger.info(f"Component {element} updated to {model}")
@@ -629,12 +647,11 @@ class AscEditor(BaseSchematic):
 
         Usage 1: ::
 
-        editor.set_component_parameters(R1, value=330, temp=25)
+            editor.set_component_parameters(R1, value=330, temp=25)
 
         Usage 2: ::
 
-        value_settings = {'value': 330, 'temp': 25} editor.set_component_parameters(R1,
-        **value_settings)
+            value_settings = {'value': 330, 'temp': 25} editor.set_component_parameters(R1, **value_settings)
 
         :param element: Reference of the circuit element.
         :type element: str :key <param_name>: The key is the parameter name and the
@@ -762,10 +779,11 @@ class AscEditor(BaseSchematic):
         )  # Setting the text in the bottom left corner of the canvas
 
     def add_library_paths(self, *paths: str) -> None:
-        """.. deprecated:: 1.1.4 Use the class method `set_custom_library_paths()`
-        instead.
+        """
+        .. deprecated:: 1.1.4
+            Use the class method `set_custom_library_paths()` instead.
 
-        Adding paths for searching for symbols and libraries
+        Adding paths for searching for symbols and libraries.
         """
         self.set_custom_library_paths(*paths)
 

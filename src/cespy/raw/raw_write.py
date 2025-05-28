@@ -292,19 +292,23 @@ class RawWrite:
         This method allows combining data from multiple RAW files. It can handle
         different axis alignments and provides options for renaming traces.
 
-        Args:     other (RawRead): The source RawRead instance to copy traces from
-        trace_filter (Union[List[str], Tuple[str, ...], str]): Traces to import - either
-        a list of trace names or a single trace name as string     **kwargs: Optional
-        keyword arguments:         - force_axis_alignment (bool): Try to sync axes if
-        they don't match         - admissible_error (float): Maximum allowed error when
-        syncing axes         - rename_format (str): Format string for renaming traces -
-        step (int): Which step to import from multi-step source (default: 0)         -
-        minimum_timestep (float): Minimum time increment to preserve
+        Args:
+            other (:class:`~cespy.raw.raw_read.RawRead`): The source RawRead instance to copy traces from
+            trace_filter (Union[List[str], Tuple[str, ...], str]): Traces to import
+                - either a list of trace names or a single trace name as string
+            **kwargs: Optional keyword arguments:
+                - force_axis_alignment (bool): Try to sync axes if they don't match
+                - admissible_error (float): Maximum allowed error when syncing axes
+                - rename_format (str): Format string for renaming traces
+                - step (int): Which step to import from multi-step source (default: 0)
+                - minimum_timestep (float): Minimum time increment to preserve
 
-        Raises:     ValueError: If the source and destination types or axis types don't
-        match     NotImplementedError: For certain unimplemented features
+        Raises:
+            ValueError: If the source and destination types or axis types don't match
+            NotImplementedError: For certain unimplemented features
 
-        Note:     This feature is partially implemented and may not work in all cases.
+        Note:
+            This feature is partially implemented and may not work in all cases.
         """
         force_axis_alignment = kwargs.get("force_axis_alignment", False)
         admissible_error = kwargs.get("admissible_error", 1e-11)

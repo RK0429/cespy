@@ -500,10 +500,13 @@ class BaseEditor(ABC):
         """
 
     def set_parameters(self, **kwargs: Union[str, int, float]) -> None:
-        """Adds one or more parameters to the netlist. Usage: ::
+        """Adds one or more parameters to the netlist.
 
-        for temp in (-40, 25, 125):     for freq in sweep_log(1, 100E3,):
-        editor.set_parameters(TEMP=80, freq=freq)
+        Usage::
+
+            for temp in (-40, 25, 125):
+                for freq in sweep_log(1, 100E3,):
+                    editor.set_parameters(TEMP=80, freq=freq)
 
         :key param_name: Key is the parameter to be set. values the ther corresponding
             values. Values can either be a str; an int or a float.
@@ -516,10 +519,12 @@ class BaseEditor(ABC):
     def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
         """Changes the value of a component, such as a Resistor, Capacitor or Inductor.
         For components inside sub-circuits, use the sub-circuit designator prefix with
-        ':' as separator (Example X1:R1) Usage: ::
+        ':' as separator (Example X1:R1).
 
-        editor.set_component_value('R1', '3.3k') editor.set_component_value('X1:C1',
-        '10u')
+        Usage::
+
+            editor.set_component_value('R1', '3.3k')
+            editor.set_component_value('X1:C1', '10u')
 
         :param device: Reference of the circuit element to be updated.
         :type device: str
@@ -527,9 +532,9 @@ class BaseEditor(ABC):
             values will automatically formated as per the engineering notations 'k' for
             kilo, 'm', for mili and so on.
         :type value: str, int or float
-        :raises: ComponentNotFoundError - In case the component is not found ValueError
-            - In case the value doesn't correspond to the expected format
-            NotImplementedError - In case the circuit element is defined in a format
+        :raises: ComponentNotFoundError - In case the component is not found
+        :raises ValueError: In case the value doesn't correspond to the expected format
+        :raises NotImplementedError: In case the circuit element is defined in a format
             which is not supported by this version. If this is the case, use GitHub to
             start a ticket. https://github.com/nunobrum/kupicelib
         """
@@ -537,20 +542,22 @@ class BaseEditor(ABC):
     @abstractmethod
     def set_element_model(self, element: str, model: str) -> None:
         """Changes the value of a circuit element, such as a diode model or a voltage
-        supply. Usage: ::
+        supply.
 
-        editor.set_element_model('D1', '1N4148') editor.set_element_model('V1' "SINE(0 1
-        3k 0 0 0)")
+        Usage::
+
+            editor.set_element_model('D1', '1N4148')
+            editor.set_element_model('V1', "SINE(0 1 3k 0 0 0)")
 
         :param element: Reference of the circuit element to be updated.
         :type element: str
         :param model: model name of the device to be updated
         :type model: str
-        :raises: ComponentNotFoundError - In case the component is not found ValueError
-            - In case the model format contains irregular characters NotImplementedError
-            - In case the circuit element is defined in a format which is not supported
-            by this version. If this is the case, use GitHub to start a ticket.
-            https://github.com/nunobrum/kupicelib
+        :raises: ComponentNotFoundError - In case the component is not found
+        :raises ValueError: In case the model format contains irregular characters
+        :raises NotImplementedError: In case the circuit element is defined in a format
+            which is not supported by this version. If this is the case, use GitHub to
+            start a ticket. https://github.com/nunobrum/kupicelib
         """
 
     @abstractmethod
@@ -560,17 +567,18 @@ class BaseEditor(ABC):
         in the form of a key-value pair where each parameter is the key and the value is
         value to be set in the netlist.
 
-        Usage 1: ::
+        Usage 1::
 
-        editor.set_component_parameters(R1, value=330, temp=25)
+            editor.set_component_parameters(R1, value=330, temp=25)
 
-        Usage 2: ::
+        Usage 2::
 
-        value_settings = {'value': 330, 'temp': 25} editor.set_component_parameters(R1,
-        **value_settings)
+            value_settings = {'value': 330, 'temp': 25}
+            editor.set_component_parameters(R1, **value_settings)
 
         :param element: Reference of the circuit element.
-        :type element: str :key <param_name>: The key is the parameter name and the
+        :type element: str
+        :key <param_name>: The key is the parameter name and the
             value is the value to be set. Values can either be strings; integers or
             floats. When None is given, the parameter will be removed, if possible.
         :return: Nothing
@@ -638,18 +646,19 @@ class BaseEditor(ABC):
         key-value pair where each component designator is the key and the value is value
         to be set in the netlist.
 
-        Usage 1: ::
+        Usage 1::
 
-        editor.set_component_values(R1=330, R2="3.3k", R3="1Meg", V1="PWL(0 1 30m 1
-        30.001m 0 60m 0 60.001m 1)")
+            editor.set_component_values(R1=330, R2="3.3k", R3="1Meg",
+                                      V1="PWL(0 1 30m 1 30.001m 0 60m 0 60.001m 1)")
 
-        Usage 2: ::
+        Usage 2::
 
-        value_settings = {'R1': 330, 'R2': '3.3k', 'R3': "1Meg", 'V1': 'PWL(0 1 30m 1
-        30.001m 0 60m 0 60.001m 1)'} editor.set_component_values(**value_settings)
+            value_settings = {'R1': 330, 'R2': '3.3k', 'R3': "1Meg",
+                            'V1': 'PWL(0 1 30m 1 30.001m 0 60m 0 60.001m 1)'}
+            editor.set_component_values(**value_settings)
 
-        :key <comp_ref>:     The key is the component designator (Ex: V1) and the value
-        is the value to be set. Values can either be     strings; integers or floats
+        :key <comp_ref>: The key is the component designator (Ex: V1) and the value
+            is the value to be set. Values can either be strings; integers or floats
 
         :return: Nothing
         :raises: ComponentNotFoundError - In case one of the component is not found.

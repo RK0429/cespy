@@ -26,7 +26,8 @@ brief explanation of what is contained inside a RAW file. In case RAW file conta
 stepped data detected, i.e. when the .STEP command is used, then it will also try to
 open the simulation LOG file and read the stepping information.
 
-RAW File Structure ==================
+RAW File Structure
+==================
 
 This section is written to help understand the why the structure of classes is defined
 as it is. You can gladly skip this section and get right down to business by seeing the
@@ -37,29 +38,33 @@ the traces the order they appear on the binary part and some extra information. 
 preamble, the lines are always started by one of the following identifiers:
 
 + Title:          => Contains the path of the source .asc file used to make the
-simulation preceded by *
+  simulation preceded by *
 
 + Date:           => Date when the simulation started
 
-+ Plotname:       => Name of the simulation. The known Simulation Types are: * Operation
-Point                     * DC transfer characteristic                     * AC Analysis
-* Transient Analysis                     * Noise Spectral Density - (V/Hz½ or A/Hz½)
-* Transfer Function
++ Plotname:       => Name of the simulation. The known Simulation Types are:
+
+  * Operation Point
+  * DC transfer characteristic
+  * AC Analysis
+  * Transient Analysis
+  * Noise Spectral Density - (V/Hz½ or A/Hz½)
+  * Transfer Function
 
 + Flags:          => Flags that are used in this plot. The simulation can have any
-combination of these flags.                    * "real" -> The traces in the raw file
-contain real values. As for example on a TRAN simulation.                    * "complex"
--> Traces in the raw file contain complex values. As for example on an AC simulation. *
-"forward" -> Tells whether the simulation has more than one point. DC transfer
-characteristic, AC Analysis, Transient Analysis or Noise Spectral Density have the
-forward flag.                      Operating Point and Transfer Function don't have this
-flag activated.                    * "log" -> The preferred plot view of this data is
-logarithmic.                    * "stepped" -> The simulation had .STEP primitives. *
-"FastAccess" -> Order of the data is changed to speed up access. See Binary section for
-details.
+  combination of these flags.
+
+  * "real" -> The traces in the raw file contain real values. As for example on a TRAN simulation.
+  * "complex" -> Traces in the raw file contain complex values. As for example on an AC simulation.
+  * "forward" -> Tells whether the simulation has more than one point. DC transfer
+    characteristic, AC Analysis, Transient Analysis or Noise Spectral Density have the
+    forward flag. Operating Point and Transfer Function don't have this flag activated.
+  * "log" -> The preferred plot view of this data is logarithmic.
+  * "stepped" -> The simulation had .STEP primitives.
+  * "FastAccess" -> Order of the data is changed to speed up access. See Binary section for details.
 
 + No. Variables:  => number of variables contained in this dataset. See section below
-for details.
+  for details.
 
 + No. Points:     => number of points per each variable in
 
@@ -73,7 +78,9 @@ for details.
 
 + Binary:         => Start of the binary section. See section below for details.
 
-Variables List -------------- The variable list contains the list of measurements saved
+Variables List
+--------------
+The variable list contains the list of measurements saved
 in the raw file. The order of the variables defines how they are stored in the binary
 section. The format is one variable per line, using the following format:
 
@@ -83,15 +90,31 @@ Here is an example:
 
 .. code-block:: text
 
-0   time    time 1   V(n001)    voltage 2   V(n004)    voltage 3   V(n003)    voltage 4
-V(n006)    voltage 5   V(adcc)    voltage 6   V(n002)    voltage 7   V(3v3_m)   voltage
-8   V(n005)    voltage 9   V(n007)    voltage 10  V(24v_dsp) voltage 11  I(C3)
-device_current 12  I(C2)      device_current 13  I(C1)      device_current 14  I(I1)
-device_current 15  I(R4)      device_current 16  I(R3)      device_current 17  I(V2)
-device_current 18  I(V1)      device_current 19  Ix(u1:+)   subckt_current 20  Ix(u1:-)
-subckt_current
+    0   time    time
+    1   V(n001)    voltage
+    2   V(n004)    voltage
+    3   V(n003)    voltage
+    4   V(n006)    voltage
+    5   V(adcc)    voltage
+    6   V(n002)    voltage
+    7   V(3v3_m)   voltage
+    8   V(n005)    voltage
+    9   V(n007)    voltage
+    10  V(24v_dsp) voltage
+    11  I(C3)      device_current
+    12  I(C2)      device_current
+    13  I(C1)      device_current
+    14  I(I1)      device_current
+    15  I(R4)      device_current
+    16  I(R3)      device_current
+    17  I(V2)      device_current
+    18  I(V1)      device_current
+    19  Ix(u1:+)   subckt_current
+    20  Ix(u1:-)   subckt_current
 
-Binary Section -------------- The binary section of .RAW file is where the data is
+Binary Section
+--------------
+The binary section of .RAW file is where the data is
 usually written, unless the user had explicitly specified an ASCII representation. In
 this case this section is replaced with a "Values" section. Spice stores data directly
 onto the disk during simulation, writing per each time or frequency step the list of
@@ -114,7 +137,8 @@ part and an imaginary part, each with 8 bytes. The way we determine the size of 
 is dividing the total block size by the number of points, then taking only the integer
 part.
 
-Fast Access -----------
+Fast Access
+-----------
 
 Once a simulation is done, the user can ask LTSpice to optimize the data structure in
 such that variables are stored contiguously as illustrated below.
@@ -136,7 +160,8 @@ automatically. Transforming data to Fast Access must be requested by the user. I
 transformation is done, it is registered in the Flags: line in the header. RawReader
 supports both Normal and Fast Access formats
 
-Classes Defined ===============
+Classes Defined
+===============
 
 The .RAW file is read during the construction (constructor method) of an `RawRead`
 object. All traces on the RAW file are uploaded into memory.
@@ -149,44 +174,44 @@ obtain the STEP information.
 Follows an example of the RawRead class usage. Information on the RawRead methods can be
 found here.
 
-Examples ========
+Examples
+========
 
 The example below demonstrates the usage of the RawRead class. It reads a .RAW file and
-uses the matplotlib library to plot the results of three traces in two subplots. ::
+uses the matplotlib library to plot the results of three traces in two subplots.
 
-import matplotlib.pyplot as plt  # Imports the matplotlib library for plotting the
-results
+.. code-block:: python
 
-LTR = RawRead("some_random_file.raw")  # Reads the RAW file contents from file
+    import matplotlib.pyplot as plt  # Imports the matplotlib library for plotting the results
 
-print(LTR.get_trace_names())  # Prints the contents of the RAW file. The result is a
-list, and print formats it. print(LTR.get_raw_property())  # Prints all the properties
-found in the Header section.
+    LTR = RawRead("some_random_file.raw")  # Reads the RAW file contents from file
 
-plt.figure()  # Creates the canvas for plotting
+    print(LTR.get_trace_names())  # Prints the contents of the RAW file. The result is a list, and print formats it.
+    print(LTR.get_raw_property())  # Prints all the properties found in the Header section.
 
-vin = LTR.get_trace('V(in)')  # Gets the trace data. If Numpy is installed, then it
-comes in numpy array format. vout = LTR.get_trace('V(out)') # Gets the second trace.
+    plt.figure()  # Creates the canvas for plotting
 
-steps = LTR.get_steps()  # Gets the step information. Returns a list of step numbers,
-ex: [0,1,2...]. If no steps                          # are present on the RAW file,
-returns only one step : [0] .
+    vin = LTR.get_trace('V(in)')  # Gets the trace data. If Numpy is installed, then it comes in numpy array format.
+    vout = LTR.get_trace('V(out)') # Gets the second trace.
 
-fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)  # Creates the two subplots. One on
-top of the other.
+    steps = LTR.get_steps()  # Gets the step information. Returns a list of step numbers, ex: [0,1,2...]. If no steps
+                             # are present on the RAW file, returns only one step : [0] .
 
-for ax in (ax1, ax2):  # Crates a grid on all the plots.     ax.grid(True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)  # Creates the two subplots. One on top of the other.
 
-plt.xlim([0.9e-3, 1.2e-3])  # Optionally, limits the X axis to just a subrange.
+    for ax in (ax1, ax2):  # Crates a grid on all the plots.
+        ax.grid(True)
 
-x = LTR.get_axis(0)  # Retrieves the time vector that will be used as X axis. Uses STEP
-0 ax1.plot(x, vin.get_wave(0)) # On first plot plots the first STEP (=0) of Vin
+    plt.xlim([0.9e-3, 1.2e-3])  # Optionally, limits the X axis to just a subrange.
 
-for step in steps:  # On the second plot prints all the STEPS of the Vout     x =
-LTR.get_axis(step)  # Retrieves the time vector that will be used as X axis. ax2.plot(x,
-vout.get_wave(step))
+    x = LTR.get_axis(0)  # Retrieves the time vector that will be used as X axis. Uses STEP 0
+    ax1.plot(x, vin.get_wave(0)) # On first plot plots the first STEP (=0) of Vin
 
-plt.show()  # Creates the matplotlib's interactive window with the plots.
+    for step in steps:  # On the second plot prints all the STEPS of the Vout
+        x = LTR.get_axis(step)  # Retrieves the time vector that will be used as X axis.
+        ax2.plot(x, vout.get_wave(step))
+
+    plt.show()  # Creates the matplotlib's interactive window with the plots.
 """
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
@@ -1052,7 +1077,7 @@ class RawRead(object):
         """Returns the steps that correspond to the query set in the `**kwargs`
         parameters. Example: ::
 
-        raw_read.get_steps(V5=1.2, TEMP=25)
+            raw_read.get_steps(V5=1.2, TEMP=25)
 
         This will return all steps in which the voltage source V5 was set to 1.2V and
         the TEMP parameter is 24 degrees. This feature is only possible if a .log file
@@ -1098,11 +1123,11 @@ class RawRead(object):
         This function is used by the export functions.
 
         :param step: Step number to retrieve. If not given, it will return all steps
-        :type step: int
+            :type step: int
         :param columns: List of traces to use as columns. Default is all traces
-        :type columns: list
+            :type columns: list
         :param kwargs: Additional arguments to pass to the pandas.DataFrame constructor
-        :type kwargs:``**dict``
+            :type kwargs:``**dict``
         :return: A pandas DataFrame
         :rtype: pandas.DataFrame
         """
@@ -1155,11 +1180,11 @@ class RawRead(object):
         """Returns a pandas DataFrame with the requested data.
 
         :param step: Step number to retrieve. If not given, it
-        :type step: int
+            :type step: int
         :param columns: List of traces to use as columns. Default is all traces
-        :type columns: list
+            :type columns: list
         :param kwargs: Additional arguments to pass to the pandas.DataFrame constructor
-        :type kwargs:``**dict``
+            :type kwargs:``**dict``
         :return: A pandas DataFrame
         :rtype: pandas.DataFrame
         """
@@ -1184,16 +1209,16 @@ class RawRead(object):
         """Saves the data to a CSV file.
 
         :param filename: Name of the file to save the data to
-        :type filename: str
+            :type filename: str
         :param columns: List of traces to use as columns. Default is all traces
-        :type columns: list
+            :type columns: list
         :param step: Step number to retrieve. If not given, it
-        :type step: int
+            :type step: int
         :param separator: separator to use in the CSV file
-        :type separator: str
+            :type separator: str
         :param kwargs: Additional arguments to pass to the pandas.DataFrame.to_csv
             function
-        :type kwargs:``**dict``
+            :type kwargs:``**dict``
         """
         try:
             # Import pandas with alias to make usage explicit for linters
@@ -1224,15 +1249,15 @@ class RawRead(object):
         """Saves the data to an Excel file.
 
         :param filename: Name of the file to save the data to
-        :type filename: Union[str, Path]
+            :type filename: Union[str, Path]
         :param columns: List of traces to use as columns. Default is None, meaning all
             traces
-        :type columns: list, optional
+            :type columns: list, optional
         :param step: Step number to retrieve, defaults to -1
-        :type step: Union[int, List[int]], optional
+            :type step: Union[int, List[int]], optional
         :param kwargs: Additional arguments to pass to the pandas.DataFrame.to_excel
             function
-        :type kwargs:``**dict``
+            :type kwargs:``**dict``
         :raises ImportError: when the 'pandas' module is not installed
         """
         try:

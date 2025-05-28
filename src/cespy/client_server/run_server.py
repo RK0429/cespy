@@ -7,7 +7,11 @@ import sys
 import time
 from typing import Type
 
-import keyboard
+try:
+    import keyboard
+except ImportError:
+    # keyboard module is optional and only needed for interactive server control
+    keyboard = None
 
 from cespy.client_server.sim_server import SimServer
 from cespy.simulators.ltspice_simulator import LTspice
@@ -67,7 +71,7 @@ def main() -> None:
     print("Server Started. Press and hold 'q' to stop")
     while server.running():
         time.sleep(0.2)
-        if keyboard.is_pressed("q"):
+        if keyboard and keyboard.is_pressed("q"):
             server.stop_server()
             break
 
