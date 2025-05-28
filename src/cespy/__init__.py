@@ -1,3 +1,10 @@
+"""CESPy - Circuit Engineering and SPICE Python package.
+
+This package provides a high-level Python interface for circuit simulation using various
+SPICE simulators (LTspice, NGspice, QSpice, Xyce). It includes tools for circuit editing,
+simulation management, and result analysis.
+"""
+
 # Add top-level version and imports for key simulator classes
 __version__ = "0.1.0"
 
