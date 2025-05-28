@@ -73,7 +73,7 @@ class NGspiceSimulator(Simulator):
         process_name = ""
     else:
         process_name = Simulator.guess_process_name(spice_exe[0])
-        _logger.debug(f"Found ngspice installed in: '{spice_exe}' ")
+        _logger.debug("Found ngspice installed in: '%s'", spice_exe)
 
     ngspice_args = {
         # '-a'            : ['-a'],
@@ -161,18 +161,19 @@ class NGspiceSimulator(Simulator):
 
         # will be set anyway?
         if switch in cls._default_run_switches:
-            _logger.info(f"Switch {switch} is already in the default switches")
+            _logger.info("Switch %s is already in the default switches", switch)
             return []
 
         if switch in cls.ngspice_args:
             if (
                 cls._compatibility_mode
-                and (switch == "-D" or switch == "--define")
+                and switch in ("-D", "--define")
                 and parameter.lower().startswith("ngbehavior")
             ):
                 _logger.info(
-                    f"Switch {switch} {parameter} is already in the default switches,"
-                    " use 'set_compatibility_mode' instead"
+                    "Switch %s %s is already in the default switches,"
+                    " use 'set_compatibility_mode' instead",
+                    switch, parameter
                 )
                 return ret
             switch_list = cls.ngspice_args[switch]
@@ -186,7 +187,8 @@ class NGspiceSimulator(Simulator):
                     ret = [switch_list[0], parameter]
                 else:
                     _logger.warning(
-                        f"Invalid parameter {parameter} for switch '{switch}'"
+                        "Invalid parameter %s for switch '%s'",
+                        parameter, switch
                     )
             else:
                 ret = switch_list

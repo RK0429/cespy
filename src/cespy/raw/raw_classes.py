@@ -28,7 +28,7 @@ from numpy import complex128, float32, float64, zeros
 from numpy.typing import NDArray
 
 
-class DataSet(object):
+class DataSet:
     """This is the base class for storing all traces of a RAW file.
 
     Returned by the get_trace() or by the get_axis() methods. Normally the user doesn't
@@ -147,14 +147,11 @@ class Axis(DataSet):
         if self.step_info is None:
             if step > 0:
                 return len(self.data)
-            else:
-                return 0
-        else:
-            if step >= len(self.step_offsets):
-                return len(self.data)
-            else:
-                offset = self.step_offsets[step]
-                return 0 if offset is None else offset
+            return 0
+        if step >= len(self.step_offsets):
+            return len(self.data)
+        offset = self.step_offsets[step]
+        return 0 if offset is None else offset
 
     def get_wave(self, step: int = 0) -> NDArray[Any]:
         """Returns a vector containing the wave values. If numpy is installed, data is
@@ -179,8 +176,7 @@ class Axis(DataSet):
             # Use typing.cast to inform the type checker that np.abs returns
             # NDArray[Any]
             return cast(NDArray[Any], np.abs(wave))
-        else:
-            return wave
+        return wave
 
     def get_time_axis(self, step: int = 0) -> NDArray[Any]:
         """.. deprecated:: 1.0 Use `get_wave()` instead.
@@ -247,7 +243,7 @@ class Axis(DataSet):
         for i, x in enumerate(timex):
             if x == t:
                 return i
-            elif x > t:
+            if x > t:
                 # Needs to interpolate the data
                 if i == 0:
                     raise IndexError("Time position is lower than t0")
@@ -269,8 +265,7 @@ class Axis(DataSet):
     def __len__(self) -> int:
         if self.step_info is None:
             return len(self.data)
-        else:
-            return self.get_len()
+        return self.get_len()
 
     def __iter__(self) -> Iterator[np.generic]:
         assert (
@@ -347,13 +342,11 @@ class TraceRead(DataSet):
         """
         if self.axis is None:
             return super().get_wave()
-        else:
-            if step == 0:
-                return self.data[: self.axis.step_offset(1)]
-            else:
-                return self.data[
-                    self.axis.step_offset(step) : self.axis.step_offset(step + 1)
-                ]
+        if step == 0:
+            return self.data[: self.axis.step_offset(1)]
+        return self.data[
+            self.axis.step_offset(step) : self.axis.step_offset(step + 1)
+        ]
 
     def get_point_at(self, t: float, step: int = 0) -> Union[float, complex]:
         """Get a point from the trace at the point specified by the /t/ argument. If the
@@ -381,15 +374,14 @@ class TraceRead(DataSet):
                 if self.numerical_type == "complex":
                     return complex(val)
                 return float(val)
-            elif (
+            if (
                 pos == last_item
             ):  # This covers the case where a float is given containing the last position
                 val = self.data[offset + i]
                 if self.numerical_type == "complex":
                     return complex(val)
                 return float(val)
-            else:
-                raise IndexError(f"The highest index is {last_item}. Received {pos}")
+            raise IndexError(f"The highest index is {last_item}. Received {pos}")
         else:
             return self.get_point(pos, step)
 
@@ -416,7 +408,7 @@ class TraceRead(DataSet):
         return len(self.data)
 
 
-class DummyTrace(object):
+class DummyTrace:
     """Dummy Trace for bypassing traces while reading."""
 
     def __init__(

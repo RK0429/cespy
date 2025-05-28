@@ -24,7 +24,7 @@ import subprocess
 # -------------------------------------------------------------------------------
 import sys
 from pathlib import Path
-from typing import IO, Optional, Union
+from typing import IO, Dict, List, Optional, Union
 
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
@@ -42,7 +42,7 @@ class LTspice(Simulator):
     # Please note that os.path.expanduser and os.path.join are sensitive to the style
     # of slash.
     # Placed in order of preference. The first to be found will be used.
-    _spice_exe_win_paths = [
+    _spice_exe_win_paths: List[str] = [
         "~/AppData/Local/Programs/ADI/LTspice/LTspice.exe",
         "~/Local Settings/Application Data/Programs/ADI/LTspice/LTspice.exe",
         "C:/Program Files/ADI/LTspice/LTspice.exe",
@@ -52,7 +52,7 @@ class LTspice(Simulator):
     ]
 
     # the default lib paths, as used by get_default_library_paths
-    _default_lib_paths = [
+    _default_lib_paths: List[str] = [
         "~/AppData/Local/LTspice/lib",
         "~/Documents/LTspiceXVII/lib/",
         "~/Documents/LTspice/lib/",
@@ -62,9 +62,9 @@ class LTspice(Simulator):
     ]
 
     # defaults:
-    spice_exe = []
-    process_name = ""
-    ltspice_args = {
+    spice_exe: List[str] = []
+    process_name: str = ""
+    ltspice_args: Dict[str, List[str]] = {
         "-alt": ["-alt"],  # Set solver to Alternate.
         # Use ASCII.raw files. Seriously degrades program performance.
         "-ascii": ["-ascii"],
@@ -82,7 +82,7 @@ class LTspice(Simulator):
         "-SOI": ["-SOI"],  # Allow up to 7 MOSFET nodes.
         "-sync": ["-sync"],  # Update component libraries.
     }
-    _default_run_switches = ["-Run", "-b"]
+    _default_run_switches: List[str] = ["-Run", "-b"]
 
     @classmethod
     def using_macos_native_sim(cls) -> bool:
@@ -99,7 +99,7 @@ class LTspice(Simulator):
         )
 
     @classmethod
-    def valid_switch(cls, switch_param: str, parameter: str = "") -> list[str]:
+    def valid_switch(cls, switch_param: str, parameter: str = "") -> List[str]:
         """Validate a command line switch.
 
         Available options for Windows/wine LTspice:
@@ -157,8 +157,8 @@ class LTspice(Simulator):
     def run(
         cls,
         netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[list[str]] = None,
-        timeout: Union[float, None] = None,
+        cmd_line_switches: Optional[List[str]] = None,
+        timeout: Optional[float] = None,
         stdout: Optional[Union[int, IO[bytes]]] = None,
         stderr: Optional[Union[int, IO[bytes]]] = None,
         exe_log: bool = False,
@@ -268,8 +268,8 @@ class LTspice(Simulator):
     def create_netlist(
         cls,
         circuit_file: Union[str, Path],
-        cmd_line_switches: Optional[list[str]] = None,
-        timeout: Union[float, None] = None,
+        cmd_line_switches: Optional[List[str]] = None,
+        timeout: Optional[float] = None,
         stdout: Optional[Union[int, IO[bytes]]] = None,
         stderr: Optional[Union[int, IO[bytes]]] = None,
         exe_log: bool = False,

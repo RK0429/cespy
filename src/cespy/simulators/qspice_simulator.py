@@ -59,7 +59,7 @@ class Qspice(Simulator):
     spice_exe = []
     process_name = ""
 
-    if sys.platform == "linux" or sys.platform == "darwin":
+    if sys.platform in ("linux", "darwin"):
         # status mid 2024: Qspice has limited support for running under linux+wine, and none for MacOS+wine
         # TODO: when the situation gets more mature, add support for wine. See
         # LTspice for an example.
@@ -81,7 +81,7 @@ class Qspice(Simulator):
         process_name = ""
     else:
         process_name = Simulator.guess_process_name(spice_exe[0])
-        _logger.debug(f"Found Qspice installed in: '{spice_exe}' ")
+        _logger.debug("Found Qspice installed in: '%s'", spice_exe)
 
     qspice_args = {
         "-ASCII": ["-ASCII"],  # Use ASCII file format for the output data(.qraw) file.
@@ -120,7 +120,7 @@ class Qspice(Simulator):
     _default_run_switches = ["-o"]
 
     @classmethod
-    def valid_switch(cls, switch: str, path: str = "") -> list[str]:
+    def valid_switch(cls, path: str, parameter: str = "") -> list[str]:
         """Validates a command line switch. The following options are available for
         QSPICE:
 
@@ -137,17 +137,17 @@ class Qspice(Simulator):
 
         * `-o <path>`: Specify the name of a file for the console output.
 
-        :param switch: switch to be added.
-        :type switch: str
-        :param path: path to the file related to the switch being given.
-        :type path: str, optional
+        :param path: switch to be added.
+        :type path: str
+        :param parameter: path to the file related to the switch being given.
+        :type parameter: str, optional
         :return: Nothing
         """
 
         # format check
-        if switch is None:
+        if path is None:
             return []
-        switch = switch.strip()
+        switch = path.strip()
         if len(switch) == 0:
             return []
         if switch[0] != "-":
@@ -155,16 +155,15 @@ class Qspice(Simulator):
 
         # will be set anyway?
         if switch in cls._default_run_switches:
-            _logger.info(f"Switch {switch} is already in the default switches")
+            _logger.info("Switch %s is already in the default switches", switch)
             return []
 
         # read from the dictionary
         if switch in cls.qspice_args:
             switches = cls.qspice_args[switch]
-            switches = [switch.replace("<path>", path) for switch in switches]
+            switches = [s.replace("<path>", parameter) for s in switches]
             return switches
-        else:
-            raise ValueError(f"Invalid Switch '{switch}'")
+        raise ValueError(f"Invalid Switch '{switch}'")
 
     @classmethod
     def run(
