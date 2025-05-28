@@ -125,55 +125,55 @@
 
 ## V. Refactoring, Code Organization, and API Simplification
 
-- [x] **A. Module and Naming Conventions:**
-  - [x] Rename `sim/tookit/` to `sim/toolkit/`.
-  - [x] Review all module and package names for clarity and consistency.
-  - [x] Ensure class and function names clearly reflect their purpose.
-- [x] **B. Code Cleanup:**
-  - [x] Merge duplicate classes/functions where `kuPyLTSpice` extended or minimally wrapped `kupicelib` components.
-  - [x] Remove any circular dependencies that might have existed between the two original packages.
-  - [x] Replace all cross-package imports with internal imports within the UnifiedPackage.
-  - [x] Identify and remove dead or legacy code sections no longer needed after merging.
-- [x] **C. Improve Code Quality:**
-  - [x] Ensure consistent and correct type hints across the entire codebase.
-    - [x] Reconcile function signatures if they differed.
-    - [x] Add missing type hints, especially from `kuPyLTSpice` code.
-  - [x] Apply a consistent coding style (e.g., using a formatter like Black, Flake8 for linting).
-  - [x] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
-- [x] **D. Simplify Simulation API:**
-  - [x] Evaluate the current user workflow for running simulations from both original packages.
-  - [x] Design and implement a clear, high-level API for running simulations in the UnifiedPackage.
-    - [x] *Consider providing a top-level class (e.g., `LTSpiceRunner`) or function (e.g., `simulate(netlist_path, ...)`).*
-  - [x] Ensure simulator engine choices (LTSpice, NGSpice, etc.) are presented coherently to the user (e.g., via a parameter, or by instantiating specific simulator classes).
-- [x] **E. Retain All Major Functionality:**
-  - [x] Systematically verify that all capabilities from both `kupicelib` and `kuPyLTSpice` are present in the unified tool:
-    - [x] LTSpice Automation (headless runs, data retrieval).
-    - [x] Schematic Editing (`.asc`, `.qsch`).
-    - [x] Data Analysis (plotting, Monte Carlo, worst-case analysis tools).
-    - [x] Multi-Engine Support (NGSpice, Qspice, Xyce, etc.).
-    - [x] Client-Server simulation mode.
-- [x] **F. Performance Considerations:**
-  - [x] During refactoring, identify any potential performance bottlenecks (e.g., large file I/O, heavy computations).
-  - [x] Note opportunities for optimization, even if not implemented immediately.
+- [ ] **A. Module and Naming Conventions:**
+  - [ ] Rename `sim/tookit/` to `sim/toolkit/`.
+  - [ ] Review all module and package names for clarity and consistency.
+  - [ ] Ensure class and function names clearly reflect their purpose.
+- [ ] **B. Code Cleanup:**
+  - [ ] Merge duplicate classes/functions where `kuPyLTSpice` extended or minimally wrapped `kupicelib` components.
+  - [ ] Remove any circular dependencies that might have existed between the two original packages.
+  - [ ] Replace all cross-package imports with internal imports within the UnifiedPackage.
+  - [ ] Identify and remove dead or legacy code sections no longer needed after merging.
+- [ ] **C. Improve Code Quality:**
+  - [ ] Ensure consistent and correct type hints across the entire codebase.
+    - [ ] Reconcile function signatures if they differed.
+    - [ ] Add missing type hints, especially from `kuPyLTSpice` code.
+  - [ ] Apply a consistent coding style (e.g., using a formatter like Black, Flake8 for linting).
+  - [ ] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
+- [ ] **D. Simplify Simulation API:**
+  - [ ] Evaluate the current user workflow for running simulations from both original packages.
+  - [ ] Design and implement a clear, high-level API for running simulations in the UnifiedPackage.
+    - [ ] *Consider providing a top-level class (e.g., `LTSpiceRunner`) or function (e.g., `simulate(netlist_path, ...)`).*
+  - [ ] Ensure simulator engine choices (LTSpice, NGSpice, etc.) are presented coherently to the user (e.g., via a parameter, or by instantiating specific simulator classes).
+- [ ] **E. Retain All Major Functionality:**
+  - [ ] Systematically verify that all capabilities from both `kupicelib` and `kuPyLTSpice` are present in the unified tool:
+    - [ ] LTSpice Automation (headless runs, data retrieval).
+    - [ ] Schematic Editing (`.asc`, `.qsch`).
+    - [ ] Data Analysis (plotting, Monte Carlo, worst-case analysis tools).
+    - [ ] Multi-Engine Support (NGSpice, Qspice, Xyce, etc.).
+    - [ ] Client-Server simulation mode.
+- [ ] **F. Performance Considerations:**
+  - [ ] During refactoring, identify any potential performance bottlenecks (e.g., large file I/O, heavy computations).
+  - [ ] Note opportunities for optimization, even if not implemented immediately.
 
 ## VI. Documentation and Examples
 
-- [x] **A. Unified README:**
-  - [x] Combine the `README.md` files from `kupicelib` and `kuPyLTSpice`.
-  - [x] The new README should:
-    - [x] Introduce the UnifiedPackage.
-    - [x] List its key features (covering combined capabilities).
-    - [x] Provide basic installation and usage examples.
-    - [x] Clearly state the license (GPL-3.0).
-- [x] **B. API Documentation:**
-  - [x] Ensure all public APIs (classes, functions, methods) have clear docstrings.
-  - [x] Update all documentation to reflect any API changes due to refactoring or renaming.
-- [x] **C. User Guide / Reference Manual (Recommended):**
-  - [x] Consider creating a more detailed User Guide or reference manual.
-  - [x] Topics could include: setup, circuit modification, running sweeps, result parsing, analysis tools.
-- [x] **D. Migration Guide (Optional but Recommended):**
-  - [x] Prepare a short guide for users transitioning from `kupicelib` or `kuPyLTSpice`.
-  - [x] Example: "If you used `kuPyLTSpice.LTSpiceSimulation(...)`, now use `cespy.simulators.LTSpiceSimulator(...)`."
+- [ ] **A. Unified README:**
+  - [ ] Combine the `README.md` files from `kupicelib` and `kuPyLTSpice`.
+  - [ ] The new README should:
+    - [ ] Introduce the UnifiedPackage.
+    - [ ] List its key features (covering combined capabilities).
+    - [ ] Provide basic installation and usage examples.
+    - [ ] Clearly state the license (GPL-3.0).
+- [ ] **B. API Documentation:**
+  - [ ] Ensure all public APIs (classes, functions, methods) have clear docstrings.
+  - [ ] Update all documentation to reflect any API changes due to refactoring or renaming.
+- [ ] **C. User Guide / Reference Manual (Recommended):**
+  - [ ] Consider creating a more detailed User Guide or reference manual.
+  - [ ] Topics could include: setup, circuit modification, running sweeps, result parsing, analysis tools.
+- [ ] **D. Migration Guide (Optional but Recommended):**
+  - [ ] Prepare a short guide for users transitioning from `kupicelib` or `kuPyLTSpice`.
+  - [ ] Example: "If you used `kuPyLTSpice.LTSpiceSimulation(...)`, now use `cespy.simulators.LTSpiceSimulator(...)`."
 
 ## VII. Unified Packaging and Build Configuration
 
