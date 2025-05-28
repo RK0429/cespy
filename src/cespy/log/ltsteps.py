@@ -160,7 +160,7 @@ def reformat_LTSpice_export(export_file: str, tabular_file: str) -> None:
     fout.close()
 
 
-class LTSpiceExport(object):
+class LTSpiceExport:
     """Opens and reads LTSpice export data when using the "Export data as text" in the
     File Menu on the waveform window.
 
@@ -241,6 +241,14 @@ class HarmonicData:
 
     @classmethod
     def from_line(cls, line: str) -> HarmonicData:
+        """Create a HarmonicData instance from a log file line.
+
+        Args:
+            line: A line from the harmonics table in the log file
+
+        Returns:
+            HarmonicData instance with parsed values
+        """
         tokens = line.split()
         harmonic_number = int(tokens[0])
         frequency = float(tokens[1])
@@ -270,6 +278,7 @@ class FourierData:
 
     @property
     def fundamental(self) -> float:
+        """Get the fundamental frequency from the first harmonic."""
         return self.harmonics[0].frequency
 
     def __getitem__(self, item: int) -> HarmonicData:
@@ -345,7 +354,7 @@ class LTSpiceLogReader(LogfileData):
             re.IGNORECASE,
         )
 
-        _logger.debug(f"Processing LOG file:{log_filename}")
+        _logger.debug("Processing LOG file: %s", log_filename)
         with open(log_filename, "r", encoding=self.encoding) as fin:
             line = fin.readline()
             # init variables, just in case. Not needed really, but helps debugging
@@ -435,8 +444,7 @@ class LTSpiceLogReader(LogfileData):
                     if not read_measures:
                         fin.close()
                         return
-                    else:
-                        break  # Jumps to the section that reads measurements
+                    break  # Jumps to the section that reads measurements
 
                 if self.step_count == 0:  # then there are no steps,
                     match = regx.match(line)

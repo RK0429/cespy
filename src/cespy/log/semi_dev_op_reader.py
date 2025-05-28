@@ -155,9 +155,9 @@ def opLogReader(
             if match is not None:
                 where = match.group(1)
                 if where is not None:  # Ensure where is not None before using lower()
-                    dataset[where.lower()] = (
-                        {}
-                    )  # Creates a dictionary for each component type
+                    dataset[
+                        where.lower()
+                    ] = {}  # Creates a dictionary for each component type
             else:
                 cols = re.split(r"\s+", line.rstrip("\r\n"))
                 if len(cols) > 1 and (

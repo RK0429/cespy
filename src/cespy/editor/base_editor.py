@@ -1,4 +1,11 @@
 # coding=utf-8
+"""Abstract base classes for SPICE netlist and schematic editors.
+
+This module provides the foundation for all editor implementations in cespy,
+defining common interfaces and functionality for manipulating SPICE circuit files.
+It includes abstract base classes for components, primitives, and the main editor
+class that handles file I/O and circuit manipulation.
+"""
 from __future__ import annotations
 
 # -------------------------------------------------------------------------------
@@ -87,6 +94,14 @@ SPICE_DOT_INSTRUCTIONS = (
 
 
 def PARAM_REGEX(pname: str) -> str:
+    """Generate a regex pattern for matching SPICE parameters.
+
+    Args:
+        pname: Parameter name to match
+
+    Returns:
+        Regex pattern string for matching the parameter
+    """
     return (
         r"(?P<name>"
         + pname
@@ -170,7 +185,7 @@ def scan_eng(value: str) -> float:
         # By industry convention, SPICE is not case sensitive
         if suffix.startswith("meg"):
             return f * 1e6
-        elif suffix[0] in "fpnuµmkgt":
+        if suffix[0] in "fpnuµmkgt":
             return (
                 f
                 * {
@@ -189,6 +204,15 @@ def scan_eng(value: str) -> float:
 
 
 def to_float(value: str, accept_invalid: bool = True) -> Union[float, str]:
+    """Convert a SPICE value string to float, handling SI suffixes.
+
+    Args:
+        value: String value to convert
+        accept_invalid: If True, return original string on parse error
+
+    Returns:
+        Float value or original string if parsing fails and accept_invalid is True
+    """
     _MULT = {
         "f": 1e-15,
         "p": 1e-12,
@@ -222,8 +246,7 @@ def to_float(value: str, accept_invalid: bool = True) -> Union[float, str]:
     if i == 0:
         if accept_invalid:
             return trimmed
-        else:
-            raise ValueError("Doesn't start with a number")
+        raise ValueError("Doesn't start with a number")
 
     if 0 < i < length and trimmed[i] in ("E", "e"):
         i += 1
@@ -268,7 +291,7 @@ class ParameterNotFoundError(Exception):
         super().__init__(f'Parameter "{parameter}" not found')
 
 
-class Primitive(object):
+class Primitive:
     """Holds the information of a primitive element in the netlist.
 
     This is a base class for the Component and is used to hold the information of the
@@ -847,12 +870,12 @@ class BaseEditor(ABC):
             path = os.path.expanduser(path)
 
         if os.path.exists(path) and os.path.isdir(path):
-            _logger.debug(f"Adding path '{path}' to the custom library path list")
+            _logger.debug("Adding path '%s' to the custom library path list", path)
             cls.custom_lib_paths.append(path)
         else:
             _logger.warning(
-                f"Cannot add path '{path}' to the custom library path list, as it does"
-                " not exist"
+                "Cannot add path '%s' to the custom library path list, as it does not exist",
+                path,
             )
 
     @classmethod
@@ -891,7 +914,7 @@ class BaseEditor(ABC):
         """Returns the model or element value of a component."""
 
 
-class HierarchicalComponent(object):
+class HierarchicalComponent:
     """Helper class to allow setting parameters when using object oriented access."""
 
     def __init__(

@@ -174,7 +174,8 @@ class SimClient:
         except Exception as e:
             _logger.error(
                 "Client: Unexpected error adding sources to session %s: %s",
-                self.session_id, e
+                self.session_id,
+                e,
             )
             return False
 

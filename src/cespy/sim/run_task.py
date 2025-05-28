@@ -175,10 +175,12 @@ class RunTask:
 
                 if self.callback:
                     if self.callback_args is not None:
-                        callback_print = ", ".join([
-                            f"{key}={value}"
-                            for key, value in self.callback_args.items()
-                        ])
+                        callback_print = ", ".join(
+                            [
+                                f"{key}={value}"
+                                for key, value in self.callback_args.items()
+                            ]
+                        )
                     else:
                         callback_print = ""
                     self.print_info(

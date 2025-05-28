@@ -805,9 +805,9 @@ class QschEditor(BaseSchematic):
                     )
                     if sub_circuit_schematic_file:
                         sub_schematic = type(self)(sub_circuit_schematic_file)
-                        sch_comp.attributes["_SUBCKT"] = (
-                            sub_schematic  # Store it for future use.
-                        )
+                        sch_comp.attributes[
+                            "_SUBCKT"
+                        ] = sub_schematic  # Store it for future use.
                     else:
                         _logger.warning(
                             f"Subcircuit '{sub_circuit_name}' not found. Have you set"

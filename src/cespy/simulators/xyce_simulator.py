@@ -260,8 +260,7 @@ class XyceSimulator(Simulator):
                     ret = [switch_list[0], parameter]
                 else:
                     _logger.warning(
-                        "Invalid parameter %s for switch '%s'",
-                        parameter, switch
+                        "Invalid parameter %s for switch '%s'", parameter, switch
                     )
             else:
                 ret = switch_list

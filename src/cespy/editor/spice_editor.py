@@ -27,16 +27,19 @@ from typing import (
     IO,
     Any,
     Callable,
+    Dict,
     Iterator,
     List,
     Match,
     Optional,
+    Pattern,
     Tuple,
     Type,
     Union,
 )
 
 from ..log.logfile_data import try_convert_value
+from ..sim.simulator import Simulator
 from ..simulators.ltspice_simulator import LTspice
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from ..utils.file_search import search_file_in_containers
@@ -76,7 +79,7 @@ def VALUE_RGX(number_regex: str) -> str:
     return r"(?P<value>(?P<formula>{)?(?(formula).*}|" + number_regex + "))"
 
 
-REPLACE_REGEXS = {
+REPLACE_REGEXS: Dict[str, str] = {
     "A": r"",  # LTspice Only : Special Functions, Parameter substitution not supported
     # Behavioral source
     "B": r"^(?P<designator>B§?[VI]?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$",
@@ -207,12 +210,12 @@ REPLACE_REGEXS = {
 SUBCKT_CLAUSE_FIND = r"^.SUBCKT\s+"
 
 # Code Optimization objects, avoiding repeated compilation of regular expressions
-component_replace_regexs = {
+component_replace_regexs: Dict[str, Pattern[str]] = {
     prefix: re.compile(pattern, re.IGNORECASE)
     for prefix, pattern in REPLACE_REGEXS.items()
 }
-subckt_regex = re.compile(r"^.SUBCKT\s+(?P<name>[\w\.]+)", re.IGNORECASE)
-lib_inc_regex = re.compile(r"^\.(LIB|INC)\s+(.*)$", re.IGNORECASE)
+subckt_regex: Pattern[str] = re.compile(r"^.SUBCKT\s+(?P<name>[\w\.]+)", re.IGNORECASE)
+lib_inc_regex: Pattern[str] = re.compile(r"^\.(LIB|INC)\s+(.*)$", re.IGNORECASE)
 
 # The following variable deprecated, and here only so that people can find it.
 # It is replaced by SpiceEditor.set_custom_library_paths().
@@ -547,7 +550,7 @@ class SpiceCircuit(BaseEditor):
         :rtype: List[str]
         """
 
-        subckt_names = []
+        subckt_names: List[str] = []
         for line in self.netlist:
             if isinstance(line, SpiceCircuit):
                 subckt_names.append(line.name())
@@ -1123,7 +1126,7 @@ class SpiceCircuit(BaseEditor):
         :type prefixes: str
         :return: A list of components matching the prefixes demanded.
         """
-        answer = []
+        answer: List[str] = []
         if prefixes == "*":
             prefixes = "".join(REPLACE_REGEXS.keys())
         for line in self.netlist:
@@ -1215,7 +1218,7 @@ class SpiceCircuit(BaseEditor):
         :returns: Circuit Nodes
         :rtype: list[str]
         """
-        circuit_nodes = []
+        circuit_nodes: List[str] = []
         for line in self.netlist:
             prefix = get_line_command(line)
             if prefix in component_replace_regexs:
@@ -1428,6 +1431,10 @@ class SpiceEditor(SpiceCircuit):
     :type create_blank: bool, optional
     """
 
+    simulation_command_update_functions: Dict[
+        str, Callable[[str, Union[str, int, float]], str]
+    ] = {}
+
     def __init__(
         self,
         netlist_file: Union[str, Path],
@@ -1595,7 +1602,7 @@ class SpiceEditor(SpiceCircuit):
         callback: Optional[Union[Type[Any], Callable[[Path, Path], Any]]] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
-        simulator: Any = None,
+        simulator: Optional[Any] = None,
     ) -> Any:
         """.. deprecated:: 1.0 Use the `run` method from the `SimRunner` class instead.
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Command-line script to run the SPICE simulation server."""
 
 import argparse
 import logging
@@ -21,6 +22,7 @@ except ImportError:
 
 
 def main() -> None:
+    """Run the main SPICE server with command-line arguments."""
     # declare simulator variable with default
     simulator: Type[LTspice] | Type[NGspiceSimulator] | Type[XyceSimulator] = LTspice
     parser = argparse.ArgumentParser(
@@ -78,7 +80,7 @@ def main() -> None:
     elif sim_key == "xyce":
         simulator = XyceSimulator
     else:
-        parser.error(f"Unsupported simulator '{args.simulator}'")
+        parser.error("Unsupported simulator '%s'" % args.simulator)
 
     print("Starting Server")
     server = SimServer(

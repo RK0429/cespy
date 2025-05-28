@@ -80,9 +80,9 @@ LTSPICE_ATTRIBUTES = ("InstName", "Def_Sub")
 class AscEditor(BaseSchematic):
     """Class made to update directly the LTspice ASC files."""
 
-    symbol_cache: Dict[str, str] = (
-        {}
-    )  # This is a class variable, so it can be shared between all instances.
+    symbol_cache: Dict[
+        str, str
+    ] = {}  # This is a class variable, so it can be shared between all instances.
     """:meta private:"""
 
     simulator_lib_paths: List[str] = LTspice.get_default_library_paths()
@@ -714,10 +714,12 @@ class AscEditor(BaseSchematic):
                             else:
                                 params[param_key][key] = value_str
                             # and make the line out of the dict
-                            component.attributes[param_key] = " ".join([
-                                f"{p_key}={p_value}"
-                                for p_key, p_value in params[param_key].items()
-                            ])
+                            component.attributes[param_key] = " ".join(
+                                [
+                                    f"{p_key}={p_value}"
+                                    for p_key, p_value in params[param_key].items()
+                                ]
+                            )
                             _logger.info(
                                 f"Component {element} updated with parameter"
                                 f" {key}:{value_str}"
@@ -741,10 +743,12 @@ class AscEditor(BaseSchematic):
                                 # if SpiceLine exists: add to the dict
                                 params[param_key][key] = value_str
                                 # and make the line out of the dict
-                                component.attributes[param_key] = " ".join([
-                                    f"{p_key}={p_value}"
-                                    for p_key, p_value in params[param_key].items()
-                                ])
+                                component.attributes[param_key] = " ".join(
+                                    [
+                                        f"{p_key}={p_value}"
+                                        for p_key, p_value in params[param_key].items()
+                                    ]
+                                )
                             else:
                                 # if SpiceLine does not exist: create the line
                                 component.attributes[param_key] = f"{key}={value_str}"

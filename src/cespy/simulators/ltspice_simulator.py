@@ -149,9 +149,7 @@ class LTspice(Simulator):
             switches = [s.replace("<path>", parameter) for s in switches]
             return switches
         valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
-        raise ValueError(
-            f"Invalid switch '{switch}'. Valid switches are: {valid_keys}"
-        )
+        raise ValueError(f"Invalid switch '{switch}'. Valid switches are: {valid_keys}")
 
     @classmethod
     def run(

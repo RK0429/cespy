@@ -269,8 +269,7 @@ class RawWrite:
             else:
                 new_name = cast(str, kwargs["rename_format"].format(name, **kwargs))
             return new_name
-        else:
-            return name
+        return name
 
     def _name_exists(self, name: str) -> bool:
         """Check if a trace name already exists in the collection.

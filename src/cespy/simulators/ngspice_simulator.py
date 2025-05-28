@@ -173,7 +173,8 @@ class NGspiceSimulator(Simulator):
                 _logger.info(
                     "Switch %s %s is already in the default switches,"
                     " use 'set_compatibility_mode' instead",
-                    switch, parameter
+                    switch,
+                    parameter,
                 )
                 return ret
             switch_list = cls.ngspice_args[switch]
@@ -187,8 +188,7 @@ class NGspiceSimulator(Simulator):
                     ret = [switch_list[0], parameter]
                 else:
                     _logger.warning(
-                        "Invalid parameter %s for switch '%s'",
-                        parameter, switch
+                        "Invalid parameter %s for switch '%s'", parameter, switch
                     )
             else:
                 ret = switch_list

@@ -547,7 +547,7 @@ class RawRead:
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
                         "Dialect is ambiguous: '%s'. Using qspice.",
-                        self.raw_params['Command']
+                        self.raw_params["Command"],
                     )
                 autodetected_dialect = "qspice"
             if "ngspice" in self.raw_params["Command"].lower():
@@ -557,7 +557,7 @@ class RawRead:
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
                         "Dialect is ambiguous: '%s'. Using ngspice.",
-                        self.raw_params['Command']
+                        self.raw_params["Command"],
                     )
                 autodetected_dialect = "ngspice"
             if "xyce" in self.raw_params["Command"].lower():
@@ -569,7 +569,7 @@ class RawRead:
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
                         "Dialect is ambiguous: '%s'. Using xyce.",
-                        self.raw_params['Command']
+                        self.raw_params["Command"],
                     )
                 autodetected_dialect = "xyce"
 
@@ -579,7 +579,8 @@ class RawRead:
                     _logger.warning(
                         "Dialect specified as %s, but the file seems to be from %s. "
                         "Trying to read it anyway.",
-                        dialect, autodetected_dialect
+                        dialect,
+                        autodetected_dialect,
                     )
         else:
             # no dialect given. Take the autodetected version
@@ -896,11 +897,13 @@ class RawRead:
         local_vars.update(
             {name: float(value) for name, value in self.spice_params.items()}
         )
-        local_vars.update({
-            namify(trace.name): trace.data
-            for trace in self._traces
-            if not isinstance(trace, DummyTrace)
-        })
+        local_vars.update(
+            {
+                namify(trace.name): trace.data
+                for trace in self._traces
+                if not isinstance(trace, DummyTrace)
+            }
+        )
         try:
             trace.data = cast(NDArray[Any], _safe_eval(formula, local_vars))
         except Exception as err:

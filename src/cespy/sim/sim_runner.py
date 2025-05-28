@@ -170,19 +170,23 @@ class AnyRunner(Protocol):
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
-    ) -> Optional[RunTask]: ...
+    ) -> Optional[RunTask]:
+        ...
 
     def wait_completion(
         self,
         timeout: Optional[float] = None,
         abort_all_on_timeout: bool = False,
-    ) -> bool: ...
+    ) -> bool:
+        ...
 
     @property
-    def okSim(self) -> int: ...
+    def okSim(self) -> int:
+        ...
 
     @property
-    def runno(self) -> int: ...
+    def runno(self) -> int:
+        ...
 
 
 class SimRunner(AnyRunner):

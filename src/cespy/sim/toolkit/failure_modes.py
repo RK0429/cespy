@@ -111,8 +111,8 @@ class FailureMode(SimAnalysis):
                 self.failure_simulations[f"{two_pin_component}_O"] = self.run()
                 # Short Circuit: insert short resistor
                 netlist = getattr(self.editor, "netlist")
-                netlist[cinfo["line"]] = (
-                    f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
-                )
+                netlist[
+                    cinfo["line"]
+                ] = f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
                 self.failure_simulations[f"{two_pin_component}_S"] = self.run()
                 self.editor.reset_netlist()

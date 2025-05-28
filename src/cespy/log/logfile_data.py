@@ -86,7 +86,8 @@ NumericType = Union[int, float, complex, LTComplex]
 
 # Create a protocol for types that can be compared
 class Comparable(Protocol):
-    def __lt__(self, other: Any) -> bool: ...
+    def __lt__(self, other: Any) -> bool:
+        ...
 
 
 T = TypeVar("T", bound=Comparable)
@@ -157,7 +158,7 @@ def split_line_into_values(line: str) -> List[ValueType]:
                 parenthesis.pop(0)
                 if len(parenthesis) == 0:
                     value_list = split_line_into_values(
-                        line[value_start + 1: i]
+                        line[value_start + 1 : i]
                     )  # Excludes the parenthesis
                     values.append(value_list)
                     value_start = i + 1
@@ -172,7 +173,7 @@ def split_line_into_values(line: str) -> List[ValueType]:
                 values.append(cast(ValueType, None))
             value_start = i + 1
     if value_start < i + 1:
-        values.append(try_convert_value(line[value_start: i + 1]))
+        values.append(try_convert_value(line[value_start : i + 1]))
     parenthesis_balanced = len(parenthesis) == 0
     if not parenthesis_balanced:
         raise ValueError("Parenthesis are not balanced")
@@ -200,9 +201,9 @@ class LogfileData:
             # Changes in step_set would be propagated to object on the call
 
         if dataset is None:
-            self.dataset: Dict[str, List[Any]] = (
-                OrderedDict()
-            )  # Dictionary in which the order of the keys is kept
+            self.dataset: Dict[
+                str, List[Any]
+            ] = OrderedDict()  # Dictionary in which the order of the keys is kept
         else:
             self.dataset = (
                 dataset.copy()

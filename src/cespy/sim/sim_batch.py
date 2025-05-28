@@ -254,9 +254,9 @@ class SimCommander(SpiceEditor):
         :return: A RunTask object
         """
         # Adapt callback if necessary
-        adapted_callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = (
-            None
-        )
+        adapted_callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None
 
         if callback is not None:
             if isinstance(callback, type) and issubclass(callback, ProcessCallback):

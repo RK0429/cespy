@@ -198,16 +198,16 @@ class QspiceLogReader(LogfileData):
                                     meas_name + "_" + str(i)
                                     for i in range(len(values) - 1)
                                 ]
-                                headers[1] = (
-                                    meas_name  # first column is the measure name without _0
-                                )
+                                headers[
+                                    1
+                                ] = meas_name  # first column is the measure name without _0
                             else:
                                 headers = [
                                     meas_name + "_" + str(i) for i in range(len(values))
                                 ]
-                                headers[0] = (
-                                    meas_name  # first column is the measure name without _0
-                                )
+                                headers[
+                                    0
+                                ] = meas_name  # first column is the measure name without _0
 
                             for title in headers:
                                 self.dataset[title.lower()] = []

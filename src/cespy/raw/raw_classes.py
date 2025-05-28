@@ -344,9 +344,7 @@ class TraceRead(DataSet):
             return super().get_wave()
         if step == 0:
             return self.data[: self.axis.step_offset(1)]
-        return self.data[
-            self.axis.step_offset(step) : self.axis.step_offset(step + 1)
-        ]
+        return self.data[self.axis.step_offset(step) : self.axis.step_offset(step + 1)]
 
     def get_point_at(self, t: float, step: int = 0) -> Union[float, complex]:
         """Get a point from the trace at the point specified by the /t/ argument. If the

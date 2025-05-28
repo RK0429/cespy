@@ -104,12 +104,12 @@ class SimServer:
 
     def run(self, session_id: str, circuit_name: str, zip_data: Binary) -> int:
         """Run a simulation for the given session.
-        
+
         Args:
             session_id: The session identifier
             circuit_name: Name of the circuit file
             zip_data: Binary data containing the circuit and dependencies
-            
+
         Returns:
             The run number of the simulation or -1 if failed
         """
@@ -167,10 +167,10 @@ class SimServer:
                 if runno == task_info["runno"]:
                     # Create a buffer to store the zip file in memory
                     zip_file = task_info["zipfile"]
-                    zip = zip_file.open("rb")
+                    zip_handle = zip_file.open("rb")
                     # Read the zip file from the buffer and send it to the server
-                    zip_data = zip.read()
-                    zip.close()
+                    zip_data = zip_handle.read()
+                    zip_handle.close()
                     self.simulation_manager.erase_files_of_runno(runno)
                     return zip_file.name, Binary(zip_data)
 

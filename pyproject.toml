@@ -31,15 +31,12 @@ Repository = "https://github.com/RK0429/cespy.git"
 packages = [{include = "cespy", from = "src"}]
 include = ["src/cespy/editor/data/asc_to_qsch_data.xml"]
 
-[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
 flake8 = "^6.0.0"
 mypy = "^1.5.1"
 pytest = "^7.4.0"
-sphinx = "^7.2.0"
-sphinx-rtd-theme = "^3.0.2"
-
-[tool.poetry.group.dev.dependencies]
 sphinx = "^7.2.0"
 sphinx-rtd-theme = "^3.0.2"
 myst-parser = "^4.0.1"

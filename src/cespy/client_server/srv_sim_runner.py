@@ -40,11 +40,11 @@ _logger = logging.getLogger("cespy.ServerSimRunner")
 
 def zip_files(raw_filename: Path, log_filename: Path) -> Path:
     """Zip raw and log files together for client download.
-    
+
     Args:
         raw_filename: Path to the raw simulation output file
         log_filename: Path to the simulation log file
-        
+
     Returns:
         Path to the created zip file
     """
@@ -85,7 +85,9 @@ class ServerSimRunner(threading.Thread):
             verbose=verbose,
             output_folder=output_folder,
         )
-        self.completed_tasks: List[Dict[str, Any]] = (
+        self.completed_tasks: List[
+            Dict[str, Any]
+        ] = (
             []
         )  # This is a list of dictionaries with the information of the completed tasks
         self._stop = False
@@ -100,16 +102,18 @@ class ServerSimRunner(threading.Thread):
             while len(self.runner.completed_tasks) > 0:
                 task = self.runner.completed_tasks.pop(0)
                 zip_filename = task.callback_return
-                self.completed_tasks.append({
-                    "runno": task.runno,
-                    "retcode": task.retcode,
-                    "circuit": task.netlist_file,
-                    "raw": task.raw_file,
-                    "log": task.log_file,
-                    "zipfile": zip_filename,
-                    "start": task.start_time,
-                    "stop": task.stop_time,
-                })
+                self.completed_tasks.append(
+                    {
+                        "runno": task.runno,
+                        "retcode": task.retcode,
+                        "circuit": task.netlist_file,
+                        "raw": task.raw_file,
+                        "log": task.log_file,
+                        "zipfile": zip_filename,
+                        "start": task.start_time,
+                        "stop": task.stop_time,
+                    }
+                )
                 _logger.debug("Task %s is finished", task)
                 _logger.debug(self.completed_tasks[-1])
                 _logger.debug(len(self.completed_tasks))
@@ -176,7 +180,7 @@ class ServerSimRunner(threading.Thread):
 
     def running(self) -> bool:
         """Check if the thread is still running.
-        
+
         Returns:
             True if the thread is running, False otherwise
         """

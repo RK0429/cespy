@@ -17,14 +17,14 @@ from cespy.log.ltsteps import LTSpiceLogReader
 
 def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
     """Read measurement data from a log file.
-    
+
     :param log_file: Path to the log file
     :return: Dictionary mapping measurement names to lists of values
     """
     try:
         log_reader = LTSpiceLogReader(log_file)
         measurements = {}
-        
+
         # Extract measurement data
         for meas_name, meas_data in log_reader.measurements.items():
             values = []
@@ -37,9 +37,9 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
                     pass
             if values:
                 measurements[meas_name] = values
-                
+
         return measurements
-        
+
     except Exception as e:
         print(f"Error reading log file: {e}")
         return {}
@@ -50,10 +50,10 @@ def create_histogram(
     title: str,
     bins: int = 50,
     output: Optional[str] = None,
-    show_stats: bool = True
+    show_stats: bool = True,
 ) -> None:
     """Create a histogram from the data.
-    
+
     :param data: List of values to plot
     :param title: Title for the histogram
     :param bins: Number of bins for the histogram
@@ -61,36 +61,54 @@ def create_histogram(
     :param show_stats: Whether to show statistics on the plot
     """
     fig, ax = plt.subplots(figsize=(10, 6))
-    
+
     # Create histogram
-    n, bins_edges, patches = ax.hist(data, bins=bins, alpha=0.7, edgecolor='black')
-    
+    n, bins_edges, patches = ax.hist(data, bins=bins, alpha=0.7, edgecolor="black")
+
     # Calculate statistics
     mean_val = np.mean(data)
     std_val = np.std(data)
     median_val = np.median(data)
-    
+
     # Add vertical lines for mean and median
-    ax.axvline(mean_val, color='red', linestyle='dashed', linewidth=2, label=f'Mean: {mean_val:.3e}')
-    ax.axvline(median_val, color='green', linestyle='dashed', linewidth=2, label=f'Median: {median_val:.3e}')
-    
+    ax.axvline(
+        mean_val,
+        color="red",
+        linestyle="dashed",
+        linewidth=2,
+        label=f"Mean: {mean_val:.3e}",
+    )
+    ax.axvline(
+        median_val,
+        color="green",
+        linestyle="dashed",
+        linewidth=2,
+        label=f"Median: {median_val:.3e}",
+    )
+
     # Add title and labels
     ax.set_title(title)
-    ax.set_xlabel('Value')
-    ax.set_ylabel('Count')
-    
+    ax.set_xlabel("Value")
+    ax.set_ylabel("Count")
+
     # Add statistics text box if requested
     if show_stats:
-        stats_text = f'Count: {len(data)}\nMean: {mean_val:.3e}\nStd: {std_val:.3e}\nMin: {min(data):.3e}\nMax: {max(data):.3e}'
-        ax.text(0.7, 0.95, stats_text, transform=ax.transAxes, 
-                verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-    
+        stats_text = f"Count: {len(data)}\nMean: {mean_val:.3e}\nStd: {std_val:.3e}\nMin: {min(data):.3e}\nMax: {max(data):.3e}"
+        ax.text(
+            0.7,
+            0.95,
+            stats_text,
+            transform=ax.transAxes,
+            verticalalignment="top",
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+        )
+
     ax.legend()
     ax.grid(True, alpha=0.3)
-    
+
     # Save or show
     if output:
-        plt.savefig(output, dpi=150, bbox_inches='tight')
+        plt.savefig(output, dpi=150, bbox_inches="tight")
         print(f"Histogram saved to: {output}")
     else:
         plt.show()
@@ -102,55 +120,52 @@ def main() -> None:
         description="Create histograms from SPICE simulation measurement data"
     )
     parser.add_argument(
-        "log_file",
-        type=Path,
-        help="Path to the log file containing measurement data"
+        "log_file", type=Path, help="Path to the log file containing measurement data"
     )
     parser.add_argument(
-        "-m", "--measurement",
-        help="Specific measurement to plot (if not specified, all measurements are plotted)"
+        "-m",
+        "--measurement",
+        help="Specific measurement to plot (if not specified, all measurements are plotted)",
     )
     parser.add_argument(
-        "-b", "--bins",
+        "-b",
+        "--bins",
         type=int,
         default=50,
-        help="Number of bins for the histogram (default: 50)"
+        help="Number of bins for the histogram (default: 50)",
     )
     parser.add_argument(
-        "-o", "--output",
-        help="Output file path for saving the plot (e.g., histogram.png)"
+        "-o",
+        "--output",
+        help="Output file path for saving the plot (e.g., histogram.png)",
     )
     parser.add_argument(
-        "--no-stats",
-        action="store_true",
-        help="Don't show statistics on the plot"
+        "--no-stats", action="store_true", help="Don't show statistics on the plot"
     )
     parser.add_argument(
-        "-l", "--list",
-        action="store_true",
-        help="List available measurements and exit"
+        "-l", "--list", action="store_true", help="List available measurements and exit"
     )
-    
+
     args = parser.parse_args()
-    
+
     if not args.log_file.exists():
         print(f"Error: Log file '{args.log_file}' not found")
         sys.exit(1)
-    
+
     # Read measurement data
     measurements = read_measurement_data(args.log_file)
-    
+
     if not measurements:
         print("No measurement data found in log file")
         sys.exit(1)
-    
+
     # List measurements if requested
     if args.list:
         print(f"Available measurements in {args.log_file.name}:")
         for name, values in measurements.items():
             print(f"  {name} ({len(values)} values)")
         sys.exit(0)
-    
+
     # Plot specific measurement or all
     if args.measurement:
         if args.measurement in measurements:
@@ -159,7 +174,7 @@ def main() -> None:
                 f"Histogram: {args.measurement}",
                 bins=args.bins,
                 output=args.output,
-                show_stats=not args.no_stats
+                show_stats=not args.no_stats,
             )
         else:
             print(f"Error: Measurement '{args.measurement}' not found in log file")
@@ -175,36 +190,36 @@ def main() -> None:
                 f"Histogram: {name}",
                 bins=args.bins,
                 output=args.output,
-                show_stats=not args.no_stats
+                show_stats=not args.no_stats,
             )
         else:
             # Multiple measurements - create subplots
             n_meas = len(measurements)
             n_cols = min(3, n_meas)
             n_rows = (n_meas + n_cols - 1) // n_cols
-            
-            fig, axes = plt.subplots(n_rows, n_cols, figsize=(5*n_cols, 4*n_rows))
+
+            fig, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
             if n_meas == 1:
                 axes = [axes]
             else:
                 axes = axes.flatten()
-            
+
             for i, (name, values) in enumerate(measurements.items()):
                 ax = axes[i]
-                ax.hist(values, bins=args.bins, alpha=0.7, edgecolor='black')
+                ax.hist(values, bins=args.bins, alpha=0.7, edgecolor="black")
                 ax.set_title(name)
-                ax.set_xlabel('Value')
-                ax.set_ylabel('Count')
+                ax.set_xlabel("Value")
+                ax.set_ylabel("Count")
                 ax.grid(True, alpha=0.3)
-            
+
             # Hide unused subplots
             for i in range(n_meas, len(axes)):
                 axes[i].set_visible(False)
-            
+
             plt.tight_layout()
-            
+
             if args.output:
-                plt.savefig(args.output, dpi=150, bbox_inches='tight')
+                plt.savefig(args.output, dpi=150, bbox_inches="tight")
                 print(f"Histograms saved to: {args.output}")
             else:
                 plt.show()

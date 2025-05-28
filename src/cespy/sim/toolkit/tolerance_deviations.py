@@ -215,7 +215,8 @@ class ToleranceDeviations(SimAnalysis, ABC):
         self.testbench_prepared = False
 
     @abstractmethod
-    def prepare_testbench(self, **kwargs: Any) -> None: ...
+    def prepare_testbench(self, **kwargs: Any) -> None:
+        ...
 
     def run_testbench(
         self,
