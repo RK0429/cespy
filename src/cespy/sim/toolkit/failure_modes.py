@@ -87,7 +87,9 @@ class FailureMode(SimAnalysis):
         open_pins: Iterable[str],
     ) -> None:
         if not component.startswith("X"):
-            raise RuntimeError("The failure modes addition only works with subcircuits")
+            raise RuntimeError(
+                "The failure modes addition only works with subcircuits"
+            )
         if component not in self.subcircuits:
             raise ComponentNotFoundError()
         _ = short_pins

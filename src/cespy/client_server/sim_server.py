@@ -154,9 +154,9 @@ class SimServer:
             _logger.debug(task_info)
             runno = task_info["runno"]
             if runno in self.sessions[session_id]:
-                ret.append(
-                    runno
-                )  # transfers the dictionary from the simulation_manager completed task
+                # transfers the dictionary from the simulation_manager
+                # completed task
+                ret.append(runno)
                 # to the return dictionary
         _logger.debug("Server: Returning status %s", ret)
         return ret
@@ -177,7 +177,8 @@ class SimServer:
                     # Create a buffer to store the zip file in memory
                     zip_file = task_info["zipfile"]
                     zip_handle = zip_file.open("rb")
-                    # Read the zip file from the buffer and send it to the server
+                    # Read the zip file from the buffer and send it to the
+                    # server
                     zip_data = zip_handle.read()
                     zip_handle.close()
                     self.simulation_manager.erase_files_of_runno(runno)

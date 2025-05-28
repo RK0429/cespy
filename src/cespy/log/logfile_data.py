@@ -7,7 +7,17 @@ import logging
 import math
 import re
 from collections import OrderedDict
-from typing import Any, Dict, Iterable, List, Optional, Protocol, TypeVar, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Protocol,
+    TypeVar,
+    Union,
+    cast,
+)
 
 # -------------------------------------------------------------------------------
 # Name:        logfile_data.py
@@ -90,6 +100,7 @@ NumericType = Union[int, float, complex, LTComplex]
 # Create a protocol for types that can be compared
 class Comparable(Protocol):
     """Protocol for types that support less-than comparison."""
+
     def __lt__(self, other: Any) -> bool:
         ...
 
@@ -97,7 +108,9 @@ class Comparable(Protocol):
 T = TypeVar("T", bound=Comparable)
 
 
-def try_convert_value(value: Union[str, int, float, List[Any], bytes]) -> ValueType:
+def try_convert_value(
+    value: Union[str, int, float, List[Any], bytes]
+) -> ValueType:
     """Tries to convert the string into an integer and if it fails, tries to convert to
     a float, if it fails, then returns the value as string.
 
@@ -205,9 +218,8 @@ class LogfileData:
             # Changes in step_set would be propagated to object on the call
 
         if dataset is None:
-            self.dataset: Dict[
-                str, List[Any]
-            ] = OrderedDict()  # Dictionary in which the order of the keys is kept
+            # Dictionary in which the order of the keys is kept
+            self.dataset: Dict[str, List[Any]] = OrderedDict()
         else:
             self.dataset = (
                 dataset.copy()
@@ -235,7 +247,9 @@ class LogfileData:
             return self.dataset[
                 key
             ]  # This will raise an Index Error if not found here.
-        raise IndexError("'%s' is not a valid step variable or measurement name" % key)
+        raise IndexError(
+            "'%s' is not a valid step variable or measurement name" % key
+        )
 
     def has_steps(self) -> bool:
         """Returns true if the simulation has steps :return: True if the simulation has
@@ -271,7 +285,9 @@ class LogfileData:
         # returns the positions where there is match
         return [i for i, a in enumerate(condition_set) if a == v]
 
-    def steps_with_conditions(self, **conditions: Union[str, int, float]) -> List[int]:
+    def steps_with_conditions(
+        self, **conditions: Union[str, int, float]
+    ) -> List[int]:
         """Returns the steps that respect one or more equality conditions.
 
         :key conditions: parameters within the Spice simulation. Values are the matches
@@ -339,10 +355,16 @@ class LogfileData:
                     )
             elif len(self.dataset[measure]) == 1:
                 # Explicitly cast to the expected return type
-                return cast(Union[float, int, str, LTComplex], self.dataset[measure][0])
+                return cast(
+                    Union[float, int, str, LTComplex], self.dataset[measure][0]
+                )
             elif len(self.dataset[measure]) == 0:
-                _logger.error('No measurements found for measure "%s"', measure)
-                raise IndexError(f'No measurements found for measure "{measure}"')
+                _logger.error(
+                    'No measurements found for measure "%s"', measure
+                )
+                raise IndexError(
+                    f'No measurements found for measure "{measure}"'
+                )
             else:
                 raise IndexError(
                     "In stepped data, the step number needs to be provided"
@@ -375,7 +397,8 @@ class LogfileData:
             # Return a copy to avoid modifying original data
             return list(self.dataset[measure])
         elif isinstance(steps, int):
-            return [self.dataset[measure][steps]]  # Return as a list for consistency
+            # Return as a list for consistency
+            return [self.dataset[measure][steps]]
         else:  # Assuming it is an iterable
             return [self.dataset[measure][step] for step in steps]
 
@@ -400,10 +423,14 @@ class LogfileData:
             v for v in values if isinstance(v, (int, float, str, LTComplex))
         ]
         if not comparable_values:
-            raise ValueError(f"No comparable values found for measure {measure}")
+            raise ValueError(
+                f"No comparable values found for measure {measure}"
+            )
 
         # Cast comparable_values to Iterable[Comparable] for max
-        return cast(ValueType, max(cast(Iterable[Comparable], comparable_values)))
+        return cast(
+            ValueType, max(cast(Iterable[Comparable], comparable_values))
+        )
 
     def min_measure_value(
         self, measure: str, steps: Union[None, int, Iterable[int]] = None
@@ -426,10 +453,14 @@ class LogfileData:
             v for v in values if isinstance(v, (int, float, str, LTComplex))
         ]
         if not comparable_values:
-            raise ValueError(f"No comparable values found for measure {measure}")
+            raise ValueError(
+                f"No comparable values found for measure {measure}"
+            )
 
         # Cast comparable_values to Iterable[Comparable] for min
-        return cast(ValueType, min(cast(Iterable[Comparable], comparable_values)))
+        return cast(
+            ValueType, min(cast(Iterable[Comparable], comparable_values))
+        )
 
     def avg_measure_value(
         self, measure: str, steps: Union[None, int, Iterable[int]] = None
@@ -446,7 +477,9 @@ class LogfileData:
         values = self.get_measure_values_at_steps(measure, steps)
         # Filter to only numeric values for calculation
         numeric_values: List[NumericType] = [
-            v for v in values if isinstance(v, (int, float, complex, LTComplex))
+            v
+            for v in values
+            if isinstance(v, (int, float, complex, LTComplex))
         ]
         if not numeric_values:
             raise ValueError(f"No numeric values found for measure {measure}")
@@ -462,8 +495,12 @@ class LogfileData:
             if len(self.dataset[param]) > 0 and isinstance(
                 self.dataset[param][0], LTComplex
             ):
-                self.dataset[param + "_mag"] = [v.mag for v in self.dataset[param]]
-                self.dataset[param + "_ph"] = [v.ph for v in self.dataset[param]]
+                self.dataset[param + "_mag"] = [
+                    v.mag for v in self.dataset[param]
+                ]
+                self.dataset[param + "_ph"] = [
+                    v.ph for v in self.dataset[param]
+                ]
 
     def split_complex_values_on_datasets(self) -> None:
         """..
@@ -549,7 +586,9 @@ class LogfileData:
                     logging.error(
                         "Data size mismatch. Not all measurements have the same"
                         ' length. Expected %d. "%s" has %d',
-                        data_size, title, len(values)
+                        data_size,
+                        title,
+                        len(values),
                     )
 
             if isinstance(values[0], list) and len(values[0]) > 1:
@@ -572,7 +611,9 @@ class LogfileData:
                 step_data = [
                     self.stepset[param][index] for param in self.stepset.keys()
                 ]
-            meas_data = [self.dataset[param][index] for param in self.dataset.keys()]
+            meas_data = [
+                self.dataset[param][index] for param in self.dataset.keys()
+            ]
 
             if (
                 append_with_line_prefix is not None
@@ -601,7 +642,9 @@ class LogfileData:
                 logging.error(
                     "Line with wrong number of values."
                     " Expected:%d Index %d has %d",
-                    columns_per_line, index+1, columns_writen
+                    columns_per_line,
+                    index + 1,
+                    columns_writen,
                 )
             fout.write("\n")
 
@@ -661,7 +704,9 @@ class LogfileData:
                 -((bin_edges - mu) ** 2) / (2 * sd**2)
             )
             plt.plot(bin_edges, y, "r--", linewidth=1)
-            plt.axvspan(mu - sigma * sd, mu + sigma * sd, alpha=0.2, color="cyan")
+            plt.axvspan(
+                mu - sigma * sd, mu + sigma * sd, alpha=0.2, color="cyan"
+            )
             plt.ylabel("Distribution [Normalised]")
         else:
             plt.ylabel("Distribution")

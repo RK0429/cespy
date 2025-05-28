@@ -137,13 +137,17 @@ class WorstCaseAnalysis(ToleranceDeviations):
             ".func wc1(nom,min,max,idx) {if(run<0, nom, if(binary(run,idx),max,min))}"
         )
         self.last_run_number = 2**index - 1
-        self.editor.add_instruction(".step param run -1 %d 1" % self.last_run_number)
+        self.editor.add_instruction(
+            ".step param run -1 %d 1" % self.last_run_number
+        )
         self.editor.set_parameter("run", -1)  # in case the step is commented.
         self.testbench_prepared = True
 
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
@@ -182,7 +186,10 @@ class WorstCaseAnalysis(ToleranceDeviations):
 
         for ref in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(ref)
-            if dev.typ == DeviationType.tolerance or dev.typ == DeviationType.minmax:
+            if (
+                dev.typ == DeviationType.tolerance
+                or dev.typ == DeviationType.minmax
+            ):
                 worst_case_elements[ref] = val, dev, "parameter"
                 self.elements_analysed.append(ref)
 
@@ -242,7 +249,11 @@ class WorstCaseAnalysis(ToleranceDeviations):
                             else val * (1 + dev.max_val)
                         )
                     elif dev.typ == DeviationType.minmax:
-                        new_val = dev.min_val if run & (1 << bit_index) else dev.max_val
+                        new_val = (
+                            dev.min_val
+                            if run & (1 << bit_index)
+                            else dev.max_val
+                        )
                     else:
                         _logger.warning("Unknown deviation type")
                         new_val = val
@@ -352,9 +363,13 @@ class WorstCaseAnalysis(ToleranceDeviations):
                 diffs = []
                 for run in range(len(wc_data)):
                     if run & bit_updated == 0:
-                        diffs.append(abs(wc_data[run] - wc_data[run | bit_updated]))
+                        diffs.append(
+                            abs(wc_data[run] - wc_data[run | bit_updated])
+                        )
                 mean = sum(diffs) / len(diffs)
-                variance = sum([(diff - mean) ** 2 for diff in diffs]) / len(diffs)
+                variance = sum([(diff - mean) ** 2 for diff in diffs]) / len(
+                    diffs
+                )
                 std_div = variance**0.5
                 return mean, std_div
 

@@ -199,13 +199,17 @@ class Montecarlo(ToleranceDeviations):
                 )
         else:
             _logger.warning("Simulator not supported for this method")
-            raise NotImplementedError("Simulator not supported for this method")
+            raise NotImplementedError(
+                "Simulator not supported for this method"
+            )
 
         self.last_run_number = kwargs.get(
             "num_runs",
             self.last_run_number if self.last_run_number != 0 else 1000,
         )
-        self.editor.add_instruction(".step param run -1 %d 1" % self.last_run_number)
+        self.editor.add_instruction(
+            ".step param run -1 %d 1" % self.last_run_number
+        )
         self.editor.set_parameter("run", -1)
         self.testbench_prepared = True
 
@@ -236,7 +240,9 @@ class Montecarlo(ToleranceDeviations):
 
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[list[str]] = None,
         timeout: Optional[float] = None,
@@ -273,9 +279,13 @@ class Montecarlo(ToleranceDeviations):
             # Run the simulation
             # Handle optional parameters properly before passing to run
             actual_callback = (
-                callback if callback is not None else lambda *args, **kwargs: None
+                callback
+                if callback is not None
+                else lambda *args, **kwargs: None
             )
-            actual_callback_args = callback_args if callback_args is not None else {}
+            actual_callback_args = (
+                callback_args if callback_args is not None else {}
+            )
             actual_timeout = timeout if timeout is not None else float("inf")
 
             rt = self.run(

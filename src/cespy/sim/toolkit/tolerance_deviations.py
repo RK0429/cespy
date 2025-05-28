@@ -64,7 +64,9 @@ class ComponentDeviation:
     def from_tolerance(
         cls, tolerance: float, distribution: str = "uniform"
     ) -> ComponentDeviation:
-        return cls(tolerance, -tolerance, DeviationType.tolerance, distribution)
+        return cls(
+            tolerance, -tolerance, DeviationType.tolerance, distribution
+        )
 
     @classmethod
     def from_min_max(
@@ -122,13 +124,17 @@ class ToleranceDeviations(SimAnalysis, ABC):
         If only the prefix is given, the tolerance is set for all. The valid prefixes
         that can be used are: R, C, L, V, I
         """
-        if ref in self.devices_with_deviation_allowed:  # Only the prefix is given
+        if (
+            ref in self.devices_with_deviation_allowed
+        ):  # Only the prefix is given
             self.default_tolerance[ref] = ComponentDeviation.from_tolerance(
                 new_tolerance, distribution
             )
         else:
             if ref in self.editor.get_components(ref[0]):
-                self.device_deviations[ref] = ComponentDeviation.from_tolerance(
+                self.device_deviations[
+                    ref
+                ] = ComponentDeviation.from_tolerance(
                     new_tolerance, distribution
                 )
 
@@ -223,7 +229,9 @@ class ToleranceDeviations(SimAnalysis, ABC):
         *,
         runs_per_sim: int = 512,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
@@ -352,23 +360,34 @@ class ToleranceDeviations(SimAnalysis, ABC):
                         log_results.stepset = {"run": dataset["run"]}
                 else:
                     # auto assign a step starting from 0 and incrementing by 1
-                    # will use the size of the first element found in the dataset
+                    # will use the size of the first element found in the
+                    # dataset
                     if dataset and len(dataset) > 0:
                         any_meas = next(iter(dataset.values()))
 
                         # Safely access self.log_data.stepset
                         run_start = 0
                         if hasattr(self.log_data, "stepset"):
-                            stepset_data = getattr(self.log_data, "stepset", {})
-                            if "run" in stepset_data and len(stepset_data["run"]) > 0:
+                            stepset_data = getattr(
+                                self.log_data, "stepset", {}
+                            )
+                            if (
+                                "run" in stepset_data
+                                and len(stepset_data["run"]) > 0
+                            ):
                                 run_start = stepset_data["run"][-1] + 1
 
                         log_results.stepset = {
-                            "run": list(range(run_start, run_start + len(any_meas)))
+                            "run": list(
+                                range(run_start, run_start + len(any_meas))
+                            )
                         }
 
-            # Set step_count if stepset exists and log_results has that attribute
-            if hasattr(log_results, "stepset") and hasattr(log_results, "step_count"):
+            # Set step_count if stepset exists and log_results has that
+            # attribute
+            if hasattr(log_results, "stepset") and hasattr(
+                log_results, "step_count"
+            ):
                 log_results.step_count = len(log_results.stepset)
 
         self.add_log_data(log_results)
@@ -376,7 +395,10 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
     def read_logfiles(self) -> LogfileData:
         """Returns the logdata for the simulations."""
-        if self.analysis_executed is False and self.testbench_executed is False:
+        if (
+            self.analysis_executed is False
+            and self.testbench_executed is False
+        ):
             raise RuntimeError("The analysis has not been executed yet")
 
         if "log_data" in self.simulation_results:
@@ -385,7 +407,10 @@ class ToleranceDeviations(SimAnalysis, ABC):
         super().read_logfiles()
         # The code below makes the run measure (if it exists) available on the stepset.
         # Note: this was only tested with LTSpice
-        if hasattr(self.log_data, "stepset") and len(self.log_data.stepset) == 0:
+        if (
+            hasattr(self.log_data, "stepset")
+            and len(self.log_data.stepset) == 0
+        ):
             if hasattr(self.log_data, "dataset"):
                 dataset = self.log_data.dataset
                 if "runm" in dataset and len(dataset["runm"]) > 0:
@@ -397,10 +422,13 @@ class ToleranceDeviations(SimAnalysis, ABC):
                         self.log_data.stepset = {"run": dataset["runm"]}
                 else:
                     # auto assign a step starting from 0 and incrementing by 1
-                    # will use the size of the first element found in the dataset
+                    # will use the size of the first element found in the
+                    # dataset
                     if dataset and len(dataset) > 0:
                         any_meas = next(iter(dataset.values()))
-                        self.log_data.stepset = {"run": list(range(len(any_meas)))}
+                        self.log_data.stepset = {
+                            "run": list(range(len(any_meas)))
+                        }
 
                 if hasattr(self.log_data, "step_count"):
                     self.log_data.step_count = len(self.log_data.stepset)
@@ -411,7 +439,9 @@ class ToleranceDeviations(SimAnalysis, ABC):
     @abstractmethod
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,

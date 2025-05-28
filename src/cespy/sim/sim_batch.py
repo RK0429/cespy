@@ -154,7 +154,9 @@ class SimCommander(SpiceEditor):
         # Handle .asc files by creating a netlist
         if netlist_file_path.suffix == ".asc":
             # Generate netlist from schematic file
-            netlist_file_path = actual_simulator.create_netlist(netlist_file_path)
+            netlist_file_path = actual_simulator.create_netlist(
+                netlist_file_path
+            )
 
         super().__init__(netlist_file_path, encoding)
 
@@ -176,7 +178,9 @@ class SimCommander(SpiceEditor):
             output_folder=output_folder,
         )
 
-    def setLTspiceRunCommand(self, spice_tool: Union[str, Type[Simulator]]) -> None:
+    def setLTspiceRunCommand(
+        self, spice_tool: Union[str, Type[Simulator]]
+    ) -> None:
         """*(Deprecated)* Manually setting the LTSpice run command.
 
         :param spice_tool: String containing the path to the spice tool to be used, or
@@ -191,7 +195,9 @@ class SimCommander(SpiceEditor):
         actual_simulator: Type[Simulator]
         if isinstance(spice_tool, str):
             actual_simulator = LTspice.create_from(spice_tool)
-        elif isinstance(spice_tool, type) and issubclass(spice_tool, Simulator):
+        elif isinstance(spice_tool, type) and issubclass(
+            spice_tool, Simulator
+        ):
             actual_simulator = spice_tool
         else:
             _logger.warning("Invalid simulator type. Using default LTspice.")
@@ -208,7 +214,9 @@ class SimCommander(SpiceEditor):
 
         output_folder = getattr(self.runner, "output_folder", None)
         timeout_val = getattr(self.runner, "timeout", None)
-        timeout_float = float(timeout_val) if timeout_val is not None else 600.0
+        timeout_float = (
+            float(timeout_val) if timeout_val is not None else 600.0
+        )
 
         self.runner = SimRunner(
             simulator=actual_simulator,
@@ -237,7 +245,9 @@ class SimCommander(SpiceEditor):
     def run(
         self,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None,
         timeout: Optional[float] = 600,
         run_filename: Optional[str] = None,
         simulator: Optional[Union[str, Type[Simulator]]] = None,
@@ -259,13 +269,17 @@ class SimCommander(SpiceEditor):
         ] = None
 
         if callback is not None:
-            if isinstance(callback, type) and issubclass(callback, ProcessCallback):
+            if isinstance(callback, type) and issubclass(
+                callback, ProcessCallback
+            ):
                 adapted_callback = callback
             elif callable(callback):
                 # Create a wrapper function that adapts the callback to the expected
                 # signature
                 # For backward compatibility, convert Path objects to strings
-                def adapted_callback_wrapper(raw_file: Path, log_file: Path) -> Any:
+                def adapted_callback_wrapper(
+                    raw_file: Path, log_file: Path
+                ) -> Any:
                     # Convert Path objects to strings for legacy callbacks
                     func = cast(Callable[[str, str], Any], callback)
                     return func(str(raw_file), str(log_file))
@@ -343,35 +357,41 @@ if __name__ == "__main__":
         LTC.set_parameters(ANA=res)
         task = LTC.run()
         if task is None:
-            raise RuntimeError("Runner.run() returned None, which is unexpected.")
+            raise RuntimeError(
+                "Runner.run() returned None, which is unexpected."
+            )
         raw, log = task.wait_results()
         _logger.debug("Raw file '%s' | Log File '%s'", raw, log)
     # Sim Statistics
-    _logger.info(
-        "Successful/Total Simulations: %s/%s", LTC.okSim, LTC.runno
-    )
+    _logger.info("Successful/Total Simulations: %s/%s", LTC.okSim, LTC.runno)
 
     def callback_function(raw_file: str, log_file: str) -> None:
         _logger.debug(
-            "Handling the simulation data of %s, log file %s", raw_file, log_file
+            "Handling the simulation data of %s, log file %s",
+            raw_file,
+            log_file,
         )
 
-    LTC = SimCommander(meAbsPath + "\\test_files\\testfile.asc", parallel_sims=1)
+    LTC = SimCommander(
+        meAbsPath + "\\test_files\\testfile.asc", parallel_sims=1
+    )
     tstart = 0
-    bias_file = None  # Initialize bias_file to prevent undefined variable error
+    bias_file = (
+        None  # Initialize bias_file to prevent undefined variable error
+    )
     for tstop in (2, 5, 8, 10):
         tduration = tstop - tstart
         LTC.add_instruction(
             f".tran {tduration}",
         )
-        if tstart != 0 and bias_file is not None:  # Check that bias_file is defined
+        if (
+            tstart != 0 and bias_file is not None
+        ):  # Check that bias_file is defined
             LTC.add_instruction(f".loadbias {bias_file}")
             # Put here your parameter modifications
             # LTC.set_parameters(param1=1, param2=2, param3=3)
         bias_file = f"sim_loadbias_{tstop}.txt"
-        LTC.add_instruction(
-            f".savebias {bias_file} internal time={tduration}"
-        )
+        LTC.add_instruction(f".savebias {bias_file} internal time={tduration}")
         tstart = tstop
         LTC.run(callback=callback_function)
 

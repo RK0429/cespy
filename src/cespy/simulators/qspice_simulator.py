@@ -92,7 +92,8 @@ class Qspice(Simulator):
         _logger.debug("Found Qspice installed in: '%s'", spice_exe)
 
     qspice_args = {
-        "-ASCII": ["-ASCII"],  # Use ASCII file format for the output data(.qraw) file.
+        # Use ASCII file format for the output data(.qraw) file.
+        "-ASCII": ["-ASCII"],
         "-ascii": [
             "-ASCII"
         ],  # lowercase also works. Not sure about the others, so keep it this way.
@@ -129,9 +130,7 @@ class Qspice(Simulator):
     _default_run_switches = ["-o"]
 
     @classmethod
-    def valid_switch(
-        cls, switch: str, parameter: str = ""
-    ) -> list[str]:
+    def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:
         """Validates a command line switch. The following options are available for
         QSPICE:
 
@@ -166,7 +165,9 @@ class Qspice(Simulator):
 
         # will be set anyway?
         if switch in cls._default_run_switches:
-            _logger.info("Switch %s is already in the default switches", switch)
+            _logger.info(
+                "Switch %s is already in the default switches", switch
+            )
             return []
 
         # read from the dictionary
@@ -253,5 +254,7 @@ class Qspice(Simulator):
                     stderr=subprocess.STDOUT,
                 )
         else:
-            error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
+            error = run_function(
+                cmd_run, timeout=timeout, stdout=stdout, stderr=stderr
+            )
         return error

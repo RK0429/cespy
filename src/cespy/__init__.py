@@ -1,8 +1,8 @@
 """CESPy - Circuit Engineering and SPICE Python package.
 
-This package provides a high-level Python interface for circuit simulation using various
-SPICE simulators (LTspice, NGspice, QSpice, Xyce). It includes tools for circuit editing,
-simulation management, and result analysis.
+This package provides a high-level Python interface for circuit simulation
+using various SPICE simulators (LTspice, NGspice, QSpice, Xyce). It includes
+tools for circuit editing, simulation management, and result analysis.
 """
 
 # Add top-level version and imports for key simulator classes
@@ -81,8 +81,9 @@ def simulate(  # pylint: disable=too-many-arguments,too-many-locals
     }
     sim_key = engine.lower()
     if sim_key not in engines:
+        engines_list = list(engines.keys())
         raise ValueError(
-            f"Unsupported engine '{engine}'. Choose from {list(engines.keys())}."
+            f"Unsupported engine '{engine}'. Choose from {engines_list}."
         )
     sim_cls = engines[sim_key]
     runner = SimRunner(

@@ -61,7 +61,8 @@ def get_short_path_name(long_name: str) -> str:
     # buffer. It will return the number of characters
     # you need to make the destination buffer. You then call it again with
     # a buffer of that size. If, due to a TOCTTOU
-    # problem, the return value is still larger, keep trying until you've got it right. So:
+    # problem, the return value is still larger, keep trying until you've got
+    # it right. So:
     output_buf_size = 0
     while True:
         output_buf = ctypes.create_unicode_buffer(output_buf_size)

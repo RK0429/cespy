@@ -119,7 +119,7 @@ def create_histogram(
 def plot_single_measurement(
     measurements: Dict[str, List[float]],
     measurement_name: str,
-    args: argparse.Namespace
+    args: argparse.Namespace,
 ) -> None:
     """Plot a single measurement histogram."""
     create_histogram(
@@ -132,8 +132,7 @@ def plot_single_measurement(
 
 
 def plot_multiple_measurements(
-    measurements: Dict[str, List[float]],
-    args: argparse.Namespace
+    measurements: Dict[str, List[float]], args: argparse.Namespace
 ) -> None:
     """Plot multiple measurements in subplots."""
     n_meas = len(measurements)
@@ -162,7 +161,8 @@ def plot_multiple_measurements(
             std_val = np.std(values)
             ax.axvline(mean_val, color="red", linestyle="--", linewidth=2)
             ax.text(
-                0.02, 0.98,
+                0.02,
+                0.98,
                 f"μ={mean_val:.3g}\nσ={std_val:.3g}",
                 transform=ax.transAxes,
                 bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5},
@@ -188,7 +188,9 @@ def main() -> None:
         description="Create histograms from SPICE simulation measurement data"
     )
     parser.add_argument(
-        "log_file", type=Path, help="Path to the log file containing measurement data"
+        "log_file",
+        type=Path,
+        help="Path to the log file containing measurement data",
     )
     parser.add_argument(
         "-m",
@@ -208,10 +210,15 @@ def main() -> None:
         help="Output file path for saving the plot (e.g., histogram.png)",
     )
     parser.add_argument(
-        "--no-stats", action="store_true", help="Don't show statistics on the plot"
+        "--no-stats",
+        action="store_true",
+        help="Don't show statistics on the plot",
     )
     parser.add_argument(
-        "-l", "--list", action="store_true", help="List available measurements and exit"
+        "-l",
+        "--list",
+        action="store_true",
+        help="List available measurements and exit",
     )
 
     args = parser.parse_args()
@@ -237,7 +244,9 @@ def main() -> None:
     # Plot specific measurement or all
     if args.measurement:
         if args.measurement not in measurements:
-            print(f"Error: Measurement '{args.measurement}' not found in log file")
+            print(
+                f"Error: Measurement '{args.measurement}' not found in log file"
+            )
             print(f"Available measurements: {', '.join(measurements.keys())}")
             sys.exit(1)
         plot_single_measurement(measurements, args.measurement, args)

@@ -75,8 +75,11 @@ def detect_encoding(
                 # Empty file
                 continue
             if expected_pattern:
-                # Search expected pattern at start of any line using MULTILINE flag
-                if not re.search(expected_pattern, lines, re_flags | re.MULTILINE):
+                # Search expected pattern at start of any line using MULTILINE
+                # flag
+                if not re.search(
+                    expected_pattern, lines, re_flags | re.MULTILINE
+                ):
                     # File did not have the expected string for this encoding
                     continue
             if encoding == "utf-8" and lines[1] == "\x00":
@@ -87,4 +90,6 @@ def detect_encoding(
         raise EncodingDetectError(
             f'Expected pattern "{expected_pattern}" not found in file:{file_path}'
         )
-    raise EncodingDetectError(f"Unable to detect encoding on log file: {file_path}")
+    raise EncodingDetectError(
+        f"Unable to detect encoding on log file: {file_path}"
+    )

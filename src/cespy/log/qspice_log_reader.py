@@ -93,7 +93,9 @@ class QspiceLogReader(LogfileData):
                     assert (
                         self.step_count == step
                     ), f"Step count mismatch: {self.step_count} != {step}"
-                    _logger.debug("Found step %s with stepset %s", step, stepset)
+                    _logger.debug(
+                        "Found step %s with stepset %s", step, stepset
+                    )
 
                     tokens = stepset.strip("\r\n").split(" ")
                     for tok in tokens:
@@ -188,7 +190,9 @@ class QspiceLogReader(LogfileData):
                     meas_expr = match.group(3)
                     _logger.debug(
                         "Found measure %s of type %s with expression %s",
-                        meas_name, sim_type, meas_expr
+                        meas_name,
+                        sim_type,
+                        meas_expr,
                     )
                 else:
                     if meas_name:
@@ -199,16 +203,15 @@ class QspiceLogReader(LogfileData):
                                     meas_name + "_" + str(i)
                                     for i in range(len(values) - 1)
                                 ]
-                                headers[
-                                    1
-                                ] = meas_name  # first column is the measure name without _0
+                                # first column is the measure name without _0
+                                headers[1] = meas_name
                             else:
                                 headers = [
-                                    meas_name + "_" + str(i) for i in range(len(values))
+                                    meas_name + "_" + str(i)
+                                    for i in range(len(values))
                                 ]
-                                headers[
-                                    0
-                                ] = meas_name  # first column is the measure name without _0
+                                # first column is the measure name without _0
+                                headers[0] = meas_name
 
                             for title in headers:
                                 self.dataset[title.lower()] = []

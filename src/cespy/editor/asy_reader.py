@@ -54,7 +54,8 @@ class AsyReader(object):
         self.pins = []
         self.lines = []
         self.shapes = []
-        self.attributes: Dict[str, str] = OrderedDict()  # Store attributes as strings
+        # Store attributes as strings
+        self.attributes: Dict[str, str] = OrderedDict()
         self._asy_file_path = Path(asy_file)
         self.windows = []
         pin = None
@@ -71,7 +72,9 @@ class AsyReader(object):
         else:
             self.encoding = encoding
 
-        with open(self._asy_file_path, "r", encoding=self.encoding) as asc_file:
+        with open(
+            self._asy_file_path, "r", encoding=self.encoding
+        ) as asc_file:
             _logger.info(f"Parsing ASY file {self._asy_file_path}")
             for line_text in asc_file:
                 if line_text.startswith("WINDOW"):
@@ -101,8 +104,11 @@ class AsyReader(object):
                         attr_text = ""
                     else:
                         continue
-                    attr_text = attr_text.strip()  # Gets rid of the \n terminator
-                    # make sure prefix is uppercase, as this is used in a lot of places
+                    attr_text = (
+                        attr_text.strip()
+                    )  # Gets rid of the \n terminator
+                    # make sure prefix is uppercase, as this is used in a lot
+                    # of places
                     if ref.upper() == "PREFIX":
                         attr_text = attr_text.upper()
                     self.attributes[ref] = attr_text
@@ -136,7 +142,9 @@ class AsyReader(object):
                     else:
                         text_alignment = HorAlign.LEFT
                         vertical_alignment = VerAlign.BOTTOM
-                        if justification.startswith("V"):  # Rotation to 90 degrees
+                        if justification.startswith(
+                            "V"
+                        ):  # Rotation to 90 degrees
                             angle = ERotation.R90
                             if justification == "VRIGHT":
                                 text_alignment = HorAlign.RIGHT
@@ -189,7 +197,9 @@ class AsyReader(object):
                             line_obj.style.pattern = line_elements[6]
                         self.lines.append(line_obj)
                     if line_elements[0] in ("RECTANGLE", "CIRCLE"):
-                        shape = Shape(line_elements[0], [Point(x1, y1), Point(x2, y2)])
+                        shape = Shape(
+                            line_elements[0], [Point(x1, y1), Point(x2, y2)]
+                        )
                         if len(line_elements) == 7:
                             shape.line_style.pattern = line_elements[6]
                         self.shapes.append(shape)
@@ -250,7 +260,9 @@ class AsyReader(object):
         spice_prefix = self.attributes["Prefix"]
         symbol = QschTag("symbol", spice_prefix[0])
         symbol.items.append(QschTag("type:", spice_prefix))
-        symbol.items.append(QschTag("description:", self.attributes["Description"]))
+        symbol.items.append(
+            QschTag("description:", self.attributes["Description"])
+        )
         symbol.items.append(QschTag("shorted pins:", "false"))
         for line in self.lines:
             x1 = int(line.V1.X * SCALE_X)
@@ -272,7 +284,8 @@ class AsyReader(object):
                     f"«rect ({x1},{y1}) ({x2},{y2}) 0 0 0 0x4000000 0x1000000 -1 0 -1»"
                 )
             elif shape.name == "ARC":
-                # translate from 4 points style of ltspice to 3 points style of qsch
+                # translate from 4 points style of ltspice to 3 points style of
+                # qsch
                 points = shape.points
 
                 px1 = points[0].X
@@ -288,8 +301,12 @@ class AsyReader(object):
                 center = Point((px1 + px2) // 2, (py1 + py2) // 2)
                 # Using only the X axis. Assuming a circle not an ellipse
                 radius = abs(px2 - px1) / 2
-                start = Point((px3 - center.X) / radius, (py3 - center.Y) / radius)
-                stop = Point((px4 - center.X) / radius, (py4 - center.Y) / radius)
+                start = Point(
+                    (px3 - center.X) / radius, (py3 - center.Y) / radius
+                )
+                stop = Point(
+                    (px4 - center.X) / radius, (py4 - center.Y) / radius
+                )
                 # calculate new coordinates for drawing
                 x1 = int(center.X * SCALE_X)
                 y1 = int(center.Y * SCALE_Y)
@@ -339,7 +356,9 @@ class AsyReader(object):
 
     def is_subcircuit(self) -> bool:
         # Prefix is guaranteed to be uppercase
-        return self.symbol_type == "BLOCK" or self.attributes.get("Prefix") == "X"
+        return (
+            self.symbol_type == "BLOCK" or self.attributes.get("Prefix") == "X"
+        )
 
     def get_library(self) -> Optional[str]:
         """Returns the library name of the model.

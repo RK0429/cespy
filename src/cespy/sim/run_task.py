@@ -71,9 +71,7 @@ def format_time_difference(time_diff: float) -> str:
         else:
             return f"{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
     else:
-        return (
-            f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
-        )
+        return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
 
 
 class RunTask:
@@ -129,11 +127,15 @@ class RunTask:
             _logger, {"runno": self.runno, "netlist": str(self.netlist_file)}
         )
 
-    def print_info(self, logger_fun: Callable[[str], Any], message: str) -> None:
+    def print_info(
+        self, logger_fun: Callable[[str], Any], message: str
+    ) -> None:
         # Use contextual logger for info/error messages
         logger_fun(message)
         if self.verbose:
-            print(f"{time.asctime()} {logger_fun.__name__}: {message}{END_LINE_TERM}")
+            print(
+                f"{time.asctime()} {logger_fun.__name__}: {message}{END_LINE_TERM}"
+            )
 
     def run(self) -> None:
         # Running the Simulation
@@ -144,7 +146,9 @@ class RunTask:
         )
         # Initialize default executable if none configured and method available
         if not self.simulator.spice_exe:
-            get_default_exec = getattr(self.simulator, "get_default_executable", None)
+            get_default_exec = getattr(
+                self.simulator, "get_default_executable", None
+            )
             if callable(get_default_exec):
                 default_exec = get_default_exec()
                 self.simulator = self.simulator.create_from(default_exec)
@@ -165,7 +169,9 @@ class RunTask:
 
         # Cleanup everything
         if self.retcode == 0:
-            self.raw_file = self.netlist_file.with_suffix(self.simulator.raw_extension)
+            self.raw_file = self.netlist_file.with_suffix(
+                self.simulator.raw_extension
+            )
             if self.raw_file.exists() and self.log_file.exists():
                 # simulation successful
                 self.print_info(
@@ -190,7 +196,9 @@ class RunTask:
                         ),
                     )
                     # Invoke callback: ProcessCallback subclass or function
-                    assert self.raw_file is not None and self.log_file is not None
+                    assert (
+                        self.raw_file is not None and self.log_file is not None
+                    )
                     if isinstance(self.callback, type) and issubclass(
                         self.callback, ProcessCallback
                     ):

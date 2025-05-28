@@ -166,7 +166,9 @@ class NGspiceSimulator(Simulator):
 
         # will be set anyway?
         if switch in cls._default_run_switches:
-            _logger.info("Switch %s is already in the default switches", switch)
+            _logger.info(
+                "Switch %s is already in the default switches", switch
+            )
             return []
 
         if switch in cls.ngspice_args:
@@ -193,7 +195,9 @@ class NGspiceSimulator(Simulator):
                     ret = [switch_list[0], parameter]
                 else:
                     _logger.warning(
-                        "Invalid parameter %s for switch '%s'", parameter, switch
+                        "Invalid parameter %s for switch '%s'",
+                        parameter,
+                        switch,
                     )
             else:
                 ret = switch_list
@@ -291,7 +295,9 @@ class NGspiceSimulator(Simulator):
                     stderr=subprocess.STDOUT,
                 )
         else:
-            error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
+            error = run_function(
+                cmd_run, timeout=timeout, stdout=stdout, stderr=stderr
+            )
         return error
 
     @classmethod

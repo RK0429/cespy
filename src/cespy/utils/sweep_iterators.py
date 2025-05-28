@@ -104,7 +104,9 @@ class sweep(BaseIterator):
     def __next__(self) -> Union[int, float]:
         val = self.start + self.niter * self.step
         self.niter += 1
-        if (self.step > 0 and val <= self.stop) or (self.step < 0 and val >= self.stop):
+        if (self.step > 0 and val <= self.stop) or (
+            self.step < 0 and val >= self.stop
+        ):
             return val
         self.finished = True
         raise StopIteration

@@ -80,9 +80,8 @@ LTSPICE_ATTRIBUTES = ("InstName", "Def_Sub")
 class AscEditor(BaseSchematic):
     """Class made to update directly the LTspice ASC files."""
 
-    symbol_cache: Dict[
-        str, str
-    ] = {}  # This is a class variable, so it can be shared between all instances.
+    # This is a class variable, so it can be shared between all instances.
+    symbol_cache: Dict[str, str] = {}
     """:meta private:"""
 
     simulator_lib_paths: List[str] = LTspice.get_default_library_paths()
@@ -325,7 +324,8 @@ class AscEditor(BaseSchematic):
                     self.sheet = line[len("SHEET ") :].strip()
                 elif line.startswith("IOPIN "):
                     _, posX, posY, direction = line.split()
-                    text = self.labels[-1]  # Assuming it is the last FLAG parsed
+                    # Assuming it is the last FLAG parsed
+                    text = self.labels[-1]
                     assert text.coord.X == int(posX) and text.coord.Y == int(
                         posY
                     ), "Syntax Error, getting a IOPIN without an associated label"
@@ -438,7 +438,8 @@ class AscEditor(BaseSchematic):
                 asc_path = Path(asc_path_str)
             return AscEditor(asc_path)
         elif lib is None and symbol.symbol_type == "CELL":
-            # TODO: the library is often specified later on, so this may need to move.
+            # TODO: the library is often specified later on, so this may need
+            # to move.
             return None
         else:
             # load the model from the library
@@ -459,7 +460,8 @@ class AscEditor(BaseSchematic):
         if "_SUBCKT" in sub.attributes:
             from typing import cast
 
-            # sub.attributes["_SUBCKT"] is BaseEditor type (AscEditor or SpiceEditor)
+            # sub.attributes["_SUBCKT"] is BaseEditor type (AscEditor or
+            # SpiceEditor)
             return cast(BaseEditor, sub.attributes["_SUBCKT"])
         raise AttributeError(f"An associated subcircuit was not found for {reference}")
 
@@ -574,7 +576,7 @@ class AscEditor(BaseSchematic):
                 _logger.warning(
                     "Component %s is in an Spice subcircuit. "
                     "This function may not work as expected.",
-                    device
+                    device,
                 )
             return sub_circuit.set_component_value(ref, value)
         else:
@@ -699,11 +701,14 @@ class AscEditor(BaseSchematic):
             params = self.get_component_parameters(element, as_dicts=True)
             if key in params:
                 # I only have the LTSPICE_PARAMETERS as keys here, so when I match, i can overwrite
-                # I do not support delete here, as some of the keys are mandatory
+                # I do not support delete here, as some of the keys are
+                # mandatory
                 component.attributes[key] = value_str
                 _logger.info(
                     "Component %s updated with parameter %s:%s",
-                    element, key, value
+                    element,
+                    key,
+                    value,
                 )
             else:
                 foundme = False
@@ -727,7 +732,9 @@ class AscEditor(BaseSchematic):
                             )
                             _logger.info(
                                 "Component %s updated with parameter %s:%s",
-                                element, key, value_str
+                                element,
+                                key,
+                                value_str,
                             )
                             foundme = True
                 if not foundme:
@@ -738,7 +745,9 @@ class AscEditor(BaseSchematic):
                             component.attributes[key] = value_str
                             _logger.info(
                                 "Component %s updated with parameter %s:%s",
-                                element, key, value_str
+                                element,
+                                key,
+                                value_str,
                             )
                         else:
                             # nothing found, and not a known parameter, put it in
@@ -759,7 +768,9 @@ class AscEditor(BaseSchematic):
                                 component.attributes[param_key] = f"{key}={value_str}"
                             _logger.info(
                                 "Component %s updated with parameter %s:%s",
-                                element, key, value_str
+                                element,
+                                key,
+                                value_str,
                             )
         self.set_updated(element)
 
@@ -883,7 +894,8 @@ class AscEditor(BaseSchematic):
                 'The .PARAM instruction should be added using the "set_parameter"'
                 " method"
             )
-        # If we get here, then the instruction was not found, so we need to add it
+        # If we get here, then the instruction was not found, so we need to add
+        # it
         x, y = self._get_text_space()
         coord = Point(x, y)
         directive = Text(

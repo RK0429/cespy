@@ -91,7 +91,9 @@ END_LINE_TERM = "\n"  #: This controls the end of line terminator used
 FLOAT_RGX = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?"
 
 # Regular expression for a number with decimal qualifier and unit
-NUMBER_RGX = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?(Meg|[kmuµnpfgt])?[a-zA-Z]*"
+NUMBER_RGX = (
+    r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?(Meg|[kmuµnpfgt])?[a-zA-Z]*"
+)
 
 # Parameters expression of the type: PARAM=value
 PARAM_RGX = r"(?P<params>(\s+\w+\s*(=\s*[\w\{\}\(\)\-\+\*\/%\.]+)?)*)?"
@@ -141,11 +143,15 @@ REPLACE_REGEXS: Dict[str, str] = {
         + ".*?$"
     ),  # JFET
     # Mutual Inductance
-    "K": (r"^(?P<designator>K§?\w+)(?P<nodes>(\s+\S+){2,4})\s+"
-          r"(?P<value>[\+\-]?[0-9\.E+-]+[kmuµnpgt]?).*$"),
+    "K": (
+        r"^(?P<designator>K§?\w+)(?P<nodes>(\s+\S+){2,4})\s+"
+        r"(?P<value>[\+\-]?[0-9\.E+-]+[kmuµnpgt]?).*$"
+    ),
     # Inductance
-    "L": (r"^(?P<designator>L§?\w+)(?P<nodes>(\s+\S+){2})\s+"
-          r"(?P<value>({)?(?(5).*}|([0-9\.E+-]+(Meg|[kmuµnpgt])?H?))).*$"),
+    "L": (
+        r"^(?P<designator>L§?\w+)(?P<nodes>(\s+\S+){2})\s+"
+        r"(?P<value>({)?(?(5).*}|([0-9\.E+-]+(Meg|[kmuµnpgt])?H?))).*$"
+    ),
     "M": (
         r"^(?P<designator>M§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>\w+)"
         + PARAM_RGX
@@ -227,8 +233,10 @@ REPLACE_REGEXS: Dict[str, str] = {
         + PARAM_RGX
         + ".*?$"
     ),  # QSPICE Unique component Ø
-    "×": (r"^(?P<designator>×\w+)(?P<nodes>(\s+\S+){4,16})\s+"
-          r"(?P<value>.*)(?P<params>(\w+\s+){1,8})\s*\\?$"),  # QSPICE proprietaty component ×
+    "×": (
+        r"^(?P<designator>×\w+)(?P<nodes>(\s+\S+){4,16})\s+"
+        r"(?P<value>.*)(?P<params>(\w+\s+){1,8})\s*\\?$"
+    ),  # QSPICE proprietaty component ×
     "Ö": (
         r"^(?P<designator>Ö\w+)(?P<nodes>(\s+\S+){5})\s+(?P<params>.*)\s*\\?$"
     ),  # LTspice proprietary component Ö
@@ -236,7 +244,8 @@ REPLACE_REGEXS: Dict[str, str] = {
 
 SUBCKT_CLAUSE_FIND = r"^.SUBCKT\s+"
 
-# Code Optimization objects, avoiding repeated compilation of regular expressions
+# Code Optimization objects, avoiding repeated compilation of regular
+# expressions
 component_replace_regexs: Dict[str, Pattern[str]] = {
     prefix: re.compile(pattern, re.IGNORECASE)
     for prefix, pattern in REPLACE_REGEXS.items()
@@ -244,7 +253,9 @@ component_replace_regexs: Dict[str, Pattern[str]] = {
 subckt_regex: Pattern[str] = re.compile(
     r"^.SUBCKT\s+(?P<name>[\w\.]+)", re.IGNORECASE
 )
-lib_inc_regex: Pattern[str] = re.compile(r"^\.(LIB|INC)\s+(.*)$", re.IGNORECASE)
+lib_inc_regex: Pattern[str] = re.compile(
+    r"^\.(LIB|INC)\s+(.*)$", re.IGNORECASE
+)
 
 # The following variable deprecated, and here only so that people can find it.
 # It is replaced by SpiceEditor.set_custom_library_paths().
@@ -275,11 +286,15 @@ def get_line_command(line: Union[str, "SpiceCircuit"]) -> str:
                     return "*"
                 elif ch == ".":  # this is a directive
                     j = i + 1
-                    while j < len(line) and (line[j] not in (" ", "\t", "\r", "\n")):
+                    while j < len(line) and (
+                        line[j] not in (" ", "\t", "\r", "\n")
+                    ):
                         j += 1
                     return line[i:j].upper()
                 else:
-                    raise SyntaxError(f'Unrecognized command in line: "{line}"')
+                    raise SyntaxError(
+                        f'Unrecognized command in line: "{line}"'
+                    )
     elif isinstance(line, SpiceCircuit):
         return ".SUBCKT"
     else:
@@ -325,7 +340,9 @@ class UnrecognizedSyntaxError(Exception):
     """Line doesn't match expected Spice syntax."""
 
     def __init__(self, line: str, regex: str) -> None:
-        super().__init__(f'Line: "{line}" doesn\'t match regular expression "{regex}"')
+        super().__init__(
+            f'Line: "{line}" doesn\'t match regular expression "{regex}"'
+        )
 
 
 class MissingExpectedClauseError(Exception):
@@ -525,12 +542,15 @@ class SpiceCircuit(BaseEditor):
                     # Don't attempt to append to a SpiceCircuit
                     self.netlist.append(line)
             elif len(cmd) == 1 and len(line) > 1 and line[1] == "§":
-                # strip any §, it is not always present and seems optional, so scrap it
+                # strip any §, it is not always present and seems optional, so
+                # scrap it
                 line = line[0] + line[2:]
                 self.netlist.append(line)
             else:
                 self.netlist.append(line)
-                if cmd[:4] == ".END":  # True for either .END and .ENDS primitives
+                if (
+                    cmd[:4] == ".END"
+                ):  # True for either .END and .ENDS primitives
                     return True  # If a sub-circuit is ended correctly, returns True
         return False  # If a sub-circuit ends abruptly, returns False
 
@@ -552,7 +572,9 @@ class SpiceCircuit(BaseEditor):
                         sub._write_lines(f)
                 f.write(command)
 
-    def _get_param_named(self, param_name: str) -> Tuple[int, Optional[Match[str]]]:
+    def _get_param_named(
+        self, param_name: str
+    ) -> Tuple[int, Optional[Match[str]]]:
         """Internal function.
 
         Do not use. Returns a line starting with command and matching the search with
@@ -651,9 +673,12 @@ class SpiceCircuit(BaseEditor):
         regex = component_replace_regexs["X"]  # The sub-circuit instance regex
         m = regex.search(sub_circuit_instance)
         if m:
-            subcircuit_name = m.group("value")  # last_token of the line before Params:
+            # last_token of the line before Params:
+            subcircuit_name = m.group("value")
         else:
-            raise UnrecognizedSyntaxError(sub_circuit_instance, REPLACE_REGEXS["X"])
+            raise UnrecognizedSyntaxError(
+                sub_circuit_instance, REPLACE_REGEXS["X"]
+            )
 
         # Search for the sub-circuit in the netlist
         sub_circuit = self.get_subcircuit_named(subcircuit_name)
@@ -674,9 +699,13 @@ class SpiceCircuit(BaseEditor):
                 return sub_circuit
         else:
             # The search was not successful
-            raise ComponentNotFoundError(f'Sub-circuit "{subcircuit_name}" not found')
+            raise ComponentNotFoundError(
+                f'Sub-circuit "{subcircuit_name}" not found'
+            )
 
-    def _get_component_line_and_regex(self, reference: str) -> Tuple[int, Match[str]]:
+    def _get_component_line_and_regex(
+        self, reference: str
+    ) -> Tuple[int, Match[str]]:
         """Internal function.
 
         Do not use.
@@ -715,7 +744,9 @@ class SpiceCircuit(BaseEditor):
             if (
                 subckt_instance in self.modified_subcircuits
             ):  # See if this was already a modified sub-circuit instance
-                sub_circuit: SpiceCircuit = self.modified_subcircuits[subckt_instance]
+                sub_circuit: SpiceCircuit = self.modified_subcircuits[
+                    subckt_instance
+                ]
             else:
                 sub_circuit_original = self.get_subcircuit(
                     subckt_instance
@@ -726,10 +757,13 @@ class SpiceCircuit(BaseEditor):
                     )  # Creates a new name with the path appended
                     sub_circuit = sub_circuit_original.clone(new_name=new_name)
 
-                    # Memorize that the copy is relative to that particular instance
+                    # Memorize that the copy is relative to that particular
+                    # instance
                     self.modified_subcircuits[subckt_instance] = sub_circuit
                     # Change the call to the sub-circuit
-                    self._set_component_attribute(subckt_instance, "model", new_name)
+                    self._set_component_attribute(
+                        subckt_instance, "model", new_name
+                    )
                 else:
                     raise ComponentNotFoundError(reference)
             # Update the component
@@ -739,7 +773,8 @@ class SpiceCircuit(BaseEditor):
         else:
             line_no, match = self._get_component_line_and_regex(reference)
             if attribute in ("value", "model"):
-                # They are actually the same thing just the model is not converted.
+                # They are actually the same thing just the model is not
+                # converted.
                 if isinstance(value, (int, float)):
                     value = format_eng(value)
                 start = match.start("value")
@@ -778,7 +813,9 @@ class SpiceCircuit(BaseEditor):
                 start = match.start("params")
                 end = match.end("params")
                 line = self.netlist[line_no]
-                self.netlist[line_no] = line[:start] + " " + params_str + line[end:]
+                self.netlist[line_no] = (
+                    line[:start] + " " + params_str + line[end:]
+                )
 
     def reset_netlist(self, create_blank: bool = False) -> None:
         """Removes all previous edits done to the netlist, i.e. resets it to the
@@ -794,7 +831,9 @@ class SpiceCircuit(BaseEditor):
             lines = ["* netlist generated from cespy", ".end"]
             finished = self._add_lines(iter(lines))
             if not finished:
-                raise SyntaxError("Netlist with missing .END or .ENDS statements")
+                raise SyntaxError(
+                    "Netlist with missing .END or .ENDS statements"
+                )
         elif hasattr(self, "netlist_file") and self.netlist_file.exists():
             with open(
                 self.netlist_file,
@@ -805,12 +844,16 @@ class SpiceCircuit(BaseEditor):
                 # Creates an iterator object to consume the file
                 finished = self._add_lines(f)
                 if not finished:
-                    raise SyntaxError("Netlist with missing .END or .ENDS statements")
+                    raise SyntaxError(
+                        "Netlist with missing .END or .ENDS statements"
+                    )
                 # else:
                 #     for _ in lines:  # Consuming the rest of the file.
                 #         pass  # print("Ignoring %s" % _)
         elif hasattr(self, "netlist_file"):
-            _logger.error("Netlist file not found: {}".format(self.netlist_file))
+            _logger.error(
+                "Netlist file not found: {}".format(self.netlist_file)
+            )
 
     def clone(self, **kwargs: Any) -> "SpiceCircuit":
         """Creates a new copy of the SpiceCircuit. Changes done at the new copy do not
@@ -825,7 +868,8 @@ class SpiceCircuit(BaseEditor):
         clone.netlist = self.netlist.copy()
         clone.netlist.insert(
             0,
-            "***** SpiceEditor Manipulated this sub-circuit ****" + END_LINE_TERM,
+            "***** SpiceEditor Manipulated this sub-circuit ****"
+            + END_LINE_TERM,
         )
         clone.netlist.append("***** ENDS SpiceEditor ****" + END_LINE_TERM)
         new_name = kwargs.get("new_name", None)
@@ -845,7 +889,9 @@ class SpiceCircuit(BaseEditor):
                     if m:
                         return m.group("name")
             else:
-                raise RuntimeError("Unable to find .SUBCKT clause in subcircuit")
+                raise RuntimeError(
+                    "Unable to find .SUBCKT clause in subcircuit"
+                )
         else:
             raise RuntimeError("Empty Subcircuit")
 
@@ -868,7 +914,9 @@ class SpiceCircuit(BaseEditor):
                         # Replacing the name in the SUBCKT Clause
                         start = m.start("name")
                         end = m.end("name")
-                        self.netlist[line_no] = line[:start] + new_name + line[end:]
+                        self.netlist[line_no] = (
+                            line[:start] + new_name + line[end:]
+                        )
                         break
                     line_no += 1
             else:
@@ -907,7 +955,9 @@ class SpiceCircuit(BaseEditor):
             the component prefix.
         """
         if SUBCKT_DIVIDER in reference:
-            if reference[0] != "X":  # Replaces a component inside of a subciruit
+            if (
+                reference[0] != "X"
+            ):  # Replaces a component inside of a subciruit
                 raise ComponentNotFoundError(
                     "Only subcircuits can have components inside."
                 )
@@ -925,12 +975,14 @@ class SpiceCircuit(BaseEditor):
                     subcircuit = self.get_subcircuit(subckt_ref)
 
                 if len(component_split) > 1:
-                    # Recursively get component from subcircuit - return as Component
+                    # Recursively get component from subcircuit - return as
+                    # Component
                     return subcircuit.get_component(
                         SUBCKT_DIVIDER.join(component_split[1:])
                     )
                 else:
-                    # Need to wrap SpiceCircuit in Component for type compatibility
+                    # Need to wrap SpiceCircuit in Component for type
+                    # compatibility
                     line_no = self.get_line_starting_with(subckt_ref)
                     return SpiceComponent(self, line_no)
         else:
@@ -952,7 +1004,8 @@ class SpiceCircuit(BaseEditor):
         component = super().__getitem__(item)
         if component.parent != self:
             # The HierarchicalComponent class must inherit from Component for this to work,
-            # or we need to return the original component instead of wrapping it
+            # or we need to return the original component instead of wrapping
+            # it
             return component
         else:
             return component
@@ -1100,7 +1153,9 @@ class SpiceCircuit(BaseEditor):
             start, stop = match.span("value")
             line = self.netlist[param_line]
             if isinstance(line, str):
-                self.netlist[param_line] = line[:start] + f"{value_str}" + line[stop:]
+                self.netlist[param_line] = (
+                    line[:start] + f"{value_str}" + line[stop:]
+                )
             else:
                 # This should not happen in normal operation
                 _logger.error("Unexpected non-string line at %s", param_line)
@@ -1110,7 +1165,8 @@ class SpiceCircuit(BaseEditor):
             insert_line = len(self.netlist) - 2
             self.netlist.insert(
                 insert_line,
-                f".PARAM {param}={value_str}  ; Batch instruction" + END_LINE_TERM,
+                f".PARAM {param}={value_str}  ; Batch instruction"
+                + END_LINE_TERM,
             )
 
     def set_component_value(
@@ -1251,20 +1307,21 @@ class SpiceCircuit(BaseEditor):
         else:
             # Insert before backanno instruction
             try:
-                line_no = self.netlist.index(
-                    ".backanno\n"
-                )  # TODO: Improve this. END of line termination could be differnt
+                # TODO: Improve this. END of line termination could be differnt
+                line_no = self.netlist.index(".backanno\n")
             except ValueError:
                 line_no = len(self.netlist) - 2
 
         nodes = " ".join(component.ports)
         model = component.attributes.get("model", "no_model")
         parameters = " ".join(
-            [f"{k}={v}" for k, v in component.attributes.items() if k != "model"]
+            [
+                f"{k}={v}"
+                for k, v in component.attributes.items()
+                if k != "model"
+            ]
         )
-        component_line = (
-            f"{component.reference} {nodes} {model} {parameters}{END_LINE_TERM}"
-        )
+        component_line = f"{component.reference} {nodes} {model} {parameters}{END_LINE_TERM}"
         self.netlist.insert(line_no, component_line)
 
     def remove_component(self, designator: str) -> None:
@@ -1310,9 +1367,8 @@ class SpiceCircuit(BaseEditor):
             if prefix in component_replace_regexs:
                 match = component_replace_regexs[prefix].match(line)
                 if match:
-                    nodes = match.group(
-                        "nodes"
-                    ).split()  # This separates by all space characters including \t
+                    # This separates by all space characters including \t
+                    nodes = match.group("nodes").split()
                     for node in nodes:
                         if node not in circuit_nodes:
                             circuit_nodes.append(node)
@@ -1342,7 +1398,8 @@ class SpiceCircuit(BaseEditor):
         if not instruction.endswith(END_LINE_TERM):
             instruction += END_LINE_TERM
         if _is_unique_instruction(instruction):
-            # Before adding new instruction, delete previously set unique instructions
+            # Before adding new instruction, delete previously set unique
+            # instructions
             i = 0
             while i < len(self.netlist):
                 line = self.netlist[i]
@@ -1363,9 +1420,9 @@ class SpiceCircuit(BaseEditor):
         if instruction not in self.netlist:
             # Insert before backanno instruction
             try:
-                index = self.netlist.index(
-                    ".backanno\n"
-                )  # TODO: Improve this. END of line termination could be different
+                # TODO: Improve this. END of line termination could be
+                # different
+                index = self.netlist.index(".backanno\n")
             except ValueError:
                 # This is where typically the .backanno instruction is
                 index = len(self.netlist) - 2
@@ -1401,7 +1458,8 @@ class SpiceCircuit(BaseEditor):
                 i += 1
         if not instr_removed:
             _logger.error(
-                'No instruction matching pattern "%s" was found', search_pattern
+                'No instruction matching pattern "%s" was found',
+                search_pattern,
             )
 
     @property
@@ -1422,7 +1480,9 @@ class SpiceCircuit(BaseEditor):
         return self._readonly
 
     @staticmethod
-    def find_subckt_in_lib(library: str, subckt_name: str) -> Optional["SpiceCircuit"]:
+    def find_subckt_in_lib(
+        library: str, subckt_name: str
+    ) -> Optional["SpiceCircuit"]:
         """Finds a sub-circuit in a library. The search is case-insensitive.
 
         :param library: path to the library to search
@@ -1435,7 +1495,9 @@ class SpiceCircuit(BaseEditor):
         :meta private:
         """
         # 0. Setup things
-        reg_subckt = re.compile(SUBCKT_CLAUSE_FIND + subckt_name, re.IGNORECASE)
+        reg_subckt = re.compile(
+            SUBCKT_CLAUSE_FIND + subckt_name, re.IGNORECASE
+        )
         # 1. Find Encoding
         try:
             encoding = detect_encoding(library)
@@ -1492,7 +1554,8 @@ class SpiceCircuit(BaseEditor):
                         )
                         if sub_circuit:
                             # Success we can go out
-                            # by the way, this circuit will have been marked as readonly
+                            # by the way, this circuit will have been marked as
+                            # readonly
                             return sub_circuit
         if self.parent is not None:
             # try searching on parent netlists
@@ -1530,7 +1593,8 @@ class SpiceEditor(SpiceCircuit):
         super().__init__()
         self.netlist_file = Path(netlist_file)
         if create_blank:
-            # when user want to create a blank netlist file, and didn't set encoding.
+            # when user want to create a blank netlist file, and didn't set
+            # encoding.
             self.encoding = "utf-8"
         else:
             if encoding == "autodetect":
@@ -1569,7 +1633,8 @@ class SpiceEditor(SpiceCircuit):
         if not instruction.endswith(END_LINE_TERM):
             instruction += END_LINE_TERM
         if _is_unique_instruction(instruction):
-            # Before adding new instruction, delete previously set unique instructions
+            # Before adding new instruction, delete previously set unique
+            # instructions
             i = 0
             while i < len(self.netlist):
                 line = self.netlist[i]
@@ -1590,9 +1655,9 @@ class SpiceEditor(SpiceCircuit):
         if instruction not in self.netlist:
             # Insert before backanno instruction
             try:
-                index = self.netlist.index(
-                    ".backanno\n"
-                )  # TODO: Improve this. END of line termination could be different
+                # TODO: Improve this. END of line termination could be
+                # different
+                index = self.netlist.index(".backanno\n")
             except ValueError:
                 # This is where typically the .backanno instruction is
                 index = len(self.netlist) - 2
@@ -1628,7 +1693,8 @@ class SpiceEditor(SpiceCircuit):
                 i += 1
         if not instr_removed:
             _logger.error(
-                'No instruction matching pattern "%s" was found', search_pattern
+                'No instruction matching pattern "%s" was found',
+                search_pattern,
             )
 
     def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
@@ -1664,7 +1730,9 @@ class SpiceEditor(SpiceCircuit):
             lines = ["* netlist generated from cespy", ".end"]
             finished = self._add_lines(iter(lines))
             if not finished:
-                raise SyntaxError("Netlist with missing .END or .ENDS statements")
+                raise SyntaxError(
+                    "Netlist with missing .END or .ENDS statements"
+                )
         elif hasattr(self, "netlist_file") and self.netlist_file.exists():
             with open(
                 self.netlist_file,
@@ -1675,17 +1743,23 @@ class SpiceEditor(SpiceCircuit):
                 # Creates an iterator object to consume the file
                 finished = self._add_lines(f)
                 if not finished:
-                    raise SyntaxError("Netlist with missing .END or .ENDS statements")
+                    raise SyntaxError(
+                        "Netlist with missing .END or .ENDS statements"
+                    )
                 # else:
                 #     for _ in lines:  # Consuming the rest of the file.
                 #         pass  # print("Ignoring %s" % _)
         elif hasattr(self, "netlist_file"):
-            _logger.error("Netlist file not found: {}".format(self.netlist_file))
+            _logger.error(
+                "Netlist file not found: {}".format(self.netlist_file)
+            )
 
     def run(
         self,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[Any], Callable[[Path, Path], Any]]] = None,
+        callback: Optional[
+            Union[Type[Any], Callable[[Path, Path], Any]]
+        ] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         simulator: Optional[Any] = None,

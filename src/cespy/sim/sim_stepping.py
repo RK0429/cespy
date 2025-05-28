@@ -148,7 +148,9 @@ class SimStepper(object):
         self.netlist.set_component_values(**kwargs)
 
     @wraps(BaseEditor.set_component_value)
-    def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
+    def set_component_value(
+        self, device: str, value: Union[str, int, float]
+    ) -> None:
         self.netlist.set_component_value(device, value)
 
     @wraps(BaseEditor.set_element_model)
@@ -161,13 +163,15 @@ class SimStepper(object):
 
     def add_value_sweep(self, comp: str, iterable: Iterable[Any]) -> None:
         """Adds a dimension to the simulation, where a component value is swept."""
-        # The next line raises an ComponentNotFoundError if the component doesn't exist
+        # The next line raises an ComponentNotFoundError if the component
+        # doesn't exist
         _ = self.netlist.get_component_value(comp)
         self.iter_list.append(StepInfo("component", comp, iterable))
 
     def add_model_sweep(self, comp: str, iterable: Iterable[Any]) -> None:
         """Adds a dimension to the simulation, where a component model is swept."""
-        # The next line raises an ComponentNotFoundError if the component doesn't exist
+        # The next line raises an ComponentNotFoundError if the component
+        # doesn't exist
         _ = self.netlist.get_component_value(comp)
         self.iter_list.append(StepInfo("model", comp, iterable))
 
@@ -184,7 +188,9 @@ class SimStepper(object):
 
     def run_all(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
@@ -213,15 +219,20 @@ class SimStepper(object):
                     iter_no -= 1
                     continue
                 if self.iter_list[iter_no].what == "param":
-                    self.netlist.set_parameter(self.iter_list[iter_no].elem, value)
+                    self.netlist.set_parameter(
+                        self.iter_list[iter_no].elem, value
+                    )
                 elif self.iter_list[iter_no].what == "component":
                     self.netlist.set_component_value(
                         self.iter_list[iter_no].elem, value
                     )
                 elif self.iter_list[iter_no].what == "model":
-                    self.netlist.set_element_model(self.iter_list[iter_no].elem, value)
+                    self.netlist.set_element_model(
+                        self.iter_list[iter_no].elem, value
+                    )
                 else:
-                    # TODO: develop other types of sweeps EX: add .STEP instruction
+                    # TODO: develop other types of sweeps EX: add .STEP
+                    # instruction
                     raise ValueError("Not Supported sweep")
                 iter_no += 1
             if iter_no < 0:

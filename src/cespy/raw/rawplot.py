@@ -30,7 +30,8 @@ def plot_traces(
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Get the x-axis data (usually time or frequency)
-        x_trace = raw_data.get_trace_names()[0]  # First trace is usually the x-axis
+        # First trace is usually the x-axis
+        x_trace = raw_data.get_trace_names()[0]
         x_data = raw_data.get_trace(x_trace).get_wave()
 
         # Plot each requested trace
@@ -74,15 +75,24 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Plot traces from SPICE raw waveform files"
     )
-    parser.add_argument("raw_file", type=Path, help="Path to the raw file to plot")
     parser.add_argument(
-        "traces", nargs="+", help="Names of traces to plot (e.g., 'V(out)' 'I(R1)')"
+        "raw_file", type=Path, help="Path to the raw file to plot"
     )
     parser.add_argument(
-        "-o", "--output", help="Output file path for saving the plot (e.g., plot.png)"
+        "traces",
+        nargs="+",
+        help="Names of traces to plot (e.g., 'V(out)' 'I(R1)')",
     )
     parser.add_argument(
-        "-l", "--list", action="store_true", help="List available traces and exit"
+        "-o",
+        "--output",
+        help="Output file path for saving the plot (e.g., plot.png)",
+    )
+    parser.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        help="List available traces and exit",
     )
 
     args = parser.parse_args()

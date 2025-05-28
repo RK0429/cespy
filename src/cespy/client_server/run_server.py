@@ -17,17 +17,21 @@ keyboard: Optional[Any] = None
 try:
     import keyboard
 except ImportError:
-    # keyboard module is optional and only needed for interactive server control
+    # keyboard module is optional and only needed for interactive
+    # server control
     pass
 
 
 def main() -> None:
     """Run the main SPICE server with command-line arguments."""
     # declare simulator variable with default
-    simulator: Type[LTspice] | Type[NGspiceSimulator] | Type[XyceSimulator] = LTspice
+    simulator: (
+        Type[LTspice] | Type[NGspiceSimulator] | Type[XyceSimulator]
+    ) = LTspice
     parser = argparse.ArgumentParser(
         description=(
-            "Run the SPICE server with specified simulator (LTSpice, NGSpice, XYCE)."
+            "Run the SPICE server with specified simulator "
+            "(LTSpice, NGSpice, XYCE)."
         )
     )
     parser.add_argument(
@@ -79,7 +83,8 @@ def main() -> None:
     elif sim_key == "xyce":
         simulator = XyceSimulator
     else:
-        parser.error(f"Unsupported simulator '{args.simulator}'")
+        msg = f"Unsupported simulator '{args.simulator}'"
+        parser.error(msg)
 
     print("Starting Server")
     server = SimServer(

@@ -85,11 +85,9 @@ class ServerSimRunner(threading.Thread):
             verbose=verbose,
             output_folder=output_folder,
         )
-        self.completed_tasks: List[
-            Dict[str, Any]
-        ] = (
-            []
-        )  # This is a list of dictionaries with the information of the completed tasks
+        # This is a list of dictionaries with the information of the completed
+        # tasks
+        self.completed_tasks: List[Dict[str, Any]] = []
         self._stop = False
 
     def run(self) -> None:
@@ -139,7 +137,8 @@ class ServerSimRunner(threading.Thread):
             started
         """
         _logger.debug("starting Simulation of %s", netlist)
-        # SimRunner.run accepts Optional[float] for timeout, so we can pass it directly
+        # SimRunner.run accepts Optional[float] for timeout, so we can pass it
+        # directly
         task = self.runner.run(
             netlist, wait_resource=True, timeout=timeout, callback=zip_files
         )

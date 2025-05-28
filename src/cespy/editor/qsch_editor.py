@@ -98,10 +98,13 @@ QSCH_NET_STR_ATTR = 5
 #   «text (-800,-650) 1 77 0 0x1000000 -1 -1 "ï»¿.tran 5m"»
 QSCH_TEXT_POS = 1
 QSCH_TEXT_SIZE = 2
-# 13="0 Degrees" 45="90 Degrees" 77="180 Degrees" 109="270 Degrees" r= 13+32*alpha/90
+# 13="0 Degrees" 45="90 Degrees" 77="180 Degrees" 109="270 Degrees" r=
+# 13+32*alpha/90
 QSCH_TEXT_ROTATION = 3
 QSCH_TEXT_COMMENT = 4  # 0="Normal Text" 1="Comment"
-QSCH_TEXT_COLOR = 5  # 0xdbbggrr  d=1 "Default" rr=Red gg=Green bb=Blue in hex format
+QSCH_TEXT_COLOR = (
+    5  # 0xdbbggrr  d=1 "Default" rr=Red gg=Green bb=Blue in hex format
+)
 QSCH_TEXT_STR_ATTR = 8
 
 QSCH_TEXT_INSTR_QUALIFIER = "ï»¿"
@@ -153,7 +156,9 @@ QSCH_TRIANGLE_POS1 = 1
 QSCH_TRIANGLE_POS2 = 2
 QSCH_TRIANGLE_POS3 = 3
 QSCH_TRIANGLE_UNKNOWN0 = 4
-QSCH_TRIANGLE_LINE_TYPE = 5  # 0=Normal 1=Dashed 2=Dotted 3=DashDot 4=DashDotDot
+QSCH_TRIANGLE_LINE_TYPE = (
+    5  # 0=Normal 1=Dashed 2=Dotted 3=DashDot 4=DashDotDot
+)
 QSCH_TRIANGLE_LINE_COLOR = 6
 QSCH_TRIANGLE_FILL_COLOR = 7
 QSCH_TRIANGLE_UNKNOWN1 = 8
@@ -198,6 +203,7 @@ def smart_split(s: str) -> List[str]:
 
 class QschReadingError(IOError):
     """Exception raised when reading QSCH files fails."""
+
     pass
 
 
@@ -318,7 +324,9 @@ class QschTag:
             except ValueError:
                 return a
 
-    def set_attr(self, index: int, value: Union[str, int, Tuple[int, int]]) -> None:
+    def set_attr(
+        self, index: int, value: Union[str, int, Tuple[int, int]]
+    ) -> None:
         """Sets the attribute at the given index. The attribute can be a string, an
         integer or a tuple. Integer values are written as integers, strings are written
         between quotes unless it starts with "0x" and tuples are written between
@@ -343,7 +351,9 @@ class QschTag:
             raise ValueError("Object not supported in set_attr")
         self.tokens[index] = value_str
 
-    def get_text(self, label: str, default: Optional[str] = None) -> Optional[str]:
+    def get_text(
+        self, label: str, default: Optional[str] = None
+    ) -> Optional[str]:
         """Returns the text of the first child tag that matches the given label. The
         label can have up to 1 space in it. It will return the entire text of the tag,
         after the label. If the label is not found, it returns the default value.
@@ -447,7 +457,9 @@ class QschEditor(BaseSchematic):
         :return: Nothing
         """
         libraries_to_include: List[str] = []
-        subcircuits_to_write: OrderedDict[str, Tuple[QschEditor, str]] = OrderedDict()
+        subcircuits_to_write: OrderedDict[
+            str, Tuple[QschEditor, str]
+        ] = OrderedDict()
 
         for refdes, comp_obj in self.components.items():
             item_tag = comp_obj.attributes["tag"]
@@ -468,7 +480,9 @@ class QschEditor(BaseSchematic):
             parameters = ""
             if len(texts) > 2:
                 for text in texts[2:]:
-                    parameters += " " + decap(text.get_text_attr(QSCH_TEXT_STR_ATTR))
+                    parameters += " " + decap(
+                        text.get_text_attr(QSCH_TEXT_STR_ATTR)
+                    )
 
             ports = comp_obj.ports.copy()
             if typ in ("¥", "Ã"):
@@ -479,7 +493,9 @@ class QschEditor(BaseSchematic):
 
             have_embedded_subcircuit = False
             # Check the libraries and embedded subcircuits
-            library_name = symbol_tag.get_text("library file", default="") or ""
+            library_name = (
+                symbol_tag.get_text("library file", default="") or ""
+            )
             if library_name and (library_name not in libraries_to_include):
                 marker = "|.subckt"
                 if library_name.startswith(marker):
@@ -488,8 +504,12 @@ class QschEditor(BaseSchematic):
                     sub_circuit_content = library_name[
                         len(marker) :
                     ].strip()  # The section after "|.subckt"
-                    sub_circuit_content = sub_circuit_content.replace("\\n", "\n")
-                    netlist_file.write(f".subckt {refdes}•{sub_circuit_content}\n")
+                    sub_circuit_content = sub_circuit_content.replace(
+                        "\\n", "\n"
+                    )
+                    netlist_file.write(
+                        f".subckt {refdes}•{sub_circuit_content}\n"
+                    )
                     have_embedded_subcircuit = True
                 else:
                     # List the libraries at the end
@@ -505,7 +525,8 @@ class QschEditor(BaseSchematic):
                     if "_SUBCKT" in comp_obj.attributes:
                         pins = symbol_tag.get_items("pin")
                         sub_ports = " ".join(
-                            pin.get_text_attr(QSCH_SYMBOL_PIN_NET) for pin in pins
+                            pin.get_text_attr(QSCH_SYMBOL_PIN_NET)
+                            for pin in pins
                         )
                         subc = cast(QschEditor, comp_obj.attributes["_SUBCKT"])
                         subcircuits_to_write[model] = (subc, sub_ports)
@@ -520,7 +541,9 @@ class QschEditor(BaseSchematic):
                     ports[3] = "[" + ports[3] + "]"
                     nets = " ".join(ports)
                     hack = "PNP" if "PNP" in symbol else "NPN"
-                    netlist_file.write(f"{refdes} {nets} {model} {hack}{parameters}\n")
+                    netlist_file.write(
+                        f"{refdes} {nets} {model} {hack}{parameters}\n"
+                    )
                 else:
                     netlist_file.write(
                         f"{refdes} {nets} [0] {model} {symbol}{parameters}\n"
@@ -529,7 +552,7 @@ class QschEditor(BaseSchematic):
                 model = texts[1].get_text_attr(QSCH_TEXT_STR_ATTR)
                 if have_embedded_subcircuit:
                     model = f"{refdes}•{model}"
-                if symbol == "NMOSB" or symbol == "PMOSB":
+                if symbol in ("NMOSB", "PMOSB"):
                     symbol = symbol[0:4]
                 if len(ports) == 3:
                     netlist_file.write(
@@ -552,7 +575,9 @@ class QschEditor(BaseSchematic):
                     "Pwr"
                 ):  # Hack alert. I don't know why the symbol is Pwr
                     symbol = symbol[3:]  # remove the Pwr from the symbol
-                netlist_file.write(f"{refdes} {nets} {model} {symbol}{parameters}\n")
+                netlist_file.write(
+                    f"{refdes} {nets} {model} {symbol}{parameters}\n"
+                )
             elif typ == "×":
                 model = decap(texts[1].get_text_attr(QSCH_TEXT_STR_ATTR))
                 if have_embedded_subcircuit:
@@ -562,7 +587,9 @@ class QschEditor(BaseSchematic):
                 model = texts[1].get_text_attr(QSCH_TEXT_STR_ATTR)
                 if have_embedded_subcircuit:
                     model = f"{refdes}•{model}"
-                netlist_file.write(f"{refdes} {nets} {model} {symbol}{parameters}\n")
+                netlist_file.write(
+                    f"{refdes} {nets} {model} {symbol}{parameters}\n"
+                )
             else:
                 value = texts[1].get_text_attr(QSCH_TEXT_STR_ATTR)
                 netlist_file.write(f"{refdes} {nets} {value}{parameters}\n")
@@ -570,7 +597,9 @@ class QschEditor(BaseSchematic):
                 #     netlist_file.write(f'{symbol}†{refdes} {nets} {value}\n')
 
         for sub_circuit in subcircuits_to_write:
-            sub_circuit_schematic, ports_str = subcircuits_to_write[sub_circuit]
+            sub_circuit_schematic, ports_str = subcircuits_to_write[
+                sub_circuit
+            ]
             netlist_file.write("\n")
             netlist_file.write(f".subckt {sub_circuit} {ports_str}\n")
             sub_circuit_schematic.write_spice_to_file(netlist_file)
@@ -599,7 +628,9 @@ class QschEditor(BaseSchematic):
                         f".lib {get_short_path_name(os.path.abspath(library_path))}\n"
                     )
                 else:
-                    netlist_file.write(f".lib {os.path.abspath(library_path)}\n")
+                    netlist_file.write(
+                        f".lib {os.path.abspath(library_path)}\n"
+                    )
 
         # Note: the .END or .ENDCKT must be inserted by the calling function
 
@@ -613,7 +644,9 @@ class QschEditor(BaseSchematic):
         if run_netlist_file.suffix == ".qsch":
             self.save_as(run_netlist_file)
         elif run_netlist_file.suffix in (".net", ".cir"):
-            with open(run_netlist_file, "w", encoding="cp1252") as netlist_file:
+            with open(
+                run_netlist_file, "w", encoding="cp1252"
+            ) as netlist_file:
                 _logger.info("Writing NET file %s", run_netlist_file)
                 netlist_file.write(
                     f"* {os.path.abspath(self._qsch_file_path.as_posix())}\n"
@@ -646,7 +679,9 @@ class QschEditor(BaseSchematic):
             y = comp_pos[1] + round(hyp * math.sin(theta), -2)
         elif 8 <= orientation <= 15:
             # The component is mirrored on the X axis
-            theta = math.atan2(y_pos, x_pos) + math.radians((orientation - 8) * 45)
+            theta = math.atan2(y_pos, x_pos) + math.radians(
+                (orientation - 8) * 45
+            )
             x = comp_pos[0] - round(
                 hyp * math.cos(theta), -2
             )  # round to multiple of 100
@@ -664,7 +699,8 @@ class QschEditor(BaseSchematic):
             "net"
         ):  # Connection to ports, grounds and nets
             if net.get_attr(1) == (x, y):
-                net_name = str(net.get_attr(5))  # Found the net, ensure it's a string
+                # Found the net, ensure it's a string
+                net_name = str(net.get_attr(5))
                 return "0" if net_name == "GND" else net_name
         for wire in self.schematic.get_items("wire"):  # Connection to wires
             if wire.get_attr(1) == (x, y) or wire.get_attr(2) == (x, y):
@@ -690,8 +726,12 @@ class QschEditor(BaseSchematic):
             self.schematic = QschTag("schematic")
         else:
             if not self._qsch_file_path.exists():
-                raise FileNotFoundError(f"File {self._qsch_file_path} not found")
-            with open(self._qsch_file_path, "r", encoding="cp1252") as qsch_file:
+                raise FileNotFoundError(
+                    f"File {self._qsch_file_path} not found"
+                )
+            with open(
+                self._qsch_file_path, "r", encoding="cp1252"
+            ) as qsch_file:
                 _logger.info("Reading QSCH file %s", self._qsch_file_path)
                 stream = qsch_file.read()
             self._parse_qsch_stream(stream)
@@ -720,7 +760,9 @@ class QschEditor(BaseSchematic):
             # process nets
             x, y = net_tag.get_attr(QSCH_NET_POS)
             net_name = net_tag.get_attr(QSCH_NET_STR_ATTR)
-            self.labels.append(Text(Point(x, y), net_name, type=TextTypeEnum.LABEL))
+            self.labels.append(
+                Text(Point(x, y), net_name, type=TextTypeEnum.LABEL)
+            )
 
         for wire in self.schematic.get_items("wire"):
             # process wires
@@ -728,12 +770,12 @@ class QschEditor(BaseSchematic):
             x2, y2 = wire.get_attr(QSCH_WIRE_POS2)
             net_attr = wire.get_attr(QSCH_WIRE_NET)
             net_str = str(net_attr)
-            # Check if the net is of the format N##, if it is get the net number
+            # Check if the net is of the format N##, if it is get the net
+            # number
             if net_str.startswith("N"):
                 try:
                     net_no = int(net_str[1:])
-                    if net_no > highest_net_number:
-                        highest_net_number = net_no
+                    highest_net_number = max(highest_net_number, net_no)
                 except ValueError:
                     pass
             self.wires.append(Line(Point(x1, y1), Point(x2, y2), net=net_str))
@@ -748,7 +790,9 @@ class QschEditor(BaseSchematic):
                     "Missing texts in component at coordinates"
                     f" {component_tag.get_attr(1)}"
                 )
-            refdes = texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(QSCH_TEXT_STR_ATTR)
+            refdes = texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(
+                QSCH_TEXT_STR_ATTR
+            )
             value = texts[QSCH_SYMBOL_TEXT_VALUE].get_attr(QSCH_TEXT_STR_ATTR)
             sch_comp = SchematicComponent(self, refdes)
             sch_comp.reference = refdes
@@ -758,7 +802,10 @@ class QschEditor(BaseSchematic):
             sch_comp.rotation = ERotation(orientation * 45)
             attr_type = symbol.get_text("type", "X") or "X"
             sch_comp.attributes["type"] = attr_type  # Assuming a sub-circuit
-            desc = symbol.get_text("description", "No Description") or "No Description"
+            desc = (
+                symbol.get_text("description", "No Description")
+                or "No Description"
+            )
             sch_comp.attributes["description"] = desc
             sch_comp.attributes["value"] = value
             sch_comp.attributes["tag"] = component_tag
@@ -787,7 +834,10 @@ class QschEditor(BaseSchematic):
                     else:
                         _logger.info(
                             "Unconnected pin at %s,%s in component %s:%s",
-                            x, y, refdes, pin
+                            x,
+                            y,
+                            refdes,
+                            pin,
                         )
                         if refdes[0] in (
                             "¥",
@@ -818,7 +868,7 @@ class QschEditor(BaseSchematic):
                         _logger.warning(
                             "Subcircuit '%s' not found. Have you set"
                             " the correct search paths?",
-                            sub_circuit_name
+                            sub_circuit_name,
                         )
 
         for text_tag in self.schematic.get_items("text"):
@@ -918,7 +968,9 @@ class QschEditor(BaseSchematic):
             "_SUBCKT" in subcircuit.attributes
         ):  # Optimization: if it was already stored, return it
             return cast(QschEditor, subcircuit.attributes["_SUBCKT"])
-        raise AttributeError(f"An associated subcircuit was not found for {reference}")
+        raise AttributeError(
+            f"An associated subcircuit was not found for {reference}"
+        )
 
     def get_parameter(self, param: str) -> str:
         # docstring inherited from BaseEditor
@@ -927,13 +979,17 @@ class QschEditor(BaseSchematic):
         if match is not None:
             return match.group("value")
         else:
-            raise ParameterNotFoundError(f"Parameter {param} not found in QSCH file")
+            raise ParameterNotFoundError(
+                f"Parameter {param} not found in QSCH file"
+            )
 
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
         # docstring inherited from BaseEditor
         tag, match = self._get_param_named(param)
         if tag is not None and match is not None:
-            _logger.debug("Parameter %s found in QSCH file, updating it", param)
+            _logger.debug(
+                "Parameter %s found in QSCH file, updating it", param
+            )
             if isinstance(value, (int, float)):
                 value_str = format_eng(value)
             else:
@@ -947,11 +1003,15 @@ class QschEditor(BaseSchematic):
                 tag.set_attr(QSCH_TEXT_STR_ATTR, text)
                 _logger.info("Parameter %s updated to %s", param, value_str)
                 _logger.debug(
-                    "Text at %s Updated to %s", tag.get_attr(QSCH_TEXT_POS), text
+                    "Text at %s Updated to %s",
+                    tag.get_attr(QSCH_TEXT_POS),
+                    text,
                 )
         else:
             # Was not found so we need to add it,
-            _logger.debug("Parameter %s not found in QSCH file, adding it", param)
+            _logger.debug(
+                "Parameter %s not found in QSCH file, adding it", param
+            )
             x, y = self._get_text_space()
             new_tag, _ = QschTag.parse(
                 f"«text ({x},{y}) 1 0 0 0x1000000 -1 -1"
@@ -963,7 +1023,7 @@ class QschEditor(BaseSchematic):
                 _logger.debug(
                     "Text added to %s Added: %s",
                     new_tag.get_attr(QSCH_TEXT_POS),
-                    new_tag.get_attr(QSCH_TEXT_STR_ATTR)
+                    new_tag.get_attr(QSCH_TEXT_STR_ATTR),
                 )
         self.updated = True
 
@@ -973,7 +1033,9 @@ class QschEditor(BaseSchematic):
         sub_circuit, ref = self._get_parent(reference)
         if ref not in sub_circuit.components:
             _logger.error("Component %s not found", ref)
-            raise ComponentNotFoundError(f"Component {ref} not found in Schematic file")
+            raise ComponentNotFoundError(
+                f"Component {ref} not found in Schematic file"
+            )
 
         component = sub_circuit.components[ref]
         comp_tag: QschTag = component.attributes["tag"]
@@ -984,7 +1046,9 @@ class QschEditor(BaseSchematic):
         # docstring inherited from BaseEditor
         sub_circuit, ref, symbol = self._get_component_symbol(element)
         texts = symbol.get_items("text")
-        assert texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(QSCH_TEXT_STR_ATTR) == ref
+        assert (
+            texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(QSCH_TEXT_STR_ATTR) == ref
+        )
         texts[QSCH_SYMBOL_TEXT_VALUE].set_attr(QSCH_TEXT_STR_ATTR, model)
         sub_circuit.components[ref].attributes["value"] = model
         _logger.info("Component %s updated to %s", element, model)
@@ -998,7 +1062,9 @@ class QschEditor(BaseSchematic):
         # docstring inherited from BaseEditor
         component = self.get_component(element)
         if "value" not in component.attributes:
-            _logger.error("Component %s does not have a Value attribute", element)
+            _logger.error(
+                "Component %s does not have a Value attribute", element
+            )
             raise ComponentNotFoundError(
                 f"Component {element} does not have a Value attribute"
             )
@@ -1054,7 +1120,9 @@ class QschEditor(BaseSchematic):
         comp_tag: QschTag = comp.attributes["tag"]
         symbol: QschTag = comp_tag.get_items("symbol")[0]
         texts = symbol.get_items("text")
-        assert texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(QSCH_TEXT_STR_ATTR) == ref
+        assert (
+            texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(QSCH_TEXT_STR_ATTR) == ref
+        )
 
         for key, value in kwargs.items():
             if isinstance(value, (int, float)):
@@ -1066,12 +1134,16 @@ class QschEditor(BaseSchematic):
             search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
             for text in texts[QSCH_SYMBOL_TEXT_VALUE:]:
                 text_value = text.get_attr(QSCH_TEXT_STR_ATTR)
-                if isinstance(text_value, str):  # Ensure text_value is a string
+                if isinstance(
+                    text_value, str
+                ):  # Ensure text_value is a string
                     for match in search_expression.finditer(text_value):
                         if match.group("name") == key:
                             start, stop = match.span("value")
                             new_text_value = (
-                                text_value[:start] + value_str + text_value[stop:]
+                                text_value[:start]
+                                + value_str
+                                + text_value[stop:]
                             )
                             text.set_attr(QSCH_TEXT_STR_ATTR, new_text_value)
                             sub_circuit.updated = True
@@ -1080,7 +1152,9 @@ class QschEditor(BaseSchematic):
                     if found:
                         break
 
-    def get_component_position(self, reference: str) -> Tuple[Point, ERotation]:
+    def get_component_position(
+        self, reference: str
+    ) -> Tuple[Point, ERotation]:
         # docstring inherited from BaseSchematic
         component = self.get_component(reference)
         return component.position, component.rotation
@@ -1111,7 +1185,9 @@ class QschEditor(BaseSchematic):
         else:
             raise ValueError("Invalid rotation parameter")
 
-        comp_tag.set_attr(QSCH_COMPONENT_POS, (int(position.X), int(position.Y)))
+        comp_tag.set_attr(
+            QSCH_COMPONENT_POS, (int(position.X), int(position.Y))
+        )
         comp_tag.set_attr(QSCH_COMPONENT_ROTATION, rot)
         component.position = position
         if isinstance(rotation, ERotation):
@@ -1196,7 +1272,8 @@ class QschEditor(BaseSchematic):
                 'The .PARAM instruction should be added using the "set_parameter"'
                 " method"
             )
-        # If we get here, then the instruction was not found, so we need to add it
+        # If we get here, then the instruction was not found, so we need to add
+        # it
         x, y = self._get_text_space()
         tag, _ = QschTag.parse(
             f"«text ({x},{y}) 1 0 0 0x1000000 -1 -1"

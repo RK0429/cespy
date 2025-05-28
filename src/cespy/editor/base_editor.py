@@ -128,9 +128,8 @@ def format_eng(value: float) -> str:
     :rtype: str
     """
     if value == 0.0:
-        return "{:g}".format(
-            value
-        )  # This avoids a problematic log(0), and the int and float conversions
+        # This avoids a problematic log(0), and the int and float conversions
+        return "{:g}".format(value)
     e = floor(log(abs(value), 1000))
     if -5 <= e < 0:
         suffix = "fpnum"[e]
@@ -577,7 +576,9 @@ class BaseEditor(ABC):
             self.set_parameter(param, kwargs[param])
 
     @abstractmethod
-    def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
+    def set_component_value(
+        self, device: str, value: Union[str, int, float]
+    ) -> None:
         """Changes the value of a component, such as a Resistor, Capacitor or Inductor.
         For components inside sub-circuits, use the sub-circuit designator prefix with
         ':' as separator (Example X1:R1).
@@ -875,7 +876,9 @@ class BaseEditor(ABC):
             path = os.path.expanduser(path)
 
         if os.path.exists(path) and os.path.isdir(path):
-            _logger.debug("Adding path '%s' to the custom library path list", path)
+            _logger.debug(
+                "Adding path '%s' to the custom library path list", path
+            )
             cls.custom_lib_paths.append(path)
         else:
             _logger.warning(

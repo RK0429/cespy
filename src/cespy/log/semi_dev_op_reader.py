@@ -150,12 +150,16 @@ def opLogReader(
             if line.startswith("Semiconductor Device Operating Points:"):
                 break
 
-        if line is not None and line.startswith("Semiconductor Device Operating Points:"):
+        if line is not None and line.startswith(
+            "Semiconductor Device Operating Points:"
+        ):
             for line in log:
                 match = is_title.search(line)
                 if match is not None:
                     where = match.group(1)
-                    if where is not None:  # Ensure where is not None before using lower()
+                    if (
+                        where is not None
+                    ):  # Ensure where is not None before using lower()
                         dataset[
                             where.lower()
                         ] = {}  # Creates a dictionary for each component type
@@ -186,6 +190,8 @@ def opLogReader(
                                         value: Union[float, str] = float(val)
                                     except ValueError:
                                         value = val
-                                    dataset[where.lower()][devices[i]][param] = value
+                                    dataset[where.lower()][devices[i]][
+                                        param
+                                    ] = value
 
     return dataset

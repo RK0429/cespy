@@ -90,18 +90,24 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         *,
         runs_per_sim: Optional[int] = None,  # This parameter is ignored
         wait_resource: bool = True,  # This parameter is ignored
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
     ) -> None:
-        raise NotImplementedError("run_testbench() is not implemented in this class")
+        raise NotImplementedError(
+            "run_testbench() is not implemented in this class"
+        )
 
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback: Optional[
+            Union[Type[ProcessCallback], Callable[..., Any]]
+        ] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
@@ -160,7 +166,9 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             val, dev, typ = worst_case_elements[ref]
             new_val = value_change(val, dev, to)
             if typ == "component":
-                self.editor.set_component_value(ref, new_val)  # update the value
+                self.editor.set_component_value(
+                    ref, new_val
+                )  # update the value
             elif typ == "parameter":
                 self.editor.set_parameter(ref, new_val)
             else:
@@ -172,8 +180,12 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             actual_callback = (
                 callback if callback is not None else lambda: None
             )  # default no-op callable
-            actual_callback_args = callback_args if callback_args is not None else ()
-            actual_timeout = timeout if timeout is not None else 0.0  # default timeout
+            actual_callback_args = (
+                callback_args if callback_args is not None else ()
+            )
+            actual_timeout = (
+                timeout if timeout is not None else 0.0
+            )  # default timeout
 
             task = self.run(
                 wait_resource=True,
@@ -195,7 +207,10 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
 
         for ref in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(ref)
-            if dev.typ == DeviationType.tolerance or dev.typ == DeviationType.minmax:
+            if (
+                dev.typ == DeviationType.tolerance
+                or dev.typ == DeviationType.minmax
+            ):
                 worst_case_elements[ref] = val, dev, "parameter"
                 self.elements_analysed.append(ref)
 
@@ -213,8 +228,12 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         actual_callback = (
             callback if callback is not None else lambda: None
         )  # default no-op callable
-        actual_callback_args = callback_args if callback_args is not None else ()
-        actual_timeout = timeout if timeout is not None else 0.0  # default timeout
+        actual_callback_args = (
+            callback_args if callback_args is not None else ()
+        )
+        actual_timeout = (
+            timeout if timeout is not None else 0.0
+        )  # default timeout
 
         self._reset_netlist()  # reset the netlist
         self.play_instructions()  # play the instructions
@@ -242,9 +261,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
                 exe_log=exe_log,
             )
         self.wait_completion()
-        self.analysis_executed = (
-            True  # Need to set this to True, so that the next step can be executed
-        )
+        self.analysis_executed = True  # Need to set this to True, so that the next step can be executed
         self.testbench_executed = True  # Idem
         # Get the results from the simulation
         log_data = self.read_logfiles()
@@ -261,7 +278,9 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             idx += 1
         # Check which components have a positive impact on the final result,
         # that is, increasing the component value increases the final result
-        max_setting = {ref: component_deltas[ref] > 0 for ref in component_deltas}
+        max_setting = {
+            ref: component_deltas[ref] > 0 for ref in component_deltas
+        }
 
         # Set all components with a positive impact to the maximum value and
         # all components with a negative impact to the minimum value
@@ -300,7 +319,8 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             idx += 1
 
             if new_value > max_value:
-                # The assumption is wrong, so the component is set to the minimum value
+                # The assumption is wrong, so the component is set to the
+                # minimum value
                 max_setting[ref] = not max_setting[ref]
                 max_value = new_value
                 # Need to restart the cycle
@@ -345,7 +365,8 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             idx += 1
             # This is the expected maximum of the final result
             if new_value < min_value:
-                # The assumption is wrong, so the component is set to the minimum value
+                # The assumption is wrong, so the component is set to the
+                # minimum value
                 min_setting[ref] = not min_setting[ref]
                 min_value = new_value
                 # Need to restart the cycle
@@ -364,14 +385,22 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         for ref in self.elements_analysed:
             val, dev, _ = worst_case_elements[ref]
             if min_setting[ref]:
-                min_comp_values[ref] = value_change(val, dev, WorstCaseType.max)
+                min_comp_values[ref] = value_change(
+                    val, dev, WorstCaseType.max
+                )
             else:
-                min_comp_values[ref] = value_change(val, dev, WorstCaseType.min)
+                min_comp_values[ref] = value_change(
+                    val, dev, WorstCaseType.min
+                )
 
             if max_setting[ref]:
-                max_comp_values[ref] = value_change(val, dev, WorstCaseType.max)
+                max_comp_values[ref] = value_change(
+                    val, dev, WorstCaseType.max
+                )
             else:
-                max_comp_values[ref] = value_change(val, dev, WorstCaseType.min)
+                max_comp_values[ref] = value_change(
+                    val, dev, WorstCaseType.min
+                )
 
         self.clear_simulation_data()
         self.cleanup_files()

@@ -76,7 +76,8 @@ class LTspice(Simulator):
         "-ascii": ["-ascii"],
         "-big": ["-big"],  # Start as a maximized window.
         "-encrypt": ["-encrypt"],
-        "-fastaccess": ["-FastAccess"],  # Convert raw file to FastAccess format.
+        # Convert raw file to FastAccess format.
+        "-fastaccess": ["-FastAccess"],
         "-FixUpSchematicFonts": ["-FixUpSchematicFonts"],
         "-FixUpSymbolFonts": ["-FixUpSymbolFonts"],
         "-ini": ["-ini", "<path>"],  # Specify alternative LTspice.ini.
@@ -105,9 +106,7 @@ class LTspice(Simulator):
         )
 
     @classmethod
-    def valid_switch(
-        cls, switch: str, parameter: str = ""
-    ) -> List[str]:
+    def valid_switch(cls, switch: str, parameter: str = "") -> List[str]:
         """Validate a command line switch.
 
         Available options for Windows/wine LTspice:
@@ -133,10 +132,13 @@ class LTspice(Simulator):
         MacOS native LTspice supports only batch mode (-b).
         """
 
-        # See if the MacOS simulator is used. If so, check if I use the native simulator
+        # See if the MacOS simulator is used. If so, check if I use the native
+        # simulator
         if cls.using_macos_native_sim():
             # native LTspice has only '-b' switch
-            raise ValueError("MacOS native LTspice supports only batch mode ('-b').")
+            raise ValueError(
+                "MacOS native LTspice supports only batch mode ('-b')."
+            )
 
         # format check
         if switch is None:
@@ -149,7 +151,9 @@ class LTspice(Simulator):
 
         # default run switches
         if switch in cls._default_run_switches:
-            _logger.info("Switch %s is already in the default switches", switch)
+            _logger.info(
+                "Switch %s is already in the default switches", switch
+            )
             return []
 
         if switch in cls.ltspice_args:
@@ -157,7 +161,9 @@ class LTspice(Simulator):
             switches = [s.replace("<path>", parameter) for s in switches]
             return switches
         valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
-        raise ValueError(f"Invalid switch '{switch}'. Valid switches are: {valid_keys}")
+        raise ValueError(
+            f"Invalid switch '{switch}'. Valid switches are: {valid_keys}"
+        )
 
     @classmethod
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -248,7 +254,8 @@ class LTspice(Simulator):
                     + cmd_line_switches
                 )
         else:
-            # Windows (well, also aix, wasi, emscripten,... where it will fail.)
+            # Windows (well, also aix, wasi, emscripten,... where it will
+            # fail.)
             cmd_run = (
                 cls.spice_exe
                 + ["-Run"]
@@ -267,7 +274,9 @@ class LTspice(Simulator):
                     stderr=subprocess.STDOUT,
                 )
         else:
-            error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
+            error = run_function(
+                cmd_run, timeout=timeout, stdout=stdout, stderr=stderr
+            )
         return error
 
     @classmethod
@@ -312,7 +321,8 @@ class LTspice(Simulator):
         """
         # prepare instructions, two stages used to enable edits on the netlist w/o open
         # GUI
-        # see: https://www.mikrocontroller.net/topic/480647?goto=5965300#5965300
+        # see:
+        # https://www.mikrocontroller.net/topic/480647?goto=5965300#5965300
         if cmd_line_switches is None:
             cmd_line_switches = []
         elif isinstance(cmd_line_switches, str):
@@ -327,7 +337,10 @@ class LTspice(Simulator):
             )
 
         cmd_netlist = (
-            cls.spice_exe + ["-netlist"] + [circuit_file.as_posix()] + cmd_line_switches
+            cls.spice_exe
+            + ["-netlist"]
+            + [circuit_file.as_posix()]
+            + cmd_line_switches
         )
         if exe_log:
             log_exe_file = circuit_file.with_suffix(".exe.log")
