@@ -11,9 +11,13 @@
       "Bash(poetry run mypy:*)",
       "Bash(python:*)",
       "Bash(mypy:*)",
+<<<<<<< Updated upstream
       "Bash(mypy:*)",
       "Bash(poetry run mypy:*)",
       "Bash(grep:*)"
+=======
+      "Bash(.venv/bin/python:*)"
+>>>>>>> Stashed changes
     ],
     "deny": []
   }
