@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Simulation client for distributed SPICE simulations.
+
+This module provides a client interface for connecting to remote simulation servers
+and executing SPICE simulations in a distributed environment. It handles job submission,
+monitoring, and result retrieval through XML-RPC communication.
+"""
 # Add future annotations for postponed evaluation of type hints
 from __future__ import annotations
 
@@ -119,7 +125,7 @@ class SimClient:
         self.server: ServerProxy = ServerProxy(f"{host_address}:{port}")
         raw_session_id = self.server.start_session()
         self.session_id: str = cast(str, raw_session_id)
-        _logger.info(f"Client: Started {self.session_id}")
+        _logger.info("Client: Started %s", self.session_id)
         # Started jobs pending retrieval
         self.started_jobs: OrderedDict[int, JobInformation] = OrderedDict()
         # This list keeps track of finished simulations that haven't yet been
@@ -162,13 +168,13 @@ class SimClient:
             return result
         except Fault as e:
             _logger.error(
-                f"Client: Failed to add sources to session {self.session_id}: {e}"
+                "Client: Failed to add sources to session %s: %s", self.session_id, e
             )
             return False
         except Exception as e:
             _logger.error(
-                "Client: Unexpected error adding sources to session"
-                f" {self.session_id}: {e}"
+                "Client: Unexpected error adding sources to session %s: %s",
+                self.session_id, e
             )
             return False
 
@@ -218,9 +224,8 @@ class SimClient:
             job_info = JobInformation(run_number=run_id, file_dir=circuit_path.parent)
             self.started_jobs[run_id] = job_info
             return run_id
-        else:
-            _logger.error(f"Client: Circuit {circuit} doesn't exit")
-            return -1
+        _logger.error("Client: Circuit %s doesn't exit", circuit)
+        return -1
 
     def get_runno_data(self, runno: int) -> pathlib.Path | None:
         """Returns the simulation output data inside a zip file name.
@@ -242,8 +247,7 @@ class SimClient:
             with open(store_path, "wb") as f:
                 f.write(zipdata.data)
             return store_path
-        else:
-            return None
+        return None
 
     def __iter__(self) -> SimClient:
         return self
@@ -259,20 +263,20 @@ class SimClient:
                 )  # Job is taken out of the started jobs list and
                 # is added to the stored jobs
                 return runno
-            else:
-                now = time.time()
-                delta = self.minimum_time_between_server_calls - (
-                    now - self._last_server_call
-                )
-                if delta > 0:
-                    time.sleep(delta)  # Go asleep for a sec
-                self._last_server_call = now
+            now = time.time()
+            delta = self.minimum_time_between_server_calls - (
+                now - self._last_server_call
+            )
+            if delta > 0:
+                time.sleep(delta)  # Go asleep for a sec
+            self._last_server_call = now
 
         # when there are no pending jobs left, exit the iterator
         raise StopIteration
 
     def close_session(self) -> None:
-        _logger.info(f"Client: Closing session {self.session_id}")
+        """Close the session with the simulation server."""
+        _logger.info("Client: Closing session %s", self.session_id)
         self.server.close_session(self.session_id)
 
 
@@ -340,7 +344,7 @@ def main() -> None:
         client.close_session()
 
     except Exception as e:
-        _logger.error(f"Error: {e}")
+        _logger.error("Error: %s", e)
         sys.exit(1)
 
 
