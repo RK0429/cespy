@@ -160,7 +160,9 @@ class XyceSimulator(Simulator):
     _default_run_switches = ["-l", "-r"]
 
     @classmethod
-    def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:  # pylint: disable=too-many-branches
+    def valid_switch(
+        cls, switch: str, parameter: str = ""
+    ) -> list[str]:  # pylint: disable=too-many-branches
         """Validates a command line switch. The following options are available for
         Xyce:
 
@@ -174,10 +176,12 @@ class XyceSimulator(Simulator):
         * `-norun`: netlist syntax and topology and exit
         * `-namesfile <path>`: output internal names file to <path> and exit
         * `-noise_names_file <path>`: output noise source names file to <path> and exit
-        * `-quiet`: suppress some of the simulation-progress messages sent to stdout
+        * `-quiet`: suppress some of the simulation-progress messages sent to
+          stdout
         * `-jacobian_test`: jacobian matrix diagnostic
         * `-hspice-ext <option>`: apply hspice compatibility features during parsing
-        * `-redefined_params <option>`: set option for redefined .params (ignore, usefirst, warn, error)
+        * `-redefined_params <option>`: set option for redefined .params
+          (ignore, usefirst, warn, error)
         * `-subckt_multiplier <option>`: enable/disable implicit subcircuit multipliers
         * `-local_variation <option>`: enable/disable local variation in UQ analysis
         * `-delim <TAB|COMMA|string>`: set the output file field delimiter

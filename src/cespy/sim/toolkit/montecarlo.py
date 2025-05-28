@@ -171,10 +171,13 @@ class Montecarlo(ToleranceDeviations):
                 )
         elif sim_name == "Qspice":
             # if gauss function is needed
-            #  => This is finally not needed because Qspice has a built-in gauss function (non-documented)
+            #  => This is finally not needed because Qspice has a built-in
+            #     gauss function (non-documented)
             # if tol_norm_func or min_max_norm_func:
-            #   self.editor.add_instruction(".func random_not0() {(random()+1e-7)/(1+1e-7)}")
-            #   self.editor.add_instruction(".func gauss(sigma) {sqrt(-2*ln(random_not0()))*cos(2*pi*random())*sigma}")
+            #   self.editor.add_instruction(
+            #       ".func random_not0() {(random()+1e-7)/(1+1e-7)}")
+            #   self.editor.add_instruction(
+            #       ".func gauss(sigma) {sqrt(-2*ln(random_not0()))*cos(2*pi*random())*sigma}")
             if tol_uni_func:
                 self.editor.add_instruction(
                     ".func utol(nom,tol) {if(run<0, nom, nom*(1+tol*(2*random()-1)))}"

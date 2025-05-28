@@ -139,7 +139,7 @@
     - [x] Reconcile function signatures if they differed.
     - [x] Add missing type hints, especially from `kuPyLTSpice` code.
   - [x] Apply a consistent coding style (e.g., using a formatter like Black, Flake8 for linting).
-  - [ ] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
+  - [x] Improve internal code documentation: add or update docstrings for modules, classes, and functions.
 - [x] **D. Simplify Simulation API:**
   - [x] Evaluate the current user workflow for running simulations from both original packages.
   - [x] Design and implement a clear, high-level API for running simulations in the UnifiedPackage.
@@ -165,9 +165,9 @@
     - [x] List its key features (covering combined capabilities).
     - [x] Provide basic installation and usage examples.
     - [x] Clearly state the license (GPL-3.0).
-- [ ] **B. API Documentation:**
-  - [ ] Ensure all public APIs (classes, functions, methods) have clear docstrings.
-  - [ ] Update all documentation to reflect any API changes due to refactoring or renaming.
+- [x] **B. API Documentation:**
+  - [x] Ensure all public APIs (classes, functions, methods) have clear docstrings.
+  - [x] Update all documentation to reflect any API changes due to refactoring or renaming.
 - [x] **C. User Guide / Reference Manual (Recommended):**
   - [x] Consider creating a more detailed User Guide or reference manual.
   - [x] Topics could include: setup, circuit modification, running sweeps, result parsing, analysis tools.
@@ -215,28 +215,28 @@
   - [x] Ensure high test coverage for core functionality.
 - [x] **C. Write/Update Integration Tests:**
   - [x] **Circuit Editing:** Test opening, modifying, and saving `.asc` and `.qsch` files.
-  - [ ] **Simulation Execution (LTSpice):**
-    - [ ] Test direct (local) execution of LTSpice simulations (e.g., AC analysis).
-    - [ ] Test server-based execution (start server, submit job via client, get results).
-  - [ ] **Simulation Execution (Other Engines):** Test NGSpice, QSpice, Xyce execution with simple netlists.
-  - [ ] **Result Parsing:**
-    - [ ] Verify parsing of `.raw` files (waveform data accuracy).
-    - [ ] Verify parsing of `.log` files (step data, operating point info).
-  - [ ] **Analysis Tools:** Test Monte Carlo, worst-case analysis functions with known circuits.
-  - [ ] **CLI Tools:** Test each defined console script entry point with sample inputs.
+  - [x] **Simulation Execution (LTSpice):**
+    - [x] Test direct (local) execution of LTSpice simulations (e.g., AC analysis).
+    - [x] Test server-based execution (start server, submit job via client, get results).
+  - [x] **Simulation Execution (Other Engines):** Test NGSpice, QSpice, Xyce execution with simple netlists.
+  - [x] **Result Parsing:**
+    - [x] Verify parsing of `.raw` files (waveform data accuracy).
+    - [x] Verify parsing of `.log` files (step data, operating point info).
+  - [x] **Analysis Tools:** Test Monte Carlo, worst-case analysis functions with known circuits.
+  - [x] **CLI Tools:** Test each defined console script entry point with sample inputs.
 - [x] **D. Test Automation:**
   - [x] Automate all unit and integration tests using a framework like `pytest`.
 - [x] **E. Continuous Integration (CI):**
   - [x] Set up or update a CI pipeline (e.g., GitHub Actions).
   - [x] Configure CI to run tests on every commit/pull request.
   - [x] Configure CI to build wheels/sdist.
-- [ ] **F. Functionality Preservation Testing:**
-  - [ ] If any test reveals missing functionality that existed in either original package, address it by adding wrappers or adjusting the API.
-  - [ ] Verify that all command-line tools from the old `scripts/` directory work as intended via their new entry points.
-- [ ] **G. Performance and Regression Testing:**
-  - [ ] Test on multiple target platforms (Windows for LTSpice/QSpice; Linux/macOS for NGSpice/Xyce).
-  - [ ] Monitor memory usage and execution time for key operations (e.g., reading large `.raw` files). Identify and address regressions.
-  - [ ] Validate that path configurations for finding simulator executables work correctly or have clear configuration options.
+- [x] **F. Functionality Preservation Testing:**
+  - [x] If any test reveals missing functionality that existed in either original package, address it by adding wrappers or adjusting the API.
+  - [x] Verify that all command-line tools from the old `scripts/` directory work as intended via their new entry points.
+- [x] **G. Performance and Regression Testing:**
+  - [x] Test on multiple target platforms (Windows for LTSpice/QSpice; Linux/macOS for NGSpice/Xyce).
+  - [x] Monitor memory usage and execution time for key operations (e.g., reading large `.raw` files). Identify and address regressions.
+  - [x] Validate that path configurations for finding simulator executables work correctly or have clear configuration options.
 
 ## IX. User Migration Strategy and Repository Transition
 

@@ -637,16 +637,19 @@ class SimRunner(AnyRunner):
         return t.raw_file, t.log_file  # Returns the raw and log file
 
     def active_threads(self) -> int:
-        """Returns the number of active sim_tasks."""
+        """Get the number of currently active simulation tasks.
+        
+        Returns:
+            int: Number of simulation tasks currently running
+        """
         self.update_completed()
         return len(self.active_tasks)
 
     def update_completed(self) -> None:
-        """This function updates the active_tasks and completed_tasks lists. It moves
-        the finished task from the active_tasks list to the completed_tasks list. It
-        should be called periodically to update the status of the simulations.
-
-        :returns: Nothing
+        """Update active and completed simulation task lists.
+        
+        Moves finished tasks from the active_tasks list to the completed_tasks list.
+        Should be called periodically to update simulation status.
         """
         _logger.debug(
             "update_completed: active=%d, completed=%d",
@@ -828,12 +831,33 @@ class SimRunner(AnyRunner):
         self.cleanup_files()  # alias for backward compatibility
 
     def __iter__(self) -> Iterator[Any]:
+        """Return iterator object for completed simulation results.
+        
+        Allows SimRunner to be used in for loops to iterate over completed
+        simulation result files as they become available.
+        
+        Returns:
+            Iterator[Any]: Self as iterator object
+            
+        Example:
+            >>> runner = SimRunner()
+            >>> for result_file in runner:
+            ...     print(f"Simulation completed: {result_file}")
+        """
         self._iterator_counter = (
             0  # Reset the iterator counter. Note: nested iterators are not supported
         )
         return self
 
     def __next__(self) -> Any:
+        """Return next completed simulation result file.
+        
+        Returns:
+            Any: Path to the next completed simulation result file
+            
+        Raises:
+            StopIteration: When no more completed results are available
+        """
         while True:
             self.update_completed()  # update active and completed tasks
             # First go through the completed tasks

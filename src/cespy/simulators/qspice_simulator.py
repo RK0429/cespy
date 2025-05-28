@@ -66,8 +66,10 @@ class Qspice(Simulator):
     process_name = ""
 
     if sys.platform in ("linux", "darwin"):
-        # status mid 2024: Qspice has limited support for running under linux+wine, and none for MacOS+wine
-        # TODO: when the situation gets more mature, add support for wine. See
+        # status mid 2024: Qspice has limited support for running under
+        # linux+wine, and none for MacOS+wine
+        # TODO: when the situation gets more mature, add support for wine.
+        # See
         # LTspice for an example.
         spice_exe = []
         process_name = ""
@@ -107,7 +109,8 @@ class Qspice(Simulator):
             "-o",
             "<path>",
         ],  # Specify the name of a file for the console output.
-        # '-p'         : ['-p'],  # Take the netlist piped from stdin. >> Not used in this implementation.
+        # '-p'         : ['-p'],  # Take the netlist piped from stdin.
+        # >> Not used in this implementation.
         "-ProtectSelections": [
             "-ProtectSelections",
             "<path>",
@@ -126,7 +129,9 @@ class Qspice(Simulator):
     _default_run_switches = ["-o"]
 
     @classmethod
-    def valid_switch(cls, path: str, parameter: str = "") -> list[str]:  # pylint: disable=arguments-renamed
+    def valid_switch(
+        cls, switch: str, parameter: str = ""
+    ) -> list[str]:
         """Validates a command line switch. The following options are available for
         QSPICE:
 
@@ -143,17 +148,17 @@ class Qspice(Simulator):
 
         * `-o <path>`: Specify the name of a file for the console output.
 
-        :param path: switch to be added.
-        :type path: str
+        :param switch: switch to be added.
+        :type switch: str
         :param parameter: path to the file related to the switch being given.
         :type parameter: str, optional
         :return: Nothing
         """
 
         # format check
-        if path is None:
+        if switch is None:
             return []
-        switch = path.strip()
+        switch = switch.strip()
         if len(switch) == 0:
             return []
         if switch[0] != "-":

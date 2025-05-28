@@ -235,8 +235,9 @@ class AsyReader(object):
                             f" ASY file: {self._asy_file_path}"
                         )
                 else:
-                    # In order to avoid crashing the program, 1) add the missing if statement above and
-                    # 2) ontact the author to add support for the missing primitive.
+                    # In order to avoid crashing the program, 1) add the missing
+                    # if statement above and 2) contact the author to add
+                    # support for the missing primitive.
                     raise NotImplementedError(
                         f'Primitive not supported for ASY file \n"{line_text}"in file:'
                         f" {self._asy_file_path}. Contact the author to add support."

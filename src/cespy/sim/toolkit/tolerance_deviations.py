@@ -261,7 +261,8 @@ class ToleranceDeviations(SimAnalysis, ABC):
             ".step param run -1 %d 1" % self.last_run_number
         )  # removes this instruction
         self.clear_simulation_data()
-        # calculate the ideal number of runs per simulation to avoid orphan runs. This is to avoid having a simulation
+        # calculate the ideal number of runs per simulation to avoid orphan
+        # runs. This is to avoid having a simulation
         # with only one run. Which poses a problem for .step instruction
         total_number_of_runs = (
             self.last_run_number + 2

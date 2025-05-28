@@ -105,7 +105,9 @@ class LTspice(Simulator):
         )
 
     @classmethod
-    def valid_switch(cls, switch_param: str, parameter: str = "") -> List[str]:  # pylint: disable=arguments-renamed
+    def valid_switch(
+        cls, switch: str, parameter: str = ""
+    ) -> List[str]:
         """Validate a command line switch.
 
         Available options for Windows/wine LTspice:
@@ -137,9 +139,9 @@ class LTspice(Simulator):
             raise ValueError("MacOS native LTspice supports only batch mode ('-b').")
 
         # format check
-        if switch_param is None:
+        if switch is None:
             return []
-        switch = switch_param.strip()
+        switch = switch.strip()
         if len(switch) == 0:
             return []
         if switch[0] != "-":

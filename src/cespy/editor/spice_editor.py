@@ -16,6 +16,30 @@
 #
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
+"""SPICE netlist parsing and editing functionality.
+
+This module provides classes and utilities for reading, parsing, modifying, and
+writing SPICE netlists. It supports a wide range of SPICE syntax including:
+
+- Component definitions (resistors, capacitors, transistors, etc.)
+- Subcircuit definitions and instantiations
+- Parameter definitions and expressions
+- Simulation commands (.tran, .ac, .dc, etc.)
+- Model definitions and library includes
+
+The main classes are:
+- SpiceComponent: Represents a single SPICE component
+- SpiceCircuit: Represents a complete SPICE circuit or subcircuit
+- SpiceEditor: High-level interface for editing SPICE netlists
+
+Example:
+    >>> from cespy.editor import SpiceEditor
+    >>> editor = SpiceEditor("circuit.net")
+    >>> editor.set_component_value("R1", "10k")
+    >>> editor.set_parameter("TEMP", 27)
+    >>> editor.add_instruction(".tran 1m 10m")
+    >>> editor.save_netlist("modified_circuit.net")
+"""
 from __future__ import annotations
 
 import logging
@@ -117,9 +141,11 @@ REPLACE_REGEXS: Dict[str, str] = {
         + ".*?$"
     ),  # JFET
     # Mutual Inductance
-    "K": r"^(?P<designator>K§?\w+)(?P<nodes>(\s+\S+){2,4})\s+(?P<value>[\+\-]?[0-9\.E+-]+[kmuµnpgt]?).*$",
+    "K": (r"^(?P<designator>K§?\w+)(?P<nodes>(\s+\S+){2,4})\s+"
+          r"(?P<value>[\+\-]?[0-9\.E+-]+[kmuµnpgt]?).*$"),
     # Inductance
-    "L": r"^(?P<designator>L§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>({)?(?(5).*}|([0-9\.E+-]+(Meg|[kmuµnpgt])?H?))).*$",
+    "L": (r"^(?P<designator>L§?\w+)(?P<nodes>(\s+\S+){2})\s+"
+          r"(?P<value>({)?(?(5).*}|([0-9\.E+-]+(Meg|[kmuµnpgt])?H?))).*$"),
     "M": (
         r"^(?P<designator>M§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>\w+)"
         + PARAM_RGX
@@ -164,7 +190,8 @@ REPLACE_REGEXS: Dict[str, str] = {
     ),  # Sub-circuit. The value is the last before any key-value parameters
     # This is structured differently than the others as it will accept any number of nodes.
     # But it only supports 1 value without any spaces in it (unlike V for example).
-    # ex: XU1 NC_01 NC_02 NC_03 NC_04 NC_05 level2 Avol=1Meg GBW=10Meg Slew=10Meg Ilimit=25m Rail=0 Vos=0 En=0 Enk=0 In=0 Ink=0 Rin=500Meg
+    # ex: XU1 NC_01 NC_02 NC_03 NC_04 NC_05 level2 Avol=1Meg GBW=10Meg
+    #     Slew=10Meg Ilimit=25m Rail=0 Vos=0 En=0 Enk=0 In=0 Ink=0 Rin=500Meg
     #     XU1 in out1 -V +V out1 OPAx189 bla_v2 =1% bla_sp1=1 bla_sp2 = 1
     #     XU1 in out1 -V +V out1 GND OPAx189_float
     "Z": r"^(?P<designator>Z§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>\w+).*$",
@@ -200,7 +227,8 @@ REPLACE_REGEXS: Dict[str, str] = {
         + PARAM_RGX
         + ".*?$"
     ),  # QSPICE Unique component Ø
-    "×": r"^(?P<designator>×\w+)(?P<nodes>(\s+\S+){4,16})\s+(?P<value>.*)(?P<params>(\w+\s+){1,8})\s*\\?$",  # QSPICE proprietaty component ×
+    "×": (r"^(?P<designator>×\w+)(?P<nodes>(\s+\S+){4,16})\s+"
+          r"(?P<value>.*)(?P<params>(\w+\s+){1,8})\s*\\?$"),  # QSPICE proprietaty component ×
     "Ö": (
         r"^(?P<designator>Ö\w+)(?P<nodes>(\s+\S+){5})\s+(?P<params>.*)\s*\\?$"
     ),  # LTspice proprietary component Ö
@@ -213,12 +241,15 @@ component_replace_regexs: Dict[str, Pattern[str]] = {
     prefix: re.compile(pattern, re.IGNORECASE)
     for prefix, pattern in REPLACE_REGEXS.items()
 }
-subckt_regex: Pattern[str] = re.compile(r"^.SUBCKT\s+(?P<name>[\w\.]+)", re.IGNORECASE)
+subckt_regex: Pattern[str] = re.compile(
+    r"^.SUBCKT\s+(?P<name>[\w\.]+)", re.IGNORECASE
+)
 lib_inc_regex: Pattern[str] = re.compile(r"^\.(LIB|INC)\s+(.*)$", re.IGNORECASE)
 
 # The following variable deprecated, and here only so that people can find it.
 # It is replaced by SpiceEditor.set_custom_library_paths().
-# Since I cannot keep it operational easily, I do not use the deprecated decorator or the magic from https://stackoverflow.com/a/922693.
+# Since I cannot keep it operational easily, I do not use the deprecated
+# decorator or the magic from https://stackoverflow.com/a/922693.
 #
 # LibSearchPaths = []
 
@@ -376,6 +407,17 @@ class SpiceComponent(Component):
         self.parent.set_component_value(self.reference, value)
 
     def __getitem__(self, item: str) -> Any:
+        """Get component attribute or parameter value.
+
+        Args:
+            item (str): The attribute or parameter name to retrieve
+
+        Returns:
+            Any: The value of the attribute or parameter
+
+        Raises:
+            KeyError: If the attribute or parameter is not found
+        """
         self.update_from_reference()
         try:
             return super().__getitem__(item)
@@ -384,6 +426,15 @@ class SpiceComponent(Component):
             return self.params[item]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set component attribute or parameter value.
+
+        Args:
+            key (str): The attribute or parameter name to set
+            value (Any): The value to set
+
+        Raises:
+            ValueError: If the editor is read-only
+        """
         if self.parent.is_read_only():
             raise ValueError("Editor is read-only")
         if key == "value":
@@ -572,22 +623,22 @@ class SpiceCircuit(BaseEditor):
             return self.parent.get_subcircuit_named(name)
         return None
 
-    def get_subcircuit(self, instance_name: str) -> "SpiceCircuit":
+    def get_subcircuit(self, reference: str) -> "SpiceCircuit":
         """Returns an object representing a Subcircuit. This object can manipulate
         elements such as the SpiceEditor does.
 
-        :param instance_name: Reference of the subcircuit
-        :type instance_name: str
+        :param reference: Reference of the subcircuit
+        :type reference: str
         :returns: SpiceCircuit instance
         :rtype: SpiceCircuit
         :raises UnrecognizedSyntaxError: when an spice command is not recognized by
             cespy
         :raises ComponentNotFoundError: When the reference was not found
         """
-        if SUBCKT_DIVIDER in instance_name:
-            subckt_ref, sub_subckts = instance_name.split(SUBCKT_DIVIDER, 1)
+        if SUBCKT_DIVIDER in reference:
+            subckt_ref, sub_subckts = reference.split(SUBCKT_DIVIDER, 1)
         else:
-            subckt_ref = instance_name
+            subckt_ref = reference
             sub_subckts = None  # eliminating the code
 
         if (
@@ -654,8 +705,9 @@ class SpiceCircuit(BaseEditor):
         # Using the first letter of the component to identify what is it
         if (
             reference[0] == "X" and SUBCKT_DIVIDER in reference
-        ):  # Replaces a component inside of a subciruit
-            # In this case the sub-circuit needs to be copied so that is copy is modified. A copy is created for each
+        ):  # Replaces a component inside of a subcircuit
+            # In this case the sub-circuit needs to be copied so that its copy
+            # is modified. A copy is created for each
             # instance of a sub-circuit.
             component_split = reference.split(SUBCKT_DIVIDER)
             subckt_instance = component_split[0]
@@ -886,6 +938,17 @@ class SpiceCircuit(BaseEditor):
             return SpiceComponent(self, line_no)
 
     def __getitem__(self, item: str) -> Component:
+        """Get component by reference name.
+
+        Args:
+            item (str): Component reference name (e.g., 'R1', 'C1')
+
+        Returns:
+            Component: The component object
+
+        Raises:
+            ComponentNotFoundError: If component is not found
+        """
         component = super().__getitem__(item)
         if component.parent != self:
             # The HierarchicalComponent class must inherit from Component for this to work,
@@ -895,13 +958,28 @@ class SpiceCircuit(BaseEditor):
             return component
 
     def __delitem__(self, key: str) -> None:
-        """This method allows the user to delete a component using the syntax: del
-        circuit['R1']"""
+        """Delete a component from the circuit.
+
+        Args:
+            key (str): Component reference name to delete
+
+        Example:
+            >>> del circuit['R1']  # Removes resistor R1
+        """
         self.remove_component(key)
 
     def __contains__(self, key: str) -> bool:
-        """This method allows the user to check if a component is in the circuit using
-        the syntax: 'R1' in circuit."""
+        """Check if a component exists in the circuit.
+
+        Args:
+            key (str): Component reference name to check
+
+        Returns:
+            bool: True if component exists, False otherwise
+
+        Example:
+            >>> 'R1' in circuit  # Returns True if R1 exists
+        """
         try:
             self.get_component(key)
             return True
@@ -909,8 +987,15 @@ class SpiceCircuit(BaseEditor):
             return False
 
     def __iter__(self) -> Iterator[Component]:
-        """This method allows the user to iterate over the components in the circuit
-        using the syntax: for component in circuit: print(component)"""
+        """Iterate over all components in the circuit.
+
+        Yields:
+            Component: Each component in the circuit
+
+        Example:
+            >>> for component in circuit:
+            ...     print(f"{component.reference}: {component.value}")
+        """
         for line_no, line in enumerate(self.netlist):
             if isinstance(line, SpiceCircuit):
                 yield from line
@@ -950,9 +1035,9 @@ class SpiceCircuit(BaseEditor):
             params[key] = try_convert_value(value)
         return dict(params)
 
-    def get_component_parameters(self, reference: str) -> dict[str, Any]:
+    def get_component_parameters(self, element: str) -> dict[str, Any]:
         # docstring inherited from BaseEditor
-        _, match = self._get_component_line_and_regex(reference)
+        _, match = self._get_component_line_and_regex(element)
         if match and match.groupdict().get("params"):
             params_str = match.group("params")
             return self._parse_params(params_str)
@@ -1018,7 +1103,7 @@ class SpiceCircuit(BaseEditor):
                 self.netlist[param_line] = line[:start] + f"{value_str}" + line[stop:]
             else:
                 # This should not happen in normal operation
-                _logger.error(f"Unexpected non-string line at {param_line}")
+                _logger.error("Unexpected non-string line at %s", param_line)
         else:
             # Was not found
             # the last two lines are typically (.backano and .end)
@@ -1029,7 +1114,7 @@ class SpiceCircuit(BaseEditor):
             )
 
     def set_component_value(
-        self, reference: str, value: Union[str, int, float]
+        self, device: str, value: Union[str, int, float]
     ) -> None:
         """Changes the value of a component, such as a Resistor, Capacitor or Inductor.
         For components inside sub-circuits, use the sub-circuit designator prefix with
@@ -1040,8 +1125,8 @@ class SpiceCircuit(BaseEditor):
             runner.set_component_value('R1', '3.3k')
             runner.set_component_value('X1:C1', '10u')
 
-        :param reference: Reference of the circuit element to be updated.
-        :type reference: str
+        :param device: Reference of the circuit element to be updated.
+        :type device: str
         :param value: value to be set on the given circuit element. Float and integer
             values will be automatically formatted as per the engineering notations 'k'
             for kilo, 'm', for mili and so on.
@@ -1054,34 +1139,36 @@ class SpiceCircuit(BaseEditor):
         """
         if self.is_read_only():
             raise ValueError("Editor is read-only")
-        self._set_component_attribute(reference, "value", value)
+        self._set_component_attribute(device, "value", value)
 
-    def set_element_model(self, reference: str, model: str) -> None:
+    def set_element_model(self, element: str, model: str) -> None:
         """Changes the value of a circuit element, such as a diode model or a voltage
         supply.
 
         Usage::
 
             runner.set_element_model('D1', '1N4148')
-            runner.set_element_model('V1', "SINE(0 1 3k 0 0 0)")
+            runner.set_element_model('V1',
+                                    "SINE(0 1 3k 0 0 0)")
 
-        :param reference: Reference of the circuit element to be updated.
-        :type reference: str
+        :param element: Reference of the circuit element to be updated.
+        :type element: str
         :param model: model name of the device to be updated
         :type model: str
         :raises ComponentNotFoundError: In case the component is not found
         :raises ValueError: In case the model format contains irregular characters
-        :raises NotImplementedError: In case the circuit element is defined in a format which is not supported
-            by this version. If this is the case, use GitHub to start a ticket.
+        :raises NotImplementedError: In case the circuit element is defined in
+            a format which is not supported by this version. If this is the
+            case, use GitHub to start a ticket.
             https://github.com/nunobrum/kupicelib
         """
         if self.is_read_only():
             raise ValueError("Editor is read-only")
-        self._set_component_attribute(reference, "model", model)
+        self._set_component_attribute(element, "model", model)
 
-    def get_component_value(self, reference: str) -> str:
+    def get_component_value(self, element: str) -> str:
         """Returns the value of a component retrieved from the netlist."""
-        component = self.get_component(reference)
+        component = self.get_component(element)
         if isinstance(component, SpiceComponent):
             return component.value_str
         elif isinstance(component, SpiceCircuit):
@@ -1089,9 +1176,9 @@ class SpiceCircuit(BaseEditor):
         else:
             return str(component)
 
-    def get_element_value(self, reference: str) -> str:
+    def get_element_value(self, element: str) -> str:
         """Returns the model or element value of a component."""
-        component = self.get_component(reference)
+        component = self.get_component(element)
         if isinstance(component, SpiceComponent):
             return str(component.attributes.get("model", ""))
         return str(component)
@@ -1280,24 +1367,24 @@ class SpiceCircuit(BaseEditor):
                     ".backanno\n"
                 )  # TODO: Improve this. END of line termination could be different
             except ValueError:
-                index = (
-                    len(self.netlist) - 2
-                )  # This is where typically the .backanno instruction is
+                # This is where typically the .backanno instruction is
+                index = len(self.netlist) - 2
             self.netlist.insert(index, instruction)
 
     def remove_instruction(self, instruction: str) -> None:
         # docstring is in the parent class
 
         # TODO: Make it more intelligent so it recognizes .models, .param and .subckt
-        # Because the netlist is stored containing the end of line terminations and because they are added when they
+        # Because the netlist is stored containing the end of line
+        # terminations and because they are added when they
         # they are added to the netlist.
         if not instruction.endswith(END_LINE_TERM):
             instruction += END_LINE_TERM
         if instruction in self.netlist:
             self.netlist.remove(instruction)
-            _logger.info(f'Instruction "{instruction}" removed')
+            _logger.info('Instruction "%s" removed', instruction)
         else:
-            _logger.error(f'Instruction "{instruction}" not found.')
+            _logger.error('Instruction "%s" not found.', instruction)
 
     def remove_Xinstruction(self, search_pattern: str) -> None:
         # docstring is in the parent class
@@ -1309,12 +1396,12 @@ class SpiceCircuit(BaseEditor):
             if isinstance(line, str) and regex.match(line):
                 del self.netlist[i]
                 instr_removed = True
-                _logger.info(f'Instruction "{line}" removed')
+                _logger.info('Instruction "%s" removed', line)
             else:
                 i += 1
         if not instr_removed:
             _logger.error(
-                f'No instruction matching pattern "{search_pattern}" was found'
+                'No instruction matching pattern "%s" was found', search_pattern
             )
 
     @property
@@ -1507,24 +1594,24 @@ class SpiceEditor(SpiceCircuit):
                     ".backanno\n"
                 )  # TODO: Improve this. END of line termination could be different
             except ValueError:
-                index = (
-                    len(self.netlist) - 2
-                )  # This is where typically the .backanno instruction is
+                # This is where typically the .backanno instruction is
+                index = len(self.netlist) - 2
             self.netlist.insert(index, instruction)
 
     def remove_instruction(self, instruction: str) -> None:
         # docstring is in the parent class
 
         # TODO: Make it more intelligent so it recognizes .models, .param and .subckt
-        # Because the netlist is stored containing the end of line terminations and because they are added when they
+        # Because the netlist is stored containing the end of line
+        # terminations and because they are added when they
         # they are added to the netlist.
         if not instruction.endswith(END_LINE_TERM):
             instruction += END_LINE_TERM
         if instruction in self.netlist:
             self.netlist.remove(instruction)
-            _logger.info(f'Instruction "{instruction}" removed')
+            _logger.info('Instruction "%s" removed', instruction)
         else:
-            _logger.error(f'Instruction "{instruction}" not found.')
+            _logger.error('Instruction "%s" not found.', instruction)
 
     def remove_Xinstruction(self, search_pattern: str) -> None:
         # docstring is in the parent class
@@ -1536,12 +1623,12 @@ class SpiceEditor(SpiceCircuit):
             if isinstance(line, str) and regex.match(line):
                 del self.netlist[i]
                 instr_removed = True
-                _logger.info(f'Instruction "{line}" removed')
+                _logger.info('Instruction "%s" removed', line)
             else:
                 i += 1
         if not instr_removed:
             _logger.error(
-                f'No instruction matching pattern "{search_pattern}" was found'
+                'No instruction matching pattern "%s" was found', search_pattern
             )
 
     def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:

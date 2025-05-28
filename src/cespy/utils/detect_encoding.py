@@ -14,7 +14,8 @@
 # Name:        international_support.py
 # Purpose:     Pragmatic way to detect encoding.
 #
-# Author:      Nuno Brum (nuno.brum@gmail.com) with special thanks to Fugio Yokohama (yokohama.fujio@gmail.com)
+# Author:      Nuno Brum (nuno.brum@gmail.com) with special thanks to
+#              Fugio Yokohama (yokohama.fujio@gmail.com)
 #
 # Created:     14-05-2022
 # Licence:     refer to the LICENSE file
@@ -86,5 +87,4 @@ def detect_encoding(
         raise EncodingDetectError(
             f'Expected pattern "{expected_pattern}" not found in file:{file_path}'
         )
-    else:
-        raise EncodingDetectError(f"Unable to detect encoding on log file: {file_path}")
+    raise EncodingDetectError(f"Unable to detect encoding on log file: {file_path}")

@@ -1,3 +1,13 @@
+"""Utilities for handling Windows short filenames.
+
+This module provides functions to get Windows short path names (8.3 format)
+which are useful when dealing with paths that contain spaces or special
+characters in Windows environments.
+
+Copyright (c) 2023 Nuno Brum
+License: GPL-3.0
+"""
+
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 #
@@ -46,8 +56,10 @@ def get_short_path_name(long_name: str) -> str:
     ]
     _GetShortPathNameW.restype = wintypes.DWORD
 
-    # GetShortPathName is used by first calling it without a destination buffer. It will return the number of characters
-    # you need to make the destination buffer. You then call it again with a buffer of that size. If, due to a TOCTTOU
+    # GetShortPathName is used by first calling it without a destination
+    # buffer. It will return the number of characters
+    # you need to make the destination buffer. You then call it again with
+    # a buffer of that size. If, due to a TOCTTOU
     # problem, the return value is still larger, keep trying until you've got it right. So:
     output_buf_size = 0
     while True:

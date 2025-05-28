@@ -127,7 +127,7 @@ class AscEditor(BaseSchematic):
             run_netlist_file = Path(run_netlist_file)
         run_netlist_file = run_netlist_file.with_suffix(".asc")
         with open(run_netlist_file, "w", encoding=self.encoding) as asc:
-            _logger.info(f"Writing ASC file {run_netlist_file}")
+            _logger.info("Writing ASC file %s", run_netlist_file)
 
             # write include directives
             for inc in self.includes:
@@ -209,7 +209,7 @@ class AscEditor(BaseSchematic):
     def reset_netlist(self, create_blank: bool = False) -> None:
         super().reset_netlist()
         with open(self.asc_file_path, "r", encoding=self.encoding) as asc_file:
-            _logger.info(f"Parsing ASC file {self.asc_file_path}")
+            _logger.info("Parsing ASC file %s", self.asc_file_path)
             component = None
             for line in asc_file:
                 # skip blank lines and include directives
@@ -387,7 +387,9 @@ class AscEditor(BaseSchematic):
                         arc_style.pattern = line_elements[10]
                     self.shapes.append(arc)
                 elif line.startswith("DATAFLAG"):
-                    pass  # DATAFLAG is the placeholder to show simulation information. It is ignored by AscEditor
+                    # DATAFLAG is the placeholder to show simulation information.
+                    # It is ignored by AscEditor
+                    pass
                 else:
                     raise NotImplementedError(
                         f'Primitive not supported for ASC file\n"{line}"'
@@ -540,22 +542,22 @@ class AscEditor(BaseSchematic):
             assert (
                 directive is not None
             ), "Directive should not be None when match is found"
-            _logger.debug(f"Parameter {param} found in ASC file, updating it")
+            _logger.debug("Parameter %s found in ASC file, updating it", param)
             start, stop = match.span("value")
             directive.text = (
                 f"{directive.text[:start]}{value_str}{directive.text[stop:]}"
             )
-            _logger.info(f"Parameter {param} updated to {value_str}")
+            _logger.info("Parameter %s updated to %s", param, value_str)
         else:
             # Was not found so we need to add it,
-            _logger.debug(f"Parameter {param} not found in ASC file, adding it")
+            _logger.debug("Parameter %s not found in ASC file, adding it", param)
             x, y = self._get_text_space()
             coord = Point(x, y)
             text = f".param {param}={value_str}"
             directive = Text(
                 coord=coord, text=text, size=2, type=TextTypeEnum.DIRECTIVE
             )
-            _logger.info(f"Parameter {param} added with value {value_str}")
+            _logger.info("Parameter %s added with value %s", param, value_str)
             self.directives.append(directive)
         self.updated = True
 
@@ -570,8 +572,9 @@ class AscEditor(BaseSchematic):
         if sub_circuit != self:  # The component is in a subcircuit
             if isinstance(sub_circuit, SpiceCircuit):
                 _logger.warning(
-                    f"Component {device} is in an Spice subcircuit. "
-                    "This function may not work as expected."
+                    "Component %s is in an Spice subcircuit. "
+                    "This function may not work as expected.",
+                    device
                 )
             return sub_circuit.set_component_value(ref, value)
         else:
@@ -582,10 +585,10 @@ class AscEditor(BaseSchematic):
                 else:
                     value_str = format_eng(value)
                 component.attributes["Value"] = value_str
-                _logger.info(f"Component {device} updated to {value_str}")
+                _logger.info("Component %s updated to %s", device, value_str)
                 self.set_updated(device)
             else:
-                _logger.error(f"Component {device} does not have a Value attribute")
+                _logger.error("Component %s does not have a Value attribute", device)
                 raise ComponentNotFoundError(
                     f"Component {device} does not have a Value attribute"
                 )
@@ -602,7 +605,7 @@ class AscEditor(BaseSchematic):
         """
         component = self.get_component(element)
         component.symbol = model  # type: ignore[assignment]
-        _logger.info(f"Component {element} updated to {model}")
+        _logger.info("Component %s updated to %s", element, model)
         self.set_updated(element)
 
     def get_component_value(self, element: str) -> str:
@@ -613,7 +616,7 @@ class AscEditor(BaseSchematic):
             if param_name in component.attributes
         ]
         if len(values) == 0:
-            _logger.error(f"Component {element} does not have a Value attribute")
+            _logger.error("Component %s does not have a Value attribute", element)
             raise ComponentNotFoundError(
                 f"Component {element} does not have a Value attribute"
             )
@@ -674,7 +677,8 @@ class AscEditor(BaseSchematic):
 
         Usage 2: ::
 
-            value_settings = {'value': 330, 'temp': 25} editor.set_component_parameters(R1, **value_settings)
+            value_settings = {'value': 330, 'temp': 25}
+            editor.set_component_parameters(R1, **value_settings)
 
         :param element: Reference of the circuit element.
         :type element: str :key <param_name>: The key is the parameter name and the
@@ -698,7 +702,8 @@ class AscEditor(BaseSchematic):
                 # I do not support delete here, as some of the keys are mandatory
                 component.attributes[key] = value_str
                 _logger.info(
-                    f"Component {element} updated with parameter {key}:{value}"
+                    "Component %s updated with parameter %s:%s",
+                    element, key, value
                 )
             else:
                 foundme = False
@@ -721,8 +726,8 @@ class AscEditor(BaseSchematic):
                                 ]
                             )
                             _logger.info(
-                                f"Component {element} updated with parameter"
-                                f" {key}:{value_str}"
+                                "Component %s updated with parameter %s:%s",
+                                element, key, value_str
                             )
                             foundme = True
                 if not foundme:
@@ -732,8 +737,8 @@ class AscEditor(BaseSchematic):
                             # known parameter, set the value
                             component.attributes[key] = value_str
                             _logger.info(
-                                f"Component {element} updated with parameter"
-                                f" {key}:{value_str}"
+                                "Component %s updated with parameter %s:%s",
+                                element, key, value_str
                             )
                         else:
                             # nothing found, and not a known parameter, put it in
@@ -753,8 +758,8 @@ class AscEditor(BaseSchematic):
                                 # if SpiceLine does not exist: create the line
                                 component.attributes[param_key] = f"{key}={value_str}"
                             _logger.info(
-                                f"Component {element} updated with parameter"
-                                f" {key}:{value_str}"
+                                "Component %s updated with parameter %s:%s",
+                                element, key, value_str
                             )
         self.set_updated(element)
 
@@ -835,7 +840,7 @@ class AscEditor(BaseSchematic):
     def _asy_file_find(self, filename: str) -> Optional[str]:
         if filename in self.symbol_cache:
             return self.symbol_cache[filename]
-        _logger.info(f"Searching for symbol {filename}...")
+        _logger.info("Searching for symbol %s...", filename)
         # create list of directories to search, based on the simulator_lib_paths.
         # Just add "/sym" to the path
         my_lib_paths = [os.path.join(x, "sym") for x in self.simulator_lib_paths]
@@ -893,7 +898,7 @@ class AscEditor(BaseSchematic):
             if instruction in self.directives[i].text:
                 text = self.directives[i].text
                 del self.directives[i]
-                _logger.info(f"Instruction {text} removed")
+                _logger.info("Instruction %s removed", text)
                 self.updated = True
                 return  # Job done, can exit this method
             i += 1
@@ -911,7 +916,7 @@ class AscEditor(BaseSchematic):
             if regex.match(instruction) is not None:
                 instr_removed = True
                 del self.directives[i]
-                _logger.info(f"Instruction {instruction} removed")
+                _logger.info("Instruction %s removed", instruction)
             else:
                 i += 1
         if instr_removed:

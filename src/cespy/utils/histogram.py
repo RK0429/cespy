@@ -4,10 +4,9 @@
 """Module for creating histograms from simulation measurement data."""
 
 import argparse
-import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -60,10 +59,10 @@ def create_histogram(
     :param output: Optional output file path
     :param show_stats: Whether to show statistics on the plot
     """
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _, ax = plt.subplots(figsize=(10, 6))
 
     # Create histogram
-    n, bins_edges, patches = ax.hist(data, bins=bins, alpha=0.7, edgecolor="black")
+    _, _, _ = ax.hist(data, bins=bins, alpha=0.7, edgecolor="black")
 
     # Calculate statistics
     mean_val = np.mean(data)
@@ -103,7 +102,7 @@ def create_histogram(
             stats_text,
             transform=ax.transAxes,
             verticalalignment="top",
-            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+            bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5},
         )
 
     ax.legend()
@@ -201,7 +200,7 @@ def main() -> None:
             n_cols = min(3, n_meas)
             n_rows = (n_meas + n_cols - 1) // n_cols
 
-            fig, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
+            _, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
             if n_meas == 1:
                 axes = [axes]
             else:

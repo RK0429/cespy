@@ -1,7 +1,27 @@
 #!/usr/bin/env python
 # coding=utf-8
+
+"""LTSpice log file parsing and analysis utilities.
+
+This module provides classes and functions for reading, parsing, and analyzing
+LTSpice simulation log files, extracting measurement data, step information,
+and error analysis.
+
+Copyright (c) 2023 Nuno Brum
+License: GPL-3.0
+"""
+
 # Enable postponed evaluation of annotations for forward references
 from __future__ import annotations
+
+import dataclasses
+import logging
+import os.path
+import re
+from typing import Any, Dict, Iterator, List, Optional, TypeVar, Union
+
+from ..utils.detect_encoding import detect_encoding
+from .logfile_data import LogfileData, try_convert_value
 
 # -------------------------------------------------------------------------------
 #
@@ -82,15 +102,6 @@ the newest .log/.txt/.mout file and use it.
 """
 __author__ = "Nuno Canto Brum <me@nunobrum.com>"
 __copyright__ = "Copyright 2023, Fribourg Switzerland"
-
-import dataclasses
-import logging
-import os.path
-import re
-from typing import Any, Dict, Iterator, List, Optional, TypeVar, Union
-
-from ..utils.detect_encoding import detect_encoding
-from .logfile_data import LogfileData, try_convert_value
 
 _logger = logging.getLogger("cespy.LTSteps")
 
@@ -348,7 +359,9 @@ class LTSpiceLogReader(LogfileData):
         # fcut: v(vout)=vmax/sqrt(2) AT 252.921
         # fcutac=8.18166e+006 FROM 1.81834e+006 TO 1e+007 => AC Find Computation
         regx = re.compile(
-            # r"^(?P<name>\w+)(:\s+.*)?=(?P<value>[\d(inf)\.E+\-\(\)dB,°]+)(( FROM (?P<from>[\d\.E+-]*) TO (?P<to>[\d\.E+-]*))|( at (?P<at>[\d\.E+-]*)))?",
+            # r"^(?P<name>\w+)(:\s+.*)?=(?P<value>[\d(inf)\.E+\-\(\)dB,°]+)"
+            # r"(( FROM (?P<from>[\d\.E+-]*) TO (?P<to>[\d\.E+-]*))|"
+            # r"( at (?P<at>[\d\.E+-]*)))?",
             r"^(?P<name>\w+)(:\s+.*)?=(?P<value>[\d(inf)E+\-\(\)dB,°(-/\w]+)( FROM"
             r" (?P<from>[\d\.E+-]*) TO (?P<to>[\d\.E+-]*)|( at (?P<at>[\d\.E+-]*)))?",
             re.IGNORECASE,
@@ -489,8 +502,8 @@ class LTSpiceLogReader(LogfileData):
                         # store the info
                         if len(measurements):
                             _logger.debug(
-                                f"Storing Measurement {meas_name} (count"
-                                f" {len(measurements)})"
+                                "Storing Measurement %s (count %d)",
+                                meas_name, len(measurements)
                             )
                             self.measure_count += len(measurements)
                             for k, title in enumerate(headers):
@@ -505,7 +518,7 @@ class LTSpiceLogReader(LogfileData):
                     meas_name = line[
                         13:
                     ]  # text which is after "Measurement: ". len("Measurement: ") -> 13
-                    _logger.debug("Reading Measurement %s" % line[13:])
+                    _logger.debug("Reading Measurement %s", line[13:])
                 else:
                     tokens = line.split("\t")
                     if len(tokens) >= 2:
@@ -535,7 +548,8 @@ class LTSpiceLogReader(LogfileData):
             # storing the last data into the dataset
             if meas_name:
                 _logger.debug(
-                    f"Storing Measurement {meas_name} (count {len(measurements)})"
+                    "Storing Measurement %s (count %d)",
+                    meas_name, len(measurements)
                 )
             if len(measurements):
                 self.measure_count += len(measurements)
@@ -546,8 +560,8 @@ class LTSpiceLogReader(LogfileData):
                     self.dataset[key] = [measure[k] for measure in measurements]
 
             _logger.info(
-                f"Identified {self.step_count} steps, read"
-                f" {self.measure_count} measurements"
+                "Identified %d steps, read %d measurements",
+                self.step_count, self.measure_count
             )
 
     def export_data(
@@ -617,7 +631,8 @@ class LTSpiceLogReader(LogfileData):
                 fout.write("\n\nHarmonic Analysis\n")
                 fout.write("\t".join(self.stepset.keys()) + "\t")
                 fout.write(
-                    "Signal\tN-Periods\tHarmonic\tFrequency\tFourier\tNormalized\tPhase\tNormalized\n"
+                    "Signal\tN-Periods\tHarmonic\tFrequency\t"
+                    "Fourier\tNormalized\tPhase\tNormalized\n"
                 )
                 for signal in self.fourier:
                     for analysis in self.fourier[signal]:
@@ -671,7 +686,8 @@ def main() -> None:
     parser.add_argument(
         "filename",
         nargs="?",
-        help="Log file to process (.txt, .log, or .mout). If not provided, uses the most recent valid file.",
+        help=("Log file to process (.txt, .log, or .mout). If not provided, "
+              "uses the most recent valid file."),
     )
     parser.add_argument(
         "--last",

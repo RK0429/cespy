@@ -248,23 +248,29 @@ class Shape:
 
 
 # Rectangle = Shape
-# Rectangle is a special case of a Shape. Rectangle is defined by two points that define the diagonal
+# Rectangle is a special case of a Shape. Rectangle is defined by two points
+# that define the diagonal
 # of the rectangle.
 
 # Circle = Shape  # Circle is a special case of a Shape. Circle is defined
 # by the rectangle that encloses it.
 
 # Arc = Shape
-# Arc is a special case of a Shape. Since different tools have different ways of defining arcs, we will use
-# # the Shape class to define them. We will only store the list of points that are provided by the tool.
+# Arc is a special case of a Shape. Since different tools have different ways
+# of defining arcs, we will use
+# the Shape class to define them. We will only store the list of points that
+# are provided by the tool.
 
-#  TODO: The following code is commented out because it is not used in the current implementation. It is kept here for
+#  TODO: The following code is commented out because it is not used in the
+# current implementation. It is kept here for
 # when we decode how ARCs are stored and we could use it to update them.
 # @dataclasses.dataclass
 # class Arc:
-#     """Opting for a non-native representation of the arc as LTspice and Qspice have different
-#     ways of storing Arc information. Start and Stop points are calculated as a fraction of the radius
-#     for X and Y. This avoids having to deal with the calculation of sines and cosines and their inverse
+#     """Opting for a non-native representation of the arc as LTspice and
+#     Qspice have different ways of storing Arc information. Start and Stop
+#     points are calculated as a fraction of the radius for X and Y. This
+#     avoids having to deal with the calculation of sines and cosines and
+#     their inverse
 #     into radians."""
 #     center: Point
 #     radius: float
@@ -319,7 +325,8 @@ class BaseSchematic(BaseEditor):
         self.ports: List[Port] = []
         self.lines: List[Line] = []
         self.shapes: List[Shape] = []
-        self.updated = False  # indicates if an edit was done and the file has to be written back to disk
+        self.updated = False  # indicates if an edit was done and the file has
+        # to be written back to disk
 
     def reset_netlist(self, create_blank: bool = False) -> None:
         """Resets the netlist to the original state."""
@@ -374,7 +381,7 @@ class BaseSchematic(BaseEditor):
             return sub_circuit.get_component(ref)
         else:
             if ref not in sub_circuit.components:
-                _logger.error(f"Component {reference} not found")
+                _logger.error("Component %s not found", reference)
                 raise ComponentNotFoundError(
                     f"Component {reference} not found in Schematic file"
                 )

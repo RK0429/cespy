@@ -29,7 +29,8 @@ __copyright__ = "Copyright 2024, Fribourg Switzerland"
 # Regular expressions
 TEXT_REGEX = re.compile(
     r"TEXT"
-    r" (-?\d+)\s+(-?\d+)\s+V?(Left|Right|Top|Bottom|Center|Invisible)\s(\d+)\s*(?P<type>[!;])(?P<text>.*)",
+    r" (-?\d+)\s+(-?\d+)\s+V?(Left|Right|Top|Bottom|Center|Invisible)\s"
+    r"(\d+)\s*(?P<type>[!;])(?P<text>.*)",
     re.IGNORECASE,
 )
 

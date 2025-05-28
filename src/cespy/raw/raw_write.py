@@ -296,7 +296,8 @@ class RawWrite:
         different axis alignments and provides options for renaming traces.
 
         Args:
-            other (:class:`~cespy.raw.raw_read.RawRead`): The source RawRead instance to copy traces from
+            other (:class:`~cespy.raw.raw_read.RawRead`): The source RawRead
+                instance to copy traces from
             trace_filter (Union[List[str], Tuple[str, ...], str]): Traces to import
                 - either a list of trace names or a single trace name as string
             **kwargs: Optional keyword arguments:

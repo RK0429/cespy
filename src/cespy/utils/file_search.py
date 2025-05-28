@@ -1,3 +1,13 @@
+"""File search utilities for SPICE simulator executables.
+
+This module provides functions to search for SPICE simulator executables
+across different operating systems and environments, with support for
+multiple search paths and patterns.
+
+Copyright (c) 2023 Nuno Brum
+License: GPL-3.0
+"""
+
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 #
@@ -80,7 +90,7 @@ def search_file_in_containers(filename: str, *containers: str) -> Optional[str]:
         '/path/to/libs/models/Model.lib'
     """
     for container in containers:
-        _logger.debug(f"Searching for '{filename}' in '{container}'")
+        _logger.debug("Searching for '%s' in '%s'", filename, container)
         if os.path.exists(container):  # Skipping invalid paths
             if container.endswith(".zip"):
                 # Search in zip files
@@ -94,8 +104,8 @@ def search_file_in_containers(filename: str, *containers: str) -> Optional[str]:
                             if not os.path.exists(temp_dir):
                                 os.makedirs(temp_dir)
                             _logger.debug(
-                                f"Found. Extracting '{filefound}' from the zip file to"
-                                f" '{temp_dir}'"
+                                "Found. Extracting '%s' from the zip file to '%s'",
+                                filefound, temp_dir
                             )
                             return zip_ref.extract(filefound, path=temp_dir)
             else:
@@ -103,7 +113,7 @@ def search_file_in_containers(filename: str, *containers: str) -> Optional[str]:
                     container, filename
                 )
                 if filefound_opt is not None:
-                    _logger.debug(f"Found '{filefound_opt}'")
+                    _logger.debug("Found '%s'", filefound_opt)
                     return filefound_opt
-    _logger.debug(f"Searching for '{filename}': NOT Found")
+    _logger.debug("Searching for '%s': NOT Found", filename)
     return None

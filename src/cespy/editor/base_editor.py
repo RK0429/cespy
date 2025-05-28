@@ -324,7 +324,9 @@ class Component(Primitive):
         """The Value as a string.
 
         :getter: Returns the value as a string
-        :setter: Sets the value. This behaves like the `set_component_value()` method of the editor, but it is more convenient to use when dealing with a single component.
+        :setter: Sets the value. This behaves like the
+            `set_component_value()` method of the editor, but it is more
+            convenient to use when dealing with a single component.
         """
         return self.parent.get_component_value(self.reference)
 
@@ -377,7 +379,8 @@ class Component(Primitive):
     def value(self) -> Union[float, int, str]:
         """The Value.
 
-        :getter: Returns the value as a number. If the value is not a number, it will return a string.
+        :getter: Returns the value as a number. If the value is not a number,
+            it will return a string.
         :setter: Sets the value.
         """
         return to_float(self.value_str, accept_invalid=True)
@@ -396,7 +399,9 @@ class Component(Primitive):
         """The model of the component.
 
         :getter: Returns the model of the component
-        :setter: Sets the model. This behaves like the `set_element_model()` method of the editor, but it is more convenient to use when dealing with a single component.
+        :setter: Sets the model. This behaves like the `set_element_model()`
+            method of the editor, but it is more convenient to use when dealing
+            with a single component.
         """
         return self.parent.get_element_value(self.reference)
 

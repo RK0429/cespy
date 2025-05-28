@@ -186,18 +186,26 @@ uses the matplotlib library to plot the results of three traces in two subplots.
 
     LTR = RawRead("some_random_file.raw")  # Reads the RAW file contents from file
 
-    print(LTR.get_trace_names())  # Prints the contents of the RAW file. The result is a list, and print formats it.
-    print(LTR.get_raw_property())  # Prints all the properties found in the Header section.
+    # Prints the contents of the RAW file. The result is a list,
+    # and print formats it.
+    print(LTR.get_trace_names())
+    # Prints all the properties found in the Header section.
+    print(LTR.get_raw_property())
 
     plt.figure()  # Creates the canvas for plotting
 
-    vin = LTR.get_trace('V(in)')  # Gets the trace data. If Numpy is installed, then it comes in numpy array format.
-    vout = LTR.get_trace('V(out)') # Gets the second trace.
+    # Gets the trace data. If Numpy is installed, then it comes in
+    # numpy array format.
+    vin = LTR.get_trace('V(in)')
+    vout = LTR.get_trace('V(out)')  # Gets the second trace.
 
-    steps = LTR.get_steps()  # Gets the step information. Returns a list of step numbers, ex: [0,1,2...]. If no steps
-                             # are present on the RAW file, returns only one step : [0] .
+    # Gets the step information. Returns a list of step numbers,
+    # ex: [0,1,2...]. If no steps are present on the RAW file,
+    # returns only one step : [0] .
+    steps = LTR.get_steps()
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)  # Creates the two subplots. One on top of the other.
+    # Creates the two subplots. One on top of the other.
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
     for ax in (ax1, ax2):  # Crates a grid on all the plots.
         ax.grid(True)
@@ -354,22 +362,53 @@ def read_float32(f: IO[bytes]) -> float:
 
 
 def consume4bytes(f: IO[bytes]) -> None:
-    """Used to advance the file pointer 4 bytes."""
+    """Advance the file pointer by 4 bytes.
+
+    Args:
+        f (IO[bytes]): Binary file object to advance
+    """
     f.read(4)
 
 
 def consume8bytes(f: IO[bytes]) -> None:
-    """Used to advance the file pointer 8 bytes."""
+    """Advance the file pointer by 8 bytes.
+
+    Args:
+        f (IO[bytes]): Binary file object to advance
+    """
     f.read(8)
 
 
 def consume16bytes(f: IO[bytes]) -> None:
-    """Used to advance the file pointer 16 bytes."""
+    """Advance the file pointer by 16 bytes.
+
+    Args:
+        f (IO[bytes]): Binary file object to advance
+    """
     f.read(16)
 
 
 def namify(spice_ref: str) -> str:
-    """Translate from V(0,n01) to V__n01__ and I(R1) to I__R1__"""
+    """Convert SPICE reference names to Python-safe identifiers.
+
+    Translates voltage and current references from SPICE format to Python-safe
+    attribute names.
+
+    Args:
+        spice_ref (str): SPICE reference in format V(node) or I(component)
+
+    Returns:
+        str: Python-safe identifier (e.g., 'V__node__', 'I__component__')
+
+    Raises:
+        NotImplementedError: If the reference format is not recognized
+
+    Examples:
+        >>> namify('V(n01)')
+        'V__n01__'
+        >>> namify('I(R1)')
+        'I__R1__'
+    """
     matchobj = re.match(r"(V|I|P)\((\w+)\)", spice_ref)
     if matchobj:
         return f"{matchobj.group(1)}__{matchobj.group(2)}__"
@@ -1000,7 +1039,8 @@ class RawRead:
 
     def _load_step_information(self, filename: Path) -> None:
         if "Command" not in self.raw_params:
-            # probably ngspice before v44 or xyce. And anyway, ngspice does not support the '.step' directive
+            # probably ngspice before v44 or xyce. And anyway, ngspice does not
+            # support the '.step' directive
             # FYI: ngspice can do something like .step via a control section with
             # while loop.
             raise SpiceReadException(

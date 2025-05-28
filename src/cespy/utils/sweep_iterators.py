@@ -1,3 +1,13 @@
+"""Iterator classes for parameter sweeps in SPICE simulations.
+
+This module provides different types of iterators for generating parameter
+values during simulation sweeps, including linear, logarithmic, and list-based
+iterators.
+
+Copyright (c) 2023 Nuno Brum
+License: GPL-3.0
+"""
+
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 #
@@ -27,7 +37,7 @@ __copyright__ = "Copyright 2021, Fribourg Switzerland"
 __all__ = ["sweep", "sweep_n", "sweep_log", "sweep_log_n"]
 
 
-class BaseIterator(object):
+class BaseIterator:
     """Common implementation to all Iterator classes."""
 
     def __init__(
@@ -96,9 +106,8 @@ class sweep(BaseIterator):
         self.niter += 1
         if (self.step > 0 and val <= self.stop) or (self.step < 0 and val >= self.stop):
             return val
-        else:
-            self.finished = True
-            raise StopIteration
+        self.finished = True
+        raise StopIteration
 
 
 def sweep_n(
@@ -167,9 +176,8 @@ class sweep_log(BaseIterator):
             self.start > self.stop and val >= self.stop
         ):
             return val
-        else:
-            self.finished = True
-            raise StopIteration
+        self.finished = True
+        raise StopIteration
 
 
 class sweep_log_n(BaseIterator):
@@ -208,6 +216,5 @@ class sweep_log_n(BaseIterator):
             val = self.start * (self.step**self.niter)
             self.niter += 1
             return val
-        else:
-            self.finished = True
-            raise StopIteration
+        self.finished = True
+        raise StopIteration

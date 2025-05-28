@@ -337,7 +337,7 @@ class LogfileData:
                 # Explicitly cast to the expected return type
                 return cast(Union[float, int, str, LTComplex], self.dataset[measure][0])
             elif len(self.dataset[measure]) == 0:
-                _logger.error(f'No measurements found for measure "{measure}"')
+                _logger.error('No measurements found for measure "%s"', measure)
                 raise IndexError(f'No measurements found for measure "{measure}"')
             else:
                 raise IndexError(
@@ -544,7 +544,8 @@ class LogfileData:
                 if len(values) != data_size:
                     logging.error(
                         "Data size mismatch. Not all measurements have the same"
-                        f' length. Expected {data_size}. "{title}" has {len(values)}'
+                        ' length. Expected %d. "%s" has %d',
+                        data_size, title, len(values)
                     )
 
             if isinstance(values[0], list) and len(values[0]) > 1:
@@ -578,24 +579,25 @@ class LogfileData:
             for s in step_data:
                 if isinstance(s, list):
                     for x in s:
-                        fout.write(value_separator + f"{x}")
+                        fout.write(value_separator + "%s" % x)
                         columns_writen += 1
                 else:
-                    fout.write(value_separator + f"{s}")
+                    fout.write(value_separator + "%s" % s)
                     columns_writen += 1
 
             for tok in meas_data:
                 if isinstance(tok, list):
                     for x in tok:
-                        fout.write(value_separator + f"{x}")
+                        fout.write(value_separator + "%s" % x)
                         columns_writen += 1
                 else:
-                    fout.write(value_separator + f"{tok}")
+                    fout.write(value_separator + "%s" % tok)
                     columns_writen += 1
             if columns_writen != columns_per_line:
                 logging.error(
                     "Line with wrong number of values."
-                    f" Expected:{columns_per_line} Index {index+1} has {columns_writen}"
+                    " Expected:%d Index %d has %d",
+                    columns_per_line, index+1, columns_writen
                 )
             fout.write("\n")
 

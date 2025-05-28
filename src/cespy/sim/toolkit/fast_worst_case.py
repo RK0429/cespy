@@ -259,12 +259,12 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             last_measure = new_measure
             _logger.info("Component %s: %g", ref, component_deltas[ref])
             idx += 1
-        # Check which components have a positive impact on the final result, that is, increasing the component value
-        # increases the final result
+        # Check which components have a positive impact on the final result,
+        # that is, increasing the component value increases the final result
         max_setting = {ref: component_deltas[ref] > 0 for ref in component_deltas}
 
-        # Set all components with a positive impact to the maximum value and all components with a negative impact to
-        # the minimum value
+        # Set all components with a positive impact to the maximum value and
+        # all components with a negative impact to the minimum value
         component_changed = False
         for ref in max_setting:
             if not max_setting[
