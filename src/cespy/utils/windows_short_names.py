@@ -47,6 +47,10 @@ def get_short_path_name(long_name: str) -> str:
         # On non-Windows platforms, just return the original path
         return long_name
 
+    # Import Windows-specific modules
+    import ctypes
+    from ctypes import wintypes
+    
     # Get the Windows API function
     _GetShortPathNameW = (
         ctypes.windll.kernel32.GetShortPathNameW

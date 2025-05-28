@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from cespy.log.ltsteps import LTSpiceLogReader
-from cespy.log.semi_dev_op_reader import MeasureReadingError
 
 
 def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
@@ -40,7 +39,7 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
 
         return measurements
 
-    except (OSError, IOError, MeasureReadingError) as e:
+    except (OSError, IOError, Exception) as e:
         print(f"Error reading log file: {e}")
         return {}
 
@@ -166,7 +165,7 @@ def plot_multiple_measurements(
                 0.02, 0.98,
                 f"μ={mean_val:.3g}\nσ={std_val:.3g}",
                 transform=ax.transAxes,
-                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5},
                 verticalalignment="top",
                 fontsize=10,
             )
