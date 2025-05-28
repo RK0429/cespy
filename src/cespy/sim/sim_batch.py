@@ -178,7 +178,7 @@ class SimCommander(SpiceEditor):
             output_folder=output_folder,
         )
 
-    def setLTspiceRunCommand(
+    def set_ltspice_run_command(
         self, spice_tool: Union[str, Type[Simulator]]
     ) -> None:
         """*(Deprecated)* Manually setting the LTSpice run command.
@@ -226,7 +226,7 @@ class SimCommander(SpiceEditor):
             output_folder=output_folder,
         )
 
-    def add_LTspiceRunCmdLineSwitches(self, *args: str) -> None:
+    def add_ltspice_run_cmd_line_switches(self, *args: str) -> None:
         """*(Deprecated)* Used to add an extra command line argument such as -I<path> to
         add symbol search path or -FastAccess to convert the raw file into Fast Access.
         The arguments is a list of strings as is defined in the LTSpice command line
@@ -400,3 +400,8 @@ if __name__ == "__main__":
     LTC.set_component_value("V1", "AC 1 0")
     LTC.run(callback=callback_function)
     LTC.wait_completion()
+
+
+# Legacy aliases for backward compatibility
+SimCommander.setLTspiceRunCommand = SimCommander.set_ltspice_run_command
+SimCommander.add_LTspiceRunCmdLineSwitches = SimCommander.add_ltspice_run_cmd_line_switches

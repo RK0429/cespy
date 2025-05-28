@@ -70,8 +70,9 @@ class JobInformation:
 
 
 class SimClient:
-    """Class used for launching simulations in a Spice Simulation Server. A Spice
-    Simulation Server is a machine running a script with an active
+    """Class used for launching simulations in a Spice Simulation Server.
+    
+    A Spice Simulation Server is a machine running a script with an active
     SimServer object.
 
     This class only implement basic level handshaking with a single
@@ -152,9 +153,10 @@ class SimClient:
     def add_sources(self, sources: Iterable[str | pathlib.Path]) -> bool:
         """Add sources to the simulation environment.
 
-        The sources are a list of file paths that are going to be transferred to the
-        server. The server will add the sources to the simulation folder. Returns True
-        if the sources were added and False if the session_id is not valid.
+        The sources are a list of file paths that are going to be transferred
+        to the server. The server will add the sources to the simulation
+        folder. Returns True if the sources were added and False if the
+        session_id is not valid.
         """
         # Create a buffer to store the zip file in memory
         zip_buffer = io.BytesIO()
@@ -197,15 +199,17 @@ class SimClient:
         circuit: str | pathlib.Path,
         dependencies: list[str | pathlib.Path] | None = None,
     ) -> int:
-        """Sends the netlist identified with the argument "circuit" to the server, and
-        it receives a run identifier (runno). Since the server can receive requests from
-        different machines, this identifier is not guaranteed to be sequential.
+        """Sends the netlist identified with the argument "circuit" to the
+        server, and it receives a run identifier (runno). Since the server
+        can receive requests from different machines, this identifier is not
+        guaranteed to be sequential.
 
-        :param circuit: path to the netlist file containing the simulation directives.
+        :param circuit: path to the netlist file containing the simulation
+            directives.
         :type circuit: pathlib.Path or str
-        :param dependencies: list of files that the netlist depends on. This is used to
-            ensure that the netlist is transferred to the server with all the necessary
-            files.
+        :param dependencies: list of files that the netlist depends on. This
+            is used to ensure that the netlist is transferred to the server
+            with all the necessary files.
         :type dependencies: list of pathlib.Path or str
         :returns: identifier on the server of the simulation.
         :rtype: int

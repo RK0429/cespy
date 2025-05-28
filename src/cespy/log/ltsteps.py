@@ -718,3 +718,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# Legacy alias for backward compatibility
+reformat_LTSpice_export = reformat_ltspice_export

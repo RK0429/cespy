@@ -2,9 +2,9 @@
 # coding=utf-8
 """Server-side simulation runner for managing parallel SPICE simulations.
 
-This module provides the ServerSimRunner class which manages simulation tasks on the
-server side, handling parallel execution, task monitoring, and result packaging
-for client retrieval.
+This module provides the ServerSimRunner class which manages simulation
+tasks on the server side, handling parallel execution, task monitoring,
+and result packaging for client retrieval.
 """
 
 import logging
@@ -56,14 +56,15 @@ def zip_files(raw_filename: Path, log_filename: Path) -> Path:
 
 
 class ServerSimRunner(threading.Thread):
-    """This class maintains updated status of the SimRunner. It was decided not to make
-    SimRunner a super class and rather make it manipulate directly the structures of
-    SimRunner. The rationale for this, was to avoid confusions between the run() on the
-    Thread class and the run on the SimRunner class. Making a class derive from two
-    different classes needs to be handled carefully.
+    """This class maintains updated status of the SimRunner. It was decided
+    not to make SimRunner a super class and rather make it manipulate
+    directly the structures of SimRunner. The rationale for this, was to
+    avoid confusions between the run() on the Thread class and the run on the
+    SimRunner class. Making a class derive from two different classes needs
+    to be handled carefully.
 
-    In consequence of the rationale above, many of the functions that were handled by
-    the SimRunner are overriden by this class.
+    In consequence of the rationale above, many of the functions that were
+    handled by the SimRunner are overriden by this class.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -75,8 +76,8 @@ class ServerSimRunner(threading.Thread):
         simulator: Any = None,
     ) -> None:
         super().__init__(name="SimManager")
-        # SimRunner expects a float for timeout, so use 600.0 as default if None
-        # is provided
+        # SimRunner expects a float for timeout, so use 600.0 as default if
+        # None is provided
         sim_timeout = 600.0 if timeout is None else timeout
         self.runner = SimRunner(
             simulator=simulator,
@@ -91,7 +92,8 @@ class ServerSimRunner(threading.Thread):
         self._stop = False
 
     def run(self) -> None:
-        """This function makes a direct manipulation of the structures of SimRunner.
+        """This function makes a direct manipulation of the structures of
+        SimRunner.
 
         This option is
         """
@@ -128,13 +130,14 @@ class ServerSimRunner(threading.Thread):
         *,
         timeout: Optional[float] = None,
     ) -> int:
-        """Adding a simulation to the list of simulations to be run. The function will
-        return the runno of the simulation or -1 if the simulation could not be started.
+        """Adding a simulation to the list of simulations to be run. The
+        function will return the runno of the simulation or -1 if the
+        simulation could not be started.
 
         :param netlist: The netlist to be simulated
         :param timeout: The timeout for the simulation
-        :return: The runno of the simulation or -1 if the simulation could not be
-            started
+        :return: The runno of the simulation or -1 if the simulation could not
+            be started
         """
         _logger.debug("starting Simulation of %s", netlist)
         # SimRunner.run accepts Optional[float] for timeout, so we can pass it

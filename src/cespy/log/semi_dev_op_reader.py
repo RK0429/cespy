@@ -28,7 +28,7 @@ from typing import Dict, List, Union
 from ..utils.detect_encoding import detect_encoding
 
 
-def opLogReader(
+def op_log_reader(
     filename: str,
 ) -> Dict[str, Dict[str, Dict[str, Union[float, str]]]]:
     """This function is exclusively dedicated to retrieving operation point parameters
@@ -195,3 +195,7 @@ def opLogReader(
                                     ] = value
 
     return dataset
+
+
+# Legacy alias for backward compatibility
+opLogReader = op_log_reader
