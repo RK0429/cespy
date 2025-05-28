@@ -91,7 +91,7 @@ class SimStepper:
             for res_value1 in sweep(2.2, 2.4, 0.2):  # Steps from 2.2 to 2.4 with 0.2 increments
                 # Updates the resistor R1 value
                 netlist.set_component_value('R1', res_value1)
-                for temperature in sweep(0, 80, 20):  # Makes temperature step from 0 to 80 degrees in 20 degree steps
+                for temperature in sweep(0, 80, 20):  # Temperature step 0-80°C in 20° steps
                     # Sets the simulation temperature
                     netlist.set_parameters(temp=80)
                     for res_value2 in (10, 25, 32):
@@ -140,10 +140,10 @@ class SimStepper:
         """Remove an instruction from the circuit."""
         self.netlist.remove_instruction(instruction)
 
-    @wraps(BaseEditor.remove_Xinstruction)
-    def remove_Xinstruction(self, search_pattern: str) -> None:
+    @wraps(BaseEditor.remove_x_instruction)
+    def remove_x_instruction(self, search_pattern: str) -> None:
         """Remove instructions matching a pattern."""
-        self.netlist.remove_Xinstruction(search_pattern)
+        self.netlist.remove_x_instruction(search_pattern)
 
     @wraps(BaseEditor.set_parameters)
     def set_parameters(self, **kwargs: Union[str, int, float]) -> None:
@@ -264,9 +264,9 @@ class SimStepper:
         self.run_all()
 
     @property
-    def okSim(self) -> int:
+    def ok_sim(self) -> int:
         """Number of successful simulations."""
-        return self.runner.okSim
+        return self.runner.ok_sim
 
     @property
     def runno(self) -> int:

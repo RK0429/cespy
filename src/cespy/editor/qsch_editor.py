@@ -1220,7 +1220,7 @@ class QschEditor(BaseSchematic):
         msg = f'Instruction "{instruction}" not found'
         _logger.error(msg)
 
-    def remove_Xinstruction(self, search_pattern: str) -> None:
+    def remove_x_instruction(self, search_pattern: str) -> None:
         # docstring inherited from BaseEditor
         regex = re.compile(search_pattern, re.IGNORECASE)
         instr_removed = False

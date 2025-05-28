@@ -41,7 +41,7 @@ simulation temperature to 80 degrees, and update the values of R1 and R2 to 3.3k
     LTC.wait_completion()  # Waits for the LTSpice simulations to complete
 
     print("Total Simulations: {}".format(LTC.runno))
-    print("Successful Simulations: {}".format(LTC.okSim))
+    print("Successful Simulations: {}".format(LTC.ok_sim))
     print("Failed Simulations: {}".format(LTC.failSim))
 
 The first line will create an python class instance that represents the LTSpice file or
@@ -313,7 +313,8 @@ class SimCommander(SpiceEditor):
         return self.runner.run_count
 
     @property
-    def okSim(self) -> int:  # pylint: disable=invalid-name
+    @property
+    def ok_sim(self) -> int:
         """*(Deprecated)* Legacy property returning successful simulations."""
         return self.runner.successful_simulations
 
@@ -347,7 +348,7 @@ if __name__ == "__main__":
         raw, log = task.wait_results()
         _logger.debug("Raw file '%s' | Log File '%s'", raw, log)
     # Sim Statistics
-    _logger.info("Successful/Total Simulations: %s/%s", LTC.okSim, LTC.runno)
+    _logger.info("Successful/Total Simulations: %s/%s", LTC.ok_sim, LTC.runno)
 
     def callback_function(raw_file: str, log_file: str) -> None:
         """Example callback function for handling simulation data."""
@@ -358,10 +359,10 @@ if __name__ == "__main__":
         )
 
     LTC = SimCommander(meAbsPath + "\\test_files\\testfile.asc", parallel_sims=1)
-    tstart = 0  # noqa: N806
-    bias_file = None  # noqa: N806 # Initialize bias_file to prevent undefined variable error
+    tstart = 0
+    bias_file = None  # Initialize bias_file to prevent undefined variable error
     for tstop in (2, 5, 8, 10):
-        tduration = tstop - tstart  # noqa: N806
+        tduration = tstop - tstart
         LTC.add_instruction(
             f".tran {tduration}",
         )
@@ -369,9 +370,9 @@ if __name__ == "__main__":
             LTC.add_instruction(f".loadbias {bias_file}")
             # Put here your parameter modifications
             # LTC.set_parameters(param1=1, param2=2, param3=3)
-        bias_file = f"sim_loadbias_{tstop}.txt"  # noqa: N806
+        bias_file = f"sim_loadbias_{tstop}.txt"
         LTC.add_instruction(f".savebias {bias_file} internal time={tduration}")
-        tstart = tstop  # noqa: N806
+        tstart = tstop
         LTC.run(callback=callback_function)
 
     LTC.reset_netlist()

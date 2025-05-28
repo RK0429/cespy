@@ -805,7 +805,7 @@ class BaseEditor(ABC):
         """
 
     @abstractmethod
-    def remove_Xinstruction(self, search_pattern: str) -> None:
+    def remove_x_instruction(self, search_pattern: str) -> None:
         """Removes a SPICE instruction from the netlist based on a search pattern. This
         is a more flexible way to remove instructions from the netlist. The search
         pattern is a regular expression that will be used to match the instructions to

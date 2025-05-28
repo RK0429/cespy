@@ -126,17 +126,24 @@ class RunTask:
         )
 
     def print_info(self, logger_fun: Callable[[str], Any], message: str) -> None:
+        """Print information and optionally log it.
+
+        Args:
+            logger_fun: Logger function to use (e.g., _logger.info)
+            message: Message to print/log
+        """
         # Use contextual logger for info/error messages
         logger_fun(message)
         if self.verbose:
             print(f"{time.asctime()} {logger_fun.__name__}: {message}{END_LINE_TERM}")
 
     def run(self) -> None:
+        """Execute the simulation task."""
         # Running the Simulation
         self.start_time = clock_function()
         self.print_info(
             _logger.info,
-            ": Starting simulation %d: %s" % (self.runno, self.netlist_file),
+            f": Starting simulation {self.runno}: {self.netlist_file}",
         )
         # Initialize default executable if none configured and method available
         if not self.simulator.spice_exe:
@@ -166,7 +173,7 @@ class RunTask:
                 # simulation successful
                 self.print_info(
                     _logger.info,
-                    "Simulation Successful. Time elapsed: %s" % sim_time,
+                    f"Simulation Successful. Time elapsed: {sim_time}",
                 )
 
                 if self.callback:
@@ -181,9 +188,8 @@ class RunTask:
                         callback_print = ""
                     self.print_info(
                         _logger.info,
-                        "Simulation Finished. Calling...{}(rawfile, logfile{})".format(
-                            self.callback.__name__, callback_print
-                        ),
+                        f"Simulation Finished. Calling...{self.callback.__name__}"
+                        f"(rawfile, logfile{callback_print})",
                     )
                     # Invoke callback: ProcessCallback subclass or function
                     assert self.raw_file is not None and self.log_file is not None
@@ -228,10 +234,8 @@ class RunTask:
                         self.stop_time = clock_function()
                         self.print_info(
                             _logger.info,
-                            "Callback Finished. Time elapsed: %s"
-                            % format_time_difference(
-                                self.stop_time - callback_start_time
-                            ),
+                            f"Callback Finished. Time elapsed: "
+                            f"{format_time_difference(self.stop_time - callback_start_time)}",
                         )
                 else:
                     self.print_info(

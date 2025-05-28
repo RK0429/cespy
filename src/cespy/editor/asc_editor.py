@@ -916,7 +916,7 @@ class AscEditor(BaseSchematic):
         _logger.error(msg)
         raise RuntimeError(msg)
 
-    def remove_Xinstruction(self, search_pattern: str) -> None:
+    def remove_x_instruction(self, search_pattern: str) -> None:
         regex = re.compile(search_pattern, re.IGNORECASE)
         instr_removed = False
         i = 0

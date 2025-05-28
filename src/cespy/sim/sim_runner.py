@@ -44,7 +44,7 @@ simulation temperature to 80 degrees, and update the values of R1 and R2 to 3.3k
     runner.wait_completion()  # Waits for the LTSpice simulations to complete
 
     print("Total Simulations: {}".format(runner.runno))
-    print("Successful Simulations: {}".format(runner.okSim))
+    print("Successful Simulations: {}".format(runner.ok_sim))
     print("Failed Simulations: {}".format(runner.failSim))
 
 The first line will create a python class instance that represents the LTSpice file or
@@ -179,7 +179,7 @@ class AnyRunner(Protocol):
     ) -> bool: ...
 
     @property
-    def okSim(self) -> int: ...
+    def ok_sim(self) -> int: ...
 
     @property
     def runno(self) -> int: ...
@@ -907,7 +907,7 @@ class SimRunner(AnyRunner):
             return None
 
     @property
-    def okSim(self) -> int:
+    def ok_sim(self) -> int:
         """Number of successful simulations completed."""
         return self.successful_simulations
 
