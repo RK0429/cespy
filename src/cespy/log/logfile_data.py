@@ -656,6 +656,7 @@ class LogfileData:
         param: str,
         steps: Optional[Union[int, Iterable[int]]] = None,
         bins: int = 50,
+        *,
         normalized: bool = True,
         sigma: float = 3.0,
         title: Optional[str] = None,
@@ -674,14 +675,14 @@ class LogfileData:
         sd = x.std()
 
         # Automatic calculation of the range
-        axisXmin: float = mu - (sigma + 1) * sd
-        axisXmax: float = mu + (sigma + 1) * sd
+        axis_x_min: float = mu - (sigma + 1) * sd
+        axis_x_max: float = mu + (sigma + 1) * sd
 
-        if mn < axisXmin:
-            axisXmin = mn
+        if mn < axis_x_min:
+            axis_x_min = mn
 
-        if mx > axisXmax:
-            axisXmax = mx
+        if mx > axis_x_max:
+            axis_x_max = mx
 
         counts, bin_edges, _ = plt.hist(
             x,
@@ -689,14 +690,14 @@ class LogfileData:
             density=normalized,
             facecolor="green",
             alpha=0.75,
-            range=(axisXmin, axisXmax),
+            range=(axis_x_min, axis_x_max),
         )
         # Get max value from counts - ensure single float
-        axisYmax: float
+        axis_y_max: float
         if isinstance(counts, np.ndarray):
-            axisYmax = float(counts.max()) * 1.1
+            axis_y_max = float(counts.max()) * 1.1
         else:
-            axisYmax = float(np.max(counts)) * 1.1
+            axis_y_max = float(np.max(counts)) * 1.1
 
         if normalized:
             # add a 'best fit' line
@@ -725,7 +726,7 @@ class LogfileData:
 
         plt.title(title)
 
-        plt.axis((axisXmin, axisXmax, 0.0, axisYmax))
+        plt.axis((axis_x_min, axis_x_max, 0.0, axis_y_max))
         plt.grid(True)
         if image_file is not None:
             plt.savefig(image_file)
