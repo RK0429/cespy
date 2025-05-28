@@ -66,7 +66,7 @@ class BaseIterator:
         raise NotImplementedError("This function needs to be overriden")
 
 
-class sweep(BaseIterator):
+class Sweep(BaseIterator):
     """Generator function to be used in sweeps.
 
     Advantages towards the range python built-in functions
@@ -74,9 +74,9 @@ class sweep(BaseIterator):
     - Supports both up and down sweeps
     Usage:
 
-        >>> list(sweep(0.3, 1.1, 0.2))
+        >>> list(Sweep(0.3, 1.1, 0.2))
         [0.3, 0.5, 0.7, 0.9000000000000001, 1.1]
-        >>> list(sweep(15, -15, 2.5))
+        >>> list(Sweep(15, -15, 2.5))
         [15, 12.5, 10.0, 7.5, 5.0, 2.5, 0.0, -2.5, -5.0, -7.5, -10.0, -12.5, -15.0]
     """
 
@@ -113,7 +113,7 @@ class sweep(BaseIterator):
 
 
 def sweep_n(
-    start: Union[int, float], stop: Union[int, float], N: int
+    start: Union[int, float], stop: Union[int, float], n: int
 ) -> Iterable[float]:
     """Helper function. Generator function that generates a 'N' number of points between
     a start and a stop interval.
@@ -128,10 +128,10 @@ def sweep_n(
         >>> list(sweep_n(15, -15, 13))
         [15, 12.5, 10.0, 7.5, 5.0, 2.5, 0.0, -2.5, -5.0, -7.5, -10.0, -12.5, -15.0]
     """
-    return sweep(start, stop, (stop - start) / (N - 1))
+    return Sweep(start, stop, (stop - start) / (n - 1))
 
 
-class sweep_log(BaseIterator):
+class SweepLog(BaseIterator):
     """Generator function to be used in logarithmic sweeps.
 
     Advantages towards the range python built-in functions
@@ -139,9 +139,9 @@ class sweep_log(BaseIterator):
     - Supports both up and down sweeps.
     Usage:
 
-        >>> list(sweep_log(0.1, 11e3, 10))
+        >>> list(SweepLog(0.1, 11e3, 10))
         [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
-        >>> list(sweep_log(1000, 1, 2))
+        >>> list(SweepLog(1000, 1, 2))
         [1000, 500.0, 250.0, 125.0, 62.5, 31.25, 15.625, 7.8125, 3.90625, 1.953125]
     """
 
@@ -166,7 +166,7 @@ class sweep_log(BaseIterator):
             self.step = 1 / self.step
         self.val = self.start
 
-    def __iter__(self) -> "sweep_log":
+    def __iter__(self) -> "SweepLog":
         super().__iter__()
         self.val = self.start
         return self
@@ -182,7 +182,7 @@ class sweep_log(BaseIterator):
         raise StopIteration
 
 
-class sweep_log_n(BaseIterator):
+class SweepLogN(BaseIterator):
     """Helper function. Generator function that generates a 'N' number of points between
     a start and a stop interval.
 
@@ -191,7 +191,7 @@ class sweep_log_n(BaseIterator):
     - Supports both up and down sweeps
     Usage:
 
-        >>> list(sweep_log_n(1, 10, 6))  # e.g., [1.0, ..., 10.0]
+        >>> list(SweepLogN(1, 10, 6))  # e.g., [1.0, ..., 10.0]
     """
 
     def __init__(
@@ -208,7 +208,7 @@ class sweep_log_n(BaseIterator):
         super().__init__(start, number_of_elements, step)
         self.niter = 0
 
-    def __iter__(self) -> "sweep_log_n":
+    def __iter__(self) -> "SweepLogN":
         super().__iter__()
         self.niter = 0
         return self
@@ -220,3 +220,9 @@ class sweep_log_n(BaseIterator):
             return val
         self.finished = True
         raise StopIteration
+
+
+# Backward compatibility aliases
+sweep = Sweep
+sweep_log = SweepLog
+sweep_log_n = SweepLogN
