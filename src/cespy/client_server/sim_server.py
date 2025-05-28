@@ -23,7 +23,7 @@ from cespy.sim.simulator import Simulator
 _logger = logging.getLogger("cespy.SimServer")
 
 
-class SimServer(object):
+class SimServer:
     """This class implements a server that can run simulations by request of a client
     located in a different machine.
 
@@ -86,7 +86,7 @@ class SimServer(object):
         The sources are contained in a zip file will be added to the simulation folder.
         Returns True if the sources were added and False if the session_id is not valid.
         """
-        _logger.info(f"Server: Add sources {session_id}")
+        _logger.info("Server: Add sources %s", session_id)
         if session_id not in self.sessions:
             return False  # This indicates that no job is started
         # Create a buffer from the zip data
@@ -96,19 +96,29 @@ class SimServer(object):
         answer = False
         with zipfile.ZipFile(zip_buffer, "r") as zip_file:
             for name in zip_file.namelist():
-                _logger.debug(f"Server: Writing {name} to zip file")
+                _logger.debug("Server: Writing %s to zip file", name)
             if len(zip_file.namelist()) >= 0:
                 zip_file.extractall(self.output_folder)
                 answer = True
         return answer
 
     def run(self, session_id: str, circuit_name: str, zip_data: Binary) -> int:
-        _logger.info(f"Server: Run {session_id} : {circuit_name}")
+        """Run a simulation for the given session.
+        
+        Args:
+            session_id: The session identifier
+            circuit_name: Name of the circuit file
+            zip_data: Binary data containing the circuit and dependencies
+            
+        Returns:
+            The run number of the simulation or -1 if failed
+        """
+        _logger.info("Server: Run %s : %s", session_id, circuit_name)
         if not self.add_sources(session_id, zip_data):
             return -1
 
         circuit_path = Path(self.output_folder) / circuit_name
-        _logger.info(f"Server: Running simulation of {circuit_path}")
+        _logger.info("Server: Running simulation of %s", circuit_path)
         runno = self.simulation_manager.add_simulation(circuit_path)
         if runno != -1:
             self.sessions[session_id].append(runno)
@@ -122,7 +132,7 @@ class SimServer(object):
         session_id = str(
             uuid.uuid4()
         )  # Needs to be a string, otherwise the rpc client can't handle it
-        _logger.info(f"Server: Starting session {session_id}")
+        _logger.info("Server: Starting session %s", session_id)
         self.sessions[session_id] = []
         return session_id
 
@@ -138,7 +148,7 @@ class SimServer(object):
 
         * 'stop' - server time
         """
-        _logger.debug(f"Server: collecting status for {session_id}")
+        _logger.debug("Server: collecting status for %s", session_id)
         ret = []
         for task_info in self.simulation_manager.completed_tasks:
             _logger.debug(task_info)
@@ -148,7 +158,7 @@ class SimServer(object):
                     runno
                 )  # transfers the dictionary from the simulation_manager completed task
                 # to the return dictionary
-        _logger.debug(f"Server: Returning status {ret}")
+        _logger.debug("Server: Returning status %s", ret)
         return ret
 
     def get_files(self, session_id: str, runno: int) -> Tuple[str, Binary]:
@@ -170,7 +180,7 @@ class SimServer(object):
         """Cleans all the pending sim_tasks with."""
         if session_id not in self.sessions:
             return False
-        _logger.info(f"Closing session {session_id}")
+        _logger.info("Closing session %s", session_id)
         for runno in self.sessions[session_id]:
             self.simulation_manager.erase_files_of_runno(runno)
         del self.sessions[session_id]
