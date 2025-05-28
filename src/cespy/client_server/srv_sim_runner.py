@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Server-side simulation runner for managing parallel SPICE simulations.
+
+This module provides the ServerSimRunner class which manages simulation tasks on the
+server side, handling parallel execution, task monitoring, and result packaging
+for client retrieval.
+"""
 
 import logging
 
@@ -33,6 +39,15 @@ _logger = logging.getLogger("cespy.ServerSimRunner")
 
 
 def zip_files(raw_filename: Path, log_filename: Path) -> Path:
+    """Zip raw and log files together for client download.
+    
+    Args:
+        raw_filename: Path to the raw simulation output file
+        log_filename: Path to the simulation log file
+        
+    Returns:
+        Path to the created zip file
+    """
     zip_filename = raw_filename.with_suffix(".zip")
     with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_file:
         zip_file.write(raw_filename)
@@ -95,7 +110,7 @@ class ServerSimRunner(threading.Thread):
                     "start": task.start_time,
                     "stop": task.stop_time,
                 })
-                _logger.debug(f"Task {task} is finished")
+                _logger.debug("Task %s is finished", task)
                 _logger.debug(self.completed_tasks[-1])
                 _logger.debug(len(self.completed_tasks))
 
@@ -119,24 +134,23 @@ class ServerSimRunner(threading.Thread):
         :return: The runno of the simulation or -1 if the simulation could not be
             started
         """
-        _logger.debug(f"starting Simulation of {netlist}")
+        _logger.debug("starting Simulation of %s", netlist)
         # SimRunner.run accepts Optional[float] for timeout, so we can pass it directly
         task = self.runner.run(
             netlist, wait_resource=True, timeout=timeout, callback=zip_files
         )
         if task is None:
-            _logger.error(f"Failed to start task {netlist}")
+            _logger.error("Failed to start task %s", netlist)
             return -1
-        else:
-            _logger.info(f"Started task {netlist} with job_id{task.runno}")
-            return int(task.runno)
+        _logger.info("Started task %s with job_id%s", netlist, task.runno)
+        return int(task.runno)
 
     def _erase_files_and_info(self, pos: int) -> None:
         task = self.completed_tasks[pos]
         for filename in ("circuit", "log", "raw", "zipfile"):
             f = task[filename]
             if f.exists():
-                _logger.info(f"deleting {f}")
+                _logger.info("deleting %s", f)
                 f.unlink()
         del self.completed_tasks[pos]
 
@@ -151,12 +165,19 @@ class ServerSimRunner(threading.Thread):
                 break
 
     def cleanup_completed(self) -> None:
+        """Clean up all completed tasks and their associated files."""
         while len(self.completed_tasks):
             self._erase_files_and_info(0)
 
     def stop(self) -> None:
+        """Signal the thread to stop running."""
         _logger.info("stopping...ServerSimRunner")
         self._stop = True
 
     def running(self) -> bool:
+        """Check if the thread is still running.
+        
+        Returns:
+            True if the thread is running, False otherwise
+        """
         return self._stop is False
