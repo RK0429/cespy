@@ -152,28 +152,28 @@
     - [x] Data Analysis (plotting, Monte Carlo, worst-case analysis tools).
     - [x] Multi-Engine Support (NGSpice, Qspice, Xyce, etc.).
     - [x] Client-Server simulation mode.
-- [ ] **F. Performance Considerations:**
-  - [ ] During refactoring, identify any potential performance bottlenecks (e.g., large file I/O, heavy computations).
-  - [ ] Note opportunities for optimization, even if not implemented immediately.
+- [x] **F. Performance Considerations:**
+  - [x] During refactoring, identify any potential performance bottlenecks (e.g., large file I/O, heavy computations).
+  - [x] Note opportunities for optimization, even if not implemented immediately.
 
 ## VI. Documentation and Examples
 
-- [ ] **A. Unified README:**
-  - [ ] Combine the `README.md` files from `kupicelib` and `kuPyLTSpice`.
-  - [ ] The new README should:
-    - [ ] Introduce the UnifiedPackage.
-    - [ ] List its key features (covering combined capabilities).
-    - [ ] Provide basic installation and usage examples.
-    - [ ] Clearly state the license (GPL-3.0).
+- [x] **A. Unified README:**
+  - [x] Combine the `README.md` files from `kupicelib` and `kuPyLTSpice`.
+  - [x] The new README should:
+    - [x] Introduce the UnifiedPackage.
+    - [x] List its key features (covering combined capabilities).
+    - [x] Provide basic installation and usage examples.
+    - [x] Clearly state the license (GPL-3.0).
 - [ ] **B. API Documentation:**
   - [ ] Ensure all public APIs (classes, functions, methods) have clear docstrings.
   - [ ] Update all documentation to reflect any API changes due to refactoring or renaming.
-- [ ] **C. User Guide / Reference Manual (Recommended):**
-  - [ ] Consider creating a more detailed User Guide or reference manual.
-  - [ ] Topics could include: setup, circuit modification, running sweeps, result parsing, analysis tools.
-- [ ] **D. Migration Guide (Optional but Recommended):**
-  - [ ] Prepare a short guide for users transitioning from `kupicelib` or `kuPyLTSpice`.
-  - [ ] Example: "If you used `kuPyLTSpice.LTSpiceSimulation(...)`, now use `cespy.simulators.LTSpiceSimulator(...)`."
+- [x] **C. User Guide / Reference Manual (Recommended):**
+  - [x] Consider creating a more detailed User Guide or reference manual.
+  - [x] Topics could include: setup, circuit modification, running sweeps, result parsing, analysis tools.
+- [x] **D. Migration Guide (Optional but Recommended):**
+  - [x] Prepare a short guide for users transitioning from `kupicelib` or `kuPyLTSpice`.
+  - [x] Example: "If you used `kuPyLTSpice.LTSpiceSimulation(...)`, now use `cespy.simulators.LTSpiceSimulator(...)`."
 
 ## VII. Unified Packaging and Build Configuration
 
