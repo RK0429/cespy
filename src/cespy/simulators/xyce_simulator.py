@@ -3,8 +3,8 @@
 """Xyce simulator implementation for cespy.
 
 This module provides the Xyce class which implements the Simulator interface
-for Xyce parallel circuit simulator. It handles simulator detection, command-line
-argument processing, and simulation execution specific to Xyce.
+for Xyce parallel circuit simulator. It handles simulator detection,
+command-line argument processing, and simulation execution specific to Xyce.
 """
 
 # -------------------------------------------------------------------------------
@@ -87,11 +87,11 @@ class XyceSimulator(Simulator):
         ],  # print compiled-in options and exit
         "-license": ["-license"],  # print license and exit
         "-param": ["-param", "<param_options>"],
-        # [device [level [<inst|mod>]]] print a terse summary of model and/or device parameters
+        # [device [level [<inst|mod>]]] print terse summary of model/device params
         "-doc": ["-doc", "<param_options>"],
-        # [device [level [<inst|mod>]]] output latex tables of model and device parameters to files
+        # [device [level [<inst|mod>]]] output latex tables of params to files
         "-doc_cat": ["-doc_cat", "<param_options>"],
-        # [device [level [<inst|mod>]]] output latex tables of model and device parameters to files
+        # [device [level [<inst|mod>]]] output latex tables of params to files
         "-count": [
             "-count"
         ],  # device count without netlist syntax or topology check
@@ -110,11 +110,11 @@ class XyceSimulator(Simulator):
         ],  # suppress some of the simulation-progress messages sent to stdout
         "-jacobian_test": ["-jacobian_test"],  # jacobian matrix diagnostic
         "-hspice-ext": ["-hspice-ext", "<hsext_options>"],
-        # apply hspice compatibility features during parsing.  option=all applies them all
+        # apply hspice compatibility features. option=all applies them all
         "-redefined_params": ["-redefined_params", "<redef_param_option>"],
-        # set option for redefined .params as ignore (use last), usefirst, warn or error
+        # set option for redefined .params (ignore, usefirst, warn, error)
         "-subckt_multiplier": ["-subckt_multiplier", "<truefalse_option>"],
-        # set option to true(default) or false to apply implicit subcircuit multipliers
+        # set option to true(default) or false for implicit subckt multipliers
         "-delim": [
             "-delim",
             "<delim_option>",
@@ -125,7 +125,7 @@ class XyceSimulator(Simulator):
             "-per-processor"
         ],  # create log file for each processor, add .<n>.<r> to log path
         "-remeasure": ["-remeasure", "<path>"],
-        # [existing Xyce output file] recompute .measure() results with existing data
+        # [existing output file] recompute .measure() results with existing data
         "-nox": [
             "-nox",
             "onoff_option",
@@ -153,7 +153,7 @@ class XyceSimulator(Simulator):
         # '-r': ['-r', '<path>'],  # generate rawfile named <file> in binary format
         "-a": ["-a"],  # use with -r <file> to output in ascii format
         "-randseed": ["-randseed", "<int_option>"],
-        # <number>          seed random number generator used by expressions and sampling methods
+        # <number> seed random number generator for expressions and sampling
         "-plugin": [
             "-plugin",
             "<plugin_list>",
@@ -167,31 +167,40 @@ class XyceSimulator(Simulator):
     def valid_switch(
         cls, switch: str, parameter: str = ""
     ) -> list[str]:  # pylint: disable=too-many-branches
-        """Validates a command line switch. The following options are available for
-        Xyce:
+        """Validates a command line switch. The following options are available
+        for Xyce:
 
         * `-capabilities`: print compiled-in options and exit
         * `-license`: print license and exit
-        * `-param [device [level [<inst|mod>]]]`: print terse summary of model/device parameters
-        * `-doc [device [level [<inst|mod>]]]`: output latex tables of model/device parameters
-        * `-doc_cat [device [level [<inst|mod>]]]`: output latex tables of model/device parameters
+        * `-param [device [level [<inst|mod>]]]`: print terse summary of
+          model/device parameters
+        * `-doc [device [level [<inst|mod>]]]`: output latex tables of
+          model/device parameters
+        * `-doc_cat [device [level [<inst|mod>]]]`: output latex tables of
+          model/device parameters
         * `-count`: device count without netlist syntax or topology check
         * `-syntax`: check netlist syntax and exit
         * `-norun`: netlist syntax and topology and exit
         * `-namesfile <path>`: output internal names file to <path> and exit
-        * `-noise_names_file <path>`: output noise source names file to <path> and exit
+        * `-noise_names_file <path>`: output noise source names file to <path>
+          and exit
         * `-quiet`: suppress some of the simulation-progress messages sent to
           stdout
         * `-jacobian_test`: jacobian matrix diagnostic
-        * `-hspice-ext <option>`: apply hspice compatibility features during parsing
+        * `-hspice-ext <option>`: apply hspice compatibility features during
+          parsing
         * `-redefined_params <option>`: set option for redefined .params
           (ignore, usefirst, warn, error)
-        * `-subckt_multiplier <option>`: enable/disable implicit subcircuit multipliers
-        * `-local_variation <option>`: enable/disable local variation in UQ analysis
+        * `-subckt_multiplier <option>`: enable/disable implicit subcircuit
+          multipliers
+        * `-local_variation <option>`: enable/disable local variation in UQ
+          analysis
         * `-delim <TAB|COMMA|string>`: set the output file field delimiter
         * `-o <basename>`: <basename> for the output file(s)
-        * `-per-processor`: create log file for each procesor, add .<n>.<r> to log path
-        * `-remeasure [existing Xyce output file]`: recompute .measure() results with existing data
+        * `-per-processor`: create log file for each procesor, add .<n>.<r> to
+          log path
+        * `-remeasure [existing Xyce output file]`: recompute .measure() results
+          with existing data
         * `-nox <on|off>`: NOX nonlinear solver usage
         * `-linsolv <solver>`: force usage of specific linear solver
         * `-maxord <1..5>`: maximum time integration order

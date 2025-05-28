@@ -2,9 +2,10 @@
 # coding=utf-8
 """XML-RPC server for distributed SPICE simulation execution.
 
-This module implements a simulation server that accepts client requests
-via XML-RPC, manages simulation sessions, executes simulations in parallel,
-and returns results to clients in a compressed format.
+This module implements a simulation server that accepts client
+requests via XML-RPC, manages simulation sessions, executes
+simulations in parallel, and returns results to clients in a
+compressed format.
 """
 
 import io
@@ -24,32 +25,34 @@ _logger = logging.getLogger("cespy.SimServer")
 
 
 class SimServer:
-    """This class implements a server that can run simulations by request of
-    a client located in a different machine.
+    """This class implements a server that can run simulations by
+    request of a client located in a different machine.
 
-    The server is implemented using the SimpleXMLRPCServer class from the
-    xmlrpc.server module.
+    The server is implemented using the SimpleXMLRPCServer class
+    from the xmlrpc.server module.
 
-    The client can request the server to start a session, run a simulation,
-    check the status of the simulations and retrieve the results of the
-    simulations. The server can run multiple simulations in parallel, but the
-    number of parallel simulations is limited by the parallel_sims parameter.
+    The client can request the server to start a session, run a
+    simulation, check the status of the simulations and retrieve the
+    results of the simulations. The server can run multiple
+    simulations in parallel, but the number of parallel simulations
+    is limited by the parallel_sims parameter.
 
-    The server can be stopped by the client by calling the stop_server method.
+    The server can be stopped by the client by calling the
+    stop_server method.
 
-    :param simulator: The simulator to be used. It must be a class that
-        derives from the BaseSimulator class.
-    :param parallel_sims: The maximum number of parallel simulations that the
-        server can run. Default is 4.
-    :param output_folder: The folder where the results of the simulations will
-        be stored. Default is './temp'
-    :param timeout: The maximum time that a simulation can run. Default is
-        None, which means that there is no timeout.
+    :param simulator: The simulator to be used. It must be a class
+        that derives from the BaseSimulator class.
+    :param parallel_sims: The maximum number of parallel simulations
+        that the server can run. Default is 4.
+    :param output_folder: The folder where the results of the
+        simulations will be stored. Default is './temp'
+    :param timeout: The maximum time that a simulation can run.
+        Default is None, which means that there is no timeout.
     :param port: The port where the server will listen for requests.
         Default is 9000
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         simulator: Type[Simulator],
         parallel_sims: int = 4,
@@ -72,8 +75,8 @@ class SimServer:
         )
         self.server.register_introspection_functions()
         self.server.register_instance(self)
-        # this will contain the session_id ids hashing their respective list of
-        # sim_tasks
+        # this will contain the session_id ids hashing their
+        # respective list of sim_tasks
         self.sessions: dict[str, list[int]] = {}
         self.simulation_manager.start()
         self.server_thread = threading.Thread(
@@ -84,9 +87,9 @@ class SimServer:
     def add_sources(self, session_id: str, zip_data: Binary) -> bool:
         """Add sources to the simulation.
 
-        The sources are contained in a zip file will be added to the simulation
-        folder. Returns True if the sources were added and False if the
-        session_id is not valid.
+        The sources are contained in a zip file will be added to the
+        simulation folder. Returns True if the sources were added and
+        False if the session_id is not valid.
         """
         _logger.info("Server: Add sources %s", session_id)
         if session_id not in self.sessions:
@@ -104,7 +107,9 @@ class SimServer:
                 answer = True
         return answer
 
-    def run(self, session_id: str, circuit_name: str, zip_data: Binary) -> int:
+    def run(
+        self, session_id: str, circuit_name: str, zip_data: Binary
+    ) -> int:
         """Run a simulation for the given session.
 
         Args:
@@ -120,8 +125,12 @@ class SimServer:
             return -1
 
         circuit_path = Path(self.output_folder) / circuit_name
-        _logger.info("Server: Running simulation of %s", circuit_path)
-        runno = self.simulation_manager.add_simulation(circuit_path)
+        _logger.info(
+            "Server: Running simulation of %s", circuit_path
+        )
+        runno = self.simulation_manager.add_simulation(
+            circuit_path
+        )
         if runno != -1:
             self.sessions[session_id].append(runno)
         return runno
@@ -131,18 +140,19 @@ class SimServer:
 
         It will be later used to sort the sim_tasks belonging to the session.
         """
-        session_id = str(
-            uuid.uuid4()
-        )  # Needs to be a string, otherwise the rpc client can't handle it
+        # Needs to be a string, otherwise the rpc client can't
+        # handle it
+        session_id = str(uuid.uuid4())
         _logger.info("Server: Starting session %s", session_id)
         self.sessions[session_id] = []
         return session_id
 
     def status(self, session_id: str) -> List[int]:
-        """Returns a dictionary with task information. The key for the
-        dictionary is the simulation identifier returned by the simulation
-        start command. The value associated with each simulation identifier is
-        another dictionary containing the following keys:
+        """Returns a dictionary with task information. The key for
+        the dictionary is the simulation identifier returned by the
+        simulation start command. The value associated with each
+        simulation identifier is another dictionary containing the
+        following keys:
 
         * 'completed' - whether the simulation is already finished
 

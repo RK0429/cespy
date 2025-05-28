@@ -14,7 +14,7 @@ import argparse
 import io
 import logging
 
-# -------------------------------------------------------------------------------
+# --------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
 #  ██╔════╝██╔══██╗██║██╔════╝██╔════╝██║     ██║██╔══██╗
@@ -30,7 +30,7 @@ import logging
 #
 # Created:     23-02-2023
 # Licence:     refer to the LICENSE file
-# -------------------------------------------------------------------------------
+# --------------------------------------------------------------
 import os.path
 import pathlib
 import sys
@@ -70,7 +70,8 @@ class JobInformation:
 
 
 class SimClient:
-    """Class used for launching simulations in a Spice Simulation Server.
+    """Class used for launching simulations in a Spice
+    Simulation Server.
     
     A Spice Simulation Server is a machine running a script with an active
     SimServer object.
@@ -153,10 +154,10 @@ class SimClient:
     def add_sources(self, sources: Iterable[str | pathlib.Path]) -> bool:
         """Add sources to the simulation environment.
 
-        The sources are a list of file paths that are going to be transferred
-        to the server. The server will add the sources to the simulation
-        folder. Returns True if the sources were added and False if the
-        session_id is not valid.
+        The sources are a list of file paths that are going to be
+        transferred to the server. The server will add the sources to
+        the simulation folder. Returns True if the sources were added
+        and False if the session_id is not valid.
         """
         # Create a buffer to store the zip file in memory
         zip_buffer = io.BytesIO()
@@ -197,19 +198,21 @@ class SimClient:
     def run(
         self,
         circuit: str | pathlib.Path,
-        dependencies: list[str | pathlib.Path] | None = None,
+        dependencies: (
+            list[str | pathlib.Path] | None
+        ) = None,
     ) -> int:
-        """Sends the netlist identified with the argument "circuit" to the
-        server, and it receives a run identifier (runno). Since the server
-        can receive requests from different machines, this identifier is not
-        guaranteed to be sequential.
+        """Sends the netlist identified with the argument "circuit"
+        to the server, and it receives a run identifier (runno).
+        Since the server can receive requests from different machines,
+        this identifier is not guaranteed to be sequential.
 
-        :param circuit: path to the netlist file containing the simulation
-            directives.
+        :param circuit: path to the netlist file containing the
+            simulation directives.
         :type circuit: pathlib.Path or str
-        :param dependencies: list of files that the netlist depends on. This
-            is used to ensure that the netlist is transferred to the server
-            with all the necessary files.
+        :param dependencies: list of files that the netlist depends
+            on. This is used to ensure that the netlist is transferred
+            to the server with all the necessary files.
         :type dependencies: list of pathlib.Path or str
         :returns: identifier on the server of the simulation.
         :rtype: int
@@ -224,9 +227,8 @@ class SimClient:
             with zipfile.ZipFile(
                 zip_buffer, "w", zipfile.ZIP_DEFLATED
             ) as zip_file:
-                zip_file.write(
-                    circuit, circuit_name
-                )  # Makes sure it writes it to the root of the zipfile
+                # Write circuit to root of the zipfile
+                zip_file.write(circuit, circuit_name)
                 if dependencies is not None:
                     for dep in dependencies:
                         dep_path = pathlib.Path(dep)
@@ -261,13 +263,17 @@ class SimClient:
 
         raw_response = self.server.get_files(self.session_id, runno)
         # Cast the server response to (filename, data) tuple
-        response: tuple[str, Binary] = cast(tuple[str, Binary], raw_response)
+        response: tuple[str, Binary] = cast(
+            tuple[str, Binary], raw_response
+        )
         zip_filename, zipdata = response
         job = self.stored_jobs.pop(runno)  # Removes it from stored jobs
         self.completed_jobs += 1
         if zip_filename != "":
             # Construct the full path for the zip file
-            store_path: pathlib.Path = job.file_dir.joinpath(zip_filename)
+            store_path: pathlib.Path = job.file_dir.joinpath(
+                zip_filename
+            )
             with open(store_path, "wb") as f:
                 f.write(zipdata.data)
             return store_path
@@ -282,10 +288,11 @@ class SimClient:
             status: list[int] = cast(list[int], raw_status)
             if len(status) > 0:
                 runno: int = status.pop(0)
+                # Job is taken out of the started jobs list
+                # and is added to the stored jobs
                 self.stored_jobs[runno] = self.started_jobs.pop(
                     runno
-                )  # Job is taken out of the started jobs list and
-                # is added to the stored jobs
+                )
                 return runno
             now = time.time()
             delta = self.minimum_time_between_server_calls - (
@@ -308,7 +315,10 @@ def main() -> None:  # pylint: disable=too-many-nested-blocks
     """Command-line interface for the simulation client."""
 
     parser = argparse.ArgumentParser(
-        description="Connect to a cespy simulation server and run simulations"
+        description=(
+            "Connect to a cespy simulation server and "
+            "run simulations"
+        )
     )
     parser.add_argument(
         "host",
@@ -335,7 +345,10 @@ def main() -> None:  # pylint: disable=too-many-nested-blocks
         default=[],
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable verbose logging"
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable verbose logging",
     )
 
     args = parser.parse_args()
