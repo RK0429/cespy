@@ -124,6 +124,7 @@ class SimCommander(SpiceEditor):
     Please check the SimRunner class for more information.
     """
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
         netlist_file: Union[str, Path],
@@ -133,9 +134,8 @@ class SimCommander(SpiceEditor):
         encoding: str = "autodetect",
         simulator: Optional[Union[str, Type[Simulator]]] = None,
     ):
-        from ..simulators.ltspice_simulator import (
-            LTspice,  # In case no simulator is given
-        )
+        # pylint: disable=import-outside-toplevel
+        from ..simulators.ltspice_simulator import LTspice
 
         # Convert simulator to the right type
         actual_simulator: Type[Simulator]
@@ -313,12 +313,12 @@ class SimCommander(SpiceEditor):
         return self.runner.run_count
 
     @property
-    def okSim(self) -> int:  # noqa: N802
+    def okSim(self) -> int:  # pylint: disable=invalid-name
         """*(Deprecated)* Legacy property returning successful simulations."""
         return self.runner.successful_simulations
 
     @property
-    def failSim(self) -> int:  # noqa: N802
+    def failSim(self) -> int:  # pylint: disable=invalid-name
         """*(Deprecated)* Legacy property returning failed simulations."""
         return self.runner.failed_simulations
 

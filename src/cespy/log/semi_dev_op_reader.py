@@ -28,6 +28,7 @@ from typing import Dict, List, Union
 from ..utils.detect_encoding import detect_encoding
 
 
+# pylint: disable=too-many-locals,too-many-branches,too-many-nested-blocks
 def op_log_reader(
     filename: str,
 ) -> Dict[str, Dict[str, Dict[str, Union[float, str]]]]:
@@ -193,6 +194,7 @@ def op_log_reader(
                                     dataset[where.lower()][devices[i]][param] = value
 
     return dataset
+# pylint: enable=too-many-locals,too-many-branches,too-many-nested-blocks
 
 
 # Legacy alias for backward compatibility

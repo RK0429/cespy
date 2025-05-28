@@ -437,22 +437,21 @@ class AscEditor(BaseSchematic):
                     raise FileNotFoundError(f"File {asc_filename} not found")
                 asc_path = Path(asc_path_str)
             return AscEditor(asc_path)
-        elif lib is None and symbol.symbol_type == "CELL":
+        if lib is None and symbol.symbol_type == "CELL":
             # TODO: the library is often specified later on, so this may need
             # to move.
             return None
-        else:
-            # load the model from the library
-            model = symbol.get_model()
-            # lib should not be None here
-            assert lib is not None
-            lib_path = self._lib_file_find(lib)
-            if lib_path is None:
-                raise FileNotFoundError(f"File {lib} not found")
-            subckt = SpiceEditor.find_subckt_in_lib(lib_path, model)
-            if isinstance(subckt, SpiceEditor):
-                return subckt
-            return None
+        # load the model from the library
+        model = symbol.get_model()
+        # lib should not be None here
+        assert lib is not None
+        lib_path = self._lib_file_find(lib)
+        if lib_path is None:
+            raise FileNotFoundError(f"File {lib} not found")
+        subckt = SpiceEditor.find_subckt_in_lib(lib_path, model)
+        if isinstance(subckt, SpiceEditor):
+            return subckt
+        return None
 
     def get_subcircuit(self, reference: str) -> BaseEditor:
         """Returns an AscEditor file corresponding to the symbol."""
@@ -522,8 +521,7 @@ class AscEditor(BaseSchematic):
         if match:
             # match.group returns Any, ensure str
             return str(match.group("value"))
-        else:
-            raise ParameterNotFoundError(f"Parameter {param} not found in ASC file")
+        raise ParameterNotFoundError(f"Parameter {param} not found in ASC file")
 
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
         """Sets a parameter value in the ASC file.
@@ -578,8 +576,7 @@ class AscEditor(BaseSchematic):
                     "This function may not work as expected.",
                     device,
                 )
-            return sub_circuit.set_component_value(ref, value)
-        else:
+                return sub_circuit.set_component_value(ref, value)
             component = self.get_component(device)
             if "Value" in component.attributes:
                 if isinstance(value, str):

@@ -160,9 +160,8 @@ class XyceSimulator(Simulator):
     _default_run_switches = ["-l", "-r"]
 
     @classmethod
-    def valid_switch(
-        cls, switch: str, parameter: str = ""
-    ) -> list[str]:  # pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches
+    def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:
         """Validates a command line switch. The following options are available
         for Xyce:
 
@@ -290,6 +289,8 @@ class XyceSimulator(Simulator):
         else:
             raise ValueError(f"Invalid Switch '{switch}'")
         return ret
+
+    # pylint: enable=too-many-branches
 
     @classmethod
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments

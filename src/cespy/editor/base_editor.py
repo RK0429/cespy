@@ -572,8 +572,8 @@ class BaseEditor(ABC):
             values. Values can either be a str; an int or a float.
         :returns: Nothing
         """
-        for param in kwargs:
-            self.set_parameter(param, kwargs[param])
+        for param, value in kwargs.items():
+            self.set_parameter(param, value)
 
     @abstractmethod
     def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
@@ -724,8 +724,8 @@ class BaseEditor(ABC):
         :return: Nothing
         :raises: ComponentNotFoundError - In case one of the component is not found.
         """
-        for value in kwargs:
-            self.set_component_value(value, kwargs[value])
+        for device, value in kwargs.items():
+            self.set_component_value(device, value)
 
     @abstractmethod
     def get_components(self, prefixes: str = "*") -> list[str]:

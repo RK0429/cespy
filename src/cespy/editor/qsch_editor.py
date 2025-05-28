@@ -278,8 +278,7 @@ class QschTag:
                 f"{''.join(tag.out(level + 1) for tag in self.items)}"
                 f"{spaces}»\n"
             )
-        else:
-            return f"{'  ' * level}«{' '.join(self.tokens)}»\n"
+        return f"{'  ' * level}«{' '.join(self.tokens)}»\n"
 
     @property
     def tag(self) -> str:
@@ -308,15 +307,14 @@ class QschTag:
         a = self.tokens[index]
         if a.startswith("(") and a.endswith(")"):
             return tuple(int(x) for x in a[1:-1].split(","))
-        elif a.startswith("0x"):
+        if a.startswith("0x"):
             return int(a[2:], 16)
-        elif a.startswith('"') and a.endswith('"'):
+        if a.startswith('"') and a.endswith('"'):
             return a[1:-1]
-        else:
-            try:
-                return int(a)
-            except ValueError:
-                return a
+        try:
+            return int(a)
+        except ValueError:
+            return a
 
     def set_attr(self, index: int, value: Union[str, int, Tuple[int, int]]) -> None:
         """Sets the attribute at the given index. The attribute can be a string, an
@@ -361,8 +359,7 @@ class QschTag:
         if len(a) != 1:
             if default is None:
                 raise IndexError(f"Label '{label}' not found in:{self}")
-            else:
-                return default
+            return default
         if len(a[0].tokens) >= 2:
             token = a[0].tokens[1]
             # Ensure we return a string
@@ -382,8 +379,7 @@ class QschTag:
         a = self.tokens[index]
         if a.startswith('"') and a.endswith('"'):
             return a[1:-1]
-        else:
-            return a
+        return a
 
 
 class QschEditor(BaseSchematic):
@@ -928,8 +924,7 @@ class QschEditor(BaseSchematic):
         _, match = self._get_param_named(param)
         if match is not None:
             return match.group("value")
-        else:
-            raise ParameterNotFoundError(f"Parameter {param} not found in QSCH file")
+        raise ParameterNotFoundError(f"Parameter {param} not found in QSCH file")
 
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
         # docstring inherited from BaseEditor
@@ -1028,9 +1023,10 @@ class QschEditor(BaseSchematic):
         param_regex = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
         for i in range(2, len(texts)):
             text = texts[i].get_attr(QSCH_TEXT_STR_ATTR)
-            matches = param_regex.finditer(text)
-            for match in matches:
-                parameters[match.group("name")] = match.group("value")
+            matches = list(param_regex.finditer(text))
+            if matches:
+                for match in matches:
+                    parameters[match.group("name")] = match.group("value")
             else:
                 parameters[i] = text
 
@@ -1164,11 +1160,10 @@ class QschEditor(BaseSchematic):
 
         if first:
             return 0, 0  # If no coordinates are found, we return the origin
-        else:
-            return (
-                min_x,
-                min_y - 240,
-            )  # Setting the text in the bottom left corner of the canvas
+        return (
+            min_x,
+            min_y - 240,
+        )  # Setting the text in the bottom left corner of the canvas
 
     def add_instruction(self, instruction: str) -> None:
         # docstring inherited from BaseEditor

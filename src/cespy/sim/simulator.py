@@ -183,8 +183,7 @@ class Simulator(ABC):
                 cls.process_name = process_name
             cls.spice_exe = exe_parts
             return cls
-        else:
-            raise FileNotFoundError(f"Provided exe file was not found '{path_to_exe}'")
+        raise FileNotFoundError(f"Provided exe file was not found '{path_to_exe}'")
 
     @staticmethod
     def guess_process_name(exe: str) -> str:
@@ -196,10 +195,8 @@ class Simulator(ABC):
                 # For MacOS wine, there will be no process called "wine". Use
                 # "wine-preloader"
                 return "wine-preloader"
-            else:
-                return Path(exe).stem
-        else:
-            return Path(exe).name
+            return Path(exe).stem
+        return Path(exe).name
 
     def __init__(self) -> None:
         raise SpiceSimulatorError("This class is not supposed to be instanced.")
@@ -331,7 +328,7 @@ class Simulator(ABC):
         """
         c_drive = None
         # See if I'm under wine
-        if sys.platform == "linux" or sys.platform == "darwin":
+        if sys.platform in ("linux", "darwin"):
             if exe_path and "/drive_c/" in exe_path:
                 # this is very likely a wine path
                 c_drive = exe_path.split("/drive_c/")[0] + "/drive_c/"

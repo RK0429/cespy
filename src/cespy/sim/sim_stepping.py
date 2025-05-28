@@ -27,6 +27,7 @@ __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2017, Fribourg Switzerland"
 
 import logging
+import sys
 from functools import wraps
 from typing import (
     Any,
@@ -60,6 +61,7 @@ class RunnerProtocol(AnyRunner, Protocol):
 
 class StepInfo:
     """Container for simulation step information."""
+
     def __init__(self, what: str, elem: str, iterable: Iterable[Any]) -> None:
         self.what = what
         self.elem = elem
@@ -87,11 +89,14 @@ class SimStepper:
         for dmodel in ("BAT54", "BAT46WJ"):
             netlist.set_element_model("D1", model)  # Sets the Diode D1 model
             for res_value1 in sweep(2.2, 2.4, 0.2):  # Steps from 2.2 to 2.4 with 0.2 increments
-                netlist.set_component_value('R1', res_value1)  # Updates the resistor R1 value
+                # Updates the resistor R1 value
+                netlist.set_component_value('R1', res_value1)
                 for temperature in sweep(0, 80, 20):  # Makes temperature step from 0 to 80 degrees in 20 degree steps
-                    netlist.set_parameters(temp=80)  # Sets the simulation temperature to be 80 degrees
+                    # Sets the simulation temperature
+                    netlist.set_parameters(temp=80)
                     for res_value2 in (10, 25, 32):
-                        netlist.set_component_value('R2', res_value2)  # Updates the resistor R2 value
+                        # Updates the resistor R2 value
+                        netlist.set_component_value('R2', res_value2)
                         runner.run(netlist)
 
         runner.wait_completion()  # Waits for the Spice simulations to complete
@@ -103,8 +108,10 @@ class SimStepper:
         netlist = SpiceEditor("my_circuit.asc")
         Stepper = SimStepper(netlist, SimRunner(parallel_sims=4, output_folder="./output"))
         Stepper.add_model_sweep('D1', "BAT54", "BAT46WJ")
-        Stepper.add_component_sweep('R1', sweep(2.2, 2.4, 0.2))  # Steps from 2.2 to 2.4 with 0.2 increments
-        Stepper.add_parameter_sweep('temp', sweep(0, 80, 20))  # Makes temperature step from 0 to 80 degrees in 20 degree steps
+        # Steps from 2.2 to 2.4 with 0.2 increments
+        Stepper.add_component_sweep('R1', sweep(2.2, 2.4, 0.2))
+        # Temperature step from 0 to 80 degrees in 20 degree steps
+        Stepper.add_parameter_sweep('temp', sweep(0, 80, 20))
         Stepper.add_component_sweep('R2', (10, 25, 32))  # Updates the resistor R2 value
         Stepper.run_all()
 
@@ -120,38 +127,47 @@ class SimStepper:
 
     @wraps(BaseEditor.add_instruction)
     def add_instruction(self, instruction: str) -> None:
+        """Add an instruction to the circuit."""
         self.netlist.add_instruction(instruction)
 
     @wraps(BaseEditor.add_instructions)
     def add_instructions(self, *instructions: str) -> None:
+        """Add multiple instructions to the circuit."""
         self.netlist.add_instructions(*instructions)
 
     @wraps(BaseEditor.remove_instruction)
     def remove_instruction(self, instruction: str) -> None:
+        """Remove an instruction from the circuit."""
         self.netlist.remove_instruction(instruction)
 
     @wraps(BaseEditor.remove_Xinstruction)
     def remove_Xinstruction(self, search_pattern: str) -> None:
+        """Remove instructions matching a pattern."""
         self.netlist.remove_Xinstruction(search_pattern)
 
     @wraps(BaseEditor.set_parameters)
     def set_parameters(self, **kwargs: Union[str, int, float]) -> None:
+        """Set multiple parameters in the circuit."""
         self.netlist.set_parameters(**kwargs)
 
     @wraps(BaseEditor.set_parameter)
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
+        """Set a single parameter in the circuit."""
         self.netlist.set_parameter(param, value)
 
     @wraps(BaseEditor.set_component_values)
     def set_component_values(self, **kwargs: Union[str, int, float]) -> None:
+        """Set multiple component values in the circuit."""
         self.netlist.set_component_values(**kwargs)
 
     @wraps(BaseEditor.set_component_value)
     def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
+        """Set a single component value in the circuit."""
         self.netlist.set_component_value(device, value)
 
     @wraps(BaseEditor.set_element_model)
     def set_element_model(self, element: str, model: str) -> None:
+        """Set the model for a circuit element."""
         self.netlist.set_element_model(element, model)
 
     def add_param_sweep(self, param: str, iterable: Iterable[Any]) -> None:
@@ -192,6 +208,7 @@ class SimStepper:
         use_loadbias: str = "Auto",
         wait_completion: bool = True,
     ) -> None:
+        """Run all simulations defined by the sweeps."""
         assert use_loadbias in (
             "Auto",
             "Yes",
@@ -200,7 +217,7 @@ class SimStepper:
         if (
             use_loadbias == "Auto" and self.total_number_of_simulations() > 10
         ) or use_loadbias == "Yes":
-            # It will choose to use .SAVEBIAS/.LOADBIAS if the number of simulaitons is higher than 10
+            # Use .SAVEBIAS/.LOADBIAS if simulations > 10
             # TODO: Make a first simulation and storing the bias
             pass
         iter_no = 0
@@ -208,7 +225,7 @@ class SimStepper:
         while True:
             while 0 <= iter_no < len(self.iter_list):
                 try:
-                    value = iterators[iter_no].__next__()
+                    value = next(iterators[iter_no])
                 except StopIteration:
                     iterators[iter_no] = iter(self.iter_list[iter_no].iter)
                     iter_no -= 1
@@ -248,10 +265,12 @@ class SimStepper:
 
     @property
     def okSim(self) -> int:
+        """Number of successful simulations."""
         return self.runner.okSim
 
     @property
     def runno(self) -> int:
+        """Current run number."""
         return self.runner.runno
 
 
@@ -272,4 +291,4 @@ if __name__ == "__main__":
     # test.add_model_sweep("D1", ("model1", "model2"))
     test.run_all()
     print("Finished")
-    exit(0)
+    sys.exit(0)

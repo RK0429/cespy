@@ -61,6 +61,7 @@ class QspiceLogReader(LogfileData):
     :type step_set: dict
     """
 
+    # pylint: disable=too-many-locals
     def __init__(
         self,
         log_filename: str,
@@ -110,6 +111,7 @@ class QspiceLogReader(LogfileData):
         if read_measures:
             meas_file = self.obtain_measures()
             self.parse_meas_file(meas_file)
+    # pylint: enable=too-many-locals
 
     def obtain_measures(self, meas_filename: Optional[Path] = None) -> Path:
         """In QSpice the measures are obtained by calling the QPOST command giving as

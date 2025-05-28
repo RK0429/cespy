@@ -220,7 +220,9 @@ class SweepLogN(BaseIterator):
         raise StopIteration
 
 
-# Backward compatibility aliases
-sweep = Sweep  # noqa: N816
-sweep_log = SweepLog  # noqa: N816
-sweep_log_n = SweepLogN  # noqa: N816
+# Backward compatibility aliases - maintain old names
+# pylint: disable=invalid-name
+sweep = Sweep
+sweep_log = SweepLog
+sweep_log_n = SweepLogN
+# pylint: enable=invalid-name

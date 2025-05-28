@@ -68,12 +68,8 @@ def format_time_difference(time_diff: float) -> str:
     if hours == 0:
         if minutes == 0:
             return f"{int(seconds):02d}.{milliseconds:04d} secs"
-        else:
-            return f"{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
-    else:
-        return (
-            f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
-        )
+        return f"{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
+    return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
 
 
 class RunTask:
