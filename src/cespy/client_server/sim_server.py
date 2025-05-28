@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""XML-RPC server for distributed SPICE simulation execution.
+
+This module implements a simulation server that accepts client requests via XML-RPC,
+manages simulation sessions, executes simulations in parallel, and returns results
+to clients in a compressed format.
+"""
 
 import io
 import logging
