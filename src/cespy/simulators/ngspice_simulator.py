@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""NGSpice simulator implementation for cespy.
+
+This module provides the NGSpice class which implements the Simulator interface
+for NGSpice. It handles simulator detection, command-line argument processing,
+and simulation execution specific to NGSpice.
+"""
 
 # -------------------------------------------------------------------------------
 #

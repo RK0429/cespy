@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""QSpice simulator implementation for cespy.
+
+This module provides the Qspice class which implements the Simulator interface
+for QSpice. It handles simulator detection, command-line argument processing,
+and simulation execution specific to QSpice.
+"""
 
 import logging
 import os

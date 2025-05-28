@@ -162,6 +162,15 @@ class SimServer:
         return ret
 
     def get_files(self, session_id: str, runno: int) -> Tuple[str, Binary]:
+        """Retrieve simulation results for a given run number.
+        
+        Args:
+            session_id: The session identifier
+            runno: The run number to retrieve files for
+            
+        Returns:
+            Tuple of (filename, binary_data) or empty values if not found
+        """
         if runno in self.sessions[session_id]:
             for task_info in self.simulation_manager.completed_tasks:
                 if runno == task_info["runno"]:
@@ -187,6 +196,11 @@ class SimServer:
         return True  # Needs to return always something. None is not supported
 
     def stop_server(self) -> bool:
+        """Stop the server and clean up resources.
+        
+        Returns:
+            True always (for XML-RPC compatibility)
+        """
         _logger.debug("Server: stopping...ServerInterface")
         self.simulation_manager.stop()
         self.server.shutdown()
@@ -194,4 +208,9 @@ class SimServer:
         return True  # Needs to return always something. None is not supported
 
     def running(self) -> bool:
+        """Check if the server is still running.
+        
+        Returns:
+            True if the server is running, False otherwise
+        """
         return self.simulation_manager.running()

@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""LTspice simulator implementation for cespy.
+
+This module provides the LTspice class which implements the Simulator interface
+for LTspice XVII. It handles simulator detection, command-line argument processing,
+and simulation execution specific to LTspice.
+"""
 
 import logging
 import os

@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Xyce simulator implementation for cespy.
+
+This module provides the Xyce class which implements the Simulator interface
+for Xyce parallel circuit simulator. It handles simulator detection, command-line
+argument processing, and simulation execution specific to Xyce.
+"""
 
 # -------------------------------------------------------------------------------
 #

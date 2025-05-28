@@ -171,7 +171,7 @@ class SimClient:
                 "Client: Failed to add sources to session %s: %s", self.session_id, e
             )
             return False
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             _logger.error(
                 "Client: Unexpected error adding sources to session %s: %s",
                 self.session_id,
@@ -344,7 +344,7 @@ def main() -> None:
 
         client.close_session()
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         _logger.error("Error: %s", e)
         sys.exit(1)
 
