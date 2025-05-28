@@ -177,34 +177,34 @@
 
 ## VII. Unified Packaging and Build Configuration
 
-- [ ] **A. Configure `pyproject.toml` (assuming Poetry):**
-  - [ ] **Project Metadata:**
-    - [ ] Set `name` to the chosen UnifiedPackage name.
-    - [ ] Set `version` (e.g., `2.0.0` or `0.1.0`).
-    - [ ] Write a comprehensive `description`.
-    - [ ] List `authors`.
-    - [ ] Specify `license = "GPL-3.0"`.
-    - [ ] Update `homepage` and `repository` URLs to the unified project's GitHub repository.
-  - [ ] **Dependencies:**
-    - [ ] List all consolidated runtime dependencies with appropriate version specifiers (e.g., `numpy`, `scipy`, `pandas`, `matplotlib`, `python = ">=3.10"`).
-    - [ ] List all development dependencies (e.g., `pytest`, linters, formatters).
-  - [ ] **Entry Points (Console Scripts):**
-    - [ ] For each script from `kupicelib/scripts/` (and any relevant `kuPyLTSpice` tools):
-      - [ ] Refactor the script's core logic into a callable function within an appropriate module of the UnifiedPackage.
-      - [ ] Define a console script entry point in `pyproject.toml` under `[tool.poetry.scripts]`. Examples:
-        - [ ] `cespy-asc-to-qsch = cespy.editor.asc_editor:main_function_for_conversion`
-        - [ ] `cespy-run-server = cespy.client_server.sim_server:main_server_function`
-        - [ ] `cespy-rawplot = cespy.raw.raw_plot:main_plot_function` (if `raw_plot.py` exists and is to be exposed)
-  - [ ] **Python Version Compatibility:**
-    - [ ] Ensure `python` version constraint is correctly specified (e.g., `>=3.10`).
-  - [ ] **Package Data (Non-code files):**
-    - [ ] Identify any necessary non-code files (e.g., `asc_to_qsch_data.xml`).
-    - [ ] Move these files to an appropriate location within the package (e.g., `cespy/editor/data/asc_to_qsch_data.xml`).
-    - [ ] Ensure these files are included in the build (e.g., using `include` in `pyproject.toml` or `MANIFEST.in` if necessary).
-  - [ ] **Typing Information:**
-    - [ ] Ensure a `py.typed` marker file is present in the top-level package directory (`cespy/py.typed`) if providing type information.
-- [ ] **B. Build System:**
-  - [ ] Ensure the chosen build system (Poetry) is correctly configured for the unified project.
+- [x] **A. Configure `pyproject.toml` (assuming Poetry):**
+  - [x] **Project Metadata:**
+    - [x] Set `name` to the chosen UnifiedPackage name.
+    - [x] Set `version` (e.g., `2.0.0` or `0.1.0`).
+    - [x] Write a comprehensive `description`.
+    - [x] List `authors`.
+    - [x] Specify `license = "GPL-3.0"`.
+    - [x] Update `homepage` and `repository` URLs to the unified project's GitHub repository.
+  - [x] **Dependencies:**
+    - [x] List all consolidated runtime dependencies with appropriate version specifiers (e.g., `numpy`, `scipy`, `pandas`, `matplotlib`, `python = ">=3.10"`).
+    - [x] List all development dependencies (e.g., `pytest`, linters, formatters).
+  - [x] **Entry Points (Console Scripts):**
+    - [x] For each script from `kupicelib/scripts/` (and any relevant `kuPyLTSpice` tools):
+      - [x] Refactor the script's core logic into a callable function within an appropriate module of the UnifiedPackage.
+      - [x] Define a console script entry point in `pyproject.toml` under `[tool.poetry.scripts]`. Examples:
+        - [x] `cespy-asc-to-qsch = cespy.editor.asc_editor:main_function_for_conversion`
+        - [x] `cespy-run-server = cespy.client_server.sim_server:main_server_function`
+        - [x] `cespy-rawplot = cespy.raw.raw_plot:main_plot_function` (if `raw_plot.py` exists and is to be exposed)
+  - [x] **Python Version Compatibility:**
+    - [x] Ensure `python` version constraint is correctly specified (e.g., `>=3.10`).
+  - [x] **Package Data (Non-code files):**
+    - [x] Identify any necessary non-code files (e.g., `asc_to_qsch_data.xml`).
+    - [x] Move these files to an appropriate location within the package (e.g., `cespy/editor/data/asc_to_qsch_data.xml`).
+    - [x] Ensure these files are included in the build (e.g., using `include` in `pyproject.toml` or `MANIFEST.in` if necessary).
+  - [x] **Typing Information:**
+    - [x] Ensure a `py.typed` marker file is present in the top-level package directory (`cespy/py.typed`) if providing type information.
+- [x] **B. Build System:**
+  - [x] Ensure the chosen build system (Poetry) is correctly configured for the unified project.
 
 ## VIII. Comprehensive Testing
 
