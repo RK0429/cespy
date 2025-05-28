@@ -52,6 +52,16 @@ target-version = ['py310']
 max-line-length = 88
 extend-ignore = ['E203', 'W503']
 
+[tool.pylint]
+max-line-length = 88
+disable = [
+    "R0801",  # Similar lines in files (duplicate-code)
+    "C0103",  # Invalid name (we have some legacy naming)
+]
+max-args = 8
+max-locals = 20
+max-public-methods = 25
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
