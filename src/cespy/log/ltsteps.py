@@ -645,3 +645,84 @@ class LTSpiceLogReader(LogfileData):
                                     f"{harmonic.normalized_phase}\n"
                                 )
                 fout.write("\n")
+
+
+def main() -> None:
+    """Command-line interface for processing LTSpice log files."""
+    import argparse
+    import os
+    import sys
+
+    def valid_extension(filename: str) -> bool:
+        """Check if the filename has a valid extension."""
+        return filename.endswith((".txt", ".log", ".mout"))
+
+    parser = argparse.ArgumentParser(
+        description="Process LTSpice log files and align data for usage in spreadsheet tools"
+    )
+    parser.add_argument(
+        "filename",
+        nargs="?",
+        help="Log file to process (.txt, .log, or .mout). If not provided, uses the most recent valid file.",
+    )
+    parser.add_argument(
+        "--last",
+        action="store_true",
+        help="Use the most recently modified valid file in the current directory",
+    )
+
+    args = parser.parse_args()
+
+    filename = args.filename
+
+    if not filename or args.last:
+        # Find the most recent valid file
+        newer_date = 0
+        for f in os.listdir():
+            if valid_extension(f):
+                date = os.path.getmtime(f)
+                if date > newer_date:
+                    newer_date = date
+                    filename = f
+
+    if filename is None:
+        print("File not found")
+        print("This tool only supports the following extensions: .txt, .log, .mout")
+        sys.exit(1)
+
+    if not valid_extension(filename):
+        print(f"Invalid extension in filename '{filename}'")
+        print("This tool only supports the following extensions: .txt, .log, .mout")
+        sys.exit(1)
+
+    # Determine output filename
+    if filename.endswith(".txt"):
+        fname_out = filename[:-3] + "tsv"
+    elif filename.endswith(".log"):
+        fname_out = filename[:-3] + "tlog"
+    elif filename.endswith(".mout"):
+        fname_out = filename[:-4] + "tmout"
+
+    print(f"Processing: {filename}")
+    print(f"Output: {fname_out}")
+
+    try:
+        # Process the log file
+        log_reader = LTSpiceLogReader(filename)
+
+        # Export step data if available
+        if log_reader.step_count > 0:
+            print(f"Found {log_reader.step_count} steps")
+            with open(fname_out, "w", encoding="utf-8") as fout:
+                log_reader.export_data(fout)
+            print(f"Data exported to {fname_out}")
+        else:
+            print("No step data found in log file")
+
+    except Exception as e:
+        print(f"Error processing file: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
