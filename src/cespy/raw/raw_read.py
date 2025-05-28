@@ -373,11 +373,10 @@ def namify(spice_ref: str) -> str:
     matchobj = re.match(r"(V|I|P)\((\w+)\)", spice_ref)
     if matchobj:
         return f"{matchobj.group(1)}__{matchobj.group(2)}__"
-    else:
-        raise NotImplementedError(f'Unrecognized alias type for alias : "{spice_ref}"')
+    raise NotImplementedError(f'Unrecognized alias type for alias : "{spice_ref}"')
 
 
-class RawRead(object):
+class RawRead:
     """Class for reading Spice wave Files. It can read all types of Files. If stepped
     data is detected, it will also try to read the corresponding LOG file so to retrieve
     the stepped data.
@@ -459,7 +458,7 @@ class RawRead(object):
         else:
             raise RuntimeError("Unrecognized encoding")
         if self.verbose:
-            _logger.debug(f"Reading the file with encoding: '{self.encoding}'")
+            _logger.debug("Reading the file with encoding: '%s'", self.encoding)
         # Storing the filename as part of the dictionary
         self.raw_params: OrderedDict[str, Any] = OrderedDict(
             Filename=raw_filename_path
@@ -547,8 +546,8 @@ class RawRead(object):
                 # see if I already saw an autodetected dialect
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
-                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using"
-                        " qspice."
+                        "Dialect is ambiguous: '%s'. Using qspice.",
+                        self.raw_params['Command']
                     )
                 autodetected_dialect = "qspice"
             if "ngspice" in self.raw_params["Command"].lower():
@@ -557,8 +556,8 @@ class RawRead(object):
                 # see if I already saw an autodetected dialect
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
-                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using"
-                        " ngspice."
+                        "Dialect is ambiguous: '%s'. Using ngspice.",
+                        self.raw_params['Command']
                     )
                 autodetected_dialect = "ngspice"
             if "xyce" in self.raw_params["Command"].lower():
@@ -569,8 +568,8 @@ class RawRead(object):
                 # see if I already saw an autodetected dialect
                 if dialect is None and autodetected_dialect is not None:
                     _logger.warning(
-                        f"Dialect is ambiguous: '{self.raw_params['Command']}'. Using"
-                        " xyce."
+                        "Dialect is ambiguous: '%s'. Using xyce.",
+                        self.raw_params['Command']
                     )
                 autodetected_dialect = "xyce"
 
@@ -578,8 +577,9 @@ class RawRead(object):
             if autodetected_dialect is not None:
                 if dialect != autodetected_dialect:
                     _logger.warning(
-                        f"Dialect specified as {dialect}, but the file seems to be from"
-                        f" {autodetected_dialect}. Trying to read it anyway."
+                        "Dialect specified as %s, but the file seems to be from %s. "
+                        "Trying to read it anyway.",
+                        dialect, autodetected_dialect
                     )
         else:
             # no dialect given. Take the autodetected version
