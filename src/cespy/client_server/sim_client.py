@@ -272,3 +272,77 @@ class SimClient:
     def close_session(self) -> None:
         _logger.info(f"Client: Closing session {self.session_id}")
         self.server.close_session(self.session_id)
+
+
+def main() -> None:
+    """Command-line interface for the simulation client."""
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(
+        description="Connect to a cespy simulation server and run simulations"
+    )
+    parser.add_argument(
+        "host", help="Server hostname or IP address (e.g., localhost, 192.168.1.100)"
+    )
+    parser.add_argument(
+        "-p", "--port", type=int, default=9000, help="Server port (default: 9000)"
+    )
+    parser.add_argument(
+        "-r", "--run", help="Path to circuit file to simulate", metavar="CIRCUIT"
+    )
+    parser.add_argument(
+        "-d",
+        "--dependencies",
+        nargs="*",
+        help="Additional files needed by the circuit",
+        default=[],
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose logging"
+    )
+
+    args = parser.parse_args()
+
+    # Configure logging
+    log_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(
+        level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
+    try:
+        # Create client and connect to server
+        client = SimClient(f"http://{args.host}", args.port)
+        print(f"Connected to server at {args.host}:{args.port}")
+        print(f"Session ID: {client.session_id}")
+
+        if args.run:
+            # Run a simulation if circuit file was provided
+            run_id = client.run(args.run, args.dependencies)
+            if run_id >= 0:
+                print(f"Started simulation with run ID: {run_id}")
+
+                # Wait for completion and download results
+                for completed_id in client:
+                    if completed_id == run_id:
+                        result_path = client.get_runno_data(completed_id)
+                        if result_path:
+                            print(f"Results saved to: {result_path}")
+                        else:
+                            print("Simulation failed or no results available")
+                        break
+            else:
+                print("Failed to start simulation")
+                sys.exit(1)
+        else:
+            print("Connected successfully. Use -r option to run a simulation.")
+
+        client.close_session()
+
+    except Exception as e:
+        _logger.error(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
