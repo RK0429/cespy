@@ -91,9 +91,7 @@ END_LINE_TERM = "\n"  #: This controls the end of line terminator used
 FLOAT_RGX = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?"
 
 # Regular expression for a number with decimal qualifier and unit
-NUMBER_RGX = (
-    r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?(Meg|[kmuµnpfgt])?[a-zA-Z]*"
-)
+NUMBER_RGX = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?(Meg|[kmuµnpfgt])?[a-zA-Z]*"
 
 # Parameters expression of the type: PARAM=value
 PARAM_RGX = r"(?P<params>(\s+\w+\s*(=\s*[\w\{\}\(\)\-\+\*\/%\.]+)?)*)?"
@@ -250,12 +248,8 @@ component_replace_regexs: Dict[str, Pattern[str]] = {
     prefix: re.compile(pattern, re.IGNORECASE)
     for prefix, pattern in REPLACE_REGEXS.items()
 }
-subckt_regex: Pattern[str] = re.compile(
-    r"^.SUBCKT\s+(?P<name>[\w\.]+)", re.IGNORECASE
-)
-lib_inc_regex: Pattern[str] = re.compile(
-    r"^\.(LIB|INC)\s+(.*)$", re.IGNORECASE
-)
+subckt_regex: Pattern[str] = re.compile(r"^.SUBCKT\s+(?P<name>[\w\.]+)", re.IGNORECASE)
+lib_inc_regex: Pattern[str] = re.compile(r"^\.(LIB|INC)\s+(.*)$", re.IGNORECASE)
 
 # The following variable deprecated, and here only so that people can find it.
 # It is replaced by SpiceEditor.set_custom_library_paths().
@@ -286,15 +280,11 @@ def get_line_command(line: Union[str, "SpiceCircuit"]) -> str:
                     return "*"
                 elif ch == ".":  # this is a directive
                     j = i + 1
-                    while j < len(line) and (
-                        line[j] not in (" ", "\t", "\r", "\n")
-                    ):
+                    while j < len(line) and (line[j] not in (" ", "\t", "\r", "\n")):
                         j += 1
                     return line[i:j].upper()
                 else:
-                    raise SyntaxError(
-                        f'Unrecognized command in line: "{line}"'
-                    )
+                    raise SyntaxError(f'Unrecognized command in line: "{line}"')
     elif isinstance(line, SpiceCircuit):
         return ".SUBCKT"
     else:
@@ -340,9 +330,7 @@ class UnrecognizedSyntaxError(Exception):
     """Line doesn't match expected Spice syntax."""
 
     def __init__(self, line: str, regex: str) -> None:
-        super().__init__(
-            f'Line: "{line}" doesn\'t match regular expression "{regex}"'
-        )
+        super().__init__(f'Line: "{line}" doesn\'t match regular expression "{regex}"')
 
 
 class MissingExpectedClauseError(Exception):
@@ -548,9 +536,7 @@ class SpiceCircuit(BaseEditor):
                 self.netlist.append(line)
             else:
                 self.netlist.append(line)
-                if (
-                    cmd[:4] == ".END"
-                ):  # True for either .END and .ENDS primitives
+                if cmd[:4] == ".END":  # True for either .END and .ENDS primitives
                     return True  # If a sub-circuit is ended correctly, returns True
         return False  # If a sub-circuit ends abruptly, returns False
 
@@ -572,9 +558,7 @@ class SpiceCircuit(BaseEditor):
                         sub._write_lines(f)
                 f.write(command)
 
-    def _get_param_named(
-        self, param_name: str
-    ) -> Tuple[int, Optional[Match[str]]]:
+    def _get_param_named(self, param_name: str) -> Tuple[int, Optional[Match[str]]]:
         """Internal function.
 
         Do not use. Returns a line starting with command and matching the search with
@@ -676,9 +660,7 @@ class SpiceCircuit(BaseEditor):
             # last_token of the line before Params:
             subcircuit_name = m.group("value")
         else:
-            raise UnrecognizedSyntaxError(
-                sub_circuit_instance, REPLACE_REGEXS["X"]
-            )
+            raise UnrecognizedSyntaxError(sub_circuit_instance, REPLACE_REGEXS["X"])
 
         # Search for the sub-circuit in the netlist
         sub_circuit = self.get_subcircuit_named(subcircuit_name)
@@ -699,13 +681,9 @@ class SpiceCircuit(BaseEditor):
                 return sub_circuit
         else:
             # The search was not successful
-            raise ComponentNotFoundError(
-                f'Sub-circuit "{subcircuit_name}" not found'
-            )
+            raise ComponentNotFoundError(f'Sub-circuit "{subcircuit_name}" not found')
 
-    def _get_component_line_and_regex(
-        self, reference: str
-    ) -> Tuple[int, Match[str]]:
+    def _get_component_line_and_regex(self, reference: str) -> Tuple[int, Match[str]]:
         """Internal function.
 
         Do not use.
@@ -744,9 +722,7 @@ class SpiceCircuit(BaseEditor):
             if (
                 subckt_instance in self.modified_subcircuits
             ):  # See if this was already a modified sub-circuit instance
-                sub_circuit: SpiceCircuit = self.modified_subcircuits[
-                    subckt_instance
-                ]
+                sub_circuit: SpiceCircuit = self.modified_subcircuits[subckt_instance]
             else:
                 sub_circuit_original = self.get_subcircuit(
                     subckt_instance
@@ -761,9 +737,7 @@ class SpiceCircuit(BaseEditor):
                     # instance
                     self.modified_subcircuits[subckt_instance] = sub_circuit
                     # Change the call to the sub-circuit
-                    self._set_component_attribute(
-                        subckt_instance, "model", new_name
-                    )
+                    self._set_component_attribute(subckt_instance, "model", new_name)
                 else:
                     raise ComponentNotFoundError(reference)
             # Update the component
@@ -813,9 +787,7 @@ class SpiceCircuit(BaseEditor):
                 start = match.start("params")
                 end = match.end("params")
                 line = self.netlist[line_no]
-                self.netlist[line_no] = (
-                    line[:start] + " " + params_str + line[end:]
-                )
+                self.netlist[line_no] = line[:start] + " " + params_str + line[end:]
 
     def reset_netlist(self, create_blank: bool = False) -> None:
         """Removes all previous edits done to the netlist, i.e. resets it to the
@@ -831,9 +803,7 @@ class SpiceCircuit(BaseEditor):
             lines = ["* netlist generated from cespy", ".end"]
             finished = self._add_lines(iter(lines))
             if not finished:
-                raise SyntaxError(
-                    "Netlist with missing .END or .ENDS statements"
-                )
+                raise SyntaxError("Netlist with missing .END or .ENDS statements")
         elif hasattr(self, "netlist_file") and self.netlist_file.exists():
             with open(
                 self.netlist_file,
@@ -844,16 +814,12 @@ class SpiceCircuit(BaseEditor):
                 # Creates an iterator object to consume the file
                 finished = self._add_lines(f)
                 if not finished:
-                    raise SyntaxError(
-                        "Netlist with missing .END or .ENDS statements"
-                    )
+                    raise SyntaxError("Netlist with missing .END or .ENDS statements")
                 # else:
                 #     for _ in lines:  # Consuming the rest of the file.
                 #         pass  # print("Ignoring %s" % _)
         elif hasattr(self, "netlist_file"):
-            _logger.error(
-                "Netlist file not found: {}".format(self.netlist_file)
-            )
+            _logger.error("Netlist file not found: {}".format(self.netlist_file))
 
     def clone(self, **kwargs: Any) -> "SpiceCircuit":
         """Creates a new copy of the SpiceCircuit. Changes done at the new copy do not
@@ -868,8 +834,7 @@ class SpiceCircuit(BaseEditor):
         clone.netlist = self.netlist.copy()
         clone.netlist.insert(
             0,
-            "***** SpiceEditor Manipulated this sub-circuit ****"
-            + END_LINE_TERM,
+            "***** SpiceEditor Manipulated this sub-circuit ****" + END_LINE_TERM,
         )
         clone.netlist.append("***** ENDS SpiceEditor ****" + END_LINE_TERM)
         new_name = kwargs.get("new_name", None)
@@ -889,9 +854,7 @@ class SpiceCircuit(BaseEditor):
                     if m:
                         return m.group("name")
             else:
-                raise RuntimeError(
-                    "Unable to find .SUBCKT clause in subcircuit"
-                )
+                raise RuntimeError("Unable to find .SUBCKT clause in subcircuit")
         else:
             raise RuntimeError("Empty Subcircuit")
 
@@ -914,9 +877,7 @@ class SpiceCircuit(BaseEditor):
                         # Replacing the name in the SUBCKT Clause
                         start = m.start("name")
                         end = m.end("name")
-                        self.netlist[line_no] = (
-                            line[:start] + new_name + line[end:]
-                        )
+                        self.netlist[line_no] = line[:start] + new_name + line[end:]
                         break
                     line_no += 1
             else:
@@ -955,9 +916,7 @@ class SpiceCircuit(BaseEditor):
             the component prefix.
         """
         if SUBCKT_DIVIDER in reference:
-            if (
-                reference[0] != "X"
-            ):  # Replaces a component inside of a subciruit
+            if reference[0] != "X":  # Replaces a component inside of a subciruit
                 raise ComponentNotFoundError(
                     "Only subcircuits can have components inside."
                 )
@@ -1153,9 +1112,7 @@ class SpiceCircuit(BaseEditor):
             start, stop = match.span("value")
             line = self.netlist[param_line]
             if isinstance(line, str):
-                self.netlist[param_line] = (
-                    line[:start] + f"{value_str}" + line[stop:]
-                )
+                self.netlist[param_line] = line[:start] + f"{value_str}" + line[stop:]
             else:
                 # This should not happen in normal operation
                 _logger.error("Unexpected non-string line at %s", param_line)
@@ -1165,13 +1122,10 @@ class SpiceCircuit(BaseEditor):
             insert_line = len(self.netlist) - 2
             self.netlist.insert(
                 insert_line,
-                f".PARAM {param}={value_str}  ; Batch instruction"
-                + END_LINE_TERM,
+                f".PARAM {param}={value_str}  ; Batch instruction" + END_LINE_TERM,
             )
 
-    def set_component_value(
-        self, device: str, value: Union[str, int, float]
-    ) -> None:
+    def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
         """Changes the value of a component, such as a Resistor, Capacitor or Inductor.
         For components inside sub-circuits, use the sub-circuit designator prefix with
         ':' as separator (Example X1:R1).
@@ -1315,13 +1269,11 @@ class SpiceCircuit(BaseEditor):
         nodes = " ".join(component.ports)
         model = component.attributes.get("model", "no_model")
         parameters = " ".join(
-            [
-                f"{k}={v}"
-                for k, v in component.attributes.items()
-                if k != "model"
-            ]
+            [f"{k}={v}" for k, v in component.attributes.items() if k != "model"]
         )
-        component_line = f"{component.reference} {nodes} {model} {parameters}{END_LINE_TERM}"
+        component_line = (
+            f"{component.reference} {nodes} {model} {parameters}{END_LINE_TERM}"
+        )
         self.netlist.insert(line_no, component_line)
 
     def remove_component(self, designator: str) -> None:
@@ -1480,9 +1432,7 @@ class SpiceCircuit(BaseEditor):
         return self._readonly
 
     @staticmethod
-    def find_subckt_in_lib(
-        library: str, subckt_name: str
-    ) -> Optional["SpiceCircuit"]:
+    def find_subckt_in_lib(library: str, subckt_name: str) -> Optional["SpiceCircuit"]:
         """Finds a sub-circuit in a library. The search is case-insensitive.
 
         :param library: path to the library to search
@@ -1495,9 +1445,7 @@ class SpiceCircuit(BaseEditor):
         :meta private:
         """
         # 0. Setup things
-        reg_subckt = re.compile(
-            SUBCKT_CLAUSE_FIND + subckt_name, re.IGNORECASE
-        )
+        reg_subckt = re.compile(SUBCKT_CLAUSE_FIND + subckt_name, re.IGNORECASE)
         # 1. Find Encoding
         try:
             encoding = detect_encoding(library)
@@ -1730,9 +1678,7 @@ class SpiceEditor(SpiceCircuit):
             lines = ["* netlist generated from cespy", ".end"]
             finished = self._add_lines(iter(lines))
             if not finished:
-                raise SyntaxError(
-                    "Netlist with missing .END or .ENDS statements"
-                )
+                raise SyntaxError("Netlist with missing .END or .ENDS statements")
         elif hasattr(self, "netlist_file") and self.netlist_file.exists():
             with open(
                 self.netlist_file,
@@ -1743,23 +1689,17 @@ class SpiceEditor(SpiceCircuit):
                 # Creates an iterator object to consume the file
                 finished = self._add_lines(f)
                 if not finished:
-                    raise SyntaxError(
-                        "Netlist with missing .END or .ENDS statements"
-                    )
+                    raise SyntaxError("Netlist with missing .END or .ENDS statements")
                 # else:
                 #     for _ in lines:  # Consuming the rest of the file.
                 #         pass  # print("Ignoring %s" % _)
         elif hasattr(self, "netlist_file"):
-            _logger.error(
-                "Netlist file not found: {}".format(self.netlist_file)
-            )
+            _logger.error("Netlist file not found: {}".format(self.netlist_file))
 
     def run(
         self,
         wait_resource: bool = True,
-        callback: Optional[
-            Union[Type[Any], Callable[[Path, Path], Any]]
-        ] = None,
+        callback: Optional[Union[Type[Any], Callable[[Path, Path], Any]]] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         simulator: Optional[Any] = None,

@@ -75,9 +75,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Plot traces from SPICE raw waveform files"
     )
-    parser.add_argument(
-        "raw_file", type=Path, help="Path to the raw file to plot"
-    )
+    parser.add_argument("raw_file", type=Path, help="Path to the raw file to plot")
     parser.add_argument(
         "traces",
         nargs="+",

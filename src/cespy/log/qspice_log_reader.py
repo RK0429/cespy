@@ -27,11 +27,7 @@ from typing import Any, Dict, Optional, Union
 
 from ..sim.simulator import run_function
 from ..simulators.qspice_simulator import Qspice
-from .logfile_data import (
-    LogfileData,
-    split_line_into_values,
-    try_convert_value,
-)
+from .logfile_data import LogfileData, split_line_into_values, try_convert_value
 
 _logger = logging.getLogger("cespy.qspice_log_reader")
 
@@ -93,9 +89,7 @@ class QspiceLogReader(LogfileData):
                     assert (
                         self.step_count == step
                     ), f"Step count mismatch: {self.step_count} != {step}"
-                    _logger.debug(
-                        "Found step %s with stepset %s", step, stepset
-                    )
+                    _logger.debug("Found step %s with stepset %s", step, stepset)
 
                     tokens = stepset.strip("\r\n").split(" ")
                     for tok in tokens:
@@ -207,8 +201,7 @@ class QspiceLogReader(LogfileData):
                                 headers[1] = meas_name
                             else:
                                 headers = [
-                                    meas_name + "_" + str(i)
-                                    for i in range(len(values))
+                                    meas_name + "_" + str(i) for i in range(len(values))
                                 ]
                                 # first column is the measure name without _0
                                 headers[0] = meas_name

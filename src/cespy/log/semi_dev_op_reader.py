@@ -160,9 +160,9 @@ def op_log_reader(
                     if (
                         where is not None
                     ):  # Ensure where is not None before using lower()
-                        dataset[
-                            where.lower()
-                        ] = {}  # Creates a dictionary for each component type
+                        dataset[where.lower()] = (
+                            {}
+                        )  # Creates a dictionary for each component type
                 else:
                     cols = re.split(r"\s+", line.rstrip("\r\n"))
                     if len(cols) > 1 and (
@@ -190,9 +190,7 @@ def op_log_reader(
                                         value: Union[float, str] = float(val)
                                     except ValueError:
                                         value = val
-                                    dataset[where.lower()][devices[i]][
-                                        param
-                                    ] = value
+                                    dataset[where.lower()][devices[i]][param] = value
 
     return dataset
 

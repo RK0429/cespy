@@ -412,9 +412,7 @@ def namify(spice_ref: str) -> str:
     matchobj = re.match(r"(V|I|P)\((\w+)\)", spice_ref)
     if matchobj:
         return f"{matchobj.group(1)}__{matchobj.group(2)}__"
-    raise NotImplementedError(
-        f'Unrecognized alias type for alias : "{spice_ref}"'
-    )
+    raise NotImplementedError(f'Unrecognized alias type for alias : "{spice_ref}"')
 
 
 class RawRead:
@@ -499,9 +497,7 @@ class RawRead:
         else:
             raise RuntimeError("Unrecognized encoding")
         if self.verbose:
-            _logger.debug(
-                "Reading the file with encoding: '%s'", self.encoding
-            )
+            _logger.debug("Reading the file with encoding: '%s'", self.encoding)
         # Storing the filename as part of the dictionary
         self.raw_params: OrderedDict[str, Any] = OrderedDict(
             Filename=raw_filename_path
@@ -676,9 +672,7 @@ class RawRead:
         for line in header[i + 1 : -1]:  # Parse the variable names
             line_elmts = line.lstrip().split("\t")
             if len(line_elmts) < 3:
-                raise RuntimeError(
-                    f"Invalid line in the Variables section: {line}"
-                )
+                raise RuntimeError(f"Invalid line in the Variables section: {line}")
             name = line_elmts[1]
             var_type = line_elmts[2]
             if ivar == 0:  # If it has an axis, it should be always read
@@ -693,9 +687,7 @@ class RawRead:
                     )
                 else:
                     axis_numerical_type = numerical_type
-                self.axis = Axis(
-                    name, var_type, self.nPoints, axis_numerical_type
-                )
+                self.axis = Axis(name, var_type, self.nPoints, axis_numerical_type)
                 trace: Union[Axis, TraceRead, DummyTrace] = self.axis
             elif isinstance(traces_to_read, (str, list, tuple)) and (
                 (traces_to_read == "*") or (name in traces_to_read)
@@ -711,9 +703,7 @@ class RawRead:
                         name, var_type, self.nPoints, None, numerical_type
                     )
             else:
-                trace = DummyTrace(
-                    name, var_type, self.nPoints, numerical_type
-                )
+                trace = DummyTrace(name, var_type, self.nPoints, numerical_type)
 
             self._traces.append(trace)
             ivar += 1
@@ -755,9 +745,7 @@ class RawRead:
                         fun = consume16bytes
                     else:
                         fun = read_complex
-                elif (
-                    trace.numerical_type == "real"
-                ):  # data size is only 4 bytes
+                elif trace.numerical_type == "real":  # data size is only 4 bytes
                     calc_block_size += 4
                     if isinstance(trace, DummyTrace):
                         fun = consume4bytes
@@ -809,9 +797,7 @@ class RawRead:
                 for point in range(self.nPoints):
                     for i, var in enumerate(self._traces):
                         value = scan_functions[i](raw_file)
-                        if value is not None and not isinstance(
-                            var, DummyTrace
-                        ):
+                        if value is not None and not isinstance(var, DummyTrace):
                             var.data[point] = value
 
         elif self.raw_type == "Values:":
@@ -857,9 +843,7 @@ class RawRead:
                     line_nr += 1
         else:
             raw_file.close()
-            raise SpiceReadException(
-                f'Unsupported RAW File. "{self.raw_type}"'
-            )
+            raise SpiceReadException(f'Unsupported RAW File. "{self.raw_type}"')
 
         raw_file.close()
 
@@ -913,9 +897,7 @@ class RawRead:
         elif property_name in self.raw_params.keys():
             return self.raw_params[property_name]
         else:
-            raise ValueError(
-                "Invalid property. Use %s" % str(self.raw_params.keys())
-            )
+            raise ValueError("Invalid property. Use %s" % str(self.raw_params.keys()))
 
     def get_trace_names(self) -> List[str]:
         """Returns a list of exiting trace names of the RAW file.
@@ -924,9 +906,7 @@ class RawRead:
         :rtype: list[str]
         """
         # parsing the aliases needs to be done before implementing this.
-        return [trace.name for trace in self._traces] + list(
-            self.aliases.keys()
-        )
+        return [trace.name for trace in self._traces] + list(self.aliases.keys())
 
     def _compute_alias(self, alias: str) -> TraceRead:
         """Constants like mho need to be replaced and  V(ref1,ref2) need to be replaced
@@ -948,9 +928,7 @@ class RawRead:
         elif alias.startswith("V("):
             whattype = "voltage"
         else:
-            raise NotImplementedError(
-                f'Unrecognized alias type for alias : "{alias}"'
-            )
+            raise NotImplementedError(f'Unrecognized alias type for alias : "{alias}"')
         trace = TraceRead(alias, whattype, self.nPoints, self.axis, "double")
         local_vars: Dict[str, Any] = {
             "pi": 3.1415926536,
@@ -1002,9 +980,7 @@ class RawRead:
         else:
             return self._traces[trace_ref]
 
-    def get_wave(
-        self, trace_ref: Union[str, int], step: int = 0
-    ) -> NDArray[Any]:
+    def get_wave(self, trace_ref: Union[str, int], step: int = 0) -> NDArray[Any]:
         """Retrieves the trace data with the requested name (trace_ref), optionally
         providing the step number.
 
@@ -1029,9 +1005,7 @@ class RawRead:
         compression, where some values on the time trace have a negative value.
         """
         trace = self.get_trace("time")
-        assert isinstance(
-            trace, Axis
-        ), "This RAW file does not have a time axis."
+        assert isinstance(trace, Axis), "This RAW file does not have a time axis."
         return trace.get_time_axis(step)
 
     def get_axis(self, step: int = 0) -> Union[NDArray[Any], List[float]]:
@@ -1047,9 +1021,7 @@ class RawRead:
         """
         if self.axis:
             axis = self.get_trace(0)
-            assert isinstance(
-                axis, Axis
-            ), "This RAW file does not have an axis."
+            assert isinstance(axis, Axis), "This RAW file does not have an axis."
             return axis.get_wave(step)
         else:
             raise RuntimeError("This RAW file does not have an axis.")
@@ -1091,9 +1063,7 @@ class RawRead:
                 )
                 log = open(logfile, "r", errors="replace", encoding=encoding)
             except OSError as exc:
-                raise SpiceReadException(
-                    "Log file '%s' not found" % logfile
-                ) from exc
+                raise SpiceReadException("Log file '%s' not found" % logfile) from exc
             except UnicodeError as exc:
                 raise SpiceReadException(
                     "Unable to parse log file '%s'" % logfile
@@ -1126,9 +1096,7 @@ class RawRead:
             try:
                 log = open(logfile, "r", errors="replace", encoding="utf-8")
             except OSError as exc:
-                raise SpiceReadException(
-                    "Log file '%s' not found" % logfile
-                ) from exc
+                raise SpiceReadException("Log file '%s' not found" % logfile) from exc
             except UnicodeError as exc:
                 raise SpiceReadException(
                     "Unable to parse log file '%s'" % logfile
@@ -1160,9 +1128,7 @@ class RawRead:
                 "Unsupported simulator. Only LTspice and QSPICE are supported."
             )
 
-    def __getitem__(
-        self, item: Union[str, int]
-    ) -> Union[Axis, TraceRead, DummyTrace]:
+    def __getitem__(self, item: Union[str, int]) -> Union[Axis, TraceRead, DummyTrace]:
         """Helper function to access traces by using the [ ] operator."""
         return self.get_trace(item)
 
@@ -1225,9 +1191,7 @@ class RawRead:
         :rtype: pandas.DataFrame
         """
         if columns is None:
-            columns = (
-                self.get_trace_names()
-            )  # if no columns are given, use all traces
+            columns = self.get_trace_names()  # if no columns are given, use all traces
         else:
             if (
                 self.axis and self.axis.name not in columns
@@ -1328,18 +1292,10 @@ class RawRead:
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(separator.join(data.keys()) + "\n")
                 for i in range(
-                    len(
-                        data[
-                            columns[0]
-                            if columns
-                            else self.get_trace_names()[0]
-                        ]
-                    )
+                    len(data[columns[0] if columns else self.get_trace_names()[0]])
                 ):
                     f.write(
-                        separator.join(
-                            [str(data[col][i]) for col in data.keys()]
-                        )
+                        separator.join([str(data[col][i]) for col in data.keys()])
                         + "\n"
                     )
 

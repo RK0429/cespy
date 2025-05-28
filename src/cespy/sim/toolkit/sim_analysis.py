@@ -22,17 +22,7 @@
 
 import logging
 from functools import wraps
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
@@ -93,9 +83,7 @@ class SimAnalysis(object):
         self,
         *,
         wait_resource: bool = True,
-        callback: Optional[
-            Union[Type[ProcessCallback], Callable[..., Any]]
-        ] = None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[Any] = None,
         timeout: Optional[float] = None,
@@ -142,14 +130,10 @@ class SimAnalysis(object):
         self.instructions_added = False
 
     def set_component_value(self, ref: str, new_value: str) -> None:
-        self.received_instructions.append(
-            ("set_component_value", ref, new_value)
-        )
+        self.received_instructions.append(("set_component_value", ref, new_value))
 
     def set_element_model(self, ref: str, new_model: str) -> None:
-        self.received_instructions.append(
-            ("set_element_model", ref, new_model)
-        )
+        self.received_instructions.append(("set_element_model", ref, new_model))
 
     def set_parameter(self, ref: str, new_value: str) -> None:
         self.received_instructions.append(("set_parameter", ref, new_value))
@@ -161,9 +145,7 @@ class SimAnalysis(object):
         self.received_instructions.append(("remove_instruction", instruction))
 
     def remove_Xinstruction(self, search_pattern: str) -> None:
-        self.received_instructions.append(
-            ("remove_Xinstruction", search_pattern)
-        )
+        self.received_instructions.append(("remove_Xinstruction", search_pattern))
 
     def play_instructions(self) -> None:
         if self.instructions_added:
@@ -224,9 +206,7 @@ class SimAnalysis(object):
             _logger.warning("Log file not found: %s", str(run_task.log_file))
             return None
         except EncodingDetectError:
-            _logger.warning(
-                "Log file %s couldn't be read", str(run_task.log_file)
-            )
+            _logger.warning("Log file %s couldn't be read", str(run_task.log_file))
             return None
         return log_results
 

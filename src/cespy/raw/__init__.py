@@ -1,14 +1,8 @@
 """Raw waveform file handling modules."""
 
+from .raw_classes import Axis, DataSet, DummyTrace, SpiceReadException, TraceRead
 from .raw_read import RawRead
 from .raw_write import RawWrite, Trace
-from .raw_classes import (
-    TraceRead,
-    DataSet,
-    Axis,
-    DummyTrace,
-    SpiceReadException,
-)
 
 __all__ = [
     "RawRead",

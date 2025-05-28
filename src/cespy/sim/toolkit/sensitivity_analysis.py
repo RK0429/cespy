@@ -60,12 +60,8 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
             self.editor.add_instruction(
                 ".func satol(nom,tol,idx) nom*if(run==idx,1+tol,1)"
             )
-        self.editor.add_instruction(
-            ".func sammx(nom,val,idx) if(run==idx,val,nom)"
-        )
-        self.editor.add_instruction(
-            ".step param run -1 %d 1" % self.last_run_number
-        )
+        self.editor.add_instruction(".func sammx(nom,val,idx) if(run==idx,val,nom)")
+        self.editor.add_instruction(".step param run -1 %d 1" % self.last_run_number)
         self.editor.set_parameter("run", -1)  # in case the step is commented.
         self.testbench_prepared = True
 
@@ -106,11 +102,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                     if isinstance(nominal_data, str)
                     else nominal_data
                 )
-                step_val = (
-                    float(step_data)
-                    if isinstance(step_data, str)
-                    else step_data
-                )
+                step_val = float(step_data) if isinstance(step_data, str) else step_data
 
                 # Handle complex numbers if present
                 if isinstance(nom_val, complex):
@@ -122,18 +114,12 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
             total_error = sum(error_data)
             if ref == "*":
                 return {
-                    ref: error_data[idx] / total_error * 100
-                    if total_error != 0
-                    else 0
+                    ref: error_data[idx] / total_error * 100 if total_error != 0 else 0
                     for idx, ref in enumerate(self.elements_analysed)
                 }
             else:
                 idx = self.elements_analysed.index(ref)
-                return (
-                    error_data[idx] / total_error * 100
-                    if total_error != 0
-                    else 0
-                )
+                return error_data[idx] / total_error * 100 if total_error != 0 else 0
         else:
             _logger.warning(
                 "The analysis was not executed. Please run the run_analysis(...) or"
@@ -143,9 +129,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
 
     def run_analysis(
         self,
-        callback: Optional[
-            Union[Type[ProcessCallback], Callable[..., Any]]
-        ] = None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
@@ -181,10 +165,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
 
         for ref in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(ref)
-            if (
-                dev.typ == DeviationType.tolerance
-                or dev.typ == DeviationType.minmax
-            ):
+            if dev.typ == DeviationType.tolerance or dev.typ == DeviationType.minmax:
                 worst_case_elements[ref] = val, dev, "parameter"
                 self.elements_analysed.append(ref)
 
@@ -211,9 +192,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
         actual_callback = (
             callback if callback is not None else lambda *args, **kwargs: None
         )
-        actual_callback_args = (
-            callback_args if callback_args is not None else {}
-        )
+        actual_callback_args = callback_args if callback_args is not None else {}
         actual_timeout = (
             timeout if timeout is not None else 600.0
         )  # Default timeout from SimRunner
@@ -245,11 +224,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                             else val
                         )
                     elif dev.typ == DeviationType.minmax:
-                        new_val = (
-                            dev.max_val
-                            if bit_setting & (1 << bit_index)
-                            else val
-                        )
+                        new_val = dev.max_val if bit_setting & (1 << bit_index) else val
                     else:
                         _logger.warning("Unknown deviation type")
                         new_val = val
@@ -309,7 +284,5 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                         dataset["run"] = runs
                 except (AttributeError, TypeError):
                     # Handle case where dataset doesn't behave like a dict
-                    _logger.warning(
-                        "Could not process dataset in expected way"
-                    )
+                    _logger.warning("Could not process dataset in expected way")
         return None

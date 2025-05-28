@@ -50,9 +50,7 @@ def zip_files(raw_filename: Path, log_filename: Path) -> Path:
         Path to the created zip file
     """
     zip_filename = raw_filename.with_suffix(".zip")
-    with zipfile.ZipFile(
-        zip_filename, "w", zipfile.ZIP_DEFLATED
-    ) as zip_file:
+    with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_file:
         zip_file.write(raw_filename)
         zip_file.write(log_filename)
     return zip_filename

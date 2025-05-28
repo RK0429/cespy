@@ -69,9 +69,7 @@ def find_file_in_directory(directory: str, filename: str) -> Optional[str]:
     return None
 
 
-def search_file_in_containers(
-    filename: str, *containers: str
-) -> Optional[str]:
+def search_file_in_containers(filename: str, *containers: str) -> Optional[str]:
     """Searches for a file with the given filename in the specified containers.
 
     Containers can be directories or zip files. For zip files, the matching file will be

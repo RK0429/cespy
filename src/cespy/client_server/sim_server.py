@@ -108,9 +108,7 @@ class SimServer:
                 answer = True
         return answer
 
-    def run(
-        self, session_id: str, circuit_name: str, zip_data: Binary
-    ) -> int:
+    def run(self, session_id: str, circuit_name: str, zip_data: Binary) -> int:
         """Run a simulation for the given session.
 
         Args:
@@ -126,12 +124,8 @@ class SimServer:
             return -1
 
         circuit_path = Path(self.output_folder) / circuit_name
-        _logger.info(
-            "Server: Running simulation of %s", circuit_path
-        )
-        runno = self.simulation_manager.add_simulation(
-            circuit_path
-        )
+        _logger.info("Server: Running simulation of %s", circuit_path)
+        runno = self.simulation_manager.add_simulation(circuit_path)
         if runno != -1:
             self.sessions[session_id].append(runno)
         return runno

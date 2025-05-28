@@ -147,12 +147,10 @@ class AscEditor(BaseSchematic):
                 posX = component.position.X
                 posY = component.position.Y
                 rotation = ASC_INV_ROTATION_DICT[component.rotation]
-                asc.write(
-                    f"SYMBOL {symbol} {posX} {posY} {rotation}" + END_LINE_TERM
-                )
+                asc.write(f"SYMBOL {symbol} {posX} {posY} {rotation}" + END_LINE_TERM)
                 for attr, value in component.attributes.items():
                     if attr.startswith("_WINDOW") and isinstance(value, Text):
-                        num_ref = attr[len("_WINDOW_"):]
+                        num_ref = attr[len("_WINDOW_") :]
                         posX = value.coord.X
                         posY = value.coord.Y
                         alignment = asc_text_align_get(value)
@@ -161,17 +159,13 @@ class AscEditor(BaseSchematic):
                             f"WINDOW {num_ref} {posX} {posY} "
                             f"{alignment} {size}" + END_LINE_TERM
                         )
-                asc.write(
-                    f"SYMATTR InstName {component.reference}" + END_LINE_TERM
-                )
+                asc.write(f"SYMATTR InstName {component.reference}" + END_LINE_TERM)
                 if (
                     component.reference.startswith("X")
                     and "_SUBCKT" in component.attributes
                 ):
                     # writing the sub-circuit if it was updated
-                    sub_circuit: Optional[AscEditor] = component.attributes[
-                        "_SUBCKT"
-                    ]
+                    sub_circuit: Optional[AscEditor] = component.attributes["_SUBCKT"]
                     if sub_circuit is not None and sub_circuit.updated:
                         sub_circuit.save_netlist(sub_circuit.asc_file_path)
                 for attr, value in component.attributes.items():
@@ -196,8 +190,7 @@ class AscEditor(BaseSchematic):
             for line in self.lines:
                 line_style_obj: LineStyle = line.style
                 line_style = (
-                    f" {line_style_obj.pattern}"
-                    if line_style_obj.pattern != "" else ""
+                    f" {line_style_obj.pattern}" if line_style_obj.pattern != "" else ""
                 )
                 asc.write(
                     "LINE Normal "
@@ -207,15 +200,10 @@ class AscEditor(BaseSchematic):
             for shape in self.shapes:
                 shape_style: LineStyle = shape.line_style
                 line_style = (
-                    f" {shape_style.pattern}"
-                    if shape_style.pattern != "" else ""
+                    f" {shape_style.pattern}" if shape_style.pattern != "" else ""
                 )
-                points = " ".join(
-                    [f"{point.X} {point.Y}" for point in shape.points]
-                )
-                asc.write(
-                    f"{shape.name} Normal {points}{line_style}" + END_LINE_TERM
-                )
+                points = " ".join([f"{point.X} {point.Y}" for point in shape.points])
+                asc.write(f"{shape.name} Normal {points}{line_style}" + END_LINE_TERM)
 
     def reset_netlist(self, create_blank: bool = False) -> None:
         super().reset_netlist()
@@ -333,7 +321,7 @@ class AscEditor(BaseSchematic):
                     ], f"Unsupported version : {version_val}"
                     self.version = version_val
                 elif line.startswith("SHEET "):
-                    self.sheet = line[len("SHEET "):].strip()
+                    self.sheet = line[len("SHEET ") :].strip()
                 elif line.startswith("IOPIN "):
                     _, posX, posY, direction = line.split()
                     # Assuming it is the last FLAG parsed

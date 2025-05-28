@@ -25,13 +25,10 @@ except ImportError:
 def main() -> None:
     """Run the main SPICE server with command-line arguments."""
     # declare simulator variable with default
-    simulator: (
-        Type[LTspice] | Type[NGspiceSimulator] | Type[XyceSimulator]
-    ) = LTspice
+    simulator: Type[LTspice] | Type[NGspiceSimulator] | Type[XyceSimulator] = LTspice
     parser = argparse.ArgumentParser(
         description=(
-            "Run the SPICE server with specified simulator "
-            "(LTSpice, NGSpice, XYCE)."
+            "Run the SPICE server with specified simulator " "(LTSpice, NGSpice, XYCE)."
         )
     )
     parser.add_argument(

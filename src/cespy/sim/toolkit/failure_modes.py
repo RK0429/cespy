@@ -87,9 +87,7 @@ class FailureMode(SimAnalysis):
         open_pins: Iterable[str],
     ) -> None:
         if not component.startswith("X"):
-            raise RuntimeError(
-                "The failure modes addition only works with subcircuits"
-            )
+            raise RuntimeError("The failure modes addition only works with subcircuits")
         if component not in self.subcircuits:
             raise ComponentNotFoundError()
         _ = short_pins
@@ -114,8 +112,8 @@ class FailureMode(SimAnalysis):
                 self.failure_simulations[f"{two_pin_component}_O"] = self.run()
                 # Short Circuit: insert short resistor
                 netlist = getattr(self.editor, "netlist")
-                netlist[
-                    cinfo["line"]
-                ] = f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
+                netlist[cinfo["line"]] = (
+                    f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
+                )
                 self.failure_simulations[f"{two_pin_component}_S"] = self.run()
                 self.editor.reset_netlist()

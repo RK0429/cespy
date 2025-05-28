@@ -82,9 +82,7 @@ class XyceSimulator(Simulator):
         # '-b'                : ['-b'],  # batch mode flag for spice compatibility (ignored)
         # '-h'                : ['-h'],  # print usage and exit
         # '-v'                : ['-v'],  # print version info and exit
-        "-capabilities": [
-            "-capabilities"
-        ],  # print compiled-in options and exit
+        "-capabilities": ["-capabilities"],  # print compiled-in options and exit
         "-license": ["-license"],  # print license and exit
         "-param": ["-param", "<param_options>"],
         # [device [level [<inst|mod>]]] print terse summary of model/device params
@@ -92,9 +90,7 @@ class XyceSimulator(Simulator):
         # [device [level [<inst|mod>]]] output latex tables of params to files
         "-doc_cat": ["-doc_cat", "<param_options>"],
         # [device [level [<inst|mod>]]] output latex tables of params to files
-        "-count": [
-            "-count"
-        ],  # device count without netlist syntax or topology check
+        "-count": ["-count"],  # device count without netlist syntax or topology check
         "-syntax": ["-syntax"],  # check netlist syntax and exit
         "-norun": ["-norun"],  # netlist syntax and topology and exit
         "-namesfile": [
@@ -236,9 +232,7 @@ class XyceSimulator(Simulator):
 
         # will be set anyway?
         if switch in cls._default_run_switches:
-            _logger.info(
-                "Switch %s is already in the default switches", switch
-            )
+            _logger.info("Switch %s is already in the default switches", switch)
             return []
 
         if switch in cls.xyce_args:
@@ -377,7 +371,5 @@ class XyceSimulator(Simulator):
                     stderr=subprocess.STDOUT,
                 )
         else:
-            error = run_function(
-                cmd_run, timeout=timeout, stdout=stdout, stderr=stderr
-            )
+            error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
         return error

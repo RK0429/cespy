@@ -23,12 +23,7 @@ import logging
 from collections import OrderedDict
 from typing import Any, Callable, List, Optional, Tuple, Union, cast
 
-from .base_editor import (
-    SUBCKT_DIVIDER,
-    BaseEditor,
-    Component,
-    ComponentNotFoundError,
-)
+from .base_editor import SUBCKT_DIVIDER, BaseEditor, Component, ComponentNotFoundError
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
@@ -184,19 +179,11 @@ class Line:
         """Returns True if the line passes through the given point."""
         if self.V1.X == self.V2.X:
             if self.V1.X == point.X:
-                if (
-                    min(self.V1.Y, self.V2.Y)
-                    <= point.Y
-                    <= max(self.V1.Y, self.V2.Y)
-                ):
+                if min(self.V1.Y, self.V2.Y) <= point.Y <= max(self.V1.Y, self.V2.Y):
                     return True
         elif self.V1.Y == self.V2.Y:
             if self.V1.Y == point.Y:
-                if (
-                    min(self.V1.X, self.V2.X)
-                    <= point.X
-                    <= max(self.V1.X, self.V2.X)
-                ):
+                if min(self.V1.X, self.V2.X) <= point.X <= max(self.V1.X, self.V2.X):
                     return True
         else:
             # The time saving tricks are over, the line is oblique, so, we have to do the math
@@ -210,11 +197,7 @@ class Line:
             # the point
             if y == point.Y:
                 # Now we have to check if the point is within the line segment
-                if (
-                    min(self.V1.X, self.V2.X)
-                    <= point.X
-                    <= max(self.V1.X, self.V2.X)
-                ):
+                if min(self.V1.X, self.V2.X) <= point.X <= max(self.V1.X, self.V2.X):
                     return True
         return False
 
@@ -400,9 +383,7 @@ class BaseSchematic(BaseEditor):
                 )
             return sub_circuit.components[ref]
 
-    def get_component_position(
-        self, reference: str
-    ) -> Tuple[Point, ERotation]:
+    def get_component_position(self, reference: str) -> Tuple[Point, ERotation]:
         """Returns the position and rotation of the component."""
         comp = self.get_component(reference)
         return comp.position, comp.rotation
@@ -464,19 +445,11 @@ class BaseSchematic(BaseEditor):
             label.coord.X = round_fun(label.coord.X * scale_x + offset_x)
             label.coord.Y = round_fun(label.coord.Y * scale_y + offset_y)
         for directive in self.directives:
-            directive.coord.X = round_fun(
-                directive.coord.X * scale_x + offset_x
-            )
-            directive.coord.Y = round_fun(
-                directive.coord.Y * scale_y + offset_y
-            )
+            directive.coord.X = round_fun(directive.coord.X * scale_x + offset_x)
+            directive.coord.Y = round_fun(directive.coord.Y * scale_y + offset_y)
         for port in self.ports:
-            port.text.coord.X = round_fun(
-                port.text.coord.X * scale_x + offset_x
-            )
-            port.text.coord.Y = round_fun(
-                port.text.coord.Y * scale_y + offset_y
-            )
+            port.text.coord.X = round_fun(port.text.coord.X * scale_x + offset_x)
+            port.text.coord.Y = round_fun(port.text.coord.Y * scale_y + offset_y)
         for line in self.lines:
             line.V1.X = round_fun(line.V1.X * scale_x + offset_x)
             line.V1.Y = round_fun(line.V1.Y * scale_y + offset_y)

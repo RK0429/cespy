@@ -7,17 +7,7 @@ import logging
 import math
 import re
 from collections import OrderedDict
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Protocol,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Dict, Iterable, List, Optional, Protocol, TypeVar, Union, cast
 
 # -------------------------------------------------------------------------------
 # Name:        logfile_data.py
@@ -100,16 +90,13 @@ NumericType = Union[int, float, complex, LTComplex]
 class Comparable(Protocol):
     """Protocol for types that support less-than comparison."""
 
-    def __lt__(self, other: Any) -> bool:
-        ...
+    def __lt__(self, other: Any) -> bool: ...
 
 
 T = TypeVar("T", bound=Comparable)
 
 
-def try_convert_value(
-    value: Union[str, int, float, List[Any], bytes]
-) -> ValueType:
+def try_convert_value(value: Union[str, int, float, List[Any], bytes]) -> ValueType:
     """Tries to convert the string into an integer and if it fails, tries to convert to
     a float, if it fails, then returns the value as string.
 
@@ -246,9 +233,7 @@ class LogfileData:
             return self.dataset[
                 key
             ]  # This will raise an Index Error if not found here.
-        raise IndexError(
-            f"'{key}' is not a valid step variable or measurement name"
-        )
+        raise IndexError(f"'{key}' is not a valid step variable or measurement name")
 
     def has_steps(self) -> bool:
         """Returns true if the simulation has steps :return: True if the simulation has
@@ -284,9 +269,7 @@ class LogfileData:
         # returns the positions where there is match
         return [i for i, a in enumerate(condition_set) if a == v]
 
-    def steps_with_conditions(
-        self, **conditions: Union[str, int, float]
-    ) -> List[int]:
+    def steps_with_conditions(self, **conditions: Union[str, int, float]) -> List[int]:
         """Returns the steps that respect one or more equality conditions.
 
         :key conditions: parameters within the Spice simulation. Values are the matches
@@ -348,24 +331,14 @@ class LogfileData:
                         Union[float, int, str, LTComplex],
                         self.dataset[measure][steps[0]],
                     )
-                raise IndexError(
-                    "Not sufficient conditions to identify a single step"
-                )
+                raise IndexError("Not sufficient conditions to identify a single step")
             if len(self.dataset[measure]) == 1:
                 # Explicitly cast to the expected return type
-                return cast(
-                    Union[float, int, str, LTComplex], self.dataset[measure][0]
-                )
+                return cast(Union[float, int, str, LTComplex], self.dataset[measure][0])
             if len(self.dataset[measure]) == 0:
-                _logger.error(
-                    'No measurements found for measure "%s"', measure
-                )
-                raise IndexError(
-                    f'No measurements found for measure "{measure}"'
-                )
-            raise IndexError(
-                "In stepped data, the step number needs to be provided"
-            )
+                _logger.error('No measurements found for measure "%s"', measure)
+                raise IndexError(f'No measurements found for measure "{measure}"')
+            raise IndexError("In stepped data, the step number needs to be provided")
         if isinstance(step, (slice, int)):
             # Explicitly cast to the expected return type
             return cast(
@@ -418,14 +391,10 @@ class LogfileData:
             v for v in values if isinstance(v, (int, float, str, LTComplex))
         ]
         if not comparable_values:
-            raise ValueError(
-                f"No comparable values found for measure {measure}"
-            )
+            raise ValueError(f"No comparable values found for measure {measure}")
 
         # Cast comparable_values to Iterable[Comparable] for max
-        return cast(
-            ValueType, max(cast(Iterable[Comparable], comparable_values))
-        )
+        return cast(ValueType, max(cast(Iterable[Comparable], comparable_values)))
 
     def min_measure_value(
         self, measure: str, steps: Union[None, int, Iterable[int]] = None
@@ -448,14 +417,10 @@ class LogfileData:
             v for v in values if isinstance(v, (int, float, str, LTComplex))
         ]
         if not comparable_values:
-            raise ValueError(
-                f"No comparable values found for measure {measure}"
-            )
+            raise ValueError(f"No comparable values found for measure {measure}")
 
         # Cast comparable_values to Iterable[Comparable] for min
-        return cast(
-            ValueType, min(cast(Iterable[Comparable], comparable_values))
-        )
+        return cast(ValueType, min(cast(Iterable[Comparable], comparable_values)))
 
     def avg_measure_value(
         self, measure: str, steps: Union[None, int, Iterable[int]] = None
@@ -472,9 +437,7 @@ class LogfileData:
         values = self.get_measure_values_at_steps(measure, steps)
         # Filter to only numeric values for calculation
         numeric_values: List[NumericType] = [
-            v
-            for v in values
-            if isinstance(v, (int, float, complex, LTComplex))
+            v for v in values if isinstance(v, (int, float, complex, LTComplex))
         ]
         if not numeric_values:
             raise ValueError(f"No numeric values found for measure {measure}")
@@ -490,12 +453,8 @@ class LogfileData:
             if len(self.dataset[param]) > 0 and isinstance(
                 self.dataset[param][0], LTComplex
             ):
-                self.dataset[param + "_mag"] = [
-                    v.mag for v in self.dataset[param]
-                ]
-                self.dataset[param + "_ph"] = [
-                    v.ph for v in self.dataset[param]
-                ]
+                self.dataset[param + "_mag"] = [v.mag for v in self.dataset[param]]
+                self.dataset[param + "_ph"] = [v.ph for v in self.dataset[param]]
 
     def split_complex_values_on_datasets(self) -> None:
         """..
@@ -547,8 +506,7 @@ class LogfileData:
         if encoding is None:
             encoding = self.encoding if hasattr(self, "encoding") else "utf-8"
 
-        fout = open(export_file, mode, encoding=encoding)
-
+        fout = open(export_file, mode, encoding=encoding)  # pylint: disable=consider-using-with
         if (
             append_with_line_prefix is not None
         ):  # if appending a file, it must write the column title
@@ -607,9 +565,7 @@ class LogfileData:
                 step_data = [
                     self.stepset[param][index] for param in self.stepset.keys()
                 ]
-            meas_data = [
-                self.dataset[param][index] for param in self.dataset.keys()
-            ]
+            meas_data = [self.dataset[param][index] for param in self.dataset.keys()]
 
             if (
                 append_with_line_prefix is not None
@@ -636,8 +592,7 @@ class LogfileData:
                     columns_writen += 1
             if columns_writen != columns_per_line:
                 logging.error(
-                    "Line with wrong number of values."
-                    " Expected:%d Index %d has %d",
+                    "Line with wrong number of values." " Expected:%d Index %d has %d",
                     columns_per_line,
                     index + 1,
                     columns_writen,
@@ -699,9 +654,7 @@ class LogfileData:
                 -((bin_edges - mu) ** 2) / (2 * sd**2)
             )
             plt.plot(bin_edges, y, "r--", linewidth=1)
-            plt.axvspan(
-                mu - sigma * sd, mu + sigma * sd, alpha=0.2, color="cyan"
-            )
+            plt.axvspan(mu - sigma * sd, mu + sigma * sd, alpha=0.2, color="cyan")
             plt.ylabel("Distribution [Normalised]")
         else:
             plt.ylabel("Distribution")

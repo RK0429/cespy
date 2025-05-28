@@ -82,9 +82,7 @@ def simulate(  # pylint: disable=too-many-arguments,too-many-locals
     sim_key = engine.lower()
     if sim_key not in engines:
         engines_list = list(engines.keys())
-        raise ValueError(
-            f"Unsupported engine '{engine}'. Choose from {engines_list}."
-        )
+        raise ValueError(f"Unsupported engine '{engine}'. Choose from {engines_list}.")
     sim_cls = engines[sim_key]
     runner = SimRunner(
         simulator=sim_cls,

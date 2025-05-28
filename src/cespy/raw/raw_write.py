@@ -84,9 +84,7 @@ class Trace(DataSet):
             else:
                 raise NotImplementedError("Unsupported data type for Trace")
 
-        DataSet.__init__(
-            self, name, whattype, len(data), numerical_type=numerical_type
-        )
+        DataSet.__init__(self, name, whattype, len(data), numerical_type=numerical_type)
         if isinstance(data, (list, tuple)):
             self.data = array(data, dtype=self.data.dtype)
         else:
@@ -155,21 +153,17 @@ class RawWrite:
         the first trace does not have a recognized whattype     IndexError: If the trace
         size doesn't match the first trace
         """
-        assert isinstance(
-            trace, Trace
-        ), "The trace needs to be of the type Trace"
+        assert isinstance(trace, Trace), "The trace needs to be of the type Trace"
         if len(self._traces) == 0:
             if trace.whattype == "time":
                 self.plot_name = self.plot_name or "Transient Analysis"
                 flag_numtype = "real"
             elif trace.whattype == "frequency":
                 if (
-                    trace.numerical_type != "complex"
-                    and self.flag_numtype != "complex"
+                    trace.numerical_type != "complex" and self.flag_numtype != "complex"
                 ) or "Noise" in str(self.plot_name):
                     self.plot_name = (
-                        self.plot_name
-                        or "Noise Spectral Density - (V/Hz½ or A/Hz½)"
+                        self.plot_name or "Noise Spectral Density - (V/Hz½ or A/Hz½)"
                     )
                     flag_numtype = "real"
                 else:
@@ -191,9 +185,7 @@ class RawWrite:
                 self.flag_numtype = flag_numtype
         else:
             if len(self._traces[0]) != len(trace):
-                raise IndexError(
-                    "The trace needs to be the same size as trace 0"
-                )
+                raise IndexError("The trace needs to be the same size as trace 0")
         self._traces.append(trace)
 
     def save(self, filename: Union[str, Path]) -> None:
@@ -213,25 +205,15 @@ class RawWrite:
         f = open(filename, "wb")
         f.write("Title: * cespy RawWrite\n".encode(self.encoding))
         f.write(
-            "Date: {}\n".format(strftime("%a %b %d %H:%M:%S %Y")).encode(
-                self.encoding
-            )
+            "Date: {}\n".format(strftime("%a %b %d %H:%M:%S %Y")).encode(self.encoding)
         )
         f.write("Plotname: {}\n".format(self.plot_name).encode(self.encoding))
         f.write("Flags: {}\n".format(self._str_flags()).encode(self.encoding))
+        f.write("No. Variables: {}\n".format(len(self._traces)).encode(self.encoding))
         f.write(
-            "No. Variables: {}\n".format(len(self._traces)).encode(
-                self.encoding
-            )
+            "No. Points: {:12}\n".format(len(self._traces[0])).encode(self.encoding)
         )
-        f.write(
-            "No. Points: {:12}\n".format(len(self._traces[0])).encode(
-                self.encoding
-            )
-        )
-        f.write(
-            "Offset:   {:.16e}\n".format(self.offset).encode(self.encoding)
-        )
+        f.write("Offset:   {:.16e}\n".format(self.offset).encode(self.encoding))
         f.write(
             "Command: Linear Technology Corporation LTspice XVII\n".encode(
                 self.encoding
@@ -241,9 +223,9 @@ class RawWrite:
         f.write("Variables:\n".encode(self.encoding))
         for i, trace in enumerate(self._traces):
             f.write(
-                "\t{0}\t{1}\t{2}\n".format(
-                    i, trace.name, trace.whattype
-                ).encode(self.encoding)
+                "\t{0}\t{1}\t{2}\n".format(i, trace.name, trace.whattype).encode(
+                    self.encoding
+                )
             )
         total_bytes = 0
         f.write("Binary:\n".encode(self.encoding))
@@ -275,9 +257,7 @@ class RawWrite:
         """
         # Make the rename as requested
         if "rename_format" in kwargs:
-            if name.endswith(")") and (
-                name.startswith("V(") or name.startswith("I(")
-            ):
+            if name.endswith(")") and (name.startswith("V(") or name.startswith("I(")):
                 new_name = (
                     name[:2]
                     + cast(
@@ -287,9 +267,7 @@ class RawWrite:
                     + name[-1]
                 )
             else:
-                new_name = cast(
-                    str, kwargs["rename_format"].format(name, **kwargs)
-                )
+                new_name = cast(str, kwargs["rename_format"].format(name, **kwargs))
             return new_name
         return name
 
@@ -458,9 +436,7 @@ class RawWrite:
         new_data = zeros(len(new_axis), dtype=trace_data.dtype)
         new_data[0] = trace_data[0]
 
-        slope = (trace_data[1] - trace_data[0]) / (
-            trace_axis[1] - trace_axis[0]
-        )
+        slope = (trace_data[1] - trace_data[0]) / (trace_axis[1] - trace_axis[0])
         i = 1
         for j, t in enumerate(new_axis):
             while i < len(trace_axis) and trace_axis[i] < t:
@@ -485,9 +461,7 @@ class RawWrite:
             if axis_length != len(old_axis):
                 my_axis = old_axis.data
                 for trace in self._traces[1:]:
-                    trace.data = self._interpolate(
-                        trace.data, my_axis, new_axis
-                    )
+                    trace.data = self._interpolate(trace.data, my_axis, new_axis)
             for imported_trace in self._imported_data:
                 new_trace = Trace(
                     imported_trace.name,

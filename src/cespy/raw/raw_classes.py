@@ -65,9 +65,7 @@ class DataSet:
             raise NotImplementedError
 
     def __str__(self) -> str:
-        return (
-            f"name:'{self.name}'\ntype:'{self.whattype}'\nlen:{len(self.data)}"
-        )
+        return f"name:'{self.name}'\ntype:'{self.whattype}'\nlen:{len(self.data)}"
 
     def __len__(self) -> int:
         return len(self.data)
@@ -171,9 +169,7 @@ class Axis(DataSet):
         if step == 0:
             wave = self.data[: self.step_offset(1)]
         else:
-            wave = self.data[
-                self.step_offset(step) : self.step_offset(step + 1)
-            ]
+            wave = self.data[self.step_offset(step) : self.step_offset(step + 1)]
         # This is a bug in LTSpice, where the time axis values are sometimes
         # negative
         if self.name == "time":
@@ -254,9 +250,7 @@ class Axis(DataSet):
                 frac = (t - timex[i - 1]) / (timex[i] - timex[i - 1])
                 return (i - 1) + float(frac)
         # Handle case where t is greater than all values in timex
-        raise IndexError(
-            f"Value {t} is greater than the maximum value in the axis"
-        )
+        raise IndexError(f"Value {t} is greater than the maximum value in the axis")
 
     def get_len(self, step: int = 0) -> int:
         """Returns the length of the axis.
@@ -350,9 +344,7 @@ class TraceRead(DataSet):
             return super().get_wave()
         if step == 0:
             return self.data[: self.axis.step_offset(1)]
-        return self.data[
-            self.axis.step_offset(step) : self.axis.step_offset(step + 1)
-        ]
+        return self.data[self.axis.step_offset(step) : self.axis.step_offset(step + 1)]
 
     def get_point_at(self, t: float, step: int = 0) -> Union[float, complex]:
         """Get a point from the trace at the point specified by the /t/ argument. If the
@@ -387,9 +379,7 @@ class TraceRead(DataSet):
                 if self.numerical_type == "complex":
                     return complex(val)
                 return float(val)
-            raise IndexError(
-                f"The highest index is {last_item}. Received {pos}"
-            )
+            raise IndexError(f"The highest index is {last_item}. Received {pos}")
         else:
             return self.get_point(pos, step)
 
@@ -436,9 +426,7 @@ class DummyTrace:
         self.numerical_type = numerical_type
 
     def __str__(self) -> str:
-        return (
-            f"name:'{self.name}'\ntype:'{self.whattype}'\nlen:{self.datalen}"
-        )
+        return f"name:'{self.name}'\ntype:'{self.whattype}'\nlen:{self.datalen}"
 
 
 class SpiceReadException(Exception):

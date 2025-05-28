@@ -163,9 +163,7 @@ class SimClient:
         zip_buffer = io.BytesIO()
 
         # Create the zip file in memory
-        with zipfile.ZipFile(
-            zip_buffer, "w", zipfile.ZIP_DEFLATED
-        ) as zip_file:
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             for source in sources:
                 dep_path = pathlib.Path(source)
                 if dep_path.exists():
@@ -198,9 +196,7 @@ class SimClient:
     def run(
         self,
         circuit: str | pathlib.Path,
-        dependencies: (
-            list[str | pathlib.Path] | None
-        ) = None,
+        dependencies: list[str | pathlib.Path] | None = None,
     ) -> int:
         """Sends the netlist identified with the argument "circuit"
         to the server, and it receives a run identifier (runno).
@@ -224,9 +220,7 @@ class SimClient:
             zip_buffer = io.BytesIO()
 
             # Create the zip file in memory
-            with zipfile.ZipFile(
-                zip_buffer, "w", zipfile.ZIP_DEFLATED
-            ) as zip_file:
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
                 # Write circuit to root of the zipfile
                 zip_file.write(circuit, circuit_name)
                 if dependencies is not None:
@@ -241,13 +235,9 @@ class SimClient:
             # Read the zip file from the buffer and send it to the server
             zip_data = zip_buffer.read()
 
-            raw_run_id = self.server.run(
-                self.session_id, circuit_name, zip_data
-            )
+            raw_run_id = self.server.run(self.session_id, circuit_name, zip_data)
             run_id: int = cast(int, raw_run_id)
-            job_info = JobInformation(
-                run_number=run_id, file_dir=circuit_path.parent
-            )
+            job_info = JobInformation(run_number=run_id, file_dir=circuit_path.parent)
             self.started_jobs[run_id] = job_info
             return run_id
         _logger.error("Client: Circuit %s doesn't exit", circuit)
@@ -263,17 +253,13 @@ class SimClient:
 
         raw_response = self.server.get_files(self.session_id, runno)
         # Cast the server response to (filename, data) tuple
-        response: tuple[str, Binary] = cast(
-            tuple[str, Binary], raw_response
-        )
+        response: tuple[str, Binary] = cast(tuple[str, Binary], raw_response)
         zip_filename, zipdata = response
         job = self.stored_jobs.pop(runno)  # Removes it from stored jobs
         self.completed_jobs += 1
         if zip_filename != "":
             # Construct the full path for the zip file
-            store_path: pathlib.Path = job.file_dir.joinpath(
-                zip_filename
-            )
+            store_path: pathlib.Path = job.file_dir.joinpath(zip_filename)
             with open(store_path, "wb") as f:
                 f.write(zipdata.data)
             return store_path
@@ -290,9 +276,7 @@ class SimClient:
                 runno: int = status.pop(0)
                 # Job is taken out of the started jobs list
                 # and is added to the stored jobs
-                self.stored_jobs[runno] = self.started_jobs.pop(
-                    runno
-                )
+                self.stored_jobs[runno] = self.started_jobs.pop(runno)
                 return runno
             now = time.time()
             delta = self.minimum_time_between_server_calls - (
@@ -315,10 +299,7 @@ def main() -> None:  # pylint: disable=too-many-nested-blocks
     """Command-line interface for the simulation client."""
 
     parser = argparse.ArgumentParser(
-        description=(
-            "Connect to a cespy simulation server and "
-            "run simulations"
-        )
+        description=("Connect to a cespy simulation server and " "run simulations")
     )
     parser.add_argument(
         "host",

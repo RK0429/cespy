@@ -165,9 +165,7 @@ class Qspice(Simulator):
 
         # will be set anyway?
         if switch in cls._default_run_switches:
-            _logger.info(
-                "Switch %s is already in the default switches", switch
-            )
+            _logger.info("Switch %s is already in the default switches", switch)
             return []
 
         # read from the dictionary
@@ -254,7 +252,5 @@ class Qspice(Simulator):
                     stderr=subprocess.STDOUT,
                 )
         else:
-            error = run_function(
-                cmd_run, timeout=timeout, stdout=stdout, stderr=stderr
-            )
+            error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
         return error

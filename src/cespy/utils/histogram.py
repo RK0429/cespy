@@ -244,9 +244,7 @@ def main() -> None:
     # Plot specific measurement or all
     if args.measurement:
         if args.measurement not in measurements:
-            print(
-                f"Error: Measurement '{args.measurement}' not found in log file"
-            )
+            print(f"Error: Measurement '{args.measurement}' not found in log file")
             print(f"Available measurements: {', '.join(measurements.keys())}")
             sys.exit(1)
         plot_single_measurement(measurements, args.measurement, args)

@@ -46,9 +46,7 @@ if sys.version_info.major >= 3 and sys.version_info.minor >= 6:
 
         This function is used for python 3.6 and higher versions.
         """
-        _logger.debug(
-            "Running command: %s, with timeout: %s", command, timeout
-        )
+        _logger.debug("Running command: %s, with timeout: %s", command, timeout)
         result = subprocess.run(
             command, check=False, timeout=timeout, stdout=stdout, stderr=stderr
         )
@@ -66,12 +64,8 @@ else:
 
         This is the old function that was used for python version prior to 3.6
         """
-        _logger.debug(
-            "Running command: %s, with timeout: %s", command, timeout
-        )
-        return subprocess.call(
-            command, timeout=timeout, stdout=stdout, stderr=stderr
-        )
+        _logger.debug("Running command: %s, with timeout: %s", command, timeout)
+        return subprocess.call(command, timeout=timeout, stdout=stdout, stderr=stderr)
 
 
 class SpiceSimulatorError(Exception):
@@ -171,9 +165,7 @@ class Simulator(ABC):
                 # Use Path and PureWindowsPath for conversion.
                 # I do not support multiple sections here, as it is not likely
                 # needed.
-                plib_path_to_exe = Path(
-                    PureWindowsPath(path_to_exe).as_posix()
-                )
+                plib_path_to_exe = Path(PureWindowsPath(path_to_exe).as_posix())
                 exe_parts = [plib_path_to_exe.as_posix()]
             else:
                 # try to extract the parts
@@ -192,9 +184,7 @@ class Simulator(ABC):
             cls.spice_exe = exe_parts
             return cls
         else:
-            raise FileNotFoundError(
-                f"Provided exe file was not found '{path_to_exe}'"
-            )
+            raise FileNotFoundError(f"Provided exe file was not found '{path_to_exe}'")
 
     @staticmethod
     def guess_process_name(exe: str) -> str:
@@ -212,9 +202,7 @@ class Simulator(ABC):
             return Path(exe).name
 
     def __init__(self) -> None:
-        raise SpiceSimulatorError(
-            "This class is not supposed to be instanced."
-        )
+        raise SpiceSimulatorError("This class is not supposed to be instanced.")
 
     @classmethod
     @abstractmethod
@@ -255,9 +243,7 @@ class Simulator(ABC):
         exe_log: bool = False,
     ) -> Path:
         """Create a netlist from a circuit file. This should be implemented by subclasses."""
-        raise SpiceSimulatorError(
-            "create_netlist must be implemented by subclass"
-        )
+        raise SpiceSimulatorError("create_netlist must be implemented by subclass")
 
     @classmethod
     def is_available(cls) -> bool:

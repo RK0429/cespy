@@ -105,11 +105,7 @@ def main() -> None:
             else:
                 if options.verbose:
                     print(
-                        "Trace "
-                        + trace
-                        + " not found. Searching for V("
-                        + trace
-                        + ")"
+                        "Trace " + trace + " not found. Searching for V(" + trace + ")"
                     )
                 if "V(" + trace + ")" in raw_traces:
                     found_traces.append("V(" + trace + ")")
@@ -146,9 +142,7 @@ def main() -> None:
         data_size = len(data[data.__iter__().__next__()])
         for i in range(data_size):
             text += (
-                options.separator.join(
-                    [str(data[col][i]) for col in data.keys()]
-                )
+                options.separator.join([str(data[col][i]) for col in data.keys()])
                 + "\n"
             )
         if options.clipboard:
@@ -160,18 +154,14 @@ def main() -> None:
     else:
         if options.output.endswith(".csv"):
             print("Writing CSV file...", end="")
-            raw_data.to_csv(
-                options.output, separator=options.separator, index=False
-            )
+            raw_data.to_csv(options.output, separator=options.separator, index=False)
             print("Done")
         elif options.output.endswith(".xlsx"):
             print("Writing Excel file...", end="")
             raw_data.to_excel(options.output, index=False)
             print("Done")
         else:
-            print(
-                "Error: Unknown output format. Valid formats are '.csv' and '.xlsx'"
-            )
+            print("Error: Unknown output format. Valid formats are '.csv' and '.xlsx'")
             parser.print_help()
             exit(1)
     exit(0)

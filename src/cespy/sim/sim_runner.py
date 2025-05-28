@@ -164,31 +164,25 @@ class AnyRunner(Protocol):
         netlist: Union[str, Path, BaseEditor],
         *,
         wait_resource: bool = True,
-        callback: Optional[
-            Union[Type[ProcessCallback], Callable[..., Any]]
-        ] = None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
-    ) -> Optional[RunTask]:
-        ...
+    ) -> Optional[RunTask]: ...
 
     def wait_completion(
         self,
         timeout: Optional[float] = None,
         abort_all_on_timeout: bool = False,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @property
-    def okSim(self) -> int:
-        ...
+    def okSim(self) -> int: ...
 
     @property
-    def runno(self) -> int:
-        ...
+    def runno(self) -> int: ...
 
 
 class SimRunner(AnyRunner):
@@ -239,10 +233,8 @@ class SimRunner(AnyRunner):
 
         self.parallel_sims = parallel_sims
         # Executor for parallel simulations
-        self._executor: ThreadPoolExecutor = (
-            concurrent.futures.ThreadPoolExecutor(
-                max_workers=self.parallel_sims
-            )
+        self._executor: ThreadPoolExecutor = concurrent.futures.ThreadPoolExecutor(
+            max_workers=self.parallel_sims
         )
         # track pairs of (task, future)
         self.active_tasks: List[Tuple[RunTask, Future[RunTask]]] = []
@@ -330,9 +322,7 @@ class SimRunner(AnyRunner):
         else:
             return Path(afile)
 
-    def _to_output_folder(
-        self, afile: Path, *, copy: bool, new_name: str = ""
-    ) -> Path:
+    def _to_output_folder(self, afile: Path, *, copy: bool, new_name: str = "") -> Path:
         if self.output_folder:
             if new_name:
                 ddst = self.output_folder / new_name
@@ -410,9 +400,7 @@ class SimRunner(AnyRunner):
         else:
             args = inspect.signature(callback).parameters
         if len(args) < 2:
-            raise ValueError(
-                "Callback function must have at least two arguments"
-            )
+            raise ValueError("Callback function must have at least two arguments")
         if len(args) > 2:
             if callback_args is None:
                 raise ValueError(
@@ -447,14 +435,10 @@ class SimRunner(AnyRunner):
         """Internal: blocks until a slot is free or timeout expires."""
         t0 = clock()
         while clock() - t0 < timeout + 1:
-            if not wait_resource or (
-                self.active_threads() < self.parallel_sims
-            ):
+            if not wait_resource or (self.active_threads() < self.parallel_sims):
                 return True
             sleep(0.1)
-        _logger.error(
-            "Timeout waiting for resources for simulation %s", self.run_count
-        )
+        _logger.error("Timeout waiting for resources for simulation %s", self.run_count)
         return False
 
     def run(
@@ -534,9 +518,7 @@ class SimRunner(AnyRunner):
         # Wait for an available resource slot or timeout
         if not self._wait_for_resources(wait_resource, timeout):
             if self.verbose:
-                _logger.warning(
-                    "Timeout on launching simulation %s.", self.run_count
-                )
+                _logger.warning("Timeout on launching simulation %s.", self.run_count)
             return None
 
         # Prepare command-line switches
@@ -544,9 +526,7 @@ class SimRunner(AnyRunner):
 
         # Use a dummy callback if None is provided, as RunTask expects a non-None
         # callback
-        actual_callback = (
-            callback if callback is not None else (lambda raw, log: None)
-        )
+        actual_callback = callback if callback is not None else (lambda raw, log: None)
 
         # Launch the simulation task via ThreadPoolExecutor
         t = RunTask(
@@ -706,9 +686,7 @@ class SimRunner(AnyRunner):
         try:
             import psutil
         except ImportError:
-            _logger.error(
-                "psutil library not installed, cannot kill processes"
-            )
+            _logger.error("psutil library not installed, cannot kill processes")
             return
 
         for proc in psutil.process_iter():
@@ -729,9 +707,7 @@ class SimRunner(AnyRunner):
             if task.start_time is None:
                 continue
             # Determine appropriate timeout value for this task
-            timeout_val = (
-                task.timeout if task.timeout is not None else self.timeout
-            )
+            timeout_val = task.timeout if task.timeout is not None else self.timeout
             if timeout_val is None:
                 continue
             # Calculate candidate stop time
@@ -782,9 +758,7 @@ class SimRunner(AnyRunner):
                         self.kill_all_spice()
                     return False
 
-        _logger.debug(
-            "wait_completion returning %s", self.failed_simulations == 0
-        )
+        _logger.debug("wait_completion returning %s", self.failed_simulations == 0)
         return self.failed_simulations == 0
 
     @staticmethod
@@ -867,7 +841,9 @@ class SimRunner(AnyRunner):
             >>> for result_file in runner:
             ...     print(f"Simulation completed: {result_file}")
         """
-        self._iterator_counter = 0  # Reset the iterator counter. Note: nested iterators are not supported
+        self._iterator_counter = (
+            0  # Reset the iterator counter. Note: nested iterators are not supported
+        )
         return self
 
     def __next__(self) -> Any:
@@ -888,9 +864,7 @@ class SimRunner(AnyRunner):
                 if ret.retcode == 0:
                     return ret.get_results()
                 else:
-                    _logger.error(
-                        "Skipping %s because simulation failed.", ret.runno
-                    )
+                    _logger.error("Skipping %s because simulation failed.", ret.runno)
 
             # Then check if there are any active tasks
             if len(self.active_tasks) == 0:

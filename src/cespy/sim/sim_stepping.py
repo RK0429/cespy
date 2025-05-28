@@ -52,12 +52,10 @@ class RunnerProtocol(AnyRunner, Protocol):
     """Protocol for runner used in SimStepper, includes okSim and runno attributes."""
 
     @property
-    def okSim(self) -> int:
-        ...
+    def okSim(self) -> int: ...
 
     @property
-    def runno(self) -> int:
-        ...
+    def runno(self) -> int: ...
 
 
 class StepInfo(object):
@@ -148,9 +146,7 @@ class SimStepper(object):
         self.netlist.set_component_values(**kwargs)
 
     @wraps(BaseEditor.set_component_value)
-    def set_component_value(
-        self, device: str, value: Union[str, int, float]
-    ) -> None:
+    def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
         self.netlist.set_component_value(device, value)
 
     @wraps(BaseEditor.set_element_model)
@@ -188,9 +184,7 @@ class SimStepper(object):
 
     def run_all(
         self,
-        callback: Optional[
-            Union[Type[ProcessCallback], Callable[..., Any]]
-        ] = None,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
@@ -219,17 +213,13 @@ class SimStepper(object):
                     iter_no -= 1
                     continue
                 if self.iter_list[iter_no].what == "param":
-                    self.netlist.set_parameter(
-                        self.iter_list[iter_no].elem, value
-                    )
+                    self.netlist.set_parameter(self.iter_list[iter_no].elem, value)
                 elif self.iter_list[iter_no].what == "component":
                     self.netlist.set_component_value(
                         self.iter_list[iter_no].elem, value
                     )
                 elif self.iter_list[iter_no].what == "model":
-                    self.netlist.set_element_model(
-                        self.iter_list[iter_no].elem, value
-                    )
+                    self.netlist.set_element_model(self.iter_list[iter_no].elem, value)
                 else:
                     # TODO: develop other types of sweeps EX: add .STEP
                     # instruction

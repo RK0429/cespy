@@ -136,9 +136,7 @@ class LTspice(Simulator):
         # simulator
         if cls.using_macos_native_sim():
             # native LTspice has only '-b' switch
-            raise ValueError(
-                "MacOS native LTspice supports only batch mode ('-b')."
-            )
+            raise ValueError("MacOS native LTspice supports only batch mode ('-b').")
 
         # format check
         if switch is None:
@@ -151,9 +149,7 @@ class LTspice(Simulator):
 
         # default run switches
         if switch in cls._default_run_switches:
-            _logger.info(
-                "Switch %s is already in the default switches", switch
-            )
+            _logger.info("Switch %s is already in the default switches", switch)
             return []
 
         if switch in cls.ltspice_args:
@@ -161,9 +157,7 @@ class LTspice(Simulator):
             switches = [s.replace("<path>", parameter) for s in switches]
             return switches
         valid_keys = ", ".join(sorted(cls.ltspice_args.keys()))
-        raise ValueError(
-            f"Invalid switch '{switch}'. Valid switches are: {valid_keys}"
-        )
+        raise ValueError(f"Invalid switch '{switch}'. Valid switches are: {valid_keys}")
 
     @classmethod
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -274,9 +268,7 @@ class LTspice(Simulator):
                     stderr=subprocess.STDOUT,
                 )
         else:
-            error = run_function(
-                cmd_run, timeout=timeout, stdout=stdout, stderr=stderr
-            )
+            error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
         return error
 
     @classmethod
@@ -337,10 +329,7 @@ class LTspice(Simulator):
             )
 
         cmd_netlist = (
-            cls.spice_exe
-            + ["-netlist"]
-            + [circuit_file.as_posix()]
-            + cmd_line_switches
+            cls.spice_exe + ["-netlist"] + [circuit_file.as_posix()] + cmd_line_switches
         )
         if exe_log:
             log_exe_file = circuit_file.with_suffix(".exe.log")
