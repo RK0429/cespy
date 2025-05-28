@@ -338,7 +338,6 @@ def main() -> None:  # pylint: disable=too-many-nested-blocks
         for completed_id in client:
             if completed_id != run_id:
                 continue
-                
             result_path = client.get_runno_data(completed_id)
             if result_path:
                 print(f"Results saved to: {result_path}")

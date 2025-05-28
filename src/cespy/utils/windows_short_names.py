@@ -32,6 +32,11 @@ License: GPL-3.0
 # https://stackoverflow.com/questions/23598289/how-to-get-windows-short-file-name-in-python
 import sys
 
+# Import Windows-specific modules only on Windows
+if sys.platform == "win32":
+    import ctypes
+    from ctypes import wintypes
+
 
 def get_short_path_name(long_name: str) -> str:
     """Gets the short path name of a given long path.
@@ -41,9 +46,6 @@ def get_short_path_name(long_name: str) -> str:
     if sys.platform != "win32":
         # On non-Windows platforms, just return the original path
         return long_name
-
-    import ctypes
-    from ctypes import wintypes
 
     # Get the Windows API function
     _GetShortPathNameW = (

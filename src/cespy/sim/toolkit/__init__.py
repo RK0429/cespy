@@ -10,7 +10,7 @@ from .sim_analysis import SimAnalysis
 
 __all__ = [
     'MonteCarloAnalysis',
-    'WorstCaseAnalysis', 
+    'WorstCaseAnalysis',
     'FastWorstCaseAnalysis',
     'SensitivityAnalysis',
     'FailureMode',

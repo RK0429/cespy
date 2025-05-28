@@ -60,7 +60,7 @@ def find_file_in_directory(directory: str, filename: str) -> Optional[str]:
     path, filename = os.path.split(filename)
     if path != "":
         directory = os.path.join(directory, path)
-    for root, dirs, files in os.walk(directory):
+    for root, _, files in os.walk(directory):
         # match case insensitive, but store the file system's file name, as the
         # file system may be case sensitive
         for filefound in files:

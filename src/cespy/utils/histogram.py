@@ -6,7 +6,7 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -118,8 +118,8 @@ def create_histogram(
 
 
 def plot_single_measurement(
-    measurements: Dict[str, List[float]], 
-    measurement_name: str, 
+    measurements: Dict[str, List[float]],
+    measurement_name: str,
     args: argparse.Namespace
 ) -> None:
     """Plot a single measurement histogram."""
@@ -133,7 +133,7 @@ def plot_single_measurement(
 
 
 def plot_multiple_measurements(
-    measurements: Dict[str, List[float]], 
+    measurements: Dict[str, List[float]],
     args: argparse.Namespace
 ) -> None:
     """Plot multiple measurements in subplots."""
@@ -155,18 +155,17 @@ def plot_multiple_measurements(
             ax.set_xlabel("Value")
             ax.set_ylabel("Frequency")
             ax.grid(True, alpha=0.3)
-            
+
             if args.no_stats:
                 continue
-                
             # Add statistics
             mean_val = np.mean(values)
             std_val = np.std(values)
             ax.axvline(mean_val, color="red", linestyle="--", linewidth=2)
             ax.text(
-                0.02, 0.98, 
+                0.02, 0.98,
                 f"μ={mean_val:.3g}\nσ={std_val:.3g}",
-                transform=ax.transAxes, 
+                transform=ax.transAxes,
                 bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
                 verticalalignment="top",
                 fontsize=10,
