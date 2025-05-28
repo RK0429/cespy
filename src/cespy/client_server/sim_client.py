@@ -3,6 +3,7 @@
 # Add future annotations for postponed evaluation of type hints
 from __future__ import annotations
 
+import argparse
 import io
 import logging
 
@@ -25,6 +26,7 @@ import logging
 # -------------------------------------------------------------------------------
 import os.path
 import pathlib
+import sys
 import time
 import zipfile
 from collections import OrderedDict
@@ -276,8 +278,6 @@ class SimClient:
 
 def main() -> None:
     """Command-line interface for the simulation client."""
-    import argparse
-    import sys
 
     parser = argparse.ArgumentParser(
         description="Connect to a cespy simulation server and run simulations"
