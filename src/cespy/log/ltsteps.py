@@ -721,4 +721,4 @@ if __name__ == "__main__":
 
 
 # Legacy alias for backward compatibility
-reformat_LTSpice_export = reformat_ltspice_export
+reformat_ltspice_export = reformat_LTSpice_export

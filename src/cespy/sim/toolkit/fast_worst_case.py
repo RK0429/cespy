@@ -261,7 +261,8 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
                 exe_log=exe_log,
             )
         self.wait_completion()
-        self.analysis_executed = True  # Need to set this to True, so that the next step can be executed
+        # Need to set this to True, so that the next step can be executed
+        self.analysis_executed = True
         self.testbench_executed = True  # Idem
         # Get the results from the simulation
         log_data = self.read_logfiles()

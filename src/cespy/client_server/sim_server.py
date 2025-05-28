@@ -57,6 +57,7 @@ class SimServer:
         simulator: Type[Simulator],
         parallel_sims: int = 4,
         output_folder: str = "./temp",
+        *,
         timeout: float = 300,
         port: int = 9000,
         host: str = "localhost",

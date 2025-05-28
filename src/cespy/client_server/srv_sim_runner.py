@@ -73,6 +73,7 @@ class ServerSimRunner(threading.Thread):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         parallel_sims: int = 4,
+        *,
         timeout: Optional[float] = None,
         verbose: bool = False,
         output_folder: Optional[str] = None,

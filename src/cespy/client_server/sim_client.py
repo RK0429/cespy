@@ -72,7 +72,7 @@ class JobInformation:
 class SimClient:
     """Class used for launching simulations in a Spice
     Simulation Server.
-    
+
     A Spice Simulation Server is a machine running a script with an active
     SimServer object.
 
