@@ -29,6 +29,7 @@ from typing import Any, List, Optional, TextIO, Tuple, Union, cast
 
 from ..simulators.qspice_simulator import Qspice
 from ..utils.file_search import search_file_in_containers
+from ..utils.windows_short_names import get_short_path_name
 from .base_editor import (
     PARAM_REGEX,
     UNIQUE_SIMULATION_DOT_INSTRUCTIONS,
@@ -368,8 +369,7 @@ class QschTag:
                     return token[1:-1]
                 return token
             return str(token)
-        else:
-            return default
+        return default
 
     def get_text_attr(self, index: int) -> str:
         """Returns the text of the attribute at the given index.
@@ -587,8 +587,6 @@ class QschEditor(BaseSchematic):
                 netlist_file.write(f".lib {library}\n")
             else:
                 if sys.platform.startswith("win"):
-                    from cespy.utils.windows_short_names import get_short_path_name
-
                     netlist_file.write(
                         f".lib {get_short_path_name(os.path.abspath(library_path))}\n"
                     )
@@ -876,7 +874,7 @@ class QschEditor(BaseSchematic):
                             return tag, match
         return None, None
 
-    def get_all_parameter_names(self, param: str = "") -> List[str]:
+    def get_all_parameter_names(self) -> List[str]:
         """Returns all parameter names from the netlist.
 
         :return: A list of parameter names found in the netlist
@@ -1095,13 +1093,14 @@ class QschEditor(BaseSchematic):
         # docstring inherited from BaseSchematic
         component = self.get_component(reference)
         comp_tag: QschTag = component.attributes["tag"]
+
+        # Handle position parameter
         if isinstance(position, tuple):
             position = Point(position[0], position[1])
-        elif isinstance(position, Point):
-            # Keep it as a Point
-            pass
-        else:
+        elif not isinstance(position, Point):
             raise ValueError("Invalid position object")
+
+        # Handle rotation parameter
         if isinstance(rotation, ERotation):
             rot = int(rotation.value / 45)
         elif isinstance(rotation, int):

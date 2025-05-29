@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Tolerance deviation handling for circuit analysis.
+
+This module provides base classes and utilities for managing component tolerances
+and deviations in circuit simulations, supporting both tolerance-based and
+min/max deviation types.
+"""
 from __future__ import annotations
 
 # -------------------------------------------------------------------------------

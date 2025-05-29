@@ -1,4 +1,10 @@
 # coding=utf-8
+"""Base classes and data structures for schematic editors.
+
+This module provides foundational classes for working with circuit schematics,
+including component representations, geometric primitives, text elements, and
+rotation/alignment enumerations used across different schematic formats.
+"""
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗

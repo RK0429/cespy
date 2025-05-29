@@ -63,6 +63,7 @@ from typing import (
 )
 
 from ..log.logfile_data import try_convert_value
+from ..sim.sim_runner import SimRunner
 from ..simulators.ltspice_simulator import LTspice
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from ..utils.file_search import search_file_in_containers
@@ -274,22 +275,20 @@ def get_line_command(line: Union[str, "SpiceCircuit"]) -> str:
                 ch = ch.upper()
                 if ch in REPLACE_REGEXS:  # A circuit element
                     return ch
-                elif ch == "+":
+                if ch == "+":
                     return "+"  # This is a line continuation.
-                elif ch in "#;*\n\r":  # It is a comment or a blank line
+                if ch in "#;*\n\r":  # It is a comment or a blank line
                     return "*"
-                elif ch == ".":  # this is a directive
+                if ch == ".":  # this is a directive
                     j = i + 1
                     while j < len(line) and (line[j] not in (" ", "\t", "\r", "\n")):
                         j += 1
                     return line[i:j].upper()
-                else:
-                    raise SyntaxError(f'Unrecognized command in line: "{line}"')
+                raise SyntaxError(f'Unrecognized command in line: "{line}"')
     elif isinstance(line, SpiceCircuit):
         return ".SUBCKT"
     else:
         raise SyntaxError('Unrecognized command in line "{}"'.format(line))
-    return "*"  # Default return - treat as comment if unable to identify
 
 
 def _first_token_upped(line: str) -> str:
@@ -586,7 +585,7 @@ class SpiceCircuit(BaseEditor):
             None,
         )  # If it fails, it returns an invalid line number and No match
 
-    def get_all_parameter_names(self, param: str = "") -> List[str]:
+    def get_all_parameter_names(self) -> List[str]:
         # docstring inherited from BaseEditor
         param_names = []
         search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
@@ -667,8 +666,7 @@ class SpiceCircuit(BaseEditor):
         if sub_circuit is not None:
             if SUBCKT_DIVIDER in reference and sub_subckts is not None:
                 return sub_circuit.get_subcircuit(sub_subckts)
-            else:
-                return sub_circuit
+            return sub_circuit
 
         # If we reached here is because the subcircuit was not found. Search for
         # it in declared libraries
@@ -677,11 +675,9 @@ class SpiceCircuit(BaseEditor):
         if sub_circuit:
             if SUBCKT_DIVIDER in reference and sub_subckts is not None:
                 return sub_circuit.get_subcircuit(sub_subckts)
-            else:
-                return sub_circuit
-        else:
-            # The search was not successful
-            raise ComponentNotFoundError(f'Sub-circuit "{subcircuit_name}" not found')
+            return sub_circuit
+        # The search was not successful
+        raise ComponentNotFoundError(f'Sub-circuit "{subcircuit_name}" not found')
 
     def _get_component_line_and_regex(self, reference: str) -> Tuple[int, Match[str]]:
         """Internal function.
@@ -920,33 +916,30 @@ class SpiceCircuit(BaseEditor):
                 raise ComponentNotFoundError(
                     "Only subcircuits can have components inside."
                 )
+            # In this case the sub-circuit needs to be copied so that is copy is modified.
+            # A copy is created for each instance of a sub-circuit.
+            component_split = reference.split(SUBCKT_DIVIDER)
+            subckt_ref = component_split[0]
+
+            if (
+                subckt_ref in self.modified_subcircuits
+            ):  # See if this was already a modified sub-circuit instance
+                subcircuit = self.modified_subcircuits[subckt_ref]
             else:
-                # In this case the sub-circuit needs to be copied so that is copy is modified.
-                # A copy is created for each instance of a sub-circuit.
-                component_split = reference.split(SUBCKT_DIVIDER)
-                subckt_ref = component_split[0]
+                subcircuit = self.get_subcircuit(subckt_ref)
 
-                if (
-                    subckt_ref in self.modified_subcircuits
-                ):  # See if this was already a modified sub-circuit instance
-                    subcircuit = self.modified_subcircuits[subckt_ref]
-                else:
-                    subcircuit = self.get_subcircuit(subckt_ref)
-
-                if len(component_split) > 1:
-                    # Recursively get component from subcircuit - return as
-                    # Component
-                    return subcircuit.get_component(
-                        SUBCKT_DIVIDER.join(component_split[1:])
-                    )
-                else:
-                    # Need to wrap SpiceCircuit in Component for type
-                    # compatibility
-                    line_no = self.get_line_starting_with(subckt_ref)
-                    return SpiceComponent(self, line_no)
-        else:
-            line_no = self.get_line_starting_with(reference)
+            if len(component_split) > 1:
+                # Recursively get component from subcircuit - return as
+                # Component
+                return subcircuit.get_component(
+                    SUBCKT_DIVIDER.join(component_split[1:])
+                )
+            # Need to wrap SpiceCircuit in Component for type
+            # compatibility
+            line_no = self.get_line_starting_with(subckt_ref)
             return SpiceComponent(self, line_no)
+        line_no = self.get_line_starting_with(reference)
+        return SpiceComponent(self, line_no)
 
     def __getitem__(self, item: str) -> Component:
         """Get component by reference name.
@@ -966,8 +959,7 @@ class SpiceCircuit(BaseEditor):
             # or we need to return the original component instead of wrapping
             # it
             return component
-        else:
-            return component
+        return component
 
     def __delitem__(self, key: str) -> None:
         """Delete a component from the circuit.
@@ -1033,10 +1025,9 @@ class SpiceCircuit(BaseEditor):
         component = self.get_component(reference)
         if isinstance(component, SpiceComponent):
             return str(component.attributes.get(attribute, ""))
-        else:
-            raise KeyError(
-                f"Attribute '{attribute}' not found in component '{reference}'"
-            )
+        raise KeyError(
+            f"Attribute '{attribute}' not found in component '{reference}'"
+        )
 
     @staticmethod
     def _parse_params(params_str: str) -> dict[str, Any]:
@@ -1053,8 +1044,7 @@ class SpiceCircuit(BaseEditor):
         if match and match.groupdict().get("params"):
             params_str = match.group("params")
             return self._parse_params(params_str)
-        else:
-            return {}
+        return {}
 
     def set_component_parameters(
         self, element: str, **kwargs: Union[str, int, float]
@@ -1077,8 +1067,7 @@ class SpiceCircuit(BaseEditor):
         _, match = self._get_param_named(param)
         if match:
             return str(match.group("value"))
-        else:
-            raise ParameterNotFoundError(param)
+        raise ParameterNotFoundError(param)
 
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
         """Sets the value of a parameter in the netlist. If the parameter is not found,
@@ -1181,10 +1170,9 @@ class SpiceCircuit(BaseEditor):
         component = self.get_component(element)
         if isinstance(component, SpiceComponent):
             return component.value_str
-        elif isinstance(component, SpiceCircuit):
+        if isinstance(component, SpiceCircuit):
             return component.name()
-        else:
-            return str(component)
+        return str(component)
 
     def get_element_value(self, element: str) -> str:
         """Returns the model or element value of a component."""
@@ -1204,10 +1192,9 @@ class SpiceCircuit(BaseEditor):
         component = self.get_component(reference)
         if isinstance(component, SpiceComponent):
             return component.ports
-        else:
-            # For SpiceCircuit, return an empty list since subcircuits don't have
-            # ports at this level
-            return []
+        # For SpiceCircuit, return an empty list since subcircuits don't have
+        # ports at this level
+        return []
 
     def get_components(self, prefixes: str = "*") -> List[str]:
         """Returns a list of components that match the list of prefixes indicated on the
@@ -1328,7 +1315,12 @@ class SpiceCircuit(BaseEditor):
 
     def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
         # docstring is in the parent class
-        pass
+        # SpiceCircuit objects are only used as subcircuits within a parent netlist
+        # They don't save themselves directly to files
+        raise NotImplementedError(
+            "SpiceCircuit objects cannot be saved directly. "
+            "They must be part of a parent netlist."
+        )
 
     def add_instruction(self, instruction: str) -> None:
         """Adds a SPICE instruction to the netlist.
@@ -1508,8 +1500,7 @@ class SpiceCircuit(BaseEditor):
         if self.parent is not None:
             # try searching on parent netlists
             return self.parent.find_subckt_in_included_libs(subcircuit_name)
-        else:
-            return None
+        return None
 
 
 class SpiceEditor(SpiceCircuit):
@@ -1647,7 +1638,7 @@ class SpiceEditor(SpiceCircuit):
 
     def remove_x_instruction(self, search_pattern: str) -> None:
         """Removes a SPICE instruction from the netlist based on a search pattern.
-        
+
         This method calls remove_Xinstruction for backward compatibility.
         """
         self.remove_Xinstruction(search_pattern)
@@ -1716,8 +1707,6 @@ class SpiceEditor(SpiceCircuit):
         Convenience function for maintaining legacy with legacy code. Runs the SPICE
         simulation.
         """
-        from ..sim.sim_runner import SimRunner
-
         runner = SimRunner(simulator=simulator)
         return runner.run(
             self,

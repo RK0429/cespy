@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Monte Carlo simulation analysis for circuit components.
+
+This module provides classes to perform Monte Carlo simulations where component
+values are replaced by random distributions (gaussian or uniform), enabling
+statistical analysis of circuit behavior under component variations.
+"""
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗

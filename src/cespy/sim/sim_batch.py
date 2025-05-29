@@ -106,6 +106,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Type, Union, cast
 
 from ..editor.spice_editor import SpiceEditor
+from ..simulators.ltspice_simulator import LTspice
 from .process_callback import ProcessCallback
 from .sim_runner import RunTask, SimRunner
 from .simulator import Simulator
@@ -134,9 +135,6 @@ class SimCommander(SpiceEditor):
         encoding: str = "autodetect",
         simulator: Optional[Union[str, Type[Simulator]]] = None,
     ):
-        # pylint: disable=import-outside-toplevel
-        from ..simulators.ltspice_simulator import LTspice
-
         # Convert simulator to the right type
         actual_simulator: Type[Simulator]
         if simulator is None:
@@ -185,8 +183,6 @@ class SimCommander(SpiceEditor):
         :return: Nothing
         :rtype: None
         """
-        from ..simulators.ltspice_simulator import LTspice
-
         # Convert spice_tool to the right type
         actual_simulator: Type[Simulator]
         if isinstance(spice_tool, str):

@@ -560,8 +560,8 @@ class LTSpiceLogReader(LogfileData):
                     if self.step_count > 0:
                         for step_no in range(self.step_count):
                             step_values = [
-                                f"{values[step_no]}" 
-                                for _, values in self.stepset.items()
+                                f"{values[step_no]}"
+                                for key, values in self.stepset.items()
                             ]
                             for analysis in self.fourier[signal]:
                                 if analysis.step == step_no:

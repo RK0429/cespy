@@ -53,7 +53,7 @@ class RunnerProtocol(AnyRunner, Protocol):
     """Protocol for runner used in SimStepper, includes okSim and runno attributes."""
 
     @property
-    def okSim(self) -> int: 
+    def okSim(self) -> int:
         """Return the number of successful simulations."""
 
     @property

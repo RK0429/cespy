@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Fast worst-case analysis implementation for circuit simulations.
+
+This module provides an optimized algorithm for worst-case analysis that reduces
+the number of simulations needed by intelligently determining component impacts
+and skipping unnecessary simulation combinations.
+"""
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗

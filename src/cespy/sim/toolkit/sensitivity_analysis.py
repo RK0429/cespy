@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Sensitivity analysis module for SPICE simulations.
+
+This module provides classes and utilities to perform quick sensitivity analysis
+on circuit components, determining how variations in component values affect
+circuit performance metrics.
+"""
 from __future__ import annotations
 
 # -------------------------------------------------------------------------------

@@ -135,9 +135,15 @@ from typing import (
     Union,
 )
 
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
 from ..editor.base_editor import BaseEditor
 from ..sim.run_task import RunTask, clock_function
 from ..sim.simulator import Simulator
+from ..simulators.ltspice_simulator import LTspice as CustomLTspice
 from .process_callback import ProcessCallback
 
 _logger = logging.getLogger("cespy.SimRunner")
@@ -160,7 +166,7 @@ class SimRunnerConfigError(Exception):
 
 class AnyRunner(Protocol):
     """Protocol for any runner that can execute simulations."""
-    
+
     def run(
         self,
         netlist: Union[str, Path, BaseEditor],
@@ -172,19 +178,27 @@ class AnyRunner(Protocol):
         timeout: Optional[float] = None,
         run_filename: Optional[str] = None,
         exe_log: bool = False,
-    ) -> Optional[RunTask]: ...
+    ) -> Optional[RunTask]:
+        """Execute simulation with specified parameters."""
+        ...
 
     def wait_completion(
         self,
         timeout: Optional[float] = None,
         abort_all_on_timeout: bool = False,
-    ) -> bool: ...
+    ) -> bool:
+        """Wait for simulation completion."""
+        ...
 
     @property
-    def ok_sim(self) -> int: ...
+    def ok_sim(self) -> int:
+        """Return number of successful simulations."""
+        ...
 
     @property
-    def runno(self) -> int: ...
+    def runno(self) -> int:
+        """Return current run number."""
+        ...
 
 
 class SimRunner(AnyRunner):
@@ -252,8 +266,6 @@ class SimRunner(AnyRunner):
         # parameter sets
 
         # Gets a simulator.
-        from ..simulators.ltspice_simulator import LTspice as CustomLTspice
-
         if simulator is None:
             simulator = CustomLTspice
         elif isinstance(simulator, (str, Path)):
@@ -321,8 +333,7 @@ class SimRunner(AnyRunner):
     def _on_output_folder(self, afile: Union[str, Path]) -> Path:
         if self.output_folder:
             return self.output_folder / Path(afile).name
-        else:
-            return Path(afile)
+        return Path(afile)
 
     def _to_output_folder(self, afile: Path, *, copy: bool, new_name: str = "") -> Path:
         if self.output_folder:
@@ -336,12 +347,10 @@ class SimRunner(AnyRunner):
             else:
                 dest = shutil.move(afile, ddst)
             return Path(dest)
-        else:
-            if new_name:
-                dest = shutil.copy(afile, afile.parent / new_name)
-                return Path(dest)
-            else:
-                return afile
+        if new_name:
+            dest = shutil.copy(afile, afile.parent / new_name)
+            return Path(dest)
+        return afile
 
     def _run_file_name(self, netlist: Union[str, Path]) -> str:
         if not isinstance(netlist, Path):
@@ -429,8 +438,7 @@ class SimRunner(AnyRunner):
                     for pos, param in enumerate(args)
                     if pos > 1
                 }
-            else:
-                return callback_args
+            return callback_args
         return {}  # Return empty dict for functions with exactly 2 arguments
 
     def _wait_for_resources(self, wait_resource: bool, timeout: float) -> bool:
@@ -684,9 +692,7 @@ class SimRunner(AnyRunner):
         """Function to terminate xxSpice processes."""
         simulator = Simulator
         process_name = simulator.process_name
-        try:
-            import psutil
-        except ImportError:
+        if psutil is None:
             _logger.error("psutil library not installed, cannot kill processes")
             return
 
@@ -864,8 +870,7 @@ class SimRunner(AnyRunner):
                 self._iterator_counter += 1
                 if ret.retcode == 0:
                     return ret.get_results()
-                else:
-                    _logger.error("Skipping %s because simulation failed.", ret.runno)
+                _logger.error("Skipping %s because simulation failed.", ret.runno)
 
             # Then check if there are any active tasks
             if len(self.active_tasks) == 0:
@@ -903,9 +908,8 @@ class SimRunner(AnyRunner):
             return self.simulator.create_netlist(
                 asc_file, cmd_line_switches=cmd_line_args
             )
-        else:
-            _logger.warning("Unable to create the Netlist from %s", asc_file)
-            return None
+        _logger.warning("Unable to create the Netlist from %s", asc_file)
+        return None
 
     @property
     def ok_sim(self) -> int:

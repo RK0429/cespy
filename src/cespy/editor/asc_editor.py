@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""LTSpice schematic file (.asc) editor and parser.
+
+This module provides comprehensive functionality for reading, parsing, modifying,
+and writing LTSpice schematic files, including component manipulation, parameter
+updates, and circuit netlist generation.
+"""
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -20,7 +26,7 @@ import logging
 import os.path
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Match, Optional, Tuple, Union
+from typing import Any, Dict, List, Match, Optional, Tuple, Union, cast
 
 from ..log.logfile_data import try_convert_value
 from ..simulators.ltspice_simulator import LTspice
@@ -207,6 +213,7 @@ class AscEditor(BaseSchematic):
 
     def reset_netlist(self, create_blank: bool = False) -> None:
         super().reset_netlist()
+        # create_blank parameter is not used in ASC files - they are always reset from file
         with open(self.asc_file_path, "r", encoding=self.encoding) as asc_file:
             _logger.info("Parsing ASC file %s", self.asc_file_path)
             component = None
@@ -457,8 +464,6 @@ class AscEditor(BaseSchematic):
         """Returns an AscEditor file corresponding to the symbol."""
         sub = self.get_component(reference)
         if "_SUBCKT" in sub.attributes:
-            from typing import cast
-
             # sub.attributes["_SUBCKT"] is BaseEditor type (AscEditor or
             # SpiceEditor)
             return cast(BaseEditor, sub.attributes["_SUBCKT"])
@@ -504,7 +509,7 @@ class AscEditor(BaseSchematic):
                         return match, directive
         return None, None
 
-    def get_all_parameter_names(self, param: str = "") -> List[str]:
+    def get_all_parameter_names(self) -> List[str]:
         # docstring inherited from BaseEditor
         param_names = []
         search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)

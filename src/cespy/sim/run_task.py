@@ -272,7 +272,7 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
             if self.callback:
                 return self.callback_return
             return self.raw_file, self.log_file
-        
+
         if self.callback:
             return None
         return self.raw_file, self.log_file

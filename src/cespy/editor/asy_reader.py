@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""LTSpice symbol file (.asy) reader and parser.
+
+This module provides functionality to parse LTSpice symbol files and translate
+them into other formats, handling symbol geometry, pins, attributes, and
+associated metadata.
+"""
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
