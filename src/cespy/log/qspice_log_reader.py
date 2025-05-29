@@ -147,8 +147,8 @@ class QspiceLogReader(LogfileData):
             _logger.error("==============================================")
             raise SimulatorNotFoundError(
                 "qspice",
-                search_paths=Qspice.get_default_install_paths()
-                if hasattr(Qspice, "get_default_install_paths")
+                search_paths=Qspice._spice_exe_win_paths
+                if hasattr(Qspice, "_spice_exe_win_paths")
                 else None,
             )
 

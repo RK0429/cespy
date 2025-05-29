@@ -181,7 +181,7 @@ class Qspice(Simulator):
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[list[Any]] = None,
+        cmd_line_switches: Optional[Union[list[Any], str]] = None,
         timeout: Optional[float] = None,
         *,
         stdout: Optional[IO[Any]] = None,

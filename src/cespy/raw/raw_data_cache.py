@@ -194,7 +194,7 @@ class RawDataCache:
         _logger.debug("Cached %s (%d bytes)", key, entry.size_bytes)
 
     def get_or_compute(
-        self, key: str, compute_func: callable, *args, **kwargs
+        self, key: str, compute_func: Callable[..., NDArray], *args, **kwargs
     ) -> NDArray:
         """Get from cache or compute if not present.
 
@@ -299,6 +299,9 @@ class RawDataCache:
 
     def _load_cache(self) -> None:
         """Load cache from disk."""
+        if self.persist_path is None:
+            return
+            
         try:
             with open(self.persist_path, "rb") as f:
                 cache_data = pickle.load(f)

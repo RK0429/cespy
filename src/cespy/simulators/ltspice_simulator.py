@@ -164,7 +164,7 @@ class LTspice(Simulator):
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[List[str]] = None,
+        cmd_line_switches: Optional[Union[List[str], str]] = None,
         timeout: Optional[float] = None,
         *,
         stdout: Optional[Union[int, IO[bytes]]] = None,
@@ -279,7 +279,7 @@ class LTspice(Simulator):
     def create_netlist(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         circuit_file: Union[str, Path],
-        cmd_line_switches: Optional[List[str]] = None,
+        cmd_line_switches: Optional[Union[List[str], str]] = None,
         timeout: Optional[float] = None,
         *,
         stdout: Optional[Union[int, IO[bytes]]] = None,

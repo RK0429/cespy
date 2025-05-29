@@ -336,8 +336,10 @@ class SchematicDiffer:
         def wire_signature(
             wire: Dict[str, Any]
         ) -> Tuple[Tuple[float, float], Tuple[float, float]]:
-            start = tuple(wire.get("start", (0, 0)))
-            end = tuple(wire.get("end", (0, 0)))
+            start_data = wire.get("start", (0.0, 0.0))
+            end_data = wire.get("end", (0.0, 0.0))
+            start = (float(start_data[0]), float(start_data[1]))
+            end = (float(end_data[0]), float(end_data[1]))
             # Normalize direction
             if start > end:
                 start, end = end, start

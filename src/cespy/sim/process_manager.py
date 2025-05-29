@@ -15,14 +15,14 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union, IO
 
 try:
     import psutil
-
+    from types import ModuleType
     HAS_PSUTIL = True
 except ImportError:
-    psutil = None
+    psutil = None  # type: ignore[assignment]
     HAS_PSUTIL = False
 
 from ..core import constants as core_constants
@@ -40,7 +40,7 @@ class ProcessInfo:
     working_directory: Path
     stdout_file: Optional[Path] = None
     stderr_file: Optional[Path] = None
-    process: Optional[subprocess.Popen] = None
+    process: Optional[subprocess.Popen[bytes]] = None
     psutil_process: Optional[Any] = None  # psutil.Process if available
 
 
@@ -87,7 +87,7 @@ class ProcessManager:
         self._memory_usage_history: List[float] = []
 
         # Cleanup thread
-        self._cleanup_thread = None
+        self._cleanup_thread: Optional[threading.Thread] = None
         self._stop_cleanup = threading.Event()
         self._start_cleanup_thread()
 
@@ -138,6 +138,9 @@ class ProcessManager:
         stderr_handle = None
 
         try:
+            stdout_handle: Union[IO[str], int]
+            stderr_handle: Union[IO[str], int]
+            
             if stdout_file:
                 stdout_handle = open(stdout_file, "w", encoding="utf-8")
             else:
@@ -162,7 +165,7 @@ class ProcessManager:
                 stdout=stdout_handle,
                 stderr=stderr_handle,
                 # Prevent console window on Windows
-                creationflags=subprocess.CREATE_NO_WINDOW
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)
                 if sys.platform == "win32"
                 else 0,
             )
@@ -490,7 +493,8 @@ class ProcessManager:
                 daemon=True,
                 name="ProcessManager-Cleanup",
             )
-            self._cleanup_thread.start()
+            if self._cleanup_thread:
+                self._cleanup_thread.start()
 
     def _stop_cleanup_thread(self) -> None:
         """Stop the cleanup thread."""

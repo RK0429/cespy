@@ -27,7 +27,7 @@ statistical analysis of circuit behavior under component variations.
 import logging
 import random
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -364,12 +364,16 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
     def run_testbench(
         self,
+        *,
+        runs_per_sim: int = 512,
+        wait_resource: bool = True,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[list[str]] = None,
+        switches: Optional[List[str]] = None,
         timeout: Optional[float] = None,
-        exe_log: bool = True,
-    ) -> None:
+        run_filename: Optional[str] = None,
+        exe_log: bool = False,
+    ) -> Optional[Iterator[Any]]:
         """Run Monte Carlo analysis using testbench mode.
 
         This is the original method for running simulations using simulator
@@ -428,6 +432,15 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 self.simulation_results["callback_returns"] = callback_rets
 
             self.testbench.analysis_executed = True
+
+            # Return iterator if callback was provided
+            if callback is not None:
+                return (
+                    sim.get_results() if sim is not None else None
+                    for sim in self.simulations
+                    if sim is not None
+                )
+            return None
 
         finally:
             self.use_testbench_mode = original_mode
@@ -568,7 +581,15 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         exe_log: bool = True,
         measure: Optional[str] = None,
         num_runs: Optional[int] = None,
-    ) -> Optional[List[AnalysisResult]]:
+    ) -> Optional[
+        Tuple[
+            float,
+            float,
+            Dict[str, Union[str, float]],
+            float,
+            Dict[str, Union[str, float]],
+        ]
+    ]:
         """Run Monte Carlo analysis (backward compatibility method).
 
         This method maintains backward compatibility while directing to the
@@ -602,7 +623,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             return None
         else:
             # Use separate run mode
-            return self.run_separate_analysis(
+            return self.run_separate_analysis(  # type: ignore[return-value]
                 callback=callback,
                 callback_args=callback_args,
                 switches=switches,

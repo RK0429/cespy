@@ -314,7 +314,8 @@ def load_config(filepath: Optional[Union[str, Path]] = None) -> CespyConfig:
 
         if loaded_config is None:
             loaded_config = CespyConfig.from_environment()
-            config = loaded_config
+        
+        config = loaded_config
 
     set_config(config)
     return config

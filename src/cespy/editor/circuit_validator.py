@@ -386,7 +386,7 @@ class CircuitValidator:
                 result.add_error(comp["name"], "Component has no node connections")
 
     def _check_component_values(
-        self, components: List[Dict], result: ValidationResult
+        self, components: List[Dict[str, Any]], result: ValidationResult
     ) -> None:
         """Check component values."""
         for comp in components:
@@ -434,7 +434,7 @@ class CircuitValidator:
                                 suggestion="Typical range: 1pH to 1kH",
                             )
 
-    def _check_models(self, components: List[Dict], result: ValidationResult) -> None:
+    def _check_models(self, components: List[Dict[str, Any]], result: ValidationResult) -> None:
         """Check model references."""
         for comp in components:
             if comp["type"] in "DQJM":
@@ -459,7 +459,7 @@ class CircuitValidator:
                         )
 
     def _check_directives(
-        self, directives: List[Dict], result: ValidationResult
+        self, directives: List[Dict[str, Any]], result: ValidationResult
     ) -> None:
         """Check simulation directives."""
         # Track what analyses are defined

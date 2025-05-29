@@ -118,7 +118,7 @@ class RawFileStreamer:
         """
         # Determine traces to process
         if traces is None:
-            trace_list = list(self._raw_reader.traces.keys())
+            trace_list = self._raw_reader.get_trace_names()
         elif isinstance(traces, str):
             trace_list = [traces]
         else:
@@ -171,8 +171,19 @@ class RawFileStreamer:
         # For now, read the full data and chunk it
         # A true streaming implementation would read chunks directly from disk
         trace = self._raw_reader.get_trace(trace_name)
-        time_data = self._raw_reader.get_trace("time").get_wave(step)
-        trace_data = trace.get_wave(step)
+        time_trace = self._raw_reader.get_trace("time")
+        
+        # Handle different trace types
+        from .raw_classes import DummyTrace
+        if isinstance(time_trace, DummyTrace):
+            time_data = time_trace.get_wave()
+        else:
+            time_data = time_trace.get_wave(step)
+            
+        if isinstance(trace, DummyTrace):
+            trace_data = trace.get_wave()
+        else:
+            trace_data = trace.get_wave(step)
 
         # Yield chunks
         for chunk_idx in range(self.num_chunks):

@@ -110,6 +110,9 @@ class LazyTrace:
 
     def _read_from_mmap(self, offset: int, num_points: int) -> NDArray:
         """Read data from memory-mapped file."""
+        if self.mmap_file is None:
+            raise RuntimeError("Memory-mapped file not available")
+            
         # Calculate byte range
         start_byte = offset
         num_bytes = num_points * self.bytes_per_point
@@ -232,7 +235,8 @@ class RawReadLazy(RawRead):
 
         # Prepare trace information
         for trace_name in self.get_trace_names():
-            trace = self.get_trace(trace_name)
+            # Get parent trace to access properties
+            parent_trace = super().get_trace(trace_name)
 
             # Create trace info
             trace_index = 0  # Will need to be set properly based on trace order
@@ -244,7 +248,7 @@ class RawReadLazy(RawRead):
             info = TraceInfo(
                 name=trace_name,
                 index=trace_index,
-                var_type=trace.whattype if hasattr(trace, "whattype") else "unknown",
+                var_type=parent_trace.whattype if hasattr(parent_trace, "whattype") else "unknown",
             )
 
             # Calculate offsets for each step
@@ -262,8 +266,8 @@ class RawReadLazy(RawRead):
 
             # Create lazy trace
             is_complex = (
-                trace.numerical_type == "complex"
-                if hasattr(trace, "numerical_type")
+                parent_trace.numerical_type == "complex"
+                if hasattr(parent_trace, "numerical_type")
                 else False
             )
             is_float64 = trace_index == 0  # X-axis usually float64
@@ -278,39 +282,58 @@ class RawReadLazy(RawRead):
 
             self._lazy_traces[trace_name] = lazy_trace
 
-    def get_trace(self, trace_name: str) -> Union[TraceRead, LazyTrace]:
+    def get_trace(self, trace_ref: Union[str, int]) -> Union[Axis, TraceRead, DummyTrace, LazyTrace]:
         """Get a trace by name.
 
         Returns LazyTrace instead of TraceRead for lazy loading.
 
         Args:
-            trace_name: Name of the trace
+            trace_ref: Name or index of the trace
 
         Returns:
-            LazyTrace object
+            LazyTrace object or parent result
         """
+        # Convert int to string if needed
+        if isinstance(trace_ref, int):
+            trace_names = self.get_trace_names()
+            if 0 <= trace_ref < len(trace_names):
+                trace_name = trace_names[trace_ref]
+            else:
+                return super().get_trace(trace_ref)
+        else:
+            trace_name = trace_ref
+            
         if trace_name in self._lazy_traces:
             return self._lazy_traces[trace_name]
 
         # Fall back to parent implementation
-        return super().get_trace(trace_name)
+        return super().get_trace(trace_ref)
 
-    def get_wave(self, trace_name: str, step: int = 0) -> NDArray:
+    def get_wave(self, trace_ref: Union[str, int], step: int = 0) -> NDArray:
         """Get waveform data for a trace.
 
         Args:
-            trace_name: Name of the trace
+            trace_ref: Name or index of the trace
             step: Step number
 
         Returns:
             Numpy array with waveform data
         """
+        # Convert int to string if needed
+        if isinstance(trace_ref, int):
+            trace_names = self.get_trace_names()
+            if 0 <= trace_ref < len(trace_names):
+                trace_name = trace_names[trace_ref]
+            else:
+                return super().get_wave(trace_ref, step)
+        else:
+            trace_name = trace_ref
+            
         if trace_name in self._lazy_traces:
             return self._lazy_traces[trace_name].get_wave(step)
 
         # Fall back to parent implementation
-        trace = self.get_trace(trace_name)
-        return trace.get_wave(step)
+        return super().get_wave(trace_ref, step)
 
     def preload_traces(
         self, trace_names: Union[str, List[str]], steps: Optional[List[int]] = None
@@ -325,7 +348,10 @@ class RawReadLazy(RawRead):
             trace_names = [trace_names]
 
         if steps is None:
-            steps = list(range(self.nSteps))
+            if hasattr(self, 'steps') and self.steps:
+                steps = list(range(len(self.steps)))
+            else:
+                steps = [0]  # Default to single step
 
         for trace_name in trace_names:
             if trace_name in self._lazy_traces:

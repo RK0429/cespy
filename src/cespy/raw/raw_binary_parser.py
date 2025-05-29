@@ -11,7 +11,7 @@ import struct
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO
+from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -43,25 +43,25 @@ BINARY_FORMATS = {
     DataFormat.FLOAT32: BinaryFormat(
         format=DataFormat.FLOAT32,
         bytes_per_value=4,
-        numpy_dtype=np.float32,
+        numpy_dtype=np.dtype(np.float32),
         struct_format="f",
     ),
     DataFormat.FLOAT64: BinaryFormat(
         format=DataFormat.FLOAT64,
         bytes_per_value=8,
-        numpy_dtype=np.float64,
+        numpy_dtype=np.dtype(np.float64),
         struct_format="d",
     ),
     DataFormat.COMPLEX64: BinaryFormat(
         format=DataFormat.COMPLEX64,
         bytes_per_value=8,
-        numpy_dtype=np.complex64,
+        numpy_dtype=np.dtype(np.complex64),
         struct_format="ff",
     ),
     DataFormat.COMPLEX128: BinaryFormat(
         format=DataFormat.COMPLEX128,
         bytes_per_value=16,
-        numpy_dtype=np.complex128,
+        numpy_dtype=np.dtype(np.complex128),
         struct_format="dd",
     ),
 }
@@ -366,7 +366,7 @@ class OptimizedBinaryParser:
         return best_format, best_order
 
     def create_memory_map(
-        self, offset: int, shape: Tuple[int, ...], dtype: np.dtype, mode: str = "r"
+        self, offset: int, shape: Tuple[int, ...], dtype: np.dtype, mode: Literal["r", "r+", "w+", "c"] = "r"
     ) -> np.memmap:
         """Create a memory-mapped array for efficient large file access.
 

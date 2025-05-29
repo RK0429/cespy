@@ -51,6 +51,10 @@ class SimulatorNotInstalledError(SimulatorError):
     """Raised when a simulator is not properly installed."""
 
 
+class InvalidSimulatorError(SimulatorError):
+    """Raised when an invalid simulator type or configuration is specified."""
+
+
 class SimulationTimeoutError(SimulatorError):
     """Raised when a simulation exceeds its timeout."""
 

@@ -27,7 +27,7 @@ class TaskPriority(Enum):
     NORMAL = 5
     LOW = 10
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         """Enable comparison for priority queue."""
         if isinstance(other, TaskPriority):
             return self.value < other.value
@@ -50,18 +50,18 @@ class TaskInfo:
     """Information about a queued task."""
 
     task_id: str = field(default_factory=lambda: str(uuid4()))
-    run_task: RunTask = field(default=None)
+    run_task: Optional[RunTask] = field(default=None)
     priority: TaskPriority = field(default=TaskPriority.NORMAL)
     dependencies: Set[str] = field(default_factory=set)
     status: TaskStatus = field(default=TaskStatus.PENDING)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize task ID if not provided."""
-        if self.task_id is None:
+        if self.task_id is None:  # type: ignore[unreachable]
             self.task_id = str(uuid4())
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         """Enable comparison for priority queue."""
         if isinstance(other, TaskInfo):
             return self.priority < other.priority
@@ -152,7 +152,7 @@ class TaskQueue:
                 task_info.status = TaskStatus.QUEUED
                 heapq.heappush(self._queue, task_info)
                 self._condition.notify()
-            else:
+            elif dependencies:
                 # Store as pending until dependencies are met
                 self._task_dependencies[task_info.task_id] = dependencies.copy()
 
@@ -366,7 +366,7 @@ class TaskQueue:
         Args:
             completed_task_id: ID of the task that just completed
         """
-        tasks_to_queue = []
+        tasks_to_queue: List[str] = []
 
         # Find tasks that were waiting on this dependency
         for task_id, deps in list(self._task_dependencies.items()):

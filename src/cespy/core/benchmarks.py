@@ -102,8 +102,8 @@ class BenchmarkSuite:
 
         start_time = time.perf_counter()
         for _ in range(1000):
-            for pattern_name, pattern_str in SPICE_PATTERNS.items():
-                cached_pattern = cached_regex(pattern_str)
+            for pattern_name, pattern_obj in SPICE_PATTERNS.items():
+                cached_pattern = cached_regex(pattern_obj.pattern)
                 cached_pattern.findall(test_text)
         end_time = time.perf_counter()
         results["cached_pattern_matching_time"] = (end_time - start_time) / 1000
@@ -248,7 +248,7 @@ class BenchmarkSuite:
 
         return results
 
-    def run_all_benchmarks(self) -> Dict[str, Dict[str, float]]:
+    def run_all_benchmarks(self) -> Dict[str, Dict[str, Union[float, str]]]:
         """Run all benchmarks and collect results.
 
         Returns:
@@ -270,8 +270,9 @@ class BenchmarkSuite:
                 end_time = time.perf_counter()
 
                 # Add total time for the benchmark category
-                result["total_benchmark_time"] = end_time - start_time
-                self.results[name] = result
+                result_with_timing: Dict[str, Union[float, str]] = dict(result)
+                result_with_timing["total_benchmark_time"] = end_time - start_time
+                self.results[name] = result_with_timing
 
                 _logger.info(
                     "Completed benchmark %s in %.3fs", name, end_time - start_time
@@ -474,7 +475,7 @@ def run_performance_benchmarks(
 
 def create_performance_test(
     name: str, baseline_file: Optional[Path] = None
-) -> Callable:
+) -> Callable[[], None]:
     """Create a performance test function for use with pytest.
 
     Args:

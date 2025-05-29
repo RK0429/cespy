@@ -222,7 +222,7 @@ def profile_performance(
 
     def decorator(func: F) -> F:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             if not performance_monitor.enabled:
                 return func(*args, **kwargs)
 
@@ -290,12 +290,12 @@ class RegexCache:
     """Cache for compiled regular expressions to improve performance."""
 
     def __init__(self, max_size: int = 1000):
-        self.cache: Dict[tuple, Pattern] = {}
+        self.cache: Dict[tuple[str, int], Pattern[str]] = {}
         self.max_size = max_size
         self.hit_count = 0
         self.miss_count = 0
 
-    def get_pattern(self, pattern: str, flags: int = 0) -> Pattern:
+    def get_pattern(self, pattern: str, flags: int = 0) -> Pattern[str]:
         """Get compiled regex pattern from cache.
 
         Args:
@@ -354,7 +354,7 @@ class RegexCache:
 regex_cache = RegexCache()
 
 
-def cached_regex(pattern: str, flags: int = 0) -> Pattern:
+def cached_regex(pattern: str, flags: int = 0) -> Pattern[str]:
     """Get cached compiled regex pattern.
 
     Args:

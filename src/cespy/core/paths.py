@@ -431,8 +431,8 @@ if is_windows():
 
             try:
                 # GetShortPathNameW returns required buffer size
-                GetShortPathNameW = (  # type: ignore[attr-defined]
-                    ctypes.windll.kernel32.GetShortPathNameW
+                GetShortPathNameW = (
+                    ctypes.windll.kernel32.GetShortPathNameW  # type: ignore[attr-defined]
                 )
                 GetShortPathNameW.argtypes = [
                     wintypes.LPCWSTR,

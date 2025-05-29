@@ -49,7 +49,7 @@ def deprecated(
 
     def decorator(func: F) -> F:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Format deprecation message
             message = f"{func.__name__} is deprecated since version {version}: {reason}"
             if replacement:
@@ -98,7 +98,7 @@ def standardize_parameters(parameter_map: Dict[str, str]) -> Callable[[F], F]:
 
     def decorator(func: F) -> F:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Convert old parameter names to new ones
             new_kwargs = {}
             for key, value in kwargs.items():
@@ -278,7 +278,7 @@ def create_compatibility_wrapper(
             reason=f"Name changed from {old_name} to {new_name}",
             replacement=new_name,
         )
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             return original(*args, **kwargs)
 
         # Copy attributes for classes
@@ -404,7 +404,7 @@ def ensure_api_consistency(func: F) -> F:
         sig = inspect.signature(func)
 
         # Validate common parameter types
-        validated_kwargs = {}
+        validated_kwargs: Dict[str, Any] = {}
         for param_name, param_value in kwargs.items():
             if param_name in sig.parameters:
                 param = sig.parameters[param_name]

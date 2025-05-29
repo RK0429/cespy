@@ -29,7 +29,7 @@ from ..core import patterns as core_patterns
 from ..core import paths as core_paths
 from ..exceptions import (
     FileFormatError,
-    IOError as CespyIOError,
+    CespyIOError,
 )
 
 from ..utils.detect_encoding import detect_encoding

@@ -32,13 +32,13 @@ class CallbackType(Enum):
 class CallbackInfo:
     """Information about a registered callback."""
 
-    callback: Union[Type[ProcessCallback], Callable]
+    callback: Union[Type[ProcessCallback], Callable[..., Any]]
     callback_type: CallbackType
     args: Tuple[Any, ...] = ()
-    kwargs: Dict[str, Any] = None
+    kwargs: Optional[Dict[str, Any]] = None
     error_handler: Optional[Callable[[Exception], None]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.kwargs is None:
             self.kwargs = {}
 
@@ -79,7 +79,7 @@ class CallbackManager:
     def register(
         self,
         callback_id: str,
-        callback: Union[Type[ProcessCallback], Callable],
+        callback: Union[Type[ProcessCallback], Callable[..., Any]],
         args: Optional[Tuple[Any, ...]] = None,
         kwargs: Optional[Dict[str, Any]] = None,
         error_handler: Optional[Callable[[Exception], None]] = None,
