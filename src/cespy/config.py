@@ -122,19 +122,31 @@ class CespyConfig:
         """
         for key, value in config_dict.items():
             if key == "simulators" and isinstance(value, dict):
-                for sim_name, sim_config in value.items():
-                    if sim_name not in self.simulators:
-                        self.simulators[sim_name] = SimulatorConfig()
-                    if isinstance(sim_config, dict):
-                        for attr, val in sim_config.items():
-                            if hasattr(self.simulators[sim_name], attr):
-                                setattr(self.simulators[sim_name], attr, val)
+                self._update_simulators_config(value)
             elif key == "server" and isinstance(value, dict):
-                for attr, val in value.items():
-                    if hasattr(self.server, attr):
-                        setattr(self.server, attr, val)
+                self._update_server_config(value)
             elif hasattr(self, key):
                 setattr(self, key, value)
+
+    def _update_simulators_config(self, simulators_config: Dict[str, Any]) -> None:
+        """Update simulators configuration."""
+        for sim_name, sim_config in simulators_config.items():
+            if sim_name not in self.simulators:
+                self.simulators[sim_name] = SimulatorConfig()
+            if isinstance(sim_config, dict):
+                self._update_simulator_attributes(sim_name, sim_config)
+
+    def _update_simulator_attributes(self, sim_name: str, sim_config: Dict[str, Any]) -> None:
+        """Update individual simulator attributes."""
+        for attr, val in sim_config.items():
+            if hasattr(self.simulators[sim_name], attr):
+                setattr(self.simulators[sim_name], attr, val)
+
+    def _update_server_config(self, server_config: Dict[str, Any]) -> None:
+        """Update server configuration."""
+        for attr, val in server_config.items():
+            if hasattr(self.server, attr):
+                setattr(self.server, attr, val)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""

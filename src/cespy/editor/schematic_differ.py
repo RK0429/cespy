@@ -9,10 +9,7 @@ versions and generate detailed change reports.
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
-from ..core import constants as core_constants
+from typing import Any, Dict, List, Optional, Tuple
 
 _logger = logging.getLogger("cespy.SchematicDiffer")
 
@@ -43,21 +40,21 @@ class ComponentChange:
         """Get human-readable description of change."""
         if self.change_type == ChangeType.ADDED:
             return f"Added {self.component_type} '{self.component_name}'"
-        elif self.change_type == ChangeType.REMOVED:
+        if self.change_type == ChangeType.REMOVED:
             return f"Removed {self.component_type} '{self.component_name}'"
-        elif self.change_type == ChangeType.MODIFIED:
+        if self.change_type == ChangeType.MODIFIED:
             desc = f"Modified {self.component_name}:"
             if self.old_value != self.new_value:
                 desc += f" value {self.old_value} -> {self.new_value}"
             for attr, (old, new) in self.attributes_changed.items():
                 desc += f", {attr} {old} -> {new}"
             return desc
-        elif self.change_type == ChangeType.MOVED:
+        if self.change_type == ChangeType.MOVED:
             if self.position_change:
                 old_pos, new_pos = self.position_change
                 return f"Moved {self.component_name} from {old_pos} to {new_pos}"
             return f"Moved {self.component_name}"
-        elif self.change_type == ChangeType.RENAMED:
+        if self.change_type == ChangeType.RENAMED:
             return f"Renamed component from '{self.old_value}' to '{self.new_value}'"
         return f"Unknown change to {self.component_name}"
 
@@ -78,9 +75,9 @@ class WireChange:
         wire_desc = f"Wire ({self.start_point} to {self.end_point})"
         if self.change_type == ChangeType.ADDED:
             return f"Added {wire_desc}"
-        elif self.change_type == ChangeType.REMOVED:
+        if self.change_type == ChangeType.REMOVED:
             return f"Removed {wire_desc}"
-        elif self.change_type == ChangeType.MODIFIED:
+        if self.change_type == ChangeType.MODIFIED:
             return f"Modified {wire_desc}: net '{self.old_net}' -> '{self.new_net}'"
         return f"Unknown change to {wire_desc}"
 
@@ -98,9 +95,9 @@ class DirectiveChange:
         """Get human-readable description of change."""
         if self.change_type == ChangeType.ADDED:
             return f"Added {self.directive_type}: {self.new_value}"
-        elif self.change_type == ChangeType.REMOVED:
+        if self.change_type == ChangeType.REMOVED:
             return f"Removed {self.directive_type}: {self.old_value}"
-        elif self.change_type == ChangeType.MODIFIED:
+        if self.change_type == ChangeType.MODIFIED:
             return f"Modified {self.directive_type}: '{self.old_value}' -> '{self.new_value}'"
         return f"Unknown change to {self.directive_type}"
 

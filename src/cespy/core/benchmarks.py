@@ -6,6 +6,7 @@ This module provides a comprehensive benchmarking suite to monitor performance
 over time and detect regressions in critical code paths.
 """
 
+import json
 import logging
 import tempfile
 import time
@@ -42,14 +43,12 @@ class BenchmarkSuite:
             return
 
         try:
-            import json
-
-            with open(self.baseline_file, "r") as f:
+            with open(self.baseline_file, "r", encoding="utf-8") as f:
                 self.baseline_data = json.load(f)
             _logger.info(
                 "Loaded baseline data with %d benchmarks", len(self.baseline_data)
             )
-        except Exception as e:
+        except (FileNotFoundError, json.JSONDecodeError, PermissionError) as e:
             _logger.warning("Failed to load baseline data: %s", e)
 
     def save_baseline(self) -> None:

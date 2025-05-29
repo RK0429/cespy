@@ -11,13 +11,14 @@ This module extends the BaseEditor with additional functionality including:
 """
 
 import logging
+import re
 from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
-from .base_editor import BaseEditor, Component
+from .base_editor import BaseEditor, Component, scan_eng, format_eng
 from .circuit_validator import CircuitValidator, ValidationResult
 from .component_factory import ComponentFactory, ComponentType
 from .schematic_differ import SchematicDiffer, SchematicDiff
@@ -209,7 +210,6 @@ class BaseEditorEnhanced(BaseEditor):
         Returns:
             List of component references that were modified
         """
-        from .base_editor import scan_eng, format_eng
 
         modified = []
         components = self.get_components(component_types or "*")
@@ -295,7 +295,6 @@ class BaseEditorEnhanced(BaseEditor):
         Returns:
             List of matching component references
         """
-        import re
 
         matches = []
         components = self.get_components(component_types or "*")
@@ -664,7 +663,6 @@ class BaseEditorEnhanced(BaseEditor):
 
     def _values_match(self, value1: str, value2: Union[str, float]) -> bool:
         """Check if two component values match."""
-        from .base_editor import scan_eng
 
         if isinstance(value2, str):
             # String comparison

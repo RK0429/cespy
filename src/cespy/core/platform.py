@@ -188,7 +188,7 @@ class PlatformManager:
                             bytes_mem = int(line.split("=")[1])
                             total_memory_gb = bytes_mem / (1024**3)
                             break
-        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, 
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError,
                 FileNotFoundError, ValueError, OSError) as e:
             _logger.debug("Failed to detect memory size: %s", e)
 
@@ -477,7 +477,7 @@ class PlatformManager:
                     check=False,
                 )
                 return process_name.lower() in result.stdout.lower()
-            
+
             result = subprocess.run(
                 ["pgrep", "-f", process_name],
                 capture_output=True,
@@ -486,7 +486,7 @@ class PlatformManager:
                 check=False,
             )
             return result.returncode == 0
-        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, 
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError,
                 FileNotFoundError, OSError) as e:
             _logger.debug("Failed to check process status: %s", e)
             return False

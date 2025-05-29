@@ -46,7 +46,7 @@ def get_short_path_name(long_name: str) -> str:
 
     # Windows-specific implementation
     # Import Windows-specific modules only on Windows
-    import ctypes  # pylint: disable=import-outside-toplevel
+    import ctypes  # pylint: disable=import-outside-toplevel  # type: ignore[unreachable]
     from ctypes import wintypes  # pylint: disable=import-outside-toplevel
 
     # Get the Windows API function
