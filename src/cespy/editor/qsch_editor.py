@@ -27,14 +27,17 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, List, Optional, TextIO, Tuple, Union, cast
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
+
 from ..simulators.qspice_simulator import Qspice
 from ..utils.file_search import search_file_in_containers
 from ..utils.windows_short_names import get_short_path_name
 from .base_editor import (
     PARAM_REGEX,
     UNIQUE_SIMULATION_DOT_INSTRUCTIONS,
-    ComponentNotFoundError,
-    ParameterNotFoundError,
     format_eng,
 )
 from .base_schematic import (
@@ -186,7 +189,7 @@ def decap(s: str) -> str:
     """Take the leading < and ending > from the parameter value on a string with the
     format "param=<value>" If they are not there, the string is returned unchanged.
     """
-    regex = re.compile(r"(\w+)=<(.*)>")
+    regex = core_patterns.QSPICE_PARAM_PATTERN
     return regex.sub(r"\1=\2", s)
 
 
@@ -195,7 +198,7 @@ def smart_split(s: str) -> List[str]:
 
     What is inside "" is not divided.
     """
-    return re.findall(r'[^"\s]+|"[^"]*"', s)
+    return core_patterns.QSPICE_SPLIT_PATTERN.findall(s)
 
 
 class QschReadingError(IOError):
@@ -419,7 +422,7 @@ class QschEditor(BaseSchematic):
         The file is saved in cp1252 encoding.
         """
         if self.updated or Path(qsch_filename) != self._qsch_file_path:
-            with open(qsch_filename, "w", encoding="cp1252") as qsch_file:
+            with open(qsch_filename, "w", encoding=core_constants.Encodings.CP1252) as qsch_file:
                 _logger.info("Writing QSCH file %s", qsch_file)
                 for c in QSCH_HEADER:
                     qsch_file.write(chr(c))
@@ -602,10 +605,10 @@ class QschEditor(BaseSchematic):
         if self.schematic is None:
             _logger.error("Empty Schematic information")
             return
-        if run_netlist_file.suffix == ".qsch":
+        if run_netlist_file.suffix == core_constants.FileExtensions.QSCH:
             self.save_as(run_netlist_file)
-        elif run_netlist_file.suffix in (".net", ".cir"):
-            with open(run_netlist_file, "w", encoding="cp1252") as netlist_file:
+        elif run_netlist_file.suffix in (core_constants.FileExtensions.NET, core_constants.FileExtensions.CIR):
+            with open(run_netlist_file, "w", encoding=core_constants.Encodings.CP1252) as netlist_file:
                 _logger.info("Writing NET file %s", run_netlist_file)
                 netlist_file.write(
                     f"* {os.path.abspath(self._qsch_file_path.as_posix())}\n"
@@ -684,7 +687,7 @@ class QschEditor(BaseSchematic):
         else:
             if not self._qsch_file_path.exists():
                 raise FileNotFoundError(f"File {self._qsch_file_path} not found")
-            with open(self._qsch_file_path, "r", encoding="cp1252") as qsch_file:
+            with open(self._qsch_file_path, "r", encoding=core_constants.Encodings.CP1252) as qsch_file:
                 _logger.info("Reading QSCH file %s", self._qsch_file_path)
                 stream = qsch_file.read()
             self._parse_qsch_stream(stream)

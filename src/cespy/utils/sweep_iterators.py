@@ -34,7 +34,7 @@ from typing import Iterable, Optional, Union
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
 
-__all__ = ["sweep", "sweep_n", "sweep_log", "sweep_log_n"]
+__all__ = ["sweep", "sweep_lin", "sweep_n", "sweep_log", "sweep_log_n"]
 
 
 class BaseIterator:
@@ -223,6 +223,7 @@ class SweepLogN(BaseIterator):
 # Backward compatibility aliases - maintain old names
 # pylint: disable=invalid-name
 sweep = Sweep
+sweep_lin = Sweep  # alias for linear sweep
 sweep_log = SweepLog
 sweep_log_n = SweepLogN
 # pylint: enable=invalid-name

@@ -32,6 +32,10 @@ import subprocess
 from pathlib import Path
 from typing import Any, Optional, Union
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import paths as core_paths
+
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
 _logger = logging.getLogger("cespy.XYCESimulator")
@@ -41,10 +45,7 @@ class XyceSimulator(Simulator):
     """Stores the simulator location and command line options and runs simulations."""
 
     # Placed in order of preference. The first to be found will be used.
-    _spice_exe_paths = [
-        "C:/Program Files/Xyce 7.9 NORAD/bin/xyce.exe",  # Windows
-        "xyce",  # linux, when in path
-    ]
+    _spice_exe_paths = core_paths.get_default_simulator_paths(core_constants.Simulators.XYCE)
 
     # the default lib paths, as used by get_default_library_paths
     # none
@@ -59,7 +60,7 @@ class XyceSimulator(Simulator):
     for exe in _spice_exe_paths:
         if exe.startswith("~"):
             exe = os.path.expanduser(exe)
-        if os.path.exists(exe):
+        if core_paths.is_valid_file(exe):
             spice_exe = [exe]
             break
         # check if file in path
@@ -77,7 +78,7 @@ class XyceSimulator(Simulator):
         spice_exe = []
         process_name = ""
     else:
-        process_name = Simulator.guess_process_name(spice_exe[0])
+        process_name = core_paths.guess_process_name(spice_exe[0])
         _logger.debug("Found xyce installed in: '%s'", spice_exe)
 
     xyce_args = {
@@ -307,7 +308,7 @@ class XyceSimulator(Simulator):
         """Executes a Xyce simulation run.
 
         A raw file and a log file will be generated, with the same name as the netlist
-        file, but with `.raw` and `.log` extension.
+        file, but with .raw and .log extension.
 
         :param netlist_file: path to the netlist file
         :type netlist_file: Union[str, Path]
@@ -351,8 +352,8 @@ class XyceSimulator(Simulator):
             cmd_line_switches = [cmd_line_switches]
         netlist_file = Path(netlist_file)
 
-        logfile = netlist_file.with_suffix(".log").as_posix()
-        rawfile = netlist_file.with_suffix(".raw").as_posix()
+        logfile = netlist_file.with_suffix(core_constants.FileExtensions.LOG).as_posix()
+        rawfile = netlist_file.with_suffix(core_constants.FileExtensions.RAW).as_posix()
 
         cmd_run = (
             cls.spice_exe
@@ -365,7 +366,7 @@ class XyceSimulator(Simulator):
         )
         # start execution
         if exe_log:
-            log_exe_file = netlist_file.with_suffix(".exe.log")
+            log_exe_file = netlist_file.with_suffix(".exe" + core_constants.FileExtensions.LOG)
             with open(log_exe_file, "w", encoding="utf-8") as outfile:
                 error = run_function(
                     cmd_run,

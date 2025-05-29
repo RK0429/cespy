@@ -23,6 +23,15 @@ import re
 import sys
 from typing import Any, Dict, Iterator, List, Optional, TypeVar, Union
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+from ..core import paths as core_paths
+from ..exceptions import (
+    FileFormatError,
+    IOError as CespyIOError,
+)
+
 from ..utils.detect_encoding import detect_encoding
 from .logfile_data import LogfileData, try_convert_value
 
@@ -88,11 +97,9 @@ def reformat_LTSpice_export(export_file: str, tabular_file: str) -> None:
         go_header = True
         run_no = "0"  # Changed from int to str as the regex will return a string
         param_values = ""
-        regx = re.compile(
-            r"Step Information: ([\w=\d\. \-]+) +\((?:Run|Step): (\d*)/\d*\)\n"
-        )
+        regx = core_patterns.LTSPICE_STEP_INFO_PATTERN
         for line in fin:
-            if line.startswith("Step Information:"):
+            if line.startswith("Step Information:"):  # LTSpice step marker
                 match = regx.match(line)
                 if match:
                     step, run_no = match.groups()
@@ -157,9 +164,9 @@ class LTSpiceExport:  # pylint: disable=too-few-public-methods
             curr_dic: Dict[str, Any] = {}
             self.dataset: Dict[str, List[Any]] = {}
 
-            regx = re.compile(r"Step Information: ([\w=\d\. -]+) +\(Run: (\d*)/\d*\)\n")
+            regx = core_patterns.LTSPICE_RUN_INFO_PATTERN
             for line in fin:
-                if line.startswith("Step Information:"):
+                if line.startswith("Step Information:"):  # LTSpice step marker
                     match = regx.match(line)
                     if match:
                         step, run_no = match.groups()
@@ -316,14 +323,8 @@ class LTSpiceLogReader(LogfileData):
         # fcut: v(vout)=vmax/sqrt(2) AT 252.921
         # fcutac=8.18166e+006 FROM 1.81834e+006 TO 1e+007 => AC Find
         # Computation
-        regx = re.compile(
-            # r"^(?P<name>\w+)(:\s+.*)?=(?P<value>[\d(inf)\.E+\-\(\)dB,°]+)"
-            # r"(( FROM (?P<from>[\d\.E+-]*) TO (?P<to>[\d\.E+-]*))|"
-            # r"( at (?P<at>[\d\.E+-]*)))?",
-            r"^(?P<name>\w+)(:\s+.*)?=(?P<value>[\d(inf)E+\-\(\)dB,°(-/\w]+)( FROM"
-            r" (?P<from>[\d\.E+-]*) TO (?P<to>[\d\.E+-]*)|( at (?P<at>[\d\.E+-]*)))?",
-            re.IGNORECASE,
-        )
+        # Use measurement data pattern from core
+        regx = core_patterns.MEAS_DATA_PATTERN
 
         _logger.debug("Processing LOG file: %s", log_filename)
         with open(log_filename, "r", encoding=self.encoding) as fin:
@@ -366,12 +367,12 @@ class LTSpiceLogReader(LogfileData):
                         line = fin.readline().strip("\r\n")
                         if line.startswith("Total Harmonic"):
                             # Find THD
-                            match = re.search(r"\d+.\d+", line)
+                            match = core_patterns.FLOAT_PATTERN.search(line)
                             if match:  # Check if match exists
                                 thd = float(match.group())
                         elif line.startswith("Partial Harmonic"):
                             # Find PHD
-                            match = re.search(r"\d+.\d+", line)
+                            match = core_patterns.FLOAT_PATTERN.search(line)
                             if match:  # Check if match exists
                                 phd = float(match.group())
                         elif line == "":
@@ -644,7 +645,9 @@ def main() -> None:
 
     def valid_extension(filename: str) -> bool:
         """Check if the filename has a valid extension."""
-        return filename.endswith((".txt", ".log", ".mout"))
+        return filename.endswith(
+            (".txt", core_constants.FileExtensions.LOG, ".mout")
+        )
 
     parser = argparse.ArgumentParser(
         description="Process LTSpice log files and align data for usage in spreadsheet tools"
@@ -690,7 +693,7 @@ def main() -> None:
     # Determine output filename
     if filename.endswith(".txt"):
         fname_out = filename[:-3] + "tsv"
-    elif filename.endswith(".log"):
+    elif filename.endswith(core_constants.FileExtensions.LOG):
         fname_out = filename[:-3] + "tlog"
     elif filename.endswith(".mout"):
         fname_out = filename[:-4] + "tmout"
@@ -712,7 +715,7 @@ def main() -> None:
         else:
             print("No step data found in log file")
 
-    except (OSError, IOError, ValueError) as e:
+    except (OSError, CespyIOError, ValueError) as e:
         print(f"Error processing file: {e}")
         sys.exit(1)
 

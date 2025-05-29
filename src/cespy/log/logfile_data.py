@@ -9,6 +9,10 @@ import re
 from collections import OrderedDict
 from typing import Any, Dict, Iterable, List, Optional, Protocol, TypeVar, Union, cast
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+
 # -------------------------------------------------------------------------------
 # Name:        logfile_data.py
 # Purpose:     Store data related to log files. This is a superclass of LTSpiceLogReader
@@ -25,9 +29,7 @@ _logger = logging.getLogger("cespy.LTSteps")
 class LTComplex(complex):
     """Class to represent complex numbers as exported by LTSpice."""
 
-    complex_match = re.compile(
-        r"\((?P<mag>.*?)(?P<dB>dB)?,(?P<ph>.*?)(?P<degrees>°)?\)"
-    )
+    complex_match = core_patterns.COMPLEX_NUMBER_PATTERN
 
     def __new__(cls, strvalue: str) -> "LTComplex":
         match = cls.complex_match.match(strvalue)
@@ -112,7 +114,7 @@ def try_convert_value(value: Union[str, int, float, List[Any], bytes]) -> ValueT
     if isinstance(value, list):
         return [try_convert_value(v) for v in value]
     if isinstance(value, bytes):
-        value = value.decode("utf-8")
+        value = value.decode(core_constants.Encodings.UTF8)
 
     # Initialize ans with a default type to satisfy the type checker
     ans: ValueType
@@ -221,7 +223,7 @@ class LogfileData:
         self.measure_count = len(self.dataset)
 
         # For storing the encoding when exporting
-        self.encoding: str = "utf-8"
+        self.encoding: str = core_constants.Encodings.UTF8
 
     def __getitem__(self, key: str) -> List[Any]:
         """__getitem__ implements :key: step or measurement name.
@@ -511,7 +513,7 @@ class LogfileData:
             return
 
         if encoding is None:
-            encoding = self.encoding if hasattr(self, "encoding") else "utf-8"
+            encoding = self.encoding if hasattr(self, "encoding") else core_constants.Encodings.UTF8
 
         with open(export_file, mode, encoding=encoding) as fout:
             if (

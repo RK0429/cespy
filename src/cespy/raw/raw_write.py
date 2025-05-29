@@ -31,6 +31,10 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple, Union, cast
 from numpy import array, float32, zeros
 from numpy.typing import NDArray
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+
 from .raw_classes import DataSet, DummyTrace
 from .raw_read import RawRead
 
@@ -113,7 +117,7 @@ class RawWrite:
     inferred from first trace. Defaults to None.     fastacces (bool, optional): Whether
     to use fast access format. Defaults to True.     numtype (str, optional): Numerical
     type for the file. Use "auto" to infer from first trace. Defaults to "auto".
-    encoding (str, optional): Character encoding for the file. Defaults to "utf_16_le".
+    encoding (str, optional): Character encoding for the file. Defaults to UTF-8.
     """
 
     def __init__(
@@ -121,7 +125,7 @@ class RawWrite:
         plot_name: Optional[str] = None,
         fastacces: bool = True,
         numtype: str = "auto",
-        encoding: str = "utf_16_le",
+        encoding: str = core_constants.Encodings.UTF8,
     ) -> None:
         self._traces: List[Trace] = []
         self.flags = RawFlags(numtype=numtype, fastaccess=fastacces)
@@ -164,7 +168,7 @@ class RawWrite:
         assert isinstance(trace, Trace), "The trace needs to be of the type Trace"
         if len(self._traces) == 0:
             if trace.whattype == "time":
-                self.plot_name = self.plot_name or "Transient Analysis"
+                self.plot_name = self.plot_name or core_constants.SimulationTypes.TRAN
                 flag_numtype = "real"
             elif trace.whattype == "frequency":
                 if (
@@ -172,17 +176,17 @@ class RawWrite:
                     and self.flags.numtype != "complex"
                 ) or "Noise" in str(self.plot_name):
                     self.plot_name = (
-                        self.plot_name or "Noise Spectral Density - (V/Hz½ or A/Hz½)"
+                        self.plot_name or core_constants.SimulationTypes.NOISE
                     )
                     flag_numtype = "real"
                 else:
-                    self.plot_name = self.plot_name or "AC Analysis"
+                    self.plot_name = self.plot_name or core_constants.SimulationTypes.AC
                     flag_numtype = "complex"
             elif trace.whattype in ("voltage", "current"):
-                self.plot_name = self.plot_name or "DC transfer characteristic"
+                self.plot_name = self.plot_name or core_constants.SimulationTypes.DC
                 flag_numtype = "real"
             elif trace.whattype == "param":
-                self.plot_name = self.plot_name or "Operating Point"
+                self.plot_name = self.plot_name or core_constants.SimulationTypes.OP
                 flag_numtype = "real"
             else:
                 raise ValueError(
@@ -204,7 +208,7 @@ class RawWrite:
         in this version.
 
         Args:     filename (Union[str, Path]): Path where the RAW file will be written.
-        The extension should be .RAW
+        The extension should be .raw
 
         Note:     If there are any imported data that need to be consolidated, this will
         happen     automatically before saving.
@@ -258,7 +262,7 @@ class RawWrite:
         """
         # Make the rename as requested
         if "rename_format" in kwargs:
-            if name.endswith(")") and (name.startswith("V(") or name.startswith("I(")):
+            if name.endswith(")") and core_patterns.VI_REF_PATTERN.match(name):
                 new_name = (
                     name[:2]
                     + cast(

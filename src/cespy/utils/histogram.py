@@ -11,8 +11,6 @@ from typing import Dict, List, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 
-from cespy.log.ltsteps import LTSpiceLogReader
-
 
 def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
     """Read measurement data from a log file.
@@ -21,6 +19,7 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
     :return: Dictionary mapping measurement names to lists of values
     """
     try:
+        from cespy.log.ltsteps import LTSpiceLogReader
         log_reader = LTSpiceLogReader(str(log_file))
         measurements = {}
 

@@ -250,6 +250,16 @@ from typing import (
 from numpy import float32, float64, frombuffer
 from numpy.typing import NDArray
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+from ..core import paths as core_paths
+from ..exceptions import (
+    FileFormatError,
+    InvalidRawFileError,
+    EncodingError,
+)
+
 from ..log.logfile_data import try_convert_value
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .raw_classes import Axis, DummyTrace, SpiceReadException, TraceRead
@@ -409,7 +419,7 @@ def namify(spice_ref: str) -> str:
         >>> namify('I(R1)')
         'I__R1__'
     """
-    matchobj = re.match(r"(V|I|P)\((\w+)\)", spice_ref)
+    matchobj = core_patterns.VIP_REF_PATTERN.match(spice_ref)
     if matchobj:
         return f"{matchobj.group(1)}__{matchobj.group(2)}__"
     raise NotImplementedError(f'Unrecognized alias type for alias : "{spice_ref}"')
@@ -450,13 +460,13 @@ class RawRead:
     )
 
     ACCEPTED_PLOTNAMES = (
-        "AC Analysis",
-        "DC transfer characteristic",
-        "Operating Point",
-        "Transient Analysis",
-        "Transfer Function",
-        "Noise Spectral Density",
-        "Frequency Response Analysis",
+        core_constants.SimulationTypes.AC,
+        core_constants.SimulationTypes.DC,
+        core_constants.SimulationTypes.OP,
+        core_constants.SimulationTypes.TRAN,
+        core_constants.SimulationTypes.TF,
+        core_constants.SimulationTypes.NOISE,
+        "Frequency Response Analysis",  # Not yet in constants
     )
 
     def __init__(
@@ -495,7 +505,7 @@ class RawRead:
             sz_enc = 2
             line = "Tit"
         else:
-            raise RuntimeError("Unrecognized encoding")
+            raise EncodingError(str(raw_filename_path), "unknown", RuntimeError("Unrecognized encoding"))
         if self.verbose:
             _logger.debug("Reading the file with encoding: '%s'", self.encoding)
         # Storing the filename as part of the dictionary
@@ -550,7 +560,7 @@ class RawRead:
         self.nPoints = int(self.raw_params["No. Points"], 10)
         self.nVariables = int(self.raw_params["No. Variables"], 10)
         if self.nPoints == 0 or self.nVariables == 0:
-            raise RuntimeError(
+            raise InvalidRawFileError(
                 "Invalid RAW file. No points or variables found: Points:"
                 f" {self.nPoints}, Variables: {self.nVariables}."
             )
@@ -568,7 +578,7 @@ class RawRead:
                 dialect = dialect.lower()
                 # given info is correct?
                 if dialect not in ("ltspice", "qspice", "ngspice", "xyce"):
-                    raise ValueError(
+                    raise FileFormatError(
                         f"Invalid RAW file dialect: '{dialect}', must be one of"
                         " 'ltspice', 'qspice', 'ngspice', 'xyce'."
                     )
@@ -628,7 +638,7 @@ class RawRead:
 
         # Do I have something?
         if not dialect:
-            raise RuntimeError(
+            raise FileFormatError(
                 "RAW file dialect is not specified and could not be auto detected."
             )
 
@@ -672,7 +682,7 @@ class RawRead:
         for line in header[i + 1 : -1]:  # Parse the variable names
             line_elmts = line.lstrip().split("\t")
             if len(line_elmts) < 3:
-                raise RuntimeError(f"Invalid line in the Variables section: {line}")
+                raise InvalidRawFileError(f"Invalid line in the Variables section: {line}")
             name = line_elmts[1]
             var_type = line_elmts[2]
             if ivar == 0:  # If it has an axis, it should be always read
@@ -915,15 +925,15 @@ class RawRead:
         eval() function."""
         formula = self.aliases[alias]
         # converting V(ref1, ref2) to (V(ref1)-V(ref2))
-        formula = re.sub(r"V\((\w+),0\)", r"V(\1)", formula)
-        formula = re.sub(r"V\(0,(\w+)\)", r"(-V(\1))", formula)
-        formula = re.sub(r"V\((\w+),(\w+)\)", r"(V(\1)-V(\2))", formula)
+        formula = core_patterns.VOLTAGE_REF_PATTERN_1.sub(r"V(\1)", formula)
+        formula = core_patterns.VOLTAGE_REF_PATTERN_2.sub(r"(-V(\1))", formula)
+        formula = core_patterns.VOLTAGE_REF_PATTERN_3.sub(r"(V(\1)-V(\2))", formula)
         # converting V(ref1) to V__ref1__ and I(ref1) to I__ref1__
-        formula = re.sub(r"(V|I|P)\((\w+)\)", r"\1__\2__", formula)
+        formula = core_patterns.VIP_REF_PATTERN.sub(r"\1__\2__", formula)
 
         # removing the mho or other constants ex:  (0.0001mho*V(0,n01)) ->
         # (0.0001*V(0,n01))
-        formula = re.sub(r"(\d+)((mho)|(ohm))", r"\1", formula)
+        formula = core_patterns.UNIT_PATTERN.sub(r"\1", formula)
         if alias.startswith("I("):
             whattype = "current"
         elif alias.startswith("V("):
@@ -1050,12 +1060,12 @@ class RawRead:
 
         if "ltspice" in self.raw_params["Command"].lower():
             # look in the .log file for information about the steps
-            if filename.suffix != ".raw":
+            if filename.suffix != core_constants.FileExtensions.RAW:
                 raise SpiceReadException(
-                    "Invalid Filename. The file should end with '.raw'"
+                    f"Invalid Filename. The file should end with '{core_constants.FileExtensions.RAW}'"
                 )
             # it should have a .log file with the same name
-            logfile = filename.with_suffix(".log")
+            logfile = filename.with_suffix(core_constants.FileExtensions.LOG)
             try:
                 encoding = detect_encoding(
                     logfile,
@@ -1087,14 +1097,14 @@ class RawRead:
 
         elif "qspice" in self.raw_params["Command"].lower():
             # look in the .log file for information about the steps
-            if filename.suffix != ".qraw":
+            if filename.suffix != core_constants.FileExtensions.QRAW:
                 raise SpiceReadException(
-                    "Invalid Filename. The file should end with '.qraw'"
+                    f"Invalid Filename. The file should end with '{core_constants.FileExtensions.QRAW}'"
                 )
             # it should have a .log file with the same name
-            logfile = filename.with_suffix(".log")
+            logfile = filename.with_suffix(core_constants.FileExtensions.LOG)
             try:
-                log = open(logfile, "r", errors="replace", encoding="utf-8")
+                log = open(logfile, "r", errors="replace", encoding=core_constants.Encodings.UTF8)
             except OSError as exc:
                 raise SpiceReadException(f"Log file '{logfile}' not found") from exc
             except UnicodeError as exc:
@@ -1102,7 +1112,7 @@ class RawRead:
                     f"Unable to parse log file '{logfile}'"
                 ) from exc
 
-            step_regex = re.compile(r"^(\d+) of \d+ steps:\s+\.step (.*)$")
+            step_regex = core_patterns.QSPICE_STEP_PATTERN
 
             for line in log:
                 match = step_regex.match(line)
@@ -1287,7 +1297,7 @@ class RawRead:
         except ImportError:
             # Export to CSV using python built-in functions
             data = self.export(columns=columns, step=step)
-            with open(filename, "w", encoding="utf-8") as f:
+            with open(filename, "w", encoding=core_constants.Encodings.UTF8) as f:
                 f.write(separator.join(data.keys()) + "\n")
                 for i in range(
                     len(data[columns[0] if columns else self.get_trace_names()[0]])

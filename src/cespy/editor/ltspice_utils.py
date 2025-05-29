@@ -21,6 +21,10 @@
 
 import re
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+
 from .base_schematic import ERotation, HorAlign, Text, VerAlign
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
@@ -28,12 +32,7 @@ __copyright__ = "Copyright 2024, Fribourg Switzerland"
 
 
 # Regular expressions
-TEXT_REGEX = re.compile(
-    r"TEXT"
-    r" (-?\d+)\s+(-?\d+)\s+V?(Left|Right|Top|Bottom|Center|Invisible)\s"
-    r"(\d+)\s*(?P<type>[!;])(?P<text>.*)",
-    re.IGNORECASE,
-)
+TEXT_REGEX = core_patterns.ASC_TEXT_PATTERN
 
 TEXT_REGEX_X = 1
 TEXT_REGEX_Y = 2
@@ -41,7 +40,7 @@ TEXT_REGEX_ALIGN = 3
 TEXT_REGEX_SIZE = 4
 TEXT_REGEX_TYPE = 5
 TEXT_REGEX_TEXT = 6
-END_LINE_TERM = "\n"
+END_LINE_TERM = core_constants.LineTerminators.UNIX
 ASC_ROTATION_DICT = {
     "R0": ERotation.R0,
     "R90": ERotation.R90,

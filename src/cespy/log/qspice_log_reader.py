@@ -25,6 +25,11 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+from ..exceptions import SimulatorNotFoundError
+
 from ..sim.simulator import run_function
 from ..simulators.qspice_simulator import Qspice
 from .logfile_data import LogfileData, split_line_into_values, try_convert_value
@@ -72,11 +77,11 @@ class QspiceLogReader(LogfileData):
         super().__init__(step_set)
         self.logname = Path(log_filename)
         if encoding is None:
-            self.encoding = "utf-8"
+            self.encoding = core_constants.Encodings.UTF8
         else:
             self.encoding = encoding
 
-        step_regex = re.compile(r"^\s*(\d+) of \d+ steps:\s+\.step (.*)$")
+        step_regex = core_patterns.QSPICE_STEP_PATTERN
 
         _logger.debug("Processing LOG file:%s", log_filename)
         with open(log_filename, "r", encoding=self.encoding) as fin:
@@ -129,7 +134,7 @@ class QspiceLogReader(LogfileData):
         :rtype: Path
         """
         if meas_filename is None:
-            meas_filename = self.logname.with_suffix(".meas")
+            meas_filename = self.logname.with_suffix(core_constants.FileExtensions.MEAS)
         elif not isinstance(meas_filename, Path):
             meas_filename = Path(meas_filename)
 
@@ -139,17 +144,17 @@ class QspiceLogReader(LogfileData):
             _logger.error("A specific location of the QSPICE can be set")
             _logger.error("using the create_from(<location>) class method")
             _logger.error("==============================================")
-            raise RuntimeError(
-                "QSPICE not found in the usual locations. Please install it and try"
-                " again."
+            raise SimulatorNotFoundError(
+                "qspice", 
+                search_paths=Qspice.get_default_install_paths() if hasattr(Qspice, 'get_default_install_paths') else None
             )
 
         # Get the QPOST location, which is the same as the QSPICE location
         qpost = [Qspice.spice_exe[0].replace("QSPICE64.exe", "QPOST.exe")]
         # Guess the name of the .net file
-        netlist = self.logname.with_suffix(".net").absolute()
+        netlist = self.logname.with_suffix(core_constants.FileExtensions.NET).absolute()
         if not Path.exists(netlist):
-            netlist = self.logname.with_suffix(".cir").absolute()
+            netlist = self.logname.with_suffix(core_constants.FileExtensions.CIR).absolute()
 
         # Run the QPOST command
         cmd_run = qpost + [str(netlist), "-o", str(meas_filename.absolute())]
@@ -165,7 +170,7 @@ class QspiceLogReader(LogfileData):
         :type meas_filename: str or Path
         :returns: Nothing
         """
-        meas_regex = re.compile(r"^\.meas (\w+) (\w+) (.*)$")
+        meas_regex = core_patterns.MEAS_STATEMENT_PATTERN
         meas_name = None
         headers = None
 

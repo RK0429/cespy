@@ -30,6 +30,9 @@ import re
 from pathlib import Path
 from typing import Union
 
+# Core imports
+from ..core import constants as core_constants
+
 
 class EncodingDetectError(Exception):
     """Exception raised when the encoding of a file cannot be detected."""
@@ -52,13 +55,13 @@ def detect_encoding(
     :rtype: str
     """
     for encoding in (
-        "utf-8",
-        "utf-16",
-        "windows-1252",
-        "utf_16_le",
-        "cp1252",
-        "cp1250",
-        "shift_jis",
+        core_constants.Encodings.UTF8,
+        core_constants.Encodings.UTF16,
+        core_constants.Encodings.WINDOWS_1252,
+        core_constants.Encodings.UTF16_LE,
+        core_constants.Encodings.CP1252,
+        core_constants.Encodings.CP1250,
+        core_constants.Encodings.SHIFT_JIS,
     ):
         try:
             with open(file_path, "r", encoding=encoding) as f:
@@ -80,7 +83,7 @@ def detect_encoding(
                 if not re.search(expected_pattern, lines, re_flags | re.MULTILINE):
                     # File did not have the expected string for this encoding
                     continue
-            if encoding == "utf-8" and lines[1] == "\x00":
+            if encoding == core_constants.Encodings.UTF8 and lines[1] == "\x00":
                 continue
             return encoding
     # Handle failure after trying all encodings

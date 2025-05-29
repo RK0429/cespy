@@ -25,6 +25,9 @@ LTSpice log file."""
 import re
 from typing import Dict, List, Union
 
+# Core imports
+from ..core import patterns as core_patterns
+
 from ..utils.detect_encoding import detect_encoding
 
 
@@ -138,7 +141,7 @@ def op_log_reader(
     :rtype: dict
     """
     dataset: Dict[str, Dict[str, Dict[str, Union[float, str]]]] = {}
-    is_title = re.compile(r"^\s*--- (.*) ---\s*$")
+    is_title = core_patterns.SECTION_TITLE_PATTERN
     encoding = detect_encoding(filename)
 
     with open(filename, "r", encoding=encoding) as log:

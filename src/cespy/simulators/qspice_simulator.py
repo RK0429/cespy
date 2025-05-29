@@ -32,6 +32,10 @@ import sys
 from pathlib import Path
 from typing import IO, Any, Optional, Union
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import paths as core_paths
+
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
 _logger = logging.getLogger("cespy.QSpiceSimulator")
@@ -41,7 +45,7 @@ class Qspice(Simulator):
     """Stores the simulator location and command line options and is responsible for
     generating netlists and running simulations."""
 
-    raw_extension = ".qraw"
+    raw_extension = core_constants.FileExtensions.QRAW
     """:meta private:"""
 
     #
@@ -51,11 +55,7 @@ class Qspice(Simulator):
     # windows paths (that are also valid for wine)
     # Please note that os.path.expanduser and os.path.join are sensitive to the style of slash.
     # Placed in order of preference. The first to be found will be used.
-    _spice_exe_win_paths = [
-        "~/Qspice/QSPICE64.exe",
-        "~/AppData/Local/Programs/Qspice/QSPICE64.exe",
-        "C:/Program Files/QSPICE/QSPICE64.exe",
-    ]
+    _spice_exe_win_paths = core_paths.get_default_simulator_paths(core_constants.Simulators.QSPICE)
 
     # the default lib paths, as used by get_default_library_paths
     _default_lib_paths = ["C:/Program Files/QSPICE", "~/Documents/QSPICE"]
@@ -79,7 +79,7 @@ class Qspice(Simulator):
                 # expand here, as I use _spice_exe_win_paths also for linux, and
                 # expanding earlier will fail
                 exe = os.path.expanduser(exe)
-            if os.path.exists(exe):
+            if core_paths.is_valid_file(exe):
                 spice_exe = [exe]
                 break
 
@@ -88,7 +88,7 @@ class Qspice(Simulator):
         spice_exe = []
         process_name = ""
     else:
-        process_name = Simulator.guess_process_name(spice_exe[0])
+        process_name = core_paths.guess_process_name(spice_exe[0])
         _logger.debug("Found Qspice installed in: '%s'", spice_exe)
 
     qspice_args = {
@@ -235,7 +235,7 @@ class Qspice(Simulator):
         # need absolute path, as early 2025 qspice has a strange repetition bug
         netlist_file = Path(netlist_file).absolute()
 
-        log_file = Path(netlist_file).with_suffix(".log").as_posix()
+        log_file = Path(netlist_file).with_suffix(core_constants.FileExtensions.LOG).as_posix()
         cmd_run = (
             cls.spice_exe
             + ["-o", log_file]
@@ -244,8 +244,8 @@ class Qspice(Simulator):
         )
         # start execution
         if exe_log:
-            log_exe_file = netlist_file.with_suffix(".exe.log")
-            with open(log_exe_file, "w", encoding="utf-8") as outfile:
+            log_exe_file = netlist_file.with_suffix(".exe" + core_constants.FileExtensions.LOG)
+            with open(log_exe_file, "w", encoding=core_constants.Encodings.UTF8) as outfile:
                 error = run_function(
                     cmd_run,
                     timeout=timeout,

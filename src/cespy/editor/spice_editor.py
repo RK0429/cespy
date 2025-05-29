@@ -62,6 +62,16 @@ from typing import (
     Union,
 )
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+from ..core import paths as core_paths
+from ..exceptions import (
+    FileFormatError,
+    EncodingError,
+)
+
+# Module imports
 from ..log.logfile_data import try_convert_value
 from ..sim.sim_runner import SimRunner
 from ..simulators.ltspice_simulator import LTspice
@@ -83,174 +93,31 @@ _logger = logging.getLogger("cespy.SpiceEditor")
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
 
-END_LINE_TERM = "\n"  #: This controls the end of line terminator used
+END_LINE_TERM = core_constants.LineTerminators.UNIX  #: This controls the end of line terminator used
 
 # A Spice netlist can only have one of the instructions below, otherwise
 # an error will be raised
 
-# Regular expressions for the different components
-FLOAT_RGX = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?"
-
-# Regular expression for a number with decimal qualifier and unit
-NUMBER_RGX = r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?(Meg|[kmuµnpfgt])?[a-zA-Z]*"
-
-# Parameters expression of the type: PARAM=value
-PARAM_RGX = r"(?P<params>(\s+\w+\s*(=\s*[\w\{\}\(\)\-\+\*\/%\.]+)?)*)?"
+# Use patterns from core
+FLOAT_RGX = str(core_patterns.FLOAT_PATTERN)
+NUMBER_RGX = str(core_patterns.ENG_NOTATION_PATTERN)
+PARAM_RGX = str(core_patterns.PARAM_ASSIGNMENT_PATTERN)
 
 
-def VALUE_RGX(number_regex: str) -> str:
-    """Named Regex for a value or a formula."""
-    return r"(?P<value>(?P<formula>{)?(?(formula).*}|" + number_regex + "))"
+# VALUE_RGX is now handled within core patterns
 
 
-REPLACE_REGEXS: Dict[str, str] = {
-    "A": r"",  # LTspice Only : Special Functions, Parameter substitution not supported
-    # Behavioral source
-    "B": r"^(?P<designator>B§?[VI]?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$",
-    "C": (
-        r"^(?P<designator>C§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
-        + VALUE_RGX(FLOAT_RGX + r"[muµnpfgt]?F?")
-        + PARAM_RGX
-        + r".*?$"
-    ),  # Capacitor
-    "D": (
-        r"^(?P<designator>D§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # Diode
-    # Voltage Dependent Voltage Source
-    "E": r"^(?P<designator>E§?\w+)(?P<nodes>(\s+\S+){2,4})\s+(?P<value>.*)$",
-    # this only supports changing gain values
-    # Current Dependent Current Source
-    "F": r"^(?P<designator>F§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$",
-    # This implementation replaces everything after the 2 first nets
-    # Voltage Dependent Current Source
-    "G": r"^(?P<designator>G§?\w+)(?P<nodes>(\s+\S+){2,4})\s+(?P<value>.*)$",
-    # This only supports changing gain values
-    # Voltage Dependent Current Source
-    "H": r"^(?P<designator>H§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$",
-    # This implementation replaces everything after the 2 first nets
-    "I": (
-        r"^(?P<designator>I§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*?)"
-        # Independent Current Source
-        r"(?P<params>(\s+\w+\s*=\s*[\w\{\}\(\)\-\+\*\/%\.]+)*)$"
-    ),
-    # This implementation replaces everything after the 2 first nets
-    "J": (
-        r"^(?P<designator>J§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>\w+)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # JFET
-    # Mutual Inductance
-    "K": (
-        r"^(?P<designator>K§?\w+)(?P<nodes>(\s+\S+){2,4})\s+"
-        r"(?P<value>[\+\-]?[0-9\.E+-]+[kmuµnpgt]?).*$"
-    ),
-    # Inductance
-    "L": (
-        r"^(?P<designator>L§?\w+)(?P<nodes>(\s+\S+){2})\s+"
-        r"(?P<value>({)?(?(5).*}|([0-9\.E+-]+(Meg|[kmuµnpgt])?H?))).*$"
-    ),
-    "M": (
-        r"^(?P<designator>M§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>\w+)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # MOSFET
-    "O": (
-        r"^(?P<designator>O§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>\w+)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # Lossy Transmission Line
-    "Q": (
-        r"^(?P<designator>Q§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>\w+)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # Bipolar
-    "R": (
-        r"^(?P<designator>R§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
-        + "(R=)?"
-        + VALUE_RGX(FLOAT_RGX + r"(Meg|[kRmuµnpfgt])?\d*")
-        + PARAM_RGX
-        + ".*?$"
-    ),  # Resistor
-    # Voltage Controlled Switch
-    "S": r"^(?P<designator>S§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>.*)$",
-    # Lossless Transmission
-    "T": r"^(?P<designator>T§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>.*)$",
-    # Uniform RC-line
-    "U": r"^(?P<designator>U§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>.*)$",
-    "V": (
-        r"^(?P<designator>V§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*?)"
-        # Independent Voltage Source
-        r"(?P<params>(\s+\w+\s*=\s*[\w\{\}\(\)\-\+\*\/%\.]+)*)$"
-    ),
-    # ex: V1 NC_08 NC_09 PWL(1u 0 +2n 1 +1m 1 +2n 0 +1m 0 +2n -1 +1m -1 +2n 0)
-    # AC 1 2 Rser=3 Cpar=4
-    # Current Controlled Switch
-    "W": r"^(?P<designator>W§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$",
-    # This implementation replaces everything after the 2 first nets
-    "X": (
-        r"^(?P<designator>X§?\w+)(?P<nodes>(\s+\S+){1,99})\s+(?P<value>[\w\.]+)"
-        r"(\s+params:)?" + PARAM_RGX + r"\\?$"
-    ),  # Sub-circuit. The value is the last before any key-value parameters
-    # This is structured differently than the others as it will accept any number of nodes.
-    # But it only supports 1 value without any spaces in it (unlike V for example).
-    # ex: XU1 NC_01 NC_02 NC_03 NC_04 NC_05 level2 Avol=1Meg GBW=10Meg
-    #     Slew=10Meg Ilimit=25m Rail=0 Vos=0 En=0 Enk=0 In=0 Ink=0 Rin=500Meg
-    #     XU1 in out1 -V +V out1 OPAx189 bla_v2 =1% bla_sp1=1 bla_sp2 = 1
-    #     XU1 in out1 -V +V out1 GND OPAx189_float
-    "Z": r"^(?P<designator>Z§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>\w+).*$",
-    # MESFET and IBGT. TODO: Parameters substitution not supported
-    "@": r"^(?P<designator>@§?\d+)(?P<nodes>(\s+\S+){2})\s?(?P<params>(.*)*)$",
-    # Frequency Noise Analysis (FRA) wiggler
-    # pattern = r'^@(\d+)\s+(\w+)\s+(\w+)(?:\s+delay=(\d+\w+))?(?:\s+fstart=(\d+\w+))?'
-    # r'(?:\s+fend=(\d+\w+))?(?:\s+oct=(\d+))?(?:\s+fcoarse=(\d+\w+))?(?:\s+nmax=(\d+\w+))?'
-    # r'\s+(\d+)\s+(\d+\w+)\s+(\d+)(?:\s+pp0=(\d+\.\d+))?(?:\s+pp1=(\d+\.\d+))?(?:\s+f0=(\d+\w+))?'
-    # r'(?:\s+f1=(\d+\w+))?(?:\s+tavgmin=(\d+\w+))?(?:\s+tsettle=(\d+\w+))?(?:\s+acmag=(\d+))?$'
-    "Ã": (
-        r"^(?P<designator>Ã\w+)(?P<nodes>(\s+\S+){16})\s+(?P<value>.*)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # QSPICE Unique component Ã
-    "¥": (
-        r"^(?P<designator>¥\w+)(?P<nodes>(\s+\S+){16})\s+(?P<value>.*)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # QSPICE Unique component ¥
-    "€": (
-        r"^(?P<designator>€\w+)(?P<nodes>(\s+\S+){32})\s+(?P<value>.*)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # QSPICE Unique component €
-    "£": (
-        r"^(?P<designator>£\w+)(?P<nodes>(\s+\S+){64})\s+(?P<value>.*)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # QSPICE Unique component £
-    "Ø": (
-        r"^(?P<designator>Ø\w+)(?P<nodes>(\s+\S+){1,99})\s+(?P<value>.*)"
-        + PARAM_RGX
-        + ".*?$"
-    ),  # QSPICE Unique component Ø
-    "×": (
-        r"^(?P<designator>×\w+)(?P<nodes>(\s+\S+){4,16})\s+"
-        r"(?P<value>.*)(?P<params>(\w+\s+){1,8})\s*\\?$"
-    ),  # QSPICE proprietaty component ×
-    "Ö": (
-        r"^(?P<designator>Ö\w+)(?P<nodes>(\s+\S+){5})\s+(?P<params>.*)\s*\\?$"
-    ),  # LTspice proprietary component Ö
-}
+# Use component patterns from core
+REPLACE_REGEXS = core_patterns.SPICE_PATTERNS
 
-SUBCKT_CLAUSE_FIND = r"^.SUBCKT\s+"
 
-# Code Optimization objects, avoiding repeated compilation of regular
-# expressions
-component_replace_regexs: Dict[str, Pattern[str]] = {
-    prefix: re.compile(pattern, re.IGNORECASE)
-    for prefix, pattern in REPLACE_REGEXS.items()
-}
-subckt_regex: Pattern[str] = re.compile(r"^.SUBCKT\s+(?P<name>[\w\.]+)", re.IGNORECASE)
-lib_inc_regex: Pattern[str] = re.compile(r"^\.(LIB|INC)\s+(.*)$", re.IGNORECASE)
+SUBCKT_CLAUSE_FIND = str(core_patterns.SUBCKT_PATTERN)
+
+# Code Optimization objects - patterns are already compiled in core
+component_replace_regexs = REPLACE_REGEXS
+# Use compiled patterns from core
+subckt_regex = core_patterns.SUBCKT_PATTERN
+lib_inc_regex = core_patterns.LIB_INC_PATTERN
 
 # The following variable deprecated, and here only so that people can find it.
 # It is replaced by SpiceEditor.set_custom_library_paths().
@@ -324,14 +191,14 @@ def _parse_params(params_str: str) -> dict[str, Any]:
     return dict(params)
 
 
-class UnrecognizedSyntaxError(Exception):
+class UnrecognizedSyntaxError(FileFormatError):
     """Line doesn't match expected Spice syntax."""
 
     def __init__(self, line: str, regex: str) -> None:
         super().__init__(f'Line: "{line}" doesn\'t match regular expression "{regex}"')
 
 
-class MissingExpectedClauseError(Exception):
+class MissingExpectedClauseError(FileFormatError):
     """Missing expected clause in Spice netlist."""
 
 
@@ -479,7 +346,7 @@ class SpiceCircuit(BaseEditor):
         self._readonly = False
         self.modified_subcircuits: dict[str, "SpiceCircuit"] = {}
         self.parent = parent
-        self.encoding = "utf-8"  # Default encoding to handle file operations
+        self.encoding = core_constants.Encodings.UTF8  # Default encoding to handle file operations
 
     def get_line_starting_with(self, substr: str) -> int:
         """Internal function. Do not use.
@@ -1551,7 +1418,7 @@ class SpiceEditor(SpiceCircuit):
         if create_blank:
             # when user want to create a blank netlist file, and didn't set
             # encoding.
-            self.encoding = "utf-8"
+            self.encoding = core_constants.Encodings.UTF8
         else:
             if encoding == "autodetect":
                 try:
