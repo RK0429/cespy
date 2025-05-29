@@ -180,7 +180,7 @@ class AnyRunner(Protocol):
         exe_log: bool = False,
     ) -> Optional[RunTask]:
         """Execute simulation with specified parameters."""
-        ...
+        raise NotImplementedError
 
     def wait_completion(
         self,
@@ -188,17 +188,17 @@ class AnyRunner(Protocol):
         abort_all_on_timeout: bool = False,
     ) -> bool:
         """Wait for simulation completion."""
-        ...
+        raise NotImplementedError
 
     @property
     def ok_sim(self) -> int:
         """Return number of successful simulations."""
-        ...
+        raise NotImplementedError
 
     @property
     def runno(self) -> int:
         """Return current run number."""
-        ...
+        raise NotImplementedError
 
 
 class SimRunner(AnyRunner):

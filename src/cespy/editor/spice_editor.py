@@ -815,7 +815,7 @@ class SpiceCircuit(BaseEditor):
                 #     for _ in lines:  # Consuming the rest of the file.
                 #         pass  # print("Ignoring %s" % _)
         elif hasattr(self, "netlist_file"):
-            _logger.error("Netlist file not found: {}".format(self.netlist_file))
+            _logger.error(f"Netlist file not found: {self.netlist_file}")
 
     def clone(self, **kwargs: Any) -> "SpiceCircuit":
         """Creates a new copy of the SpiceCircuit. Changes done at the new copy do not
@@ -1692,7 +1692,7 @@ class SpiceEditor(SpiceCircuit):
                 #     for _ in lines:  # Consuming the rest of the file.
                 #         pass  # print("Ignoring %s" % _)
         elif hasattr(self, "netlist_file"):
-            _logger.error("Netlist file not found: {}".format(self.netlist_file))
+            _logger.error(f"Netlist file not found: {self.netlist_file}")
 
     def run(
         self,
