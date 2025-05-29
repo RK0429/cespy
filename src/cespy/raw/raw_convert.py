@@ -41,6 +41,9 @@ from typing import List, Union
 
 import clipboard  # type: ignore
 
+# Core imports
+from ..core import constants as core_constants
+
 from .raw_read import RawRead
 
 

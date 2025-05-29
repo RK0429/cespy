@@ -26,50 +26,177 @@ statistical analysis of circuit behavior under component variations.
 
 import logging
 import random
-from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
+from collections import defaultdict
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
+import numpy as np
+from numpy.typing import NDArray
+
+from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
 from ..process_callback import ProcessCallback
+from ..run_task import RunTask
+from .base_analysis import AnalysisResult, AnalysisStatus, StatisticalAnalysis
 from .tolerance_deviations import ComponentDeviation, DeviationType, ToleranceDeviations
 
-_logger = logging.getLogger("cespy.SimAnalysis")
+_logger = logging.getLogger("cespy.MonteCarloAnalysis")
 
 
-class Montecarlo(ToleranceDeviations):
-    """Class to automate Montecarlo simulations, where component values and parameters
-    are replaced by a random distribution (either a gaussian or a uniform distribution).
-
-    This is a statistical method, hence, it needs a considerable number of simulations
-    to achieve a final gaussian distribution in order to apply this method. If the
-    number of parameters and component values is low, it is better to use a Worst-Case
-    approach.
-
-    Like the Worst-Case and Sensitivity analysis, there are two possible approaches to
-    use this class:
-
-    Class to automate Worst-Case simulations, where all possible combinations of maximum
-    and minimums possible values of component values and parameters are done.
-
-    It is advised to use this algorithm when the number of parameters to be varied is
-    reduced. Typically less than 10 or 12. A higher number will translate into a huge
-    number of simulations. For more than 1000 simulations, it is better to use a
-    statistical method such as the Montecarlo.
-
-    Like the Worst-Case and Sensitivity analysis, there are two possible approaches to
-    use this class:
-
-    1. Preparing a testbench where all combinations are managed directly by the
-    simulator, replacing  parameters and component values by formulas and using a .STEP
-    primitive to cycle through all possible  combinations.
-
-    2. Launching each simulation separately where the running python script manages all
-    parameter value variations.
-
-    The first approach is normally faster, but not possible in all simulators. The
-    second approach is a valid backup when every single simulation takes too long, or
-    when it is prone to crashes and stalls.
+class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
+    """Class to automate Monte Carlo simulations with statistical analysis.
+    
+    This class provides two operational modes:
+    
+    1. **Testbench Mode** (default): Uses simulator formulas with .STEP directives
+       for efficient batch execution. This is faster but requires simulator support.
+       
+    2. **Separate Run Mode**: Runs individual simulations with Python managing
+       parameter variations. This provides better control and error recovery.
+    
+    The class inherits from both ToleranceDeviations (for component variation
+    management) and StatisticalAnalysis (for parallel execution and result analysis).
+    
+    Example:
+        ```python
+        # Testbench mode (faster, single simulation with many runs)
+        mc = Montecarlo('circuit.asc', num_runs=1000, use_testbench_mode=True)
+        mc.set_tolerance('R1', 0.05)  # 5% tolerance
+        mc.run_testbench()
+        stats = mc.get_measurement_statistics('Vout')
+        
+        # Separate run mode (better control, individual simulations)
+        mc = Montecarlo('circuit.asc', num_runs=100, use_testbench_mode=False, parallel=True)
+        mc.set_tolerance('R1', 0.05)
+        results = mc.run_analysis()
+        stats = mc.calculate_statistics('Vout')
+        ```
     """
 
+    def __init__(
+        self,
+        circuit_file: Union[str, BaseEditor],
+        num_runs: int = 1000,
+        seed: Optional[int] = None,
+        use_testbench_mode: bool = True,
+        **kwargs
+    ):
+        """Initialize Monte Carlo analysis.
+        
+        Args:
+            circuit_file: Circuit file path or editor instance
+            num_runs: Number of simulation runs
+            seed: Random seed for reproducibility
+            use_testbench_mode: If True, use simulator formulas; if False, separate runs
+            **kwargs: Additional arguments for base classes
+        """
+        # Initialize ToleranceDeviations first
+        ToleranceDeviations.__init__(self, circuit_file, kwargs.get('runner'))
+        
+        # Initialize StatisticalAnalysis  
+        StatisticalAnalysis.__init__(self, circuit_file, num_runs, seed, **kwargs)
+        
+        # Monte Carlo specific attributes
+        self.use_testbench_mode = use_testbench_mode
+        self._current_run_params: List[Dict[str, Any]] = []
+        
+        # Set random seed for Random class too (for backward compatibility)
+        if seed is not None:
+            random.seed(seed)
+    
+    def prepare_runs(self) -> List[Dict[str, Any]]:
+        """Prepare parameter sets for all Monte Carlo runs.
+        
+        Returns:
+            List of parameter dictionaries for each run
+        """
+        if self.use_testbench_mode:
+            # In testbench mode, prepare a single run with formulas
+            self.prepare_testbench(num_runs=self.num_runs)
+            return [{"run_id": 0, "type": "testbench"}]
+        else:
+            # In separate run mode, prepare individual parameter sets
+            all_params = []
+            for run_id in range(self.num_runs):
+                params = self._generate_run_parameters(run_id)
+                all_params.append(params)
+            self._current_run_params = all_params
+            return all_params
+    
+    def _generate_run_parameters(self, run_id: int) -> Dict[str, Any]:
+        """Generate parameters for a single run.
+        
+        Args:
+            run_id: Run identifier
+            
+        Returns:
+            Dictionary of parameters for this run
+        """
+        params = {"run_id": run_id}
+        
+        # Generate component variations
+        for ref in self.get_components("*"):
+            val, dev = self.get_component_value_deviation_type(ref)
+            if isinstance(val, float) and dev.typ != DeviationType.NONE:
+                new_val = self._get_sim_value(val, dev)
+                if new_val != val:
+                    params[f"comp_{ref}"] = new_val
+        
+        # Generate parameter variations
+        for param in self.parameter_deviations:
+            val, dev = self.get_parameter_value_deviation_type(param)
+            if isinstance(val, (int, float)) and dev.typ != DeviationType.NONE:
+                new_val = self._get_sim_value(val, dev)
+                if new_val != val:
+                    params[f"param_{param}"] = new_val
+        
+        return params
+    
+    def apply_parameters(self, parameters: Dict[str, Any]) -> None:
+        """Apply parameters to the circuit.
+        
+        Args:
+            parameters: Parameters to apply
+        """
+        if parameters.get("type") == "testbench":
+            # Testbench mode - formulas already applied
+            return
+        
+        # Apply component values
+        for key, value in parameters.items():
+            if key.startswith("comp_"):
+                ref = key[5:]  # Remove "comp_" prefix
+                self.editor.set_component_value(ref, value)
+            elif key.startswith("param_"):
+                param = key[6:]  # Remove "param_" prefix
+                self.editor.set_parameter(param, value)
+    
+    def extract_results(self, run_task: RunTask) -> Dict[str, Any]:
+        """Extract measurements from a completed run.
+        
+        Args:
+            run_task: Completed simulation task
+            
+        Returns:
+            Dictionary of measurements
+        """
+        measurements = {}
+        
+        # Read log file
+        log_data = self.read_logfile(run_task)
+        if log_data is not None:
+            # Extract all measurements
+            for meas_name in log_data.dataset:
+                meas_values = log_data.dataset[meas_name]
+                if meas_values:
+                    # For testbench mode, return all values
+                    if self.use_testbench_mode:
+                        measurements[meas_name] = meas_values
+                    else:
+                        # For single run mode, return the last value
+                        measurements[meas_name] = meas_values[-1]
+        
+        return measurements
+    
     # pylint: disable=too-many-branches,too-many-statements
     def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepares the simulation by setting the tolerances for the components :keyword
@@ -234,45 +361,44 @@ class Montecarlo(ToleranceDeviations):
             _logger.warning("Unknown deviation type")
         return new_val
 
-    # pylint: disable=too-many-positional-arguments
-    def run_analysis(
+    def run_testbench(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[list[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
-        measure: Optional[str] = None,
-        num_runs: int = 1000,
     ) -> None:
-        """This method runs the analysis without updating the netlist.
-
-        It will update component values and parameters according to their deviation type
-        and call the simulation. The advantage of this method is that it doesn't require
-        adding random functions to the netlist. The number of times the simulation is
-        done is specified on the argument num_runs.
+        """Run Monte Carlo analysis using testbench mode.
+        
+        This is the original method for running simulations using simulator
+        formulas and .STEP directives. It's faster but less flexible.
+        
+        Args:
+            callback: Process callback for simulation monitoring
+            callback_args: Arguments for the callback
+            switches: Additional simulator switches
+            timeout: Timeout for the simulation
+            exe_log: Whether to log execution
         """
-        self.elements_analysed.clear()
-        self.clear_simulation_data()
-        for _ in range(num_runs):
-            self._reset_netlist()  # reset the netlist
-            self.play_instructions()  # play the instructions
-            # Preparing the variation on components
-            for ref in self.get_components("*"):
-                val, dev = self.get_component_value_deviation_type(ref)
-                if isinstance(val, float):
-                    new_val = self._get_sim_value(val, dev)
-                    if new_val != val:
-                        self.editor.set_component_value(ref, new_val)
-            # Preparing the variation on parameters
-            for param in self.parameter_deviations:
-                val, dev = self.get_parameter_value_deviation_type(param)
-                if isinstance(val, (int, float)):
-                    new_val = self._get_sim_value(val, dev)
-                    if new_val != val:
-                        self.editor.set_parameter(param, new_val)
+        # Ensure testbench mode is enabled
+        original_mode = self.use_testbench_mode
+        self.use_testbench_mode = True
+        
+        try:
+            # Prepare testbench if not already done
+            if not getattr(self.testbench, 'prepared', False):
+                self.prepare_testbench(num_runs=self.num_runs)
+            
+            # Clear previous data
+            self.elements_analysed.clear()
+            self.clear_simulation_data()
+            
+            # Reset and apply instructions
+            self._reset_netlist()
+            self.play_instructions()
+            
             # Run the simulation
-            # Handle optional parameters properly before passing to run
             actual_callback = (
                 callback if callback is not None else lambda *args, **kwargs: None
             )
@@ -288,16 +414,89 @@ class Montecarlo(ToleranceDeviations):
                 exe_log=exe_log,
             )
 
-        self.runner.wait_completion()
-        if callback is not None:
-            callback_rets = []
-            for rt in self.simulations:
-                if rt is not None:
-                    callback_rets.append(rt.get_results())
-            self.simulation_results["callback_returns"] = callback_rets
-        self.testbench.analysis_executed = True
+            self.runner.wait_completion()
+            
+            # Process callback results
+            if callback is not None:
+                callback_rets = []
+                for sim_rt in self.simulations:
+                    if sim_rt is not None:
+                        callback_rets.append(sim_rt.get_results())
+                if not hasattr(self, 'simulation_results'):
+                    self.simulation_results = {}
+                self.simulation_results["callback_returns"] = callback_rets
+            
+            self.testbench.analysis_executed = True
+            
+        finally:
+            self.use_testbench_mode = original_mode
+    
+    def run_separate_analysis(
+        self,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[list[str]] = None,
+        timeout: Optional[float] = None,
+        exe_log: bool = True,
+    ) -> List[AnalysisResult]:
+        """Run Monte Carlo analysis with separate simulations.
+        
+        This method runs each simulation separately, allowing for better control
+        and recovery from individual simulation failures.
+        
+        Args:
+            callback: Process callback for simulation monitoring
+            callback_args: Arguments for the callback
+            switches: Additional simulator switches
+            timeout: Timeout for each simulation
+            exe_log: Whether to log execution
+            
+        Returns:
+            List of analysis results
+        """
+        # Temporarily disable testbench mode
+        original_mode = self.use_testbench_mode
+        self.use_testbench_mode = False
+        
+        try:
+            # Set up callback forwarding if needed
+            if callback is not None:
+                self._setup_callback_forwarding(callback, callback_args)
+            
+            # Run the analysis using base class method
+            results = super().run_analysis()
+            
+            # Process callback results if needed
+            if callback is not None:
+                self._process_callback_results(results)
+            
+            return results
+            
+        finally:
+            self.use_testbench_mode = original_mode
+    
+    def _setup_callback_forwarding(self, callback, callback_args):
+        """Set up callback forwarding for individual runs."""
+        # Store original runner callback settings
+        self._original_callback = getattr(self.runner, 'default_callback', None)
+        self._original_callback_args = getattr(self.runner, 'default_callback_args', None)
+        
+        # Set new callback
+        if hasattr(self.runner, 'set_default_callback'):
+            self.runner.set_default_callback(callback, callback_args)
+    
+    def _process_callback_results(self, results: List[AnalysisResult]):
+        """Process callback results from individual runs."""
+        callback_returns = []
+        for result in results:
+            if result.success and hasattr(result, 'callback_result'):
+                callback_returns.append(result.callback_result)
+        
+        if not hasattr(self, 'simulation_results'):
+            self.simulation_results = {}
+        self.simulation_results["callback_returns"] = callback_returns
 
-    def analyse_measurement(self, meas_name: str) -> Optional[Any]:
+    def analyse_measurement(self, meas_name: str) -> Optional[List[float]]:
         """Returns the measurement data for the given measurement name.
 
         If the measurement is not found, it returns None Note: It is up to the user to
@@ -305,15 +504,105 @@ class Montecarlo(ToleranceDeviations):
         to calculate the mean and standard deviation of the data. It is also usual to
         consider max and min as 3 sigma, which is 99.7% of the data.
         """
-        if not self.testbench.analysis_executed:
-            _logger.warning(
-                "The analysis was not executed. Please run the analysis before calling"
-                " this method"
+        if self.use_testbench_mode:
+            # In testbench mode, read from log files
+            if not getattr(self.testbench, 'analysis_executed', False):
+                _logger.warning(
+                    "The analysis was not executed. Please run the analysis before calling"
+                    " this method"
+                )
+                return None
+            log_data: LogfileData = self.read_logfiles()
+            meas_data = log_data[meas_name]
+            if meas_data is None:
+                _logger.warning("Measurement %s not found in log files", meas_name)
+                return None
+            return meas_data
+        else:
+            # In separate run mode, collect from results
+            values = []
+            for result in self.results:
+                if result.success and meas_name in result.measurements:
+                    value = result.measurements[meas_name]
+                    if isinstance(value, (int, float)):
+                        values.append(float(value))
+            return values if values else None
+    
+    def get_measurement_statistics(self, meas_name: str) -> Dict[str, float]:
+        """Get statistics for a measurement.
+        
+        This is a convenience method that combines analyse_measurement
+        with calculate_statistics from the base class.
+        
+        Args:
+            meas_name: Name of the measurement
+            
+        Returns:
+            Dictionary with statistical measures
+        """
+        # If using testbench mode, need to populate results first
+        if self.use_testbench_mode and not self.results:
+            values = self.analyse_measurement(meas_name)
+            if values:
+                # Create synthetic results for statistics calculation
+                for i, value in enumerate(values):
+                    result = AnalysisResult(
+                        run_id=i,
+                        status=AnalysisStatus.COMPLETED,
+                        measurements={meas_name: value}
+                    )
+                    self.results.append(result)
+        
+        return self.calculate_statistics(meas_name)
+    
+    # Backward compatibility methods
+    def run_analysis(
+        self,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[list[str]] = None,
+        timeout: Optional[float] = None,
+        exe_log: bool = True,
+        measure: Optional[str] = None,
+        num_runs: Optional[int] = None,
+    ) -> Optional[List[AnalysisResult]]:
+        """Run Monte Carlo analysis (backward compatibility method).
+        
+        This method maintains backward compatibility while directing to the
+        appropriate analysis method based on the current mode.
+        
+        Args:
+            callback: Process callback for simulation monitoring
+            callback_args: Arguments for the callback
+            switches: Additional simulator switches
+            timeout: Timeout for simulations
+            exe_log: Whether to log execution
+            measure: Deprecated parameter (ignored)
+            num_runs: Override number of runs (updates self.num_runs)
+            
+        Returns:
+            List of results if separate mode, None if testbench mode
+        """
+        # Update num_runs if provided
+        if num_runs is not None:
+            self.num_runs = num_runs
+        
+        if self.use_testbench_mode:
+            # Use testbench mode
+            self.run_testbench(
+                callback=callback,
+                callback_args=callback_args,
+                switches=switches,
+                timeout=timeout,
+                exe_log=exe_log
             )
             return None
-        log_data: LogfileData = self.read_logfiles()
-        meas_data = log_data[meas_name]
-        if meas_data is None:
-            _logger.warning("Measurement %s not found in log files", meas_name)
-            return None
-        return meas_data
+        else:
+            # Use separate run mode
+            return self.run_separate_analysis(
+                callback=callback,
+                callback_args=callback_args,
+                switches=switches,
+                timeout=timeout,
+                exe_log=exe_log
+            )

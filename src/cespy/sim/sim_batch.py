@@ -387,3 +387,6 @@ setattr(
     "add_LTspiceRunCmdLineSwitches",
     SimCommander.add_ltspice_run_cmd_line_switches,
 )
+
+# Alias for historical reasons
+SimBatch = SimCommander

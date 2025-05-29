@@ -37,6 +37,10 @@ from math import floor, log
 from pathlib import Path
 from typing import Any, List, Union
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+from ..core import paths as core_paths
 from ..sim.simulator import Simulator
 
 _logger = logging.getLogger("cespy.BaseEditor")
@@ -280,14 +284,41 @@ def to_float(value: str, accept_invalid: bool = True) -> Union[float, str]:
 
 
 class ComponentNotFoundError(Exception):
-    """Component Not Found Error."""
+    """Component Not Found Error.
+    
+    This exception is raised when a component reference is not found in the circuit.
+    """
+    
+    def __init__(self, component_ref: str, message: str = None):
+        """Initialize ComponentNotFoundError.
+        
+        Args:
+            component_ref: The component reference that was not found
+            message: Optional custom message
+        """
+        if message is None:
+            message = f"Component '{component_ref}' not found"
+        super().__init__(message)
+        self.component_ref = component_ref
 
 
 class ParameterNotFoundError(Exception):
-    """ParameterNotFound Error."""
+    """Parameter Not Found Error.
+    
+    This exception is raised when a parameter is not found in the circuit.
+    """
 
-    def __init__(self, parameter: str) -> None:
-        super().__init__(f'Parameter "{parameter}" not found')
+    def __init__(self, parameter: str, message: str = None) -> None:
+        """Initialize ParameterNotFoundError.
+        
+        Args:
+            parameter: The parameter name that was not found
+            message: Optional custom message
+        """
+        if message is None:
+            message = f'Parameter "{parameter}" not found'
+        super().__init__(message)
+        self.parameter = parameter
 
 
 class Primitive:
@@ -869,16 +900,15 @@ class BaseEditor(ABC):
     @classmethod
     def _check_and_append_custom_library_path(cls, path: str) -> None:
         """:meta private:"""
-        if path.startswith("~"):
-            path = os.path.expanduser(path)
+        expanded_path = core_paths.expand_user_path(path)
 
-        if os.path.exists(path) and os.path.isdir(path):
-            _logger.debug("Adding path '%s' to the custom library path list", path)
-            cls.custom_lib_paths.append(path)
+        if core_paths.is_valid_directory(expanded_path):
+            _logger.debug("Adding path '%s' to the custom library path list", expanded_path)
+            cls.custom_lib_paths.append(expanded_path)
         else:
             _logger.warning(
                 "Cannot add path '%s' to the custom library path list, as it does not exist",
-                path,
+                expanded_path,
             )
 
     @classmethod

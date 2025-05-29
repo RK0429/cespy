@@ -32,6 +32,15 @@ import sys
 from pathlib import Path
 from typing import IO, Dict, List, Optional, Union
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import paths as core_paths
+from ..exceptions import (
+    SimulatorNotFoundError,
+    SimulationTimeoutError,
+    FileFormatError,
+)
+
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
 _logger = logging.getLogger("cespy.LTSpiceSimulator")
@@ -44,18 +53,8 @@ class LTspice(Simulator):
     Searches on the any usual locations for a simulator.
     """
 
-    # windows paths (that are also valid for wine)
-    # Please note that os.path.expanduser and os.path.join are sensitive to the style
-    # of slash.
-    # Placed in order of preference. The first to be found will be used.
-    _spice_exe_win_paths: List[str] = [
-        "~/AppData/Local/Programs/ADI/LTspice/LTspice.exe",
-        "~/Local Settings/Application Data/Programs/ADI/LTspice/LTspice.exe",
-        "C:/Program Files/ADI/LTspice/LTspice.exe",
-        "C:/Program Files/LTC/LTspiceXVII/XVIIx64.exe",
-        "C:/Program Files (x86)/LTC/LTspiceXVII/XVIIx64.exe",
-        "C:/Program Files (x86)/LTC/LTspiceIV/scad3.exe",
-    ]
+    # Use default paths from core constants
+    _spice_exe_win_paths: List[str] = core_paths.get_default_simulator_paths(core_constants.Simulators.LTSPICE)
 
     # the default lib paths, as used by get_default_library_paths
     _default_lib_paths: List[str] = [
@@ -223,7 +222,7 @@ class LTspice(Simulator):
         if sys.platform in ("linux", "darwin"):
             if cls.using_macos_native_sim():
                 # native MacOS simulator, which has its limitations
-                if netlist_file.suffix.lower().endswith(".asc"):
+                if netlist_file.suffix.lower() == core_constants.FileExtensions.ASC:
                     raise NotImplementedError(
                         "MacOS native LTspice cannot run simulations on '.asc' files. "
                         "Simulate '.net' or '.cir' files or use LTspice under wine."
@@ -260,7 +259,7 @@ class LTspice(Simulator):
             )
         # start execution
         if exe_log:
-            log_exe_file = netlist_file.with_suffix(".exe.log")
+            log_exe_file = netlist_file.with_suffix(".exe.log")  # LTSpice specific log extension
             with open(log_exe_file, "wb") as outfile:
                 error = run_function(
                     cmd_run,
@@ -348,13 +347,13 @@ class LTspice(Simulator):
             )
 
         if error == 0:
-            netlist = circuit_file.with_suffix(".net")
+            netlist = circuit_file.with_suffix(core_constants.FileExtensions.NET)
             if netlist.exists():
                 _logger.debug("OK")
                 return netlist
         msg = "Failed to create netlist"
         _logger.error(msg)
-        raise RuntimeError(msg)
+        raise SpiceSimulatorError(msg)
 
     @classmethod
     def detect_executable(cls) -> None:
@@ -372,14 +371,14 @@ class LTspice(Simulator):
         if spice_folder and spice_executable:
             cls.spice_exe = [
                 "wine",
-                os.path.join(spice_folder, spice_executable),
+                core_paths.join_paths(spice_folder, spice_executable),
             ]
             cls.process_name = spice_executable
             return
         if spice_folder:
             cls.spice_exe = [
                 "wine",
-                os.path.join(spice_folder, "/XVIIx64.exe"),
+                core_paths.join_paths(spice_folder, "XVIIx64.exe"),
             ]
             cls.process_name = "XVIIx64.exe"
             return
@@ -389,24 +388,22 @@ class LTspice(Simulator):
             )
             cls.spice_exe = [
                 "wine",
-                os.path.join(default_folder, spice_executable),
+                core_paths.join_paths(default_folder, spice_executable),
             ]
             cls.process_name = spice_executable
             return
         for exe in cls._spice_exe_win_paths:
             path = exe
-            if path.startswith("~"):
-                path = "C:/users/" + os.path.expandvars("${USER}" + path[1:])
-            path = os.path.expanduser(path.replace("C:/", "~/.wine/drive_c/"))
-            if os.path.exists(path):
-                cls.spice_exe = ["wine", path]
-                cls.process_name = cls.guess_process_name(path)
+            expanded_path, exists = core_paths.expand_and_check_local_dir(path)
+            if exists:
+                cls.spice_exe = ["wine", expanded_path]
+                cls.process_name = core_paths.guess_process_name(expanded_path)
                 return
         if sys.platform == "darwin":
             exe = "/Applications/LTspice.app/Contents/MacOS/LTspice"
-            if os.path.exists(exe):
+            if core_paths.is_valid_file(exe):
                 cls.spice_exe = [exe]
-                cls.process_name = cls.guess_process_name(exe)
+                cls.process_name = core_paths.guess_process_name(exe)
 
     @classmethod
     def _detect_windows_executable(cls) -> None:
@@ -415,9 +412,9 @@ class LTspice(Simulator):
             path = exe
             if path.startswith("~"):
                 path = os.path.expanduser(path)
-            if os.path.exists(path):
+            if core_paths.is_valid_file(path):
                 cls.spice_exe = [path]
-                cls.process_name = cls.guess_process_name(path)
+                cls.process_name = core_paths.guess_process_name(path)
                 return
 
 

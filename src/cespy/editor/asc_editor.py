@@ -28,17 +28,21 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Match, Optional, Tuple, Union, cast
 
+# Core imports
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
+from ..core import paths as core_paths
+
 from ..log.logfile_data import try_convert_value
 from ..simulators.ltspice_simulator import LTspice
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from ..utils.file_search import search_file_in_containers
 from .asy_reader import AsyReader
+from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
 from .base_editor import (
     PARAM_REGEX,
     UNIQUE_SIMULATION_DOT_INSTRUCTIONS,
     BaseEditor,
-    ComponentNotFoundError,
-    ParameterNotFoundError,
     format_eng,
 )
 from .base_schematic import (
@@ -73,14 +77,20 @@ _logger = logging.getLogger("cespy.AscEditor")
 
 
 LTSPICE_PARAMETERS = (
-    "Value",
-    "Value2",
-    "SpiceModel",
-    "SpiceLine",
-    "SpiceLine2",
+    core_constants.LTSpiceConstants.VALUE,
+    core_constants.LTSpiceConstants.VALUE2,
+    core_constants.LTSpiceConstants.SPICE_MODEL,
+    core_constants.LTSpiceConstants.SPICE_LINE,
+    core_constants.LTSpiceConstants.SPICE_LINE2,
 )
-LTSPICE_PARAMETERS_REDUCED = ("SpiceLine", "SpiceLine2")
-LTSPICE_ATTRIBUTES = ("InstName", "Def_Sub")
+LTSPICE_PARAMETERS_REDUCED = (
+    core_constants.LTSpiceConstants.SPICE_LINE,
+    core_constants.LTSpiceConstants.SPICE_LINE2,
+)
+LTSPICE_ATTRIBUTES = (
+    core_constants.LTSpiceConstants.INST_NAME,
+    core_constants.LTSpiceConstants.DEF_SUB,
+)
 
 
 class AscEditor(BaseSchematic):
@@ -130,7 +140,7 @@ class AscEditor(BaseSchematic):
     def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
         if isinstance(run_netlist_file, str):
             run_netlist_file = Path(run_netlist_file)
-        run_netlist_file = run_netlist_file.with_suffix(".asc")
+        run_netlist_file = run_netlist_file.with_suffix(core_constants.FileExtensions.ASC)
         with open(run_netlist_file, "w", encoding=self.encoding) as asc:
             _logger.info("Writing ASC file %s", run_netlist_file)
 
