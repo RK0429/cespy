@@ -44,18 +44,18 @@ _logger = logging.getLogger("cespy.MonteCarloAnalysis")
 
 class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
     """Class to automate Monte Carlo simulations with statistical analysis.
-    
+
     This class provides two operational modes:
-    
+
     1. **Testbench Mode** (default): Uses simulator formulas with .STEP directives
        for efficient batch execution. This is faster but requires simulator support.
-       
+
     2. **Separate Run Mode**: Runs individual simulations with Python managing
        parameter variations. This provides better control and error recovery.
-    
+
     The class inherits from both ToleranceDeviations (for component variation
     management) and StatisticalAnalysis (for parallel execution and result analysis).
-    
+
     Example:
         ```python
         # Testbench mode (faster, single simulation with many runs)
@@ -63,7 +63,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         mc.set_tolerance('R1', 0.05)  # 5% tolerance
         mc.run_testbench()
         stats = mc.get_measurement_statistics('Vout')
-        
+
         # Separate run mode (better control, individual simulations)
         mc = Montecarlo('circuit.asc', num_runs=100, use_testbench_mode=False, parallel=True)
         mc.set_tolerance('R1', 0.05)
@@ -78,10 +78,10 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         num_runs: int = 1000,
         seed: Optional[int] = None,
         use_testbench_mode: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """Initialize Monte Carlo analysis.
-        
+
         Args:
             circuit_file: Circuit file path or editor instance
             num_runs: Number of simulation runs
@@ -90,22 +90,22 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             **kwargs: Additional arguments for base classes
         """
         # Initialize ToleranceDeviations first
-        ToleranceDeviations.__init__(self, circuit_file, kwargs.get('runner'))
-        
-        # Initialize StatisticalAnalysis  
+        ToleranceDeviations.__init__(self, circuit_file, kwargs.get("runner"))
+
+        # Initialize StatisticalAnalysis
         StatisticalAnalysis.__init__(self, circuit_file, num_runs, seed, **kwargs)
-        
+
         # Monte Carlo specific attributes
         self.use_testbench_mode = use_testbench_mode
         self._current_run_params: List[Dict[str, Any]] = []
-        
+
         # Set random seed for Random class too (for backward compatibility)
         if seed is not None:
             random.seed(seed)
-    
+
     def prepare_runs(self) -> List[Dict[str, Any]]:
         """Prepare parameter sets for all Monte Carlo runs.
-        
+
         Returns:
             List of parameter dictionaries for each run
         """
@@ -121,18 +121,18 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 all_params.append(params)
             self._current_run_params = all_params
             return all_params
-    
+
     def _generate_run_parameters(self, run_id: int) -> Dict[str, Any]:
         """Generate parameters for a single run.
-        
+
         Args:
             run_id: Run identifier
-            
+
         Returns:
             Dictionary of parameters for this run
         """
         params = {"run_id": run_id}
-        
+
         # Generate component variations
         for ref in self.get_components("*"):
             val, dev = self.get_component_value_deviation_type(ref)
@@ -140,7 +140,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 new_val = self._get_sim_value(val, dev)
                 if new_val != val:
                     params[f"comp_{ref}"] = new_val
-        
+
         # Generate parameter variations
         for param in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(param)
@@ -148,19 +148,19 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 new_val = self._get_sim_value(val, dev)
                 if new_val != val:
                     params[f"param_{param}"] = new_val
-        
+
         return params
-    
+
     def apply_parameters(self, parameters: Dict[str, Any]) -> None:
         """Apply parameters to the circuit.
-        
+
         Args:
             parameters: Parameters to apply
         """
         if parameters.get("type") == "testbench":
             # Testbench mode - formulas already applied
             return
-        
+
         # Apply component values
         for key, value in parameters.items():
             if key.startswith("comp_"):
@@ -169,18 +169,18 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             elif key.startswith("param_"):
                 param = key[6:]  # Remove "param_" prefix
                 self.editor.set_parameter(param, value)
-    
+
     def extract_results(self, run_task: RunTask) -> Dict[str, Any]:
         """Extract measurements from a completed run.
-        
+
         Args:
             run_task: Completed simulation task
-            
+
         Returns:
             Dictionary of measurements
         """
         measurements = {}
-        
+
         # Read log file
         log_data = self.read_logfile(run_task)
         if log_data is not None:
@@ -194,9 +194,9 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                     else:
                         # For single run mode, return the last value
                         measurements[meas_name] = meas_values[-1]
-        
+
         return measurements
-    
+
     # pylint: disable=too-many-branches,too-many-statements
     def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepares the simulation by setting the tolerances for the components :keyword
@@ -218,7 +218,8 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             if dev.typ == DeviationType.TOLERANCE:
                 tolstr = f"{dev.max_val:g}".rstrip("0").rstrip(".")
                 if dev.distribution == "uniform":
-                    new_val = f"{{utol({val},{tolstr})}}"  # calculate expression for new value
+                    # calculate expression for new value
+                    new_val = f"{{utol({val},{tolstr})}}"
                     tol_uni_func = True
                 elif dev.distribution == "normal":
                     new_val = f"{{ntol({val},{tolstr})}}"
@@ -370,10 +371,10 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         exe_log: bool = True,
     ) -> None:
         """Run Monte Carlo analysis using testbench mode.
-        
+
         This is the original method for running simulations using simulator
         formulas and .STEP directives. It's faster but less flexible.
-        
+
         Args:
             callback: Process callback for simulation monitoring
             callback_args: Arguments for the callback
@@ -384,20 +385,20 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         # Ensure testbench mode is enabled
         original_mode = self.use_testbench_mode
         self.use_testbench_mode = True
-        
+
         try:
             # Prepare testbench if not already done
-            if not getattr(self.testbench, 'prepared', False):
+            if not getattr(self.testbench, "prepared", False):
                 self.prepare_testbench(num_runs=self.num_runs)
-            
+
             # Clear previous data
             self.elements_analysed.clear()
             self.clear_simulation_data()
-            
+
             # Reset and apply instructions
             self._reset_netlist()
             self.play_instructions()
-            
+
             # Run the simulation
             actual_callback = (
                 callback if callback is not None else lambda *args, **kwargs: None
@@ -415,22 +416,22 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             )
 
             self.runner.wait_completion()
-            
+
             # Process callback results
             if callback is not None:
                 callback_rets = []
                 for sim_rt in self.simulations:
                     if sim_rt is not None:
                         callback_rets.append(sim_rt.get_results())
-                if not hasattr(self, 'simulation_results'):
+                if not hasattr(self, "simulation_results"):
                     self.simulation_results = {}
                 self.simulation_results["callback_returns"] = callback_rets
-            
+
             self.testbench.analysis_executed = True
-            
+
         finally:
             self.use_testbench_mode = original_mode
-    
+
     def run_separate_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
@@ -440,59 +441,61 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         exe_log: bool = True,
     ) -> List[AnalysisResult]:
         """Run Monte Carlo analysis with separate simulations.
-        
+
         This method runs each simulation separately, allowing for better control
         and recovery from individual simulation failures.
-        
+
         Args:
             callback: Process callback for simulation monitoring
             callback_args: Arguments for the callback
             switches: Additional simulator switches
             timeout: Timeout for each simulation
             exe_log: Whether to log execution
-            
+
         Returns:
             List of analysis results
         """
         # Temporarily disable testbench mode
         original_mode = self.use_testbench_mode
         self.use_testbench_mode = False
-        
+
         try:
             # Set up callback forwarding if needed
             if callback is not None:
                 self._setup_callback_forwarding(callback, callback_args)
-            
+
             # Run the analysis using base class method
             results = super().run_analysis()
-            
+
             # Process callback results if needed
             if callback is not None:
                 self._process_callback_results(results)
-            
+
             return results
-            
+
         finally:
             self.use_testbench_mode = original_mode
-    
+
     def _setup_callback_forwarding(self, callback, callback_args):
         """Set up callback forwarding for individual runs."""
         # Store original runner callback settings
-        self._original_callback = getattr(self.runner, 'default_callback', None)
-        self._original_callback_args = getattr(self.runner, 'default_callback_args', None)
-        
+        self._original_callback = getattr(self.runner, "default_callback", None)
+        self._original_callback_args = getattr(
+            self.runner, "default_callback_args", None
+        )
+
         # Set new callback
-        if hasattr(self.runner, 'set_default_callback'):
+        if hasattr(self.runner, "set_default_callback"):
             self.runner.set_default_callback(callback, callback_args)
-    
+
     def _process_callback_results(self, results: List[AnalysisResult]):
         """Process callback results from individual runs."""
         callback_returns = []
         for result in results:
-            if result.success and hasattr(result, 'callback_result'):
+            if result.success and hasattr(result, "callback_result"):
                 callback_returns.append(result.callback_result)
-        
-        if not hasattr(self, 'simulation_results'):
+
+        if not hasattr(self, "simulation_results"):
             self.simulation_results = {}
         self.simulation_results["callback_returns"] = callback_returns
 
@@ -506,7 +509,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         """
         if self.use_testbench_mode:
             # In testbench mode, read from log files
-            if not getattr(self.testbench, 'analysis_executed', False):
+            if not getattr(self.testbench, "analysis_executed", False):
                 _logger.warning(
                     "The analysis was not executed. Please run the analysis before calling"
                     " this method"
@@ -527,16 +530,16 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                     if isinstance(value, (int, float)):
                         values.append(float(value))
             return values if values else None
-    
+
     def get_measurement_statistics(self, meas_name: str) -> Dict[str, float]:
         """Get statistics for a measurement.
-        
+
         This is a convenience method that combines analyse_measurement
         with calculate_statistics from the base class.
-        
+
         Args:
             meas_name: Name of the measurement
-            
+
         Returns:
             Dictionary with statistical measures
         """
@@ -549,12 +552,12 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                     result = AnalysisResult(
                         run_id=i,
                         status=AnalysisStatus.COMPLETED,
-                        measurements={meas_name: value}
+                        measurements={meas_name: value},
                     )
                     self.results.append(result)
-        
+
         return self.calculate_statistics(meas_name)
-    
+
     # Backward compatibility methods
     def run_analysis(
         self,
@@ -567,10 +570,10 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         num_runs: Optional[int] = None,
     ) -> Optional[List[AnalysisResult]]:
         """Run Monte Carlo analysis (backward compatibility method).
-        
+
         This method maintains backward compatibility while directing to the
         appropriate analysis method based on the current mode.
-        
+
         Args:
             callback: Process callback for simulation monitoring
             callback_args: Arguments for the callback
@@ -579,14 +582,14 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             exe_log: Whether to log execution
             measure: Deprecated parameter (ignored)
             num_runs: Override number of runs (updates self.num_runs)
-            
+
         Returns:
             List of results if separate mode, None if testbench mode
         """
         # Update num_runs if provided
         if num_runs is not None:
             self.num_runs = num_runs
-        
+
         if self.use_testbench_mode:
             # Use testbench mode
             self.run_testbench(
@@ -594,7 +597,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 callback_args=callback_args,
                 switches=switches,
                 timeout=timeout,
-                exe_log=exe_log
+                exe_log=exe_log,
             )
             return None
         else:
@@ -604,5 +607,5 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 callback_args=callback_args,
                 switches=switches,
                 timeout=timeout,
-                exe_log=exe_log
+                exe_log=exe_log,
             )

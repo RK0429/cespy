@@ -18,12 +18,17 @@ from .component_factory import ComponentFactory, ComponentType, BaseComponent
 from .circuit_validator import CircuitValidator, ValidationResult, ValidationLevel
 from .schematic_differ import SchematicDiffer, SchematicDiff, ChangeType
 from .base_editor_enhanced import BaseEditorEnhanced, EditOperation
-from .netlist_optimizer import NetlistOptimizer, OptimizationConfig, OptimizationLevel, OptimizationResult
+from .netlist_optimizer import (
+    NetlistOptimizer,
+    OptimizationConfig,
+    OptimizationLevel,
+    OptimizationResult,
+)
 
 __all__ = [
-    "AscEditor", 
-    "QschEditor", 
-    "SpiceCircuit", 
+    "AscEditor",
+    "QschEditor",
+    "SpiceCircuit",
     "SpiceEditor",
     "ComponentFactory",
     "ComponentType",
@@ -39,5 +44,5 @@ __all__ = [
     "NetlistOptimizer",
     "OptimizationConfig",
     "OptimizationLevel",
-    "OptimizationResult"
+    "OptimizationResult",
 ]

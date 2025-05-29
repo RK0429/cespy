@@ -46,7 +46,7 @@ def get_short_path_name(long_name: str) -> str:
     if sys.platform != "win32":
         # On non-Windows platforms, just return the original path
         return long_name
-    
+
     # Windows-specific implementation
     # Import Windows-specific modules only on Windows
     import ctypes  # pylint: disable=import-outside-toplevel

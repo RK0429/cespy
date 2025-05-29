@@ -93,7 +93,8 @@ _logger = logging.getLogger("cespy.SpiceEditor")
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
 
-END_LINE_TERM = core_constants.LineTerminators.UNIX  #: This controls the end of line terminator used
+#: This controls the end of line terminator used
+END_LINE_TERM = core_constants.LineTerminators.UNIX
 
 # A Spice netlist can only have one of the instructions below, otherwise
 # an error will be raised
@@ -346,7 +347,8 @@ class SpiceCircuit(BaseEditor):
         self._readonly = False
         self.modified_subcircuits: dict[str, "SpiceCircuit"] = {}
         self.parent = parent
-        self.encoding = core_constants.Encodings.UTF8  # Default encoding to handle file operations
+        # Default encoding to handle file operations
+        self.encoding = core_constants.Encodings.UTF8
 
     def get_line_starting_with(self, substr: str) -> int:
         """Internal function. Do not use.

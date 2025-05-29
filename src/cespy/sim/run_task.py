@@ -154,7 +154,8 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
                     self.simulator = self.simulator.create_from(default_exec)
                 else:
                     _logger.warning(
-                        "get_default_executable returned unexpected type: %s", type(default_exec)
+                        "get_default_executable returned unexpected type: %s",
+                        type(default_exec),
                     )
         # start execution
         self.retcode = self.simulator.run(

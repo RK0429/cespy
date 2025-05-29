@@ -33,6 +33,7 @@ from .sim_analysis import SimAnalysis
 @dataclass
 class ComponentSets:
     """Groups different component types to reduce instance attributes."""
+
     resistors: List[str] = field(default_factory=list)
     capacitors: List[str] = field(default_factory=list)
     inductors: List[str] = field(default_factory=list)
@@ -78,7 +79,7 @@ class FailureMode(SimAnalysis):
             diodes=list(self.editor.get_components("D")),
             bipolars=list(self.editor.get_components("Q")),
             mosfets=list(self.editor.get_components("M")),
-            subcircuits=list(self.editor.get_components("X"))
+            subcircuits=list(self.editor.get_components("X")),
         )
         self.user_failure_modes: Dict[str, Dict[str, Any]] = OrderedDict()
         # Mapping of failure names to RunTask instances
@@ -161,8 +162,8 @@ class FailureMode(SimAnalysis):
                 self.failure_simulations[f"{two_pin_component}_O"] = self.run()
                 # Short Circuit: insert short resistor
                 netlist = getattr(self.editor, "netlist")
-                netlist[cinfo["line"]] = (
-                    f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
-                )
+                netlist[
+                    cinfo["line"]
+                ] = f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"
                 self.failure_simulations[f"{two_pin_component}_S"] = self.run()
                 self.editor.reset_netlist()

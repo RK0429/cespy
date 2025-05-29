@@ -140,7 +140,9 @@ class AscEditor(BaseSchematic):
     def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
         if isinstance(run_netlist_file, str):
             run_netlist_file = Path(run_netlist_file)
-        run_netlist_file = run_netlist_file.with_suffix(core_constants.FileExtensions.ASC)
+        run_netlist_file = run_netlist_file.with_suffix(
+            core_constants.FileExtensions.ASC
+        )
         with open(run_netlist_file, "w", encoding=self.encoding) as asc:
             _logger.info("Writing ASC file %s", run_netlist_file)
 

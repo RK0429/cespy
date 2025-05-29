@@ -432,17 +432,19 @@ if is_windows():
             try:
                 # GetShortPathNameW returns required buffer size
                 GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW  # type: ignore[attr-defined]
-                GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+                GetShortPathNameW.argtypes = [
+                    wintypes.LPCWSTR,
+                    wintypes.LPWSTR,
+                    wintypes.DWORD,
+                ]
                 GetShortPathNameW.restype = wintypes.DWORD
-                
+
                 buffer_size = GetShortPathNameW(long_name, None, 0)
                 if buffer_size == 0:
                     return long_name
 
                 output = ctypes.create_unicode_buffer(buffer_size)
-                result = GetShortPathNameW(
-                    long_name, output, buffer_size
-                )
+                result = GetShortPathNameW(long_name, output, buffer_size)
 
                 return output.value if result else long_name
             except (AttributeError, OSError):
@@ -464,7 +466,7 @@ else:
 def is_wine_available() -> bool:
     """
     Check if Wine is available on the system.
-    
+
     Returns:
         True if Wine is available, False otherwise
     """
@@ -474,21 +476,21 @@ def is_wine_available() -> bool:
 def get_wine_prefix() -> Optional[Path]:
     """
     Get the Wine prefix directory.
-    
+
     Returns:
         Path to Wine prefix if available, None otherwise
     """
     if not is_wine_available():
         return None
-    
+
     # Check WINEPREFIX environment variable first
     wine_prefix = os.environ.get("WINEPREFIX")
     if wine_prefix and os.path.isdir(wine_prefix):
         return Path(wine_prefix)
-    
+
     # Default Wine prefix location
     default_prefix = Path.home() / ".wine"
     if default_prefix.exists():
         return default_prefix
-    
+
     return None

@@ -116,6 +116,7 @@ class QspiceLogReader(LogfileData):
         if read_measures:
             meas_file = self.obtain_measures()
             self.parse_meas_file(meas_file)
+
     # pylint: enable=too-many-locals
 
     def obtain_measures(self, meas_filename: Optional[Path] = None) -> Path:
@@ -145,8 +146,10 @@ class QspiceLogReader(LogfileData):
             _logger.error("using the create_from(<location>) class method")
             _logger.error("==============================================")
             raise SimulatorNotFoundError(
-                "qspice", 
-                search_paths=Qspice.get_default_install_paths() if hasattr(Qspice, 'get_default_install_paths') else None
+                "qspice",
+                search_paths=Qspice.get_default_install_paths()
+                if hasattr(Qspice, "get_default_install_paths")
+                else None,
             )
 
         # Get the QPOST location, which is the same as the QSPICE location
@@ -154,7 +157,9 @@ class QspiceLogReader(LogfileData):
         # Guess the name of the .net file
         netlist = self.logname.with_suffix(core_constants.FileExtensions.NET).absolute()
         if not Path.exists(netlist):
-            netlist = self.logname.with_suffix(core_constants.FileExtensions.CIR).absolute()
+            netlist = self.logname.with_suffix(
+                core_constants.FileExtensions.CIR
+            ).absolute()
 
         # Run the QPOST command
         cmd_run = qpost + [str(netlist), "-o", str(meas_filename.absolute())]

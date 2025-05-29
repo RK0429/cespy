@@ -422,7 +422,9 @@ class QschEditor(BaseSchematic):
         The file is saved in cp1252 encoding.
         """
         if self.updated or Path(qsch_filename) != self._qsch_file_path:
-            with open(qsch_filename, "w", encoding=core_constants.Encodings.CP1252) as qsch_file:
+            with open(
+                qsch_filename, "w", encoding=core_constants.Encodings.CP1252
+            ) as qsch_file:
                 _logger.info("Writing QSCH file %s", qsch_file)
                 for c in QSCH_HEADER:
                     qsch_file.write(chr(c))
@@ -607,8 +609,13 @@ class QschEditor(BaseSchematic):
             return
         if run_netlist_file.suffix == core_constants.FileExtensions.QSCH:
             self.save_as(run_netlist_file)
-        elif run_netlist_file.suffix in (core_constants.FileExtensions.NET, core_constants.FileExtensions.CIR):
-            with open(run_netlist_file, "w", encoding=core_constants.Encodings.CP1252) as netlist_file:
+        elif run_netlist_file.suffix in (
+            core_constants.FileExtensions.NET,
+            core_constants.FileExtensions.CIR,
+        ):
+            with open(
+                run_netlist_file, "w", encoding=core_constants.Encodings.CP1252
+            ) as netlist_file:
                 _logger.info("Writing NET file %s", run_netlist_file)
                 netlist_file.write(
                     f"* {os.path.abspath(self._qsch_file_path.as_posix())}\n"
@@ -687,7 +694,9 @@ class QschEditor(BaseSchematic):
         else:
             if not self._qsch_file_path.exists():
                 raise FileNotFoundError(f"File {self._qsch_file_path} not found")
-            with open(self._qsch_file_path, "r", encoding=core_constants.Encodings.CP1252) as qsch_file:
+            with open(
+                self._qsch_file_path, "r", encoding=core_constants.Encodings.CP1252
+            ) as qsch_file:
                 _logger.info("Reading QSCH file %s", self._qsch_file_path)
                 stream = qsch_file.read()
             self._parse_qsch_stream(stream)
@@ -810,9 +819,9 @@ class QschEditor(BaseSchematic):
                     )
                     if sub_circuit_schematic_file:
                         sub_schematic = type(self)(sub_circuit_schematic_file)
-                        sch_comp.attributes["_SUBCKT"] = (
-                            sub_schematic  # Store it for future use.
-                        )
+                        sch_comp.attributes[
+                            "_SUBCKT"
+                        ] = sub_schematic  # Store it for future use.
                     else:
                         _logger.warning(
                             "Subcircuit '%s' not found. Have you set"

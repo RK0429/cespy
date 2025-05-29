@@ -67,7 +67,8 @@ class WorstCaseAnalysis(ToleranceDeviations):
             return False  # no need to set the deviation
         new_val = val
         if dev.typ == DeviationType.TOLERANCE:
-            new_val = f"{{wc({val},{dev.max_val:g},{index})}}"  # calculate expression for new value
+            # calculate expression for new value
+            new_val = f"{{wc({val},{dev.max_val:g},{index})}}"
         elif dev.typ == DeviationType.MINMAX:
             # calculate expression for new value
             new_val = f"{{wc1({val},{dev.min_val:g},{dev.max_val:g},{index})}}"

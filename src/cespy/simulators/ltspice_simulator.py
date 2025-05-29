@@ -54,7 +54,9 @@ class LTspice(Simulator):
     """
 
     # Use default paths from core constants
-    _spice_exe_win_paths: List[str] = core_paths.get_default_simulator_paths(core_constants.Simulators.LTSPICE)
+    _spice_exe_win_paths: List[str] = core_paths.get_default_simulator_paths(
+        core_constants.Simulators.LTSPICE
+    )
 
     # the default lib paths, as used by get_default_library_paths
     _default_lib_paths: List[str] = [
@@ -259,7 +261,9 @@ class LTspice(Simulator):
             )
         # start execution
         if exe_log:
-            log_exe_file = netlist_file.with_suffix(".exe.log")  # LTSpice specific log extension
+            log_exe_file = netlist_file.with_suffix(
+                ".exe.log"
+            )  # LTSpice specific log extension
             with open(log_exe_file, "wb") as outfile:
                 error = run_function(
                     cmd_run,

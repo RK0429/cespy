@@ -471,9 +471,7 @@ class LTSpiceLogReader(LogfileData):
                             if title is None:
                                 continue
                             key = title.lower()
-                            self.dataset[key] = [
-                                measure[k] for measure in measurements
-                            ]
+                            self.dataset[key] = [measure[k] for measure in measurements]
                     headers = []
                     measurements = []
                     # text which is after "Measurement: ". len("Measurement: ")
@@ -645,9 +643,7 @@ def main() -> None:
 
     def valid_extension(filename: str) -> bool:
         """Check if the filename has a valid extension."""
-        return filename.endswith(
-            (".txt", core_constants.FileExtensions.LOG, ".mout")
-        )
+        return filename.endswith((".txt", core_constants.FileExtensions.LOG, ".mout"))
 
     parser = argparse.ArgumentParser(
         description="Process LTSpice log files and align data for usage in spreadsheet tools"

@@ -285,13 +285,13 @@ def to_float(value: str, accept_invalid: bool = True) -> Union[float, str]:
 
 class ComponentNotFoundError(Exception):
     """Component Not Found Error.
-    
+
     This exception is raised when a component reference is not found in the circuit.
     """
-    
+
     def __init__(self, component_ref: str, message: Optional[str] = None):
         """Initialize ComponentNotFoundError.
-        
+
         Args:
             component_ref: The component reference that was not found
             message: Optional custom message
@@ -304,13 +304,13 @@ class ComponentNotFoundError(Exception):
 
 class ParameterNotFoundError(Exception):
     """Parameter Not Found Error.
-    
+
     This exception is raised when a parameter is not found in the circuit.
     """
 
     def __init__(self, parameter: str, message: Optional[str] = None) -> None:
         """Initialize ParameterNotFoundError.
-        
+
         Args:
             parameter: The parameter name that was not found
             message: Optional custom message
@@ -903,7 +903,9 @@ class BaseEditor(ABC):
         expanded_path = core_paths.get_absolute_path(path)
 
         if core_paths.is_valid_directory(expanded_path):
-            _logger.debug("Adding path '%s' to the custom library path list", expanded_path)
+            _logger.debug(
+                "Adding path '%s' to the custom library path list", expanded_path
+            )
             cls.custom_lib_paths.append(expanded_path)
         else:
             _logger.warning(

@@ -52,8 +52,6 @@ class SimulatorNotFoundError(SimulatorError):
 class SimulatorNotInstalledError(SimulatorError):
     """Raised when a simulator is not properly installed."""
 
-    pass
-
 
 class SimulationTimeoutError(SimulatorError):
     """Raised when a simulation exceeds its timeout."""
@@ -96,25 +94,17 @@ class SimulationFailedError(SimulatorError):
 class FileFormatError(CespyError):
     """Base class for file format related errors."""
 
-    pass
-
 
 class InvalidNetlistError(FileFormatError):
     """Raised when a netlist file is invalid or corrupted."""
-
-    pass
 
 
 class InvalidSchematicError(FileFormatError):
     """Raised when a schematic file is invalid or corrupted."""
 
-    pass
-
 
 class InvalidRawFileError(FileFormatError):
     """Raised when a raw simulation output file is invalid."""
-
-    pass
 
 
 class UnsupportedFormatError(FileFormatError):
@@ -138,8 +128,6 @@ class UnsupportedFormatError(FileFormatError):
 # Component and circuit exceptions
 class ComponentError(CespyError):
     """Base class for component-related errors."""
-
-    pass
 
 
 class ComponentNotFoundError(ComponentError):
@@ -234,8 +222,6 @@ class ValidationError(ComponentError):
 class AnalysisError(CespyError):
     """Base class for analysis-related errors."""
 
-    pass
-
 
 class OptimizationError(AnalysisError):
     """Raised when an optimization operation fails."""
@@ -255,23 +241,17 @@ class OptimizationError(AnalysisError):
 class ConvergenceError(AnalysisError):
     """Raised when a simulation fails to converge."""
 
-    pass
-
 
 class InsufficientDataError(AnalysisError):
     """Raised when there's not enough data for analysis."""
 
-    pass
-
 
 # I/O exceptions
-class IOError(CespyError):
+class CespyIOError(CespyError):
     """Base class for I/O related errors."""
 
-    pass
 
-
-class FileNotFoundError(IOError):
+class CespyFileNotFoundError(CespyIOError):
     """Raised when a required file is not found."""
 
     def __init__(self, filepath: str) -> None:
@@ -286,13 +266,11 @@ class FileNotFoundError(IOError):
         super().__init__(message, details)
 
 
-class PermissionError(IOError):
+class CespyPermissionError(CespyIOError):
     """Raised when there's insufficient permission to access a file."""
 
-    pass
 
-
-class EncodingError(IOError):
+class EncodingError(CespyIOError):
     """Raised when there's an encoding/decoding error."""
 
     def __init__(
@@ -319,44 +297,30 @@ class EncodingError(IOError):
 class ConfigurationError(CespyError):
     """Base class for configuration-related errors."""
 
-    pass
-
 
 class InvalidConfigurationError(ConfigurationError):
     """Raised when configuration is invalid."""
 
-    pass
-
 
 class MissingConfigurationError(ConfigurationError):
     """Raised when required configuration is missing."""
-
-    pass
 
 
 # Server/Client exceptions
 class ServerError(CespyError):
     """Base class for server-related errors."""
 
-    pass
-
 
 class ServerNotRunningError(ServerError):
     """Raised when trying to connect to a server that's not running."""
-
-    pass
 
 
 class ServerConnectionError(ServerError):
     """Raised when unable to connect to the server."""
 
-    pass
-
 
 class ServerTimeoutError(ServerError):
     """Raised when a server operation times out."""
-
-    pass
 
 
 # Deprecated functionality

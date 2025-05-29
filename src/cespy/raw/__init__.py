@@ -9,8 +9,20 @@ from .raw_classes import Axis, DataSet, DummyTrace, SpiceReadException, TraceRea
 from .raw_read import RawRead
 from .raw_write import RawWrite, Trace
 from .raw_read_lazy import RawReadLazy, LazyTrace
-from .raw_stream import RawFileStreamer, StreamProcessor, StreamConfig, MinMaxProcessor, AverageProcessor
-from .raw_data_cache import RawDataCache, MultiLevelCache, CachePolicy, LRUPolicy, LFUPolicy
+from .raw_stream import (
+    RawFileStreamer,
+    StreamProcessor,
+    StreamConfig,
+    MinMaxProcessor,
+    AverageProcessor,
+)
+from .raw_data_cache import (
+    RawDataCache,
+    MultiLevelCache,
+    CachePolicy,
+    LRUPolicy,
+    LFUPolicy,
+)
 from .raw_binary_parser import OptimizedBinaryParser, DataFormat, BinaryFormat
 
 __all__ = [

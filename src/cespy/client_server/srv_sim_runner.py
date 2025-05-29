@@ -102,8 +102,8 @@ class ServerSimRunner(threading.Thread):
         while True:
             self.runner.update_completed()
             # Access tasks attribute if it exists
-            tasks_attr = getattr(self.runner, 'tasks', None)
-            if tasks_attr and hasattr(tasks_attr, 'completed_tasks'):
+            tasks_attr = getattr(self.runner, "tasks", None)
+            if tasks_attr and hasattr(tasks_attr, "completed_tasks"):
                 while len(tasks_attr.completed_tasks) > 0:
                     task = tasks_attr.completed_tasks.pop(0)
                     zip_filename = task.callback_return
