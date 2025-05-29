@@ -32,6 +32,7 @@ __all__ = [
     "AscEditor",
     "SpiceEditor",
     "SpiceCircuit",
+    "SimRunner",
     "LTSpiceLogReader",
     "RawRead",
     "SpiceReadException",
