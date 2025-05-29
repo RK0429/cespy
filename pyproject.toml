@@ -1,19 +1,112 @@
 [project]
 name = "cespy"
 version = "0.1.0"
-description = ""
+description = "A unified Python toolkit for automating SPICE circuit simulators, merging functionality from kupicelib and kuPyLTSpice."
+license = "GPL-3.0"
 authors = [
     {name = "Ryota Kobayashi",email = "s.woods.m.29@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10,<4.0"
 dependencies = [
+  "numpy",
+  "scipy",
+  "psutil",
+  "clipboard",
+  "matplotlib",
+  "keyboard",
+  "types-keyboard>=0.13.2.20240310",
+  "types-psutil>=7.0.0.20250516",
+  "pandas>=2.2.3",
+  "pandas-stubs>=2.2.3.241126",
+  "python-json-logger (>=3.3.0,<4.0.0)",
 ]
+
+# Project URLs
+[project.urls]
+Homepage = "https://github.com/RK0429/cespy"
+Repository = "https://github.com/RK0429/cespy.git"
 
 [tool.poetry]
 packages = [{include = "cespy", from = "src"}]
+include = ["src/cespy/editor/data/asc_to_qsch_data.xml"]
 
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+flake8 = "^6.0.0"
+mypy = "^1.5.1"
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.11.0"
+sphinx = "^7.2.0"
+sphinx-rtd-theme = "^3.0.2"
+myst-parser = "^4.0.1"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.flake8]
+max-line-length = 100
+extend-ignore = ['E203', 'W503']
+
+[tool.pylint]
+max-line-length = 100
+disable = [
+    "R0801",  # Similar lines in files (duplicate-code)
+    "C0103",  # Invalid name (we have some legacy naming)
+]
+max-args = 8
+max-locals = 20
+max-public-methods = 25
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[project.scripts]
+cespy-asc-to-qsch = "cespy.editor.asc_to_qsch:main"
+cespy-run-server = "cespy.client_server.run_server:main"
+cespy-raw-convert = "cespy.raw.raw_convert:main"
+cespy-sim-client = "cespy.client_server.sim_client:main"
+cespy-ltsteps = "cespy.log.ltsteps:main"
+cespy-rawplot = "cespy.raw.rawplot:main"
+cespy-histogram = "cespy.utils.histogram:main"

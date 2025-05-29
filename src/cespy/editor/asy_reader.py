@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""LTSpice symbol file (.asy) reader and parser.
+
+This module provides functionality to parse LTSpice symbol files and translate
+them into other formats, handling symbol geometry, pins, attributes, and
+associated metadata.
+"""
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -20,8 +26,9 @@
 import logging
 import re
 from collections import OrderedDict
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .base_schematic import (
@@ -37,24 +44,35 @@ from .base_schematic import (
 from .ltspice_utils import asc_text_align_set
 from .qsch_editor import QschTag
 
-_logger = logging.getLogger("kupicelib.AsyReader")
+_logger = logging.getLogger("cespy.AsyReader")
 SCALE_X = 6.25
 SCALE_Y = -6.25
 
 
-class AsyReader(object):
+@dataclass
+class SymbolElements:
+    """Groups symbol elements to reduce instance attributes."""
+
+    pins: List = field(default_factory=list)
+    lines: List = field(default_factory=list)
+    shapes: List = field(default_factory=list)
+    windows: List = field(default_factory=list)
+    attributes: Dict[str, str] = field(default_factory=OrderedDict)
+
+
+class AsyReader:
     """Symbol parser."""
 
-    def __init__(self, asy_file: Union[Path, str], encoding="autodetect"):
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+    def __init__(
+        self, asy_file: Union[Path, str], encoding: str = "autodetect"
+    ) -> None:
         super().__init__()
         self.version: str = "4"  # Store version as string
         self.symbol_type = None
-        self.pins = []
-        self.lines = []
-        self.shapes = []
-        self.attributes: Dict[str, str] = OrderedDict()  # Store attributes as strings
+        self.elements = SymbolElements()
         self._asy_file_path = Path(asy_file)
-        self.windows = []
+        self.encoding: str = ""
         pin = None
         if not self._asy_file_path.exists():
             raise FileNotFoundError(f"File {asy_file} not found")
@@ -70,10 +88,17 @@ class AsyReader(object):
             self.encoding = encoding
 
         with open(self._asy_file_path, "r", encoding=self.encoding) as asc_file:
-            _logger.info(f"Parsing ASY file {self._asy_file_path}")
+            _logger.info("Parsing ASY file %s", self._asy_file_path)
             for line_text in asc_file:
                 if line_text.startswith("WINDOW"):
-                    tag, num_ref, posX, posY, alignment, size_str = line_text.split()
+                    (
+                        _,
+                        num_ref,
+                        posX,
+                        posY,
+                        alignment,
+                        size_str,
+                    ) = line_text.split()
                     coord = Point(int(posX), int(posY))
                     text_obj = Text(
                         coord=coord,
@@ -82,23 +107,24 @@ class AsyReader(object):
                         type=TextTypeEnum.ATTRIBUTE,
                     )
                     text_obj = asc_text_align_set(text_obj, alignment)
-                    self.windows.append(text_obj)
+                    self.elements.windows.append(text_obj)
                 elif line_text.startswith("SYMATTR"):
                     tokens = line_text.split(maxsplit=2)
                     if len(tokens) == 3:
-                        tag, ref, attr_text = tokens
+                        _, ref, attr_text = tokens
                     elif len(tokens) == 2:
-                        tag, ref = tokens
+                        _, ref = tokens
                         attr_text = ""
                     else:
                         continue
                     attr_text = attr_text.strip()  # Gets rid of the \n terminator
-                    # make sure prefix is uppercase, as this is used in a lot of places
+                    # make sure prefix is uppercase, as this is used in a lot
+                    # of places
                     if ref.upper() == "PREFIX":
                         attr_text = attr_text.upper()
-                    self.attributes[ref] = attr_text
+                    self.elements.attributes[ref] = attr_text
                 elif line_text.startswith("Version"):
-                    tag, version = line_text.split()
+                    _, version = line_text.split()
                     assert version in [
                         "4",
                         "4.0",
@@ -106,16 +132,16 @@ class AsyReader(object):
                     ], f"Unsupported version : {version}"
                     self.version = version  # Store version as string
                 elif line_text.startswith("SymbolType "):
-                    self.symbol_type = line_text[len("SymbolType "):].strip()
+                    self.symbol_type = line_text[len("SymbolType ") :].strip()
                 elif line_text.startswith("PINATTR"):
                     assert pin is not None, "A PIN was already created."
-                    tag, attribute, value = line_text.split(" ", maxsplit=3)
+                    _, attribute, value = line_text.split(" ", maxsplit=3)
                     value = value.strip()  # gets rid of the \n
                     pin.text += f"{attribute}={value};"
                 elif line_text.startswith("PIN"):
                     if pin is not None:
-                        self.pins.append(pin)
-                    tag, x, y, justification, offset = line_text.split()
+                        self.elements.pins.append(pin)
+                    _, x, y, justification, offset = line_text.split()
                     coord = Point(int(x), int(y))
                     angle = ERotation.R0
 
@@ -178,12 +204,12 @@ class AsyReader(object):
                         line_obj = Line(Point(x1, y1), Point(x2, y2))
                         if len(line_elements) == 7:
                             line_obj.style.pattern = line_elements[6]
-                        self.lines.append(line_obj)
+                        self.elements.lines.append(line_obj)
                     if line_elements[0] in ("RECTANGLE", "CIRCLE"):
                         shape = Shape(line_elements[0], [Point(x1, y1), Point(x2, y2)])
                         if len(line_elements) == 7:
                             shape.line_style.pattern = line_elements[6]
-                        self.shapes.append(shape)
+                        self.elements.shapes.append(shape)
 
                 elif line_text.startswith("ARC"):
                     # I don't support editing yet, so why make it complicated
@@ -202,7 +228,7 @@ class AsyReader(object):
                     arc = Shape("ARC", points)
                     if len(line_elements) == 11:
                         arc.line_style.pattern = line_elements[10]
-                    self.shapes.append(arc)
+                    self.elements.shapes.append(arc)
 
                 elif line_text.startswith("TEXT "):
                     line_elements = line_text.split()
@@ -217,31 +243,37 @@ class AsyReader(object):
                             type=TextTypeEnum.COMMENT,
                             textAlignment=HorAlign(line_elements[3]),
                         )
-                        self.windows.append(text_obj)
+                        self.elements.windows.append(text_obj)
                     else:
                         # Text in asy not supported however non-critical and not
                         # neccesary to crash the program.
                         _logger.warning(
-                            f"Cosmetic text in ASY format not supported, text skipped. ASY file: {self._asy_file_path}"
+                            "Cosmetic text in ASY format not supported, text skipped."
+                            " ASY file: %s",
+                            self._asy_file_path,
                         )
                 else:
-                    # In order to avoid crashing the program, 1) add the missing if statement above and
-                    # 2) ontact the author to add support for the missing primitive.
+                    # In order to avoid crashing the program, 1) add the missing
+                    # if statement above and 2) contact the author to add
+                    # support for the missing primitive.
                     raise NotImplementedError(
-                        f"Primitive not supported for ASY file \n"
-                        f'"{line_text}"'
-                        f"in file: {self._asy_file_path}. Contact the author to add support.")
+                        f'Primitive not supported for ASY file \n"{line_text}"in file:'
+                        f" {self._asy_file_path}. Contact the author to add support."
+                    )
             if pin is not None:
-                self.pins.append(pin)
+                self.elements.pins.append(pin)
 
-    def to_qsch(self, *args):
+    # pylint: disable=too-many-locals,too-many-statements
+    def to_qsch(self, *args: str) -> QschTag:
         """Create a QschTag representing a component symbol."""
-        spice_prefix = self.attributes["Prefix"]
+        spice_prefix = self.elements.attributes["Prefix"]
         symbol = QschTag("symbol", spice_prefix[0])
         symbol.items.append(QschTag("type:", spice_prefix))
-        symbol.items.append(QschTag("description:", self.attributes["Description"]))
+        symbol.items.append(
+            QschTag("description:", self.elements.attributes["Description"])
+        )
         symbol.items.append(QschTag("shorted pins:", "false"))
-        for line in self.lines:
+        for line in self.elements.lines:
             x1 = int(line.V1.X * SCALE_X)
             y1 = int(line.V1.Y * SCALE_Y)
             x2 = int(line.V2.X * SCALE_X)
@@ -251,7 +283,7 @@ class AsyReader(object):
             )
             symbol.items.append(segment)
 
-        for shape in self.shapes:
+        for shape in self.elements.shapes:
             if shape.name == "RECTANGLE":
                 x1 = int(shape.points[0].X * SCALE_X)
                 y1 = int(shape.points[0].Y * SCALE_Y)
@@ -261,25 +293,26 @@ class AsyReader(object):
                     f"«rect ({x1},{y1}) ({x2},{y2}) 0 0 0 0x4000000 0x1000000 -1 0 -1»"
                 )
             elif shape.name == "ARC":
-                # translate from 4 points style of ltspice to 3 points style of qsch
+                # translate from 4 points style of ltspice to 3 points style of
+                # qsch
                 points = shape.points
 
-                x1 = points[0].X
-                x2 = points[1].X
-                x3 = points[2].X
-                x4 = points[3].X
-                y1 = points[0].Y
-                y2 = points[1].Y
-                y3 = points[2].Y
-                y4 = points[3].Y
+                px1 = points[0].X
+                px2 = points[1].X
+                px3 = points[2].X
+                px4 = points[3].X
 
-                center = Point((x1 + x2) // 2, (y1 + y2) // 2)
-                radius = (
-                    abs(x2 - x1) / 2
-                )  # Using only the X axis. Assuming a circle not an ellipse
-                start = Point((x3 - center.X) / radius, (y3 - center.Y) / radius)
-                stop = Point((x4 - center.X) / radius, (y4 - center.Y) / radius)
-                # overwriting the points with the new ones
+                py1 = points[0].Y
+                py2 = points[1].Y
+                py3 = points[2].Y
+                py4 = points[3].Y
+
+                center = Point((px1 + px2) // 2, (py1 + py2) // 2)
+                # Using only the X axis. Assuming a circle not an ellipse
+                radius = abs(px2 - px1) / 2
+                start = Point((px3 - center.X) / radius, (py3 - center.Y) / radius)
+                stop = Point((px4 - center.X) / radius, (py4 - center.Y) / radius)
+                # calculate new coordinates for drawing
                 x1 = int(center.X * SCALE_X)
                 y1 = int(center.Y * SCALE_Y)
                 x2 = int(start.X * SCALE_X)
@@ -289,7 +322,7 @@ class AsyReader(object):
                 shape_tag, _ = QschTag.parse(
                     f"«arc3p ({x1},{y1}) ({x2},{y2}) ({x3},{y3}) 0 0 0xff0000 -1 -1»"
                 )
-            elif shape.name == "CIRCLE" or shape.name == "ellipse":
+            elif shape.name in ("CIRCLE", "ellipse"):
                 x1 = int(shape.points[0].X * SCALE_X)
                 y1 = int(shape.points[0].Y * SCALE_Y)
                 x2 = int(shape.points[1].X * SCALE_X)
@@ -301,16 +334,16 @@ class AsyReader(object):
                 raise ValueError(f"Shape {shape.name} not supported")
             symbol.items.append(shape_tag)
 
-        for i, attr in enumerate(self.windows):
+        for i, attr in enumerate(self.elements.windows):
             coord = attr.coord
             x = coord.X * SCALE_X
             y = coord.Y * SCALE_Y
             text, _ = QschTag.parse(
-                f"«text ({x:.0f},{y:.0f})" f' 1 7 0 0x1000000 -1 -1 "{args[i]}"»'
+                f'«text ({x:.0f},{y:.0f}) 1 7 0 0x1000000 -1 -1 "{args[i]}"»'
             )
             symbol.items.append(text)
 
-        for pin in self.pins:
+        for pin in self.elements.pins:
             coord = pin.coord
             attr_dict = {}
             for pair in pin.text.split(";"):
@@ -320,15 +353,21 @@ class AsyReader(object):
 
             pin_tag, _ = QschTag.parse(
                 f"«pin ({coord.X * SCALE_X:.0f},{coord.Y * SCALE_Y:.0f}) (0,0)"
-                f' 1 0 0 0x1000000 -1 "{attr_dict["PinName"]}"»'
+                f" 1 0 0 0x1000000 -1 \"{attr_dict['PinName']}\"»"
             )
             symbol.items.append(pin_tag)
 
         return symbol
 
-    def is_subcircuit(self):
+    def is_subcircuit(self) -> bool:
+        """Check if the symbol represents a subcircuit.
+
+        Returns True if the symbol type is BLOCK or has prefix X.
+        """
         # Prefix is guaranteed to be uppercase
-        return self.symbol_type == "BLOCK" or self.attributes.get("Prefix") == "X"
+        return (
+            self.symbol_type == "BLOCK" or self.elements.attributes.get("Prefix") == "X"
+        )
 
     def get_library(self) -> Optional[str]:
         """Returns the library name of the model.
@@ -346,12 +385,12 @@ class AsyReader(object):
             "Value",
             "Value2",
         ):
-            if attr in self.attributes and (
-                self.attributes[attr].lower().endswith(suffixes)
+            if attr in self.elements.attributes and (
+                self.elements.attributes[attr].lower().endswith(suffixes)
             ):
-                return self.attributes[attr]
+                return self.elements.attributes[attr]
         # Default to None if there is no library file attribute
-        return self.attributes.get("SpiceModel")
+        return self.elements.attributes.get("SpiceModel")
 
     def get_model(self) -> str:
         """Returns the model name of the component.
@@ -368,8 +407,8 @@ class AsyReader(object):
             "SpiceLine2",
             "Def_Sub",
         ):
-            if attr in self.attributes:
-                return self.attributes[attr]
+            if attr in self.elements.attributes:
+                return self.elements.attributes[attr]
         raise ValueError("No Value or Value2 attribute found")
 
     def get_value(self) -> Union[int, float, str]:
@@ -387,7 +426,7 @@ class AsyReader(object):
             except ValueError:
                 return value.strip()  # Removes the leading trailing spaces
 
-    def get_schematic_file(self):
+    def get_schematic_file(self) -> Path:
         """Returns the file name of the component, if it were a .asc file."""
         assert self._asy_file_path.suffix == ".asy", "File is not an asy file"
         assert self.symbol_type == "BLOCK", "File is not a sub-circuit"

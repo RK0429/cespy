@@ -1,4 +1,10 @@
 # coding=utf-8
+"""Base classes and data structures for schematic editors.
+
+This module provides foundational classes for working with circuit schematics,
+including component representations, geometric primitives, text elements, and
+rotation/alignment enumerations used across different schematic formats.
+"""
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -17,18 +23,19 @@
 # -------------------------------------------------------------------------------
 
 
+from copy import deepcopy
 import dataclasses
 import enum
 import logging
 from collections import OrderedDict
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union, cast
 
 from .base_editor import SUBCKT_DIVIDER, BaseEditor, Component, ComponentNotFoundError
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
 
-_logger = logging.getLogger("kupicelib.BaseSchematic")
+_logger = logging.getLogger("cespy.BaseSchematic")
 
 
 class ERotation(enum.IntEnum):
@@ -51,39 +58,41 @@ class ERotation(enum.IntEnum):
     M270 = 360 + 270  # Mirror 270 Rotation
     M315 = 360 + 315  # Mirror 315 Rotation
 
-    def __str__(self):
+    # pylint: disable=too-many-return-statements,too-many-branches
+    def __str__(self) -> str:
         if self.value == 0:
             return "0 Rotation"
-        elif self.value == 45:
+        if self.value == 45:
             return "45 Rotation"
-        elif self.value == 90:
+        if self.value == 90:
             return "90 Rotation"
-        elif self.value == 135:
+        if self.value == 135:
             return "135 Rotation"
-        elif self.value == 180:
+        if self.value == 180:
             return "180 Rotation"
-        elif self.value == 225:
+        if self.value == 225:
             return "225 Rotation"
-        elif self.value == 270:
+        if self.value == 270:
             return "270 Rotation"
-        elif self.value == 315:
+        if self.value == 315:
             return "315 Rotation"
-        elif self.value == 360 + 0:
+        if self.value == 360 + 0:
             return "Mirror 0 Rotation"
-        elif self.value == 360 + 45:
+        if self.value == 360 + 45:
             return "Mirror 45 Rotation"
-        elif self.value == 360 + 90:
+        if self.value == 360 + 90:
             return "Mirror 90 Rotation"
-        elif self.value == 360 + 135:
+        if self.value == 360 + 135:
             return "Mirror 135 Rotation"
-        elif self.value == 360 + 180:
+        if self.value == 360 + 180:
             return "Mirror 180 Rotation"
-        elif self.value == 360 + 225:
+        if self.value == 360 + 225:
             return "Mirror 225 Rotation"
-        elif self.value == 360 + 270:
+        if self.value == 360 + 270:
             return "Mirror 270 Rotation"
-        elif self.value == 360 + 315:
+        if self.value == 360 + 315:
             return "Mirror 315 Rotation"
+        return super().__str__()
 
     # def mirror_y_axis(self):
     #     if self == ERotation.R0:
@@ -148,6 +157,7 @@ class LineStyle:
         self.pattern: str = pattern
 
 
+# pylint: disable=too-few-public-methods
 class Point:
     """X, Y coordinates."""
 
@@ -156,11 +166,16 @@ class Point:
         self.Y = Y
 
 
+# pylint: disable=too-few-public-methods
 class Line:
     """X1, Y1, X2, Y2 coordinates."""
 
     def __init__(
-        self, v1: Point, v2: Point, style: Optional[LineStyle] = None, net: str = ""
+        self,
+        v1: Point,
+        v2: Point,
+        style: Optional[LineStyle] = None,
+        net: str = "",
     ):
         self.V1 = v1
         self.V2 = v2
@@ -202,7 +217,8 @@ class Line:
         The intercepts is calculated by checking if the line touches any of the line
         vertices
         """
-        # We have to check if the line touches any of the vertices of the given line
+        # We have to check if the line touches any of the vertices of the given
+        # line
         if self.touches(line.V1) or self.touches(line.V2):
             return True
         # We also have to check if the given line touches any of the vertices of
@@ -212,6 +228,7 @@ class Line:
         return False
 
 
+# pylint: disable=too-few-public-methods
 class Shape:
     """Polygon object.
 
@@ -238,28 +255,30 @@ class Shape:
 
 
 # Rectangle = Shape
-# Rectangle is a special case of a Shape. Rectangle is defined by two points that
-# define the diagonal of the rectangle.
+# Rectangle is a special case of a Shape. Rectangle is defined by two points
+# that define the diagonal
+# of the rectangle.
 
 # Circle = Shape  # Circle is a special case of a Shape. Circle is defined
 # by the rectangle that encloses it.
 
 # Arc = Shape
-# Arc is a special case of a Shape. Since different tools have different ways of
-# defining arcs, we will use the Shape class to define them. We will only store the
-# list of points that are provided by the tool.
+# Arc is a special case of a Shape. Since different tools have different ways
+# of defining arcs, we will use
+# the Shape class to define them. We will only store the list of points that
+# are provided by the tool.
 
-# TODO: The following code is commented out because it is not used in the current
-# implementation. It is kept here for when we decode how ARCs are stored and we
-# could use it to update them.
+# Note: The following code is commented out because it is not used in the
+# current implementation. It is kept here for
+# when we decode how ARCs are stored and we could use it to update them.
 # @dataclasses.dataclass
 # class Arc:
-#     """Opting for a non-native representation of the arc as LTspice and Qspice
-#     have different ways of storing Arc information. Start and Stop points are
-#     calculated as a fraction of the radius for X and Y. This avoids having to
-#     deal with the calculation of sines and cosines and their inverse into radians."""
-#     for X and Y. This avoids having to deal with the calculation of sines and cosines
-#     and their inverse into radians."""
+#     """Opting for a non-native representation of the arc as LTspice and
+#     Qspice have different ways of storing Arc information. Start and Stop
+#     points are calculated as a fraction of the radius for X and Y. This
+#     avoids having to deal with the calculation of sines and cosines and
+#     their inverse
+#     into radians."""
 #     center: Point
 #     radius: float
 #     start: Point = Point(0, 0)
@@ -291,63 +310,102 @@ class Port:
 class SchematicComponent(Component):
     """Holds component information."""
 
-    def __init__(self, parent, line):
+    def __init__(self, parent: BaseEditor, line: str) -> None:
         super().__init__(parent, line)
         self.position: Point = Point(0, 0)
         self.rotation: ERotation = ERotation.R0
         self.symbol = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.reference} {self.position.X} {self.position.Y} {self.rotation}"
+
+
+@dataclasses.dataclass
+class SchematicElements:
+    """Groups schematic elements to reduce instance attributes."""
+    components: OrderedDict[str, SchematicComponent] = dataclasses.field(
+        default_factory=OrderedDict
+    )
+    wires: List[Line] = dataclasses.field(default_factory=list)
+    labels: List[Text] = dataclasses.field(default_factory=list)
+    directives: List[Text] = dataclasses.field(default_factory=list)
+    ports: List[Port] = dataclasses.field(default_factory=list)
+    lines: List[Line] = dataclasses.field(default_factory=list)
+    shapes: List[Shape] = dataclasses.field(default_factory=list)
 
 
 class BaseSchematic(BaseEditor):
     """This defines the primitives (protocol) to be used for both SpiceEditor and
     AscEditor classes."""
 
-    def __init__(self):
-        self.components: OrderedDict[str, SchematicComponent] = OrderedDict()
-        self.wires: List[Line] = []
-        self.labels: List[Text] = []
-        self.directives: List[Text] = []
-        self.ports: List[Port] = []
-        self.lines: List[Line] = []
-        self.shapes: List[Shape] = []
-        self.updated = False  # indicates if an edit was done and the file has to be written back to disk
+    def __init__(self) -> None:
+        self.elements = SchematicElements()
+        self.updated = False  # indicates if an edit was done and the file has
+        # to be written back to disk
+
+    # Properties for backward compatibility
+    @property
+    def components(self) -> OrderedDict[str, SchematicComponent]:
+        """Access to components dictionary."""
+        return self.elements.components
+
+    @property
+    def wires(self) -> List[Line]:
+        """Access to wires list."""
+        return self.elements.wires
+
+    @property
+    def labels(self) -> List[Text]:
+        """Access to labels list."""
+        return self.elements.labels
+
+    @property
+    def directives(self) -> List[Text]:
+        """Access to directives list."""
+        return self.elements.directives
+
+    @property
+    def ports(self) -> List[Port]:
+        """Access to ports list."""
+        return self.elements.ports
+
+    @property
+    def lines(self) -> List[Line]:
+        """Access to lines list."""
+        return self.elements.lines
+
+    @property
+    def shapes(self) -> List[Shape]:
+        """Access to shapes list."""
+        return self.elements.shapes
 
     def reset_netlist(self, create_blank: bool = False) -> None:
         """Resets the netlist to the original state."""
-        self.components.clear()
-        self.wires.clear()
-        self.labels.clear()
-        self.directives.clear()
-        self.lines.clear()
-        self.shapes.clear()
+        self.elements.components.clear()
+        self.elements.wires.clear()
+        self.elements.labels.clear()
+        self.elements.directives.clear()
+        self.elements.lines.clear()
+        self.elements.shapes.clear()
         self.updated = False
 
     def copy_from(self, editor: "BaseSchematic") -> None:
         """Clones the contents of the given editor."""
-        from copy import deepcopy
-
-        self.components = deepcopy(editor.components)
-        self.wires = deepcopy(editor.wires)
-        self.labels = deepcopy(editor.labels)
-        self.directives = deepcopy(editor.directives)
-        self.lines = deepcopy(editor.lines)
-        self.shapes = deepcopy(editor.shapes)
+        self.elements = deepcopy(editor.elements)
         self.updated = True
 
-    def _get_parent(self, reference) -> Tuple["BaseSchematic", str]:
+    def _get_parent(self, reference: str) -> Tuple["BaseSchematic", str]:
         if SUBCKT_DIVIDER in reference:
             sub_ref, sub_comp = reference.split(SUBCKT_DIVIDER, 1)
 
             subckt = self.get_component(sub_ref)
-            subcircuit = subckt.attributes["_SUBCKT"]
+            # The _SUBCKT attribute holds a BaseSchematic instance
+            subcircuit_any = subckt.attributes["_SUBCKT"]
+            subcircuit = cast(BaseSchematic, subcircuit_any)
             return subcircuit, sub_comp
-        else:
-            return self, reference
+        return self, reference
 
-    def set_updated(self, reference):
+    def set_updated(self, reference: str) -> None:
         """:meta private:"""
         sub_circuit, _ = self._get_parent(reference)
         sub_circuit.updated = True
@@ -364,13 +422,12 @@ class BaseSchematic(BaseEditor):
 
         if sub_circuit != self:  # The component is in a subcircuit
             return sub_circuit.get_component(ref)
-        else:
-            if ref not in sub_circuit.components:
-                _logger.error(f"Component {reference} not found")
-                raise ComponentNotFoundError(
-                    f"Component {reference} not found in Schematic file"
-                )
-            return sub_circuit.components[ref]
+        if ref not in sub_circuit.components:
+            _logger.error("Component %s not found", reference)
+            raise ComponentNotFoundError(
+                f"Component {reference} not found in Schematic file"
+            )
+        return sub_circuit.components[ref]
 
     def get_component_position(self, reference: str) -> Tuple[Point, ERotation]:
         """Returns the position and rotation of the component."""
@@ -394,7 +451,7 @@ class BaseSchematic(BaseEditor):
         comp.rotation = rotation
         self.set_updated(reference)
 
-    def add_component(self, component: Component, **kwargs) -> None:
+    def add_component(self, component: Component, **kwargs: Any) -> None:
         if not isinstance(component, SchematicComponent):
             schematic_component = SchematicComponent(self, component.line)
             schematic_component.reference = component.reference
@@ -413,9 +470,9 @@ class BaseSchematic(BaseEditor):
 
     def scale(
         self,
-        offset_x,
-        offset_y,
-        scale_x,
+        offset_x: float,
+        offset_y: float,
+        scale_x: float,
         scale_y: float,
         round_fun: Optional[Callable[[float], Union[int, float]]] = None,
     ) -> None:

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(poetry run make:*)",
+      "Bash(ls:*)",
+      "Bash(source:*)",
+      "Bash(.venv/Scripts/python:*)",
+      "Bash(grep:*)",
+      "Bash(poetry run flake8:*)",
+      "Bash(poetry run mypy:*)",
+      "Bash(python:*)",
+      "Bash(mypy:*)",
+<<<<<<< Updated upstream
+      "Bash(mypy:*)",
+      "Bash(poetry run mypy:*)",
+      "Bash(grep:*)"
+=======
+      "Bash(.venv/bin/python:*)"
+>>>>>>> Stashed changes
+    ],
+    "deny": []
+  }
+}

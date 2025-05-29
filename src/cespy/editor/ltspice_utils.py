@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Utilities for working with LTSpice files and configurations."""
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -28,7 +29,9 @@ __copyright__ = "Copyright 2024, Fribourg Switzerland"
 
 # Regular expressions
 TEXT_REGEX = re.compile(
-    r"TEXT (-?\d+)\s+(-?\d+)\s+V?(Left|Right|Top|Bottom|Center|Invisible)\s(\d+)\s*(?P<type>[!;])(?P<text>.*)",
+    r"TEXT"
+    r" (-?\d+)\s+(-?\d+)\s+V?(Left|Right|Top|Bottom|Center|Invisible)\s"
+    r"(\d+)\s*(?P<type>[!;])(?P<text>.*)",
     re.IGNORECASE,
 )
 
@@ -66,22 +69,22 @@ LT_ATTRIBUTE_NUMBERS_INV = {val: key for key, val in LT_ATTRIBUTE_NUMBERS.items(
 WEIGHT_CONVERSION_TABLE = ("Thin", "Normal", "Thick")
 
 
-def asc_text_align_set(text: Text, alignment: str):
+def asc_text_align_set(text: Text, alignment: str) -> Text:
     """Sets the alignment of the text in the ASC format."""
     # Default
     text.textAlignment = HorAlign.CENTER
     text.verticalAlignment = VerAlign.CENTER
-    if alignment == "Left" or alignment == "VLeft":
+    if alignment in ("Left", "VLeft"):
         text.textAlignment = HorAlign.LEFT
-    elif alignment == "Center" or alignment == "VCenter":
+    elif alignment in ("Center", "VCenter"):
         pass
-    elif alignment == "Right" or alignment == "VRight":
+    elif alignment in ("Right", "VRight"):
         text.textAlignment = HorAlign.RIGHT
-    elif alignment == "Top" or alignment == "VTop":
+    elif alignment in ("Top", "VTop"):
         text.verticalAlignment = VerAlign.TOP
-    elif alignment == "Bottom" or alignment == "VBottom":
+    elif alignment in ("Bottom", "VBottom"):
         text.verticalAlignment = VerAlign.BOTTOM
-    elif alignment == "Invisible" or alignment == "VInvisible":
+    elif alignment in ("Invisible", "VInvisible"):
         text.visible = False
     else:
         raise ValueError(f"Invalid alignment {alignment}")
