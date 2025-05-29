@@ -88,7 +88,7 @@ class Montecarlo(ToleranceDeviations):
                 ref
             )  # get there present value
             new_val = val
-            if dev.typ == DeviationType.tolerance:
+            if dev.typ == DeviationType.TOLERANCE:
                 tolstr = f"{dev.max_val:g}".rstrip("0").rstrip(".")
                 if dev.distribution == "uniform":
                     new_val = f"{{utol({val},{tolstr})}}"  # calculate expression for new value
@@ -96,7 +96,7 @@ class Montecarlo(ToleranceDeviations):
                 elif dev.distribution == "normal":
                     new_val = f"{{ntol({val},{tolstr})}}"
                     tol_norm_func = True
-            elif dev.typ == DeviationType.minmax:
+            elif dev.typ == DeviationType.MINMAX:
                 if dev.distribution == "uniform":
                     new_val = "{urng(%s, %s,%s)}" % (
                         val,
@@ -120,14 +120,14 @@ class Montecarlo(ToleranceDeviations):
         for param in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(param)
             new_val = val
-            if dev.typ == DeviationType.tolerance:
+            if dev.typ == DeviationType.TOLERANCE:
                 if dev.distribution == "uniform":
                     new_val = "{utol(%s,%s)}" % (val, dev.max_val)
                     tol_uni_func = True
                 elif dev.distribution == "normal":
                     new_val = "{ntol(%s,%s)}" % (val, dev.max_val)
                     tol_norm_func = True
-            elif dev.typ == DeviationType.minmax:
+            elif dev.typ == DeviationType.MINMAX:
                 if dev.distribution == "uniform":
                     new_val = "{urng(%s,%s,%s)}" % (
                         val,
@@ -213,14 +213,14 @@ class Montecarlo(ToleranceDeviations):
     def _get_sim_value(value: float, dev: ComponentDeviation) -> float:
         """Returns a new value for the simulation."""
         new_val = value
-        if dev.typ == DeviationType.tolerance:
+        if dev.typ == DeviationType.TOLERANCE:
             if dev.distribution == "uniform":
                 new_val = random.Random().uniform(
                     value * (1 - dev.max_val), value * (1 + dev.max_val)
                 )
             elif dev.distribution == "normal":
                 new_val = random.Random().gauss(value, dev.max_val / 3)
-        elif dev.typ == DeviationType.minmax:
+        elif dev.typ == DeviationType.MINMAX:
             if dev.distribution == "uniform":
                 new_val = random.Random().uniform(dev.min_val, dev.max_val)
             elif dev.distribution == "normal":
@@ -228,7 +228,7 @@ class Montecarlo(ToleranceDeviations):
                     (dev.max_val + dev.min_val) / 2,
                     (dev.max_val - dev.min_val) / 6,
                 )
-        elif dev.typ == DeviationType.none:
+        elif dev.typ == DeviationType.NONE:
             pass
         else:
             _logger.warning("Unknown deviation type")

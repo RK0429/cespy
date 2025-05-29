@@ -46,9 +46,9 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
         for comp in self.get_components("*"):
             val, dev = self.get_component_value_deviation_type(comp)
             new_val = val
-            if dev.typ == DeviationType.tolerance:
+            if dev.typ == DeviationType.TOLERANCE:
                 new_val = f"{{satol({val},{dev.max_val:g},{no})}}"
-            elif dev.typ == DeviationType.minmax:
+            elif dev.typ == DeviationType.MINMAX:
                 used_value = dev.min_val if use_min else dev.max_val
                 new_val = f"{{sammx({val},{used_value:g},{no})}}"
 
@@ -159,7 +159,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
             val1, dev1 = self.get_component_value_deviation_type(
                 ref1
             )  # get there present value
-            if dev1.min_val == dev1.max_val or dev1.typ == DeviationType.none:
+            if dev1.min_val == dev1.max_val or dev1.typ == DeviationType.NONE:
                 return
             worst_case_elements[ref1] = val1, dev1, "component"
             self.elements_analysed.append(ref1)
@@ -169,7 +169,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
 
         for ref in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(ref)
-            if dev.typ in (DeviationType.tolerance, DeviationType.minmax):
+            if dev.typ in (DeviationType.TOLERANCE, DeviationType.MINMAX):
                 worst_case_elements[ref] = val, dev, "parameter"
                 self.elements_analysed.append(ref)
 
@@ -221,13 +221,13 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 if bit_updated & 1:
                     ref = self.elements_analysed[bit_index]
                     val, dev, typ = worst_case_elements[ref]
-                    if dev.typ == DeviationType.tolerance:
+                    if dev.typ == DeviationType.TOLERANCE:
                         new_val = (
                             val * (1 + dev.max_val)
                             if bit_setting & (1 << bit_index)
                             else val
                         )
-                    elif dev.typ == DeviationType.minmax:
+                    elif dev.typ == DeviationType.MINMAX:
                         new_val = dev.max_val if bit_setting & (1 << bit_index) else val
                     else:
                         _logger.warning("Unknown deviation type")

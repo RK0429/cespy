@@ -127,7 +127,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             val1, dev1 = self.get_component_value_deviation_type(
                 ref1
             )  # get there present value
-            if dev1.min_val == dev1.max_val or dev1.typ == DeviationType.none:
+            if dev1.min_val == dev1.max_val or dev1.typ == DeviationType.NONE:
                 return
             worst_case_elements[ref1] = val1, dev1, "component"
             self.elements_analysed.append(ref1)
@@ -139,13 +139,13 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             if isinstance(val, str):
                 return val
             # val is now float
-            if dev.typ == DeviationType.tolerance:
+            if dev.typ == DeviationType.TOLERANCE:
                 if to == WorstCaseType.max:
                     return val * (1 + dev.max_val)
                 if to == WorstCaseType.min:
                     return val * (1 - dev.max_val)
                 return val
-            if dev.typ == DeviationType.minmax:
+            if dev.typ == DeviationType.MINMAX:
                 if to == WorstCaseType.max:
                     return dev.max_val
                 if to == WorstCaseType.min:
@@ -193,7 +193,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
 
         for ref in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(ref)
-            if dev.typ in (DeviationType.tolerance, DeviationType.minmax):
+            if dev.typ in (DeviationType.TOLERANCE, DeviationType.MINMAX):
                 worst_case_elements[ref] = val, dev, "parameter"
                 self.elements_analysed.append(ref)
 
