@@ -1391,7 +1391,7 @@ class SpiceCircuit(BaseEditor):
 
     def remove_Xinstruction(self, search_pattern: str) -> None:
         """Remove all instructions matching the given search pattern.
-        
+
         Args:
             search_pattern: Regular expression pattern to match instructions to remove.
         """
@@ -1635,7 +1635,7 @@ class SpiceEditor(SpiceCircuit):
 
     def remove_Xinstruction(self, search_pattern: str) -> None:
         """Remove all instructions matching the given search pattern.
-        
+
         Args:
             search_pattern: Regular expression pattern to match instructions to remove.
         """

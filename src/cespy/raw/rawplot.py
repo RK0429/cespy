@@ -10,8 +10,8 @@ from typing import List, Optional
 
 import matplotlib.pyplot as plt
 
-from cespy.raw.raw_read import RawRead
 from cespy.raw.raw_classes import DummyTrace
+from cespy.raw.raw_read import RawRead
 
 
 def plot_traces(
@@ -28,7 +28,7 @@ def plot_traces(
         raw_data = RawRead(raw_file)
 
         # Create figure
-        fig, ax = plt.subplots(figsize=(10, 6))
+        _, ax = plt.subplots(figsize=(10, 6))
 
         # Get the x-axis data (usually time or frequency)
         # First trace is usually the x-axis

@@ -178,7 +178,7 @@ class SimAnalysis:
 
     def save_netlist(self, filename: str) -> None:
         """Save the netlist to a file after applying all recorded instructions.
-        
+
         Args:
             filename: Path to save the netlist to.
         """

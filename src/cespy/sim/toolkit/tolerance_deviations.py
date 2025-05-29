@@ -17,7 +17,7 @@ from __future__ import annotations
 #  ███████║██║     ██║╚██████╗███████╗███████╗██║██████╔╝
 #  ╚══════╝╚═╝     ╚═╝ ╚═════╝╚══════╝╚══════╝╚═╝╚═════╝
 #
-# Name:        montecarlo.py
+# Name:        tolerance_deviations.py
 # Purpose:     Classes to automate Monte-Carlo simulations
 #
 # Author:      Nuno Brum (nuno.brum@gmail.com)
@@ -52,9 +52,9 @@ from .sim_analysis import SimAnalysis
 class DeviationType(Enum):
     """Enum to define the type of deviation."""
 
-    tolerance = "tolerance"
-    minmax = "minmax"
-    none = "none"
+    TOLERANCE = "tolerance"
+    MINMAX = "minmax"
+    NONE = "none"
 
 
 @dataclass
@@ -63,7 +63,7 @@ class ComponentDeviation:
 
     max_val: float
     min_val: float = 0.0
-    typ: DeviationType = DeviationType.tolerance
+    typ: DeviationType = DeviationType.TOLERANCE
     distribution: str = "uniform"
 
     @classmethod
@@ -71,45 +71,46 @@ class ComponentDeviation:
         cls, tolerance: float, distribution: str = "uniform"
     ) -> ComponentDeviation:
         """Create a ComponentDeviation from a tolerance value.
-        
+
         Args:
             tolerance: Tolerance value (e.g., 0.1 for ±10%).
             distribution: Distribution type ('uniform' or 'normal').
-            
+
         Returns:
             A ComponentDeviation instance.
         """
-        return cls(tolerance, -tolerance, DeviationType.tolerance, distribution)
+        return cls(tolerance, -tolerance, DeviationType.TOLERANCE, distribution)
 
     @classmethod
     def from_min_max(
         cls, min_val: float, max_val: float, distribution: str = "uniform"
     ) -> ComponentDeviation:
         """Create a ComponentDeviation from min/max values.
-        
+
         Args:
             min_val: Minimum value.
             max_val: Maximum value.
             distribution: Distribution type ('uniform' or 'normal').
-            
+
         Returns:
             A ComponentDeviation instance.
         """
-        return cls(min_val, max_val, DeviationType.minmax, distribution)
+        return cls(min_val, max_val, DeviationType.MINMAX, distribution)
 
     @classmethod
     def none(cls) -> ComponentDeviation:
         """Create a ComponentDeviation with no deviation.
-        
+
         Returns:
             A ComponentDeviation instance with zero deviation.
         """
-        return cls(0.0, 0.0, DeviationType.none)
+        return cls(0.0, 0.0, DeviationType.NONE)
 
 
 @dataclass
 class TestbenchState:
     """Groups testbench-related state flags."""
+
     prepared: bool = False
     executed: bool = False
     analysis_executed: bool = False
@@ -199,10 +200,10 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
     def get_components(self, prefix: str) -> Iterable[str]:
         """Get all components with the given prefix that can have deviations.
-        
+
         Args:
             prefix: Component prefix (e.g., 'R', 'C', 'L') or '*' for all allowed types.
-            
+
         Returns:
             An iterable of component references.
         """
@@ -218,13 +219,13 @@ class ToleranceDeviations(SimAnalysis, ABC):
         self, ref: str
     ) -> Tuple[Union[str, float], ComponentDeviation]:
         """Get the value and deviation type for a component.
-        
+
         Args:
             ref: Component reference (e.g., 'R1', 'C2').
-            
+
         Returns:
             A tuple containing (component_value, deviation_info).
-            
+
         Raises:
             ValueError: If the reference is not a valid component type.
         """
@@ -251,7 +252,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
         distribution: str = "uniform",
     ) -> None:
         """Set the deviation range for a parameter.
-        
+
         Args:
             ref: Parameter reference name.
             min_val: Minimum value.
@@ -266,10 +267,10 @@ class ToleranceDeviations(SimAnalysis, ABC):
         self, param: str
     ) -> Tuple[Any, ComponentDeviation]:
         """Get the value and deviation type for a parameter.
-        
+
         Args:
             param: Parameter name.
-            
+
         Returns:
             A tuple containing (parameter_value, deviation_info).
         """
@@ -278,7 +279,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
     def save_netlist(self, filename: str) -> None:
         """Save the netlist to a file, preparing the testbench if necessary.
-        
+
         Args:
             filename: The path to save the netlist to.
         """
@@ -294,10 +295,10 @@ class ToleranceDeviations(SimAnalysis, ABC):
     @abstractmethod
     def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepare the testbench for simulation.
-        
+
         This abstract method must be implemented by subclasses to set up
         the specific testbench configuration for the analysis type.
-        
+
         Args:
             **kwargs: Analysis-specific keyword arguments.
         """
@@ -425,14 +426,16 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
         # Safely check and process stepset and dataset attributes
         if not (hasattr(log_results, "stepset") and hasattr(log_results, "dataset")):
-            return self.log_data.update(log_results)
-        
+            self.add_log_data(log_results)
+            return log_results
+
         stepset = getattr(log_results, "stepset", {})
         dataset = getattr(log_results, "dataset", {})
 
         if len(stepset) > 0:
-            return self.log_data.update(log_results)
-            
+            self.add_log_data(log_results)
+            return log_results
+
         # Handle empty stepset
         if "run" in dataset and len(dataset["run"]) > 0:
             if isinstance(dataset["run"][0], LTComplex):
@@ -466,7 +469,10 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
     def read_logfiles(self) -> LogfileData:
         """Returns the logdata for the simulations."""
-        if self.testbench.analysis_executed is False and self.testbench.executed is False:
+        if (
+            self.testbench.analysis_executed is False
+            and self.testbench.executed is False
+        ):
             raise RuntimeError("The analysis has not been executed yet")
 
         if "log_data" in self.simulation_results:
@@ -519,11 +525,11 @@ class ToleranceDeviations(SimAnalysis, ABC):
         ]
     ]:
         """Run the tolerance analysis.
-        
+
         This abstract method must be implemented by subclasses to perform the actual
         tolerance/sensitivity analysis. The override should set
         self.testbench.analysis_executed to True.
-        
+
         Args:
             callback: Optional callback function to process results.
             callback_args: Arguments to pass to the callback function.
@@ -531,7 +537,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
             timeout: Timeout for each simulation run.
             exe_log: Whether to log simulator execution output.
             measure: Name of the measurement to analyze.
-            
+
         Returns:
             Optional tuple with analysis results, format depends on the specific analysis type.
         """

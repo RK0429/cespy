@@ -52,6 +52,7 @@ SCALE_Y = -6.25
 @dataclass
 class SymbolElements:
     """Groups symbol elements to reduce instance attributes."""
+
     pins: List = field(default_factory=list)
     lines: List = field(default_factory=list)
     shapes: List = field(default_factory=list)
@@ -248,7 +249,8 @@ class AsyReader:
                         # neccesary to crash the program.
                         _logger.warning(
                             "Cosmetic text in ASY format not supported, text skipped."
-                            " ASY file: %s", self._asy_file_path
+                            " ASY file: %s",
+                            self._asy_file_path,
                         )
                 else:
                     # In order to avoid crashing the program, 1) add the missing
@@ -267,7 +269,9 @@ class AsyReader:
         spice_prefix = self.elements.attributes["Prefix"]
         symbol = QschTag("symbol", spice_prefix[0])
         symbol.items.append(QschTag("type:", spice_prefix))
-        symbol.items.append(QschTag("description:", self.elements.attributes["Description"]))
+        symbol.items.append(
+            QschTag("description:", self.elements.attributes["Description"])
+        )
         symbol.items.append(QschTag("shorted pins:", "false"))
         for line in self.elements.lines:
             x1 = int(line.V1.X * SCALE_X)
@@ -357,11 +361,13 @@ class AsyReader:
 
     def is_subcircuit(self) -> bool:
         """Check if the symbol represents a subcircuit.
-        
+
         Returns True if the symbol type is BLOCK or has prefix X.
         """
         # Prefix is guaranteed to be uppercase
-        return self.symbol_type == "BLOCK" or self.elements.attributes.get("Prefix") == "X"
+        return (
+            self.symbol_type == "BLOCK" or self.elements.attributes.get("Prefix") == "X"
+        )
 
     def get_library(self) -> Optional[str]:
         """Returns the library name of the model.
