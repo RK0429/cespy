@@ -11,7 +11,7 @@ import logging
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from .performance import benchmark_function, PerformanceMonitor
 
@@ -21,10 +21,10 @@ _logger = logging.getLogger("cespy.Benchmarks")
 class BenchmarkSuite:
     """Collection of performance benchmarks for cespy components."""
     
-    def __init__(self):
-        self.results: Dict[str, Dict[str, float]] = {}
+    def __init__(self) -> None:
+        self.results: Dict[str, Dict[str, Union[float, str]]] = {}
         self.baseline_file: Optional[Path] = None
-        self.baseline_data: Dict[str, Dict[str, float]] = {}
+        self.baseline_data: Dict[str, Dict[str, Union[float, str]]] = {}
         self.performance_monitor = PerformanceMonitor()
     
     def set_baseline_file(self, file_path: Path) -> None:
@@ -99,7 +99,7 @@ class BenchmarkSuite:
         from .performance import cached_regex
         start_time = time.perf_counter()
         for _ in range(1000):
-            for pattern_str in SPICE_PATTERNS.values():
+            for pattern_name, pattern_str in SPICE_PATTERNS.items():
                 cached_pattern = cached_regex(pattern_str)
                 cached_pattern.findall(test_text)
         end_time = time.perf_counter()
@@ -277,7 +277,7 @@ class BenchmarkSuite:
         if not self.baseline_data:
             return {'status': 'no_baseline', 'message': 'No baseline data available'}
         
-        comparison = {
+        comparison: Dict[str, Any] = {
             'status': 'passed',
             'regressions': [],
             'improvements': [],
@@ -459,7 +459,7 @@ def create_performance_test(name: str, baseline_file: Optional[Path] = None) -> 
     Returns:
         Test function that can be used with pytest
     """
-    def test_performance():
+    def test_performance() -> None:
         """Performance regression test."""
         suite = run_performance_benchmarks(baseline_file)
         

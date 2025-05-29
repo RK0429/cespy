@@ -10,7 +10,7 @@ import json
 import logging
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any, Union, Callable
 
 from cespy.core.constants import Defaults, Encodings, Simulators
 from cespy.exceptions import ConfigurationError, InvalidConfigurationError
@@ -87,7 +87,7 @@ class CespyConfig:
     enable_profiling: bool = False
     cache_parsed_files: bool = True
     
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize simulator configurations if not provided."""
         if not self.simulators:
             for sim in Simulators.ALL:
@@ -208,7 +208,7 @@ class CespyConfig:
         config = cls()
         
         # Map environment variables to config attributes
-        env_mapping = {
+        env_mapping: Dict[str, tuple[str, Callable[[str], Any]]] = {
             "CESPY_DEFAULT_ENCODING": ("default_encoding", str),
             "CESPY_DEFAULT_TIMEOUT": ("default_timeout", float),
             "CESPY_PARALLEL_SIMS": ("parallel_sims", int),
@@ -297,17 +297,17 @@ def load_config(filepath: Optional[Union[str, Path]] = None) -> CespyConfig:
             Path.cwd() / ".cespy.json",
         ]
         
-        config = None
+        loaded_config: Optional[CespyConfig] = None
         for location in config_locations:
             if location.exists():
                 try:
-                    config = CespyConfig.from_file(location)
+                    loaded_config = CespyConfig.from_file(location)
                     break
                 except ConfigurationError:
                     continue
         
-        if config is None:
-            config = CespyConfig.from_environment()
+        if loaded_config is None:
+            loaded_config = CespyConfig.from_environment()
     
-    set_config(config)
-    return config
+    set_config(loaded_config)
+    return loaded_config

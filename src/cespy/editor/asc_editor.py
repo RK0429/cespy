@@ -536,7 +536,7 @@ class AscEditor(BaseSchematic):
         if match:
             # match.group returns Any, ensure str
             return str(match.group("value"))
-        raise ParameterNotFoundError(f"Parameter {param} not found in ASC file")
+        raise ParameterNotFoundError(param, f"Parameter {param} not found in ASC file")
 
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
         """Sets a parameter value in the ASC file.

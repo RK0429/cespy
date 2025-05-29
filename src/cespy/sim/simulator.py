@@ -195,8 +195,10 @@ class Simulator(ABC):
                 # For MacOS wine, there will be no process called "wine". Use
                 # "wine-preloader"
                 return "wine-preloader"
-            return Path(exe).stem
-        return Path(exe).name
+            else:
+                return Path(exe).stem
+        else:
+            return Path(exe).name
 
     def __init__(self) -> None:
         raise SpiceSimulatorError("This class is not supposed to be instanced.")

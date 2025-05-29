@@ -63,7 +63,7 @@ class PerformanceMetrics:
 class PerformanceMonitor:
     """Centralized performance monitoring and optimization."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.metrics: Dict[str, PerformanceMetrics] = {}
         self.enabled = True
         self.threshold_warning_time = 1.0  # Warn if function takes > 1 second
@@ -116,7 +116,7 @@ class PerformanceMonitor:
             Metrics for specific function or all metrics
         """
         if function_name:
-            return self.metrics.get(function_name)
+            return self.metrics.get(function_name, PerformanceMetrics(function_name))
         return self.metrics.copy()
     
     def get_slowest_functions(self, count: int = 10) -> List[PerformanceMetrics]:
@@ -222,7 +222,7 @@ def profile_performance(
     """
     def decorator(func: F) -> F:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             if not performance_monitor.enabled:
                 return func(*args, **kwargs)
             
@@ -261,12 +261,12 @@ def profile_performance(
                     func.__name__, execution_time, memory_usage
                 )
         
-        return wrapper
+        return wrapper  # type: ignore
     return decorator
 
 
 @contextmanager
-def performance_timer(operation_name: str):
+def performance_timer(operation_name: str) -> Any:
     """Context manager for timing operations.
     
     Args:
@@ -373,7 +373,7 @@ class PerformanceOptimizer:
         Returns:
             Dictionary with optimization recommendations
         """
-        recommendations = {}
+        recommendations: Dict[str, Any] = {}
         
         if file_size_mb < 1:
             # Small files
@@ -404,7 +404,7 @@ class PerformanceOptimizer:
         Returns:
             Dictionary with optimization recommendations
         """
-        recommendations = {
+        recommendations: Dict[str, Any] = {
             'compile_patterns': True,
             'use_cache': True,
             'problematic_patterns': [],
@@ -414,23 +414,29 @@ class PerformanceOptimizer:
         for pattern in patterns:
             # Check for common performance issues
             if '.*' in pattern and pattern.count('.*') > 2:
-                recommendations['problematic_patterns'].append({
-                    'pattern': pattern,
-                    'issue': 'Multiple .* can cause backtracking',
-                    'suggestion': 'Use more specific patterns or possessive quantifiers'
-                })
+                problematic_patterns = recommendations['problematic_patterns']
+                if isinstance(problematic_patterns, list):
+                    problematic_patterns.append({
+                        'pattern': pattern,
+                        'issue': 'Multiple .* can cause backtracking',
+                        'suggestion': 'Use more specific patterns or possessive quantifiers'
+                    })
             
             if pattern.startswith('.*') or pattern.endswith('.*'):
-                recommendations['optimizations'].append({
-                    'pattern': pattern,
-                    'optimization': 'Consider anchoring with ^ or $ if possible'
-                })
+                optimizations = recommendations['optimizations']
+                if isinstance(optimizations, list):
+                    optimizations.append({
+                        'pattern': pattern,
+                        'optimization': 'Consider anchoring with ^ or $ if possible'
+                    })
             
             if '|' in pattern and len(pattern.split('|')) > 5:
-                recommendations['optimizations'].append({
-                    'pattern': pattern,
-                    'optimization': 'Consider splitting complex alternations'
-                })
+                optimizations = recommendations['optimizations']
+                if isinstance(optimizations, list):
+                    optimizations.append({
+                        'pattern': pattern,
+                        'optimization': 'Consider splitting complex alternations'
+                    })
         
         return recommendations
     
@@ -445,7 +451,7 @@ class PerformanceOptimizer:
         Returns:
             Dictionary with memory optimization recommendations
         """
-        recommendations = {}
+        recommendations: Dict[str, Any] = {}
         
         # Get platform info for memory-aware recommendations
         try:
@@ -475,7 +481,7 @@ class PerformanceOptimizer:
         return recommendations
 
 
-def benchmark_function(func: Callable, *args, iterations: int = 100, **kwargs) -> Dict[str, float]:
+def benchmark_function(func: Callable[..., Any], *args: Any, iterations: int = 100, **kwargs: Any) -> Dict[str, float]:
     """Benchmark a function's performance.
     
     Args:

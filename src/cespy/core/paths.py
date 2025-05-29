@@ -414,6 +414,7 @@ def guess_process_name(exe_path: str) -> str:
 if is_windows():
     try:
         import ctypes
+        from ctypes import wintypes
 
         def get_short_path_name(long_name: str) -> str:
             """
@@ -428,17 +429,24 @@ if is_windows():
             if not os.path.exists(long_name):
                 return long_name
 
-            # GetShortPathNameW returns required buffer size
-            buffer_size = ctypes.windll.kernel32.GetShortPathNameW(long_name, None, 0)
-            if buffer_size == 0:
+            try:
+                # GetShortPathNameW returns required buffer size
+                GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW  # type: ignore[attr-defined]
+                GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+                GetShortPathNameW.restype = wintypes.DWORD
+                
+                buffer_size = GetShortPathNameW(long_name, None, 0)
+                if buffer_size == 0:
+                    return long_name
+
+                output = ctypes.create_unicode_buffer(buffer_size)
+                result = GetShortPathNameW(
+                    long_name, output, buffer_size
+                )
+
+                return output.value if result else long_name
+            except (AttributeError, OSError):
                 return long_name
-
-            output = ctypes.create_unicode_buffer(buffer_size)
-            result = ctypes.windll.kernel32.GetShortPathNameW(
-                long_name, output, buffer_size
-            )
-
-            return output.value if result else long_name
 
     except ImportError:
 

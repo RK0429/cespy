@@ -11,7 +11,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Pattern, Type, Union
 
 from ..core import constants as core_constants
 from ..core import patterns as core_patterns
@@ -59,7 +59,7 @@ class ComponentTemplate:
     optional_attributes: List[str] = field(default_factory=list)
     pin_names: List[str] = field(default_factory=list)
     spice_template: str = ""
-    validation_pattern: Optional[str] = None
+    validation_pattern: Optional[Pattern[str]] = None
 
 
 class BaseComponent:
@@ -333,7 +333,7 @@ class ComponentFactory:
     and validation.
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize component factory."""
         self._custom_templates: Dict[str, ComponentTemplate] = {}
         self._component_classes: Dict[ComponentType, Type[BaseComponent]] = {}
@@ -364,12 +364,12 @@ class ComponentFactory:
             try:
                 component_type = ComponentType(component_type)
             except ValueError:
-                raise InvalidComponentError(f"Unknown component type: {component_type}")
+                raise InvalidComponentError("component_type", f"Unknown component type: {component_type}")
         
         # Get template
         template = COMPONENT_TEMPLATES.get(component_type)
         if not template:
-            raise InvalidComponentError(f"No template for component type: {component_type}")
+            raise InvalidComponentError(str(component_type), f"No template for component type: {component_type}")
         
         # Generate name if not provided
         if not name:

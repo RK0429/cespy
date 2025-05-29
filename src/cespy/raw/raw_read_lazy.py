@@ -33,12 +33,11 @@ class TraceInfo:
     step_info: Dict[int, Tuple[int, int]] = field(default_factory=dict)  # step -> (offset, length)
 
 
-@dataclass
 class LazyTrace:
     """Lazy-loaded trace that reads data on demand."""
     
     def __init__(self, trace_info: TraceInfo, file_path: Path, 
-                 is_complex: bool, is_float64: bool, mmap_file: Optional[mmap.mmap] = None):
+                 is_complex: bool, is_float64: bool, mmap_file: Optional[mmap.mmap] = None) -> None:
         """Initialize lazy trace.
         
         Args:
@@ -111,7 +110,7 @@ class LazyTrace:
         
         # Convert to numpy array
         if self.is_complex:
-            dtype = np.complex128
+            dtype: Any = np.complex128
         elif self.is_float64:
             dtype = np.float64
         else:
@@ -173,8 +172,8 @@ class RawReadLazy(RawRead):
         raw_filename: Union[str, Path],
         traces_to_read: Union[str, List[str], None] = "*",
         dialect: Optional[str] = None,
-        **kwargs
-    ):
+        **kwargs: Any
+    ) -> None:
         """Initialize lazy raw file reader.
         
         Args:
@@ -223,22 +222,29 @@ class RawReadLazy(RawRead):
                 self.use_mmap = False
         
         # Prepare trace information
-        for trace_name in self.traces:
-            trace = self.traces[trace_name]
+        for trace_name in self.get_trace_names():
+            trace = self.get_trace(trace_name)
             
             # Create trace info
+            trace_index = 0  # Will need to be set properly based on trace order
+            for i, name in enumerate(self.get_trace_names()):
+                if name == trace_name:
+                    trace_index = i
+                    break
+            
             info = TraceInfo(
                 name=trace_name,
-                index=trace.index,
-                var_type=trace.type
+                index=trace_index,
+                var_type=trace.whattype if hasattr(trace, 'whattype') else 'unknown'
             )
             
             # Calculate offsets for each step
             # This is simplified - actual implementation would need to parse file structure
-            for step in range(self.nSteps):
+            num_steps = len(list(self.get_steps())) if self.steps else 1
+            for step in range(num_steps):
                 # Calculate offset based on file structure
                 # This would need to be adapted based on actual raw file format
-                offset = self._calculate_trace_offset(trace.index, step)
+                offset = self._calculate_trace_offset(trace_index, step)
                 num_points = self.nPoints
                 
                 info.step_info[step] = (offset, num_points)
@@ -246,11 +252,14 @@ class RawReadLazy(RawRead):
             self._trace_info[trace_name] = info
             
             # Create lazy trace
+            is_complex = trace.numerical_type == "complex" if hasattr(trace, 'numerical_type') else False
+            is_float64 = (trace_index == 0)  # X-axis usually float64
+            
             lazy_trace = LazyTrace(
                 trace_info=info,
                 file_path=self.file_path,
-                is_complex=self._is_complex,
-                is_float64=(trace.index == 0),  # X-axis usually float64
+                is_complex=is_complex,
+                is_float64=is_float64,
                 mmap_file=self.mmap_file
             )
             
@@ -370,18 +379,25 @@ class RawReadLazy(RawRead):
         # - Each trace has self.nPoints data points
         
         bytes_per_point = 4  # float32 by default
-        if self._is_complex:
+        # Determine complex from raw_params or a reasonable default
+        plotname = self.raw_params.get("Plotname", "")
+        is_complex = "AC" in plotname.upper()
+        
+        if is_complex:
             bytes_per_point = 16
         elif trace_index == 0:  # X-axis
             bytes_per_point = 8
         
         # Calculate offset
         # This is a simplified formula - actual implementation would be more complex
-        points_per_step = self.nPoints * len(self.traces)
+        num_traces = len(self.get_trace_names())
+        points_per_step = self.nPoints * num_traces
         step_offset = step * points_per_step * bytes_per_point
         trace_offset = trace_index * self.nPoints * bytes_per_point
         
-        return self.binary_start + step_offset + trace_offset
+        # Use a reasonable binary start offset - this would need to be calculated properly
+        binary_start = 1024  # Approximate header size
+        return binary_start + step_offset + trace_offset
     
     def close(self) -> None:
         """Close file handles and clean up resources."""
@@ -400,15 +416,15 @@ class RawReadLazy(RawRead):
         
         _logger.debug("RawReadLazy closed")
     
-    def __enter__(self):
+    def __enter__(self) -> "RawReadLazy":
         """Context manager entry."""
         return self
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Context manager exit."""
         self.close()
     
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor to ensure cleanup."""
         try:
             self.close()

@@ -12,7 +12,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from ..core import constants as core_constants
 from ..core import patterns as core_patterns
@@ -114,10 +114,10 @@ class CircuitValidator:
     - Common mistake detection
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize circuit validator."""
         self._model_library: Set[str] = set()
-        self._custom_rules: List[callable] = []
+        self._custom_rules: List[Callable[..., Any]] = []
         self._known_subcircuits: Set[str] = set()
         
         _logger.info("CircuitValidator initialized")
@@ -209,7 +209,7 @@ class CircuitValidator:
         """
         self._known_subcircuits.add(subcircuit_name)
     
-    def add_custom_rule(self, rule_function: callable) -> None:
+    def add_custom_rule(self, rule_function: Callable[..., Any]) -> None:
         """Add a custom validation rule.
         
         Args:
@@ -217,14 +217,14 @@ class CircuitValidator:
         """
         self._custom_rules.append(rule_function)
     
-    def _parse_netlist(self, netlist_content: str) -> Tuple[List[Dict], List[Dict], Set[str]]:
+    def _parse_netlist(self, netlist_content: str) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], Set[str]]:
         """Parse netlist into components and directives.
         
         Returns:
             Tuple of (components, directives, nodes)
         """
-        components = []
-        directives = []
+        components: List[Dict[str, Any]] = []
+        directives: List[Dict[str, Any]] = []
         nodes = set()
         
         lines = netlist_content.strip().split('\n')
@@ -312,11 +312,11 @@ class CircuitValidator:
         else:
             return None
     
-    def _check_connectivity(self, components: List[Dict], nodes: Set[str], 
+    def _check_connectivity(self, components: List[Dict[str, Any]], nodes: Set[str], 
                            result: ValidationResult) -> None:
         """Check circuit connectivity."""
         # Count connections per node
-        node_connections = defaultdict(int)
+        node_connections: Dict[str, int] = defaultdict(int)
         for comp in components:
             for node in comp['nodes']:
                 node_connections[node] += 1
@@ -470,11 +470,10 @@ class CircuitValidator:
         if not analyses:
             result.add_info(
                 None,
-                "No analysis directive found (.tran, .ac, .dc, etc.)",
-                suggestion="Add analysis directive to run simulation"
+                "No analysis directive found (.tran, .ac, .dc, etc.). Add analysis directive to run simulation"
             )
     
-    def _check_common_mistakes(self, components: List[Dict], directives: List[Dict],
+    def _check_common_mistakes(self, components: List[Dict[str, Any]], directives: List[Dict[str, Any]],
                               result: ValidationResult) -> None:
         """Check for common circuit mistakes."""
         # Check for voltage sources in parallel
@@ -507,11 +506,10 @@ class CircuitValidator:
             # Simple check - more than 2 capacitors might form a loop
             result.add_info(
                 None,
-                "Multiple capacitors detected - check for capacitor loops",
-                suggestion="Capacitor loops require initial conditions"
+                "Multiple capacitors detected - check for capacitor loops. Capacitor loops require initial conditions"
             )
     
-    def _check_custom_rules(self, components: List[Dict], directives: List[Dict],
+    def _check_custom_rules(self, components: List[Dict[str, Any]], directives: List[Dict[str, Any]],
                            result: ValidationResult) -> None:
         """Run custom validation rules."""
         for rule in self._custom_rules:

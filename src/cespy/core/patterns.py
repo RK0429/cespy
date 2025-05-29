@@ -6,14 +6,14 @@ organized by category to reduce duplication and improve maintainability.
 """
 
 import re
-from typing import Pattern, Dict
+from typing import Dict, Pattern
 
 # Component value patterns
 COMPONENT_VALUE_PATTERN: Pattern[str] = re.compile(r'value=([^"\s]+)')
-COMPONENT_REF_PATTERN: Pattern[str] = re.compile(r'^[RLCVIJKEFHGBDMOQSTUWXZ]\w+')
+COMPONENT_REF_PATTERN: Pattern[str] = re.compile(r"^[RLCVIJKEFHGBDMOQSTUWXZ]\w+")
 
 # Parameter patterns
-PARAM_PATTERN: Pattern[str] = re.compile(r'\.param\s+(\w+)\s*=\s*(.+)', re.IGNORECASE)
+PARAM_PATTERN: Pattern[str] = re.compile(r"\.param\s+(\w+)\s*=\s*(.+)", re.IGNORECASE)
 PARAM_ASSIGNMENT_PATTERN: Pattern[str] = re.compile(
     r"(?P<name>\w+)\s*[= ]\s*(?P<value>(?P<cb>\{)?(?(cb)[^\}]*\}|[\d\.\+\-Ee]+[a-zA-Z%]*))"
 )
@@ -59,110 +59,96 @@ COMPLEX_NUMBER_PATTERN: Pattern[str] = re.compile(
 # SPICE component patterns
 SPICE_PATTERNS: Dict[str, Pattern[str]] = {
     # Behavioral source
-    'B': re.compile(
+    "B": re.compile(
         r"^(?P<designator>B§?[VI]?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$"
     ),
     # Capacitor
-    'C': re.compile(
+    "C": re.compile(
         r"^(?P<designator>C§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
         r"(?P<value>(?P<formula>{)?(?(formula).*}|[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[muµnpfgt]?F?))"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\{\}\(\)\-\+\*\/%\.]+)?)*)?"
     ),
     # Diode
-    'D': re.compile(
+    "D": re.compile(
         r"^(?P<designator>D§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # Voltage controlled voltage source
-    'E': re.compile(
-        r"^(?P<designator>E§?\w+)(?P<nodes>(\s+\S+){2})(?P<value>.*)$"
-    ),
+    "E": re.compile(r"^(?P<designator>E§?\w+)(?P<nodes>(\s+\S+){2})(?P<value>.*)$"),
     # Current controlled current source
-    'F': re.compile(
+    "F": re.compile(
         r"^(?P<designator>F§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)\s+(?P<factor>[\+\-]?\d*\.?\d*[eE]?[\+\-]?\d*)"
     ),
     # Voltage controlled current source
-    'G': re.compile(
-        r"^(?P<designator>G§?\w+)(?P<nodes>(\s+\S+){2})(?P<value>.*)$"
-    ),
+    "G": re.compile(r"^(?P<designator>G§?\w+)(?P<nodes>(\s+\S+){2})(?P<value>.*)$"),
     # Current controlled voltage source
-    'H': re.compile(
+    "H": re.compile(
         r"^(?P<designator>H§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)"
         r"\s+(?P<factor>[\+\-]?\d*\.?\d+[eE]?[\+\-]?\d*)"
     ),
     # Current source
-    'I': re.compile(
-        r"^(?P<designator>I§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$"
-    ),
+    "I": re.compile(r"^(?P<designator>I§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$"),
     # JFET
-    'J': re.compile(
+    "J": re.compile(
         r"^(?P<designator>J§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>\w+)"
         r"(?P<params>(\s+\w+\s*(=\s*[\+\-\w\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # Coupled inductors
-    'K': re.compile(
+    "K": re.compile(
         r"^(?P<designator>K§?\w+)\s+(?P<inductor1>L§?\w+)\s+(?P<inductor2>L§?\w+)"
         r"\s+(?P<value>[\+\-]?\d*\.?\d+[eE]?[\+\-]?\d*)"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # Inductor
-    'L': re.compile(
+    "L": re.compile(
         r"^(?P<designator>L§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
         r"(?P<value>(?P<formula>{)?(?(formula).*}|[\+\-]?[0-9]*\.?[0-9]+([eE][\+\-]?[0-9]+)?[muµnpfk]?H?))"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # MOSFET
-    'M': re.compile(
+    "M": re.compile(
         r"^(?P<designator>M§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>[\w\.]+)"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # Lossy transmission line
-    'O': re.compile(
+    "O": re.compile(
         r"^(?P<designator>O§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>\w+)"
         r"(?P<params>.*)"
     ),
     # Bipolar transistor
-    'Q': re.compile(
+    "Q": re.compile(
         r"^(?P<designator>Q§?\w+)(?P<nodes>(\s+\S+){3,4})\s+(?P<value>[\w\.]+)"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # Resistor
-    'R': re.compile(
+    "R": re.compile(
         r"^(?P<designator>R§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
         r"(?P<value>(?P<formula>\{)?(?(formula).*\}|[\+\-]?[0-9\.E]+\s*[TGMkmuµnp]?(?P<unit>[Ω☐■◘]|ohm)?))"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # Voltage controlled switch
-    'S': re.compile(
+    "S": re.compile(
         r"^(?P<designator>S§?\w+)(?P<nodes>(\s+\S+){4})\s+(?P<value>[\w\.]+)"
         r"(?P<params>.*)?"
     ),
     # Transmission line
-    'T': re.compile(
-        r"^(?P<designator>T§?\w+)(?P<nodes>(\s+\S+){4})"
-        r"(?P<params>.*)"
-    ),
+    "T": re.compile(r"^(?P<designator>T§?\w+)(?P<nodes>(\s+\S+){4})" r"(?P<params>.*)"),
     # Uniform RC line
-    'U': re.compile(
-        r"^(?P<designator>U§?\w+)(?P<nodes>(\s+\S+){3})"
-        r"(?P<model>.*)"
-    ),
+    "U": re.compile(r"^(?P<designator>U§?\w+)(?P<nodes>(\s+\S+){3})" r"(?P<model>.*)"),
     # Voltage source
-    'V': re.compile(
-        r"^(?P<designator>V§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$"
-    ),
+    "V": re.compile(r"^(?P<designator>V§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$"),
     # Current controlled switch
-    'W': re.compile(
+    "W": re.compile(
         r"^(?P<designator>W§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)"
         r"\s+(?P<model>[\w\.]+)(?P<params>.*)"
     ),
     # Subcircuit
-    'X': re.compile(
+    "X": re.compile(
         r"^(?P<designator>X§?\w+)(?P<nodes>(\s+\S+)+)\s+(?P<value>[\w\./\:]+)"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)"
     ),
     # MESFET
-    'Z': re.compile(
+    "Z": re.compile(
         r"^(?P<designator>Z§?\w+)(?P<nodes>(\s+\S+){3})\s+(?P<value>\w+)"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),

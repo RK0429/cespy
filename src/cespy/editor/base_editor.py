@@ -35,7 +35,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from math import floor, log
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 
 # Core imports
 from ..core import constants as core_constants
@@ -289,7 +289,7 @@ class ComponentNotFoundError(Exception):
     This exception is raised when a component reference is not found in the circuit.
     """
     
-    def __init__(self, component_ref: str, message: str = None):
+    def __init__(self, component_ref: str, message: Optional[str] = None):
         """Initialize ComponentNotFoundError.
         
         Args:
@@ -308,7 +308,7 @@ class ParameterNotFoundError(Exception):
     This exception is raised when a parameter is not found in the circuit.
     """
 
-    def __init__(self, parameter: str, message: str = None) -> None:
+    def __init__(self, parameter: str, message: Optional[str] = None) -> None:
         """Initialize ParameterNotFoundError.
         
         Args:
@@ -900,7 +900,7 @@ class BaseEditor(ABC):
     @classmethod
     def _check_and_append_custom_library_path(cls, path: str) -> None:
         """:meta private:"""
-        expanded_path = core_paths.expand_user_path(path)
+        expanded_path = core_paths.get_absolute_path(path)
 
         if core_paths.is_valid_directory(expanded_path):
             _logger.debug("Adding path '%s' to the custom library path list", expanded_path)

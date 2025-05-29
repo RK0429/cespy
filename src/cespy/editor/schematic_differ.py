@@ -51,8 +51,10 @@ class ComponentChange:
                 desc += f", {attr} {old} -> {new}"
             return desc
         elif self.change_type == ChangeType.MOVED:
-            old_pos, new_pos = self.position_change
-            return f"Moved {self.component_name} from {old_pos} to {new_pos}"
+            if self.position_change:
+                old_pos, new_pos = self.position_change
+                return f"Moved {self.component_name} from {old_pos} to {new_pos}"
+            return f"Moved {self.component_name}"
         elif self.change_type == ChangeType.RENAMED:
             return f"Renamed component from '{self.old_value}' to '{self.new_value}'"
         return f"Unknown change to {self.component_name}"
@@ -191,7 +193,7 @@ class SchematicDiffer:
     - Support undo/redo operations
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize schematic differ."""
         self._change_history: List[SchematicDiff] = []
         self._position_tolerance = 0.1  # Tolerance for position comparison
@@ -307,7 +309,7 @@ class SchematicDiffer:
         changes = []
         
         # Create wire signatures for comparison
-        def wire_signature(wire):
+        def wire_signature(wire: Dict[str, Any]) -> Tuple[Tuple[float, float], Tuple[float, float]]:
             start = tuple(wire.get('start', (0, 0)))
             end = tuple(wire.get('end', (0, 0)))
             # Normalize direction
@@ -374,8 +376,8 @@ class SchematicDiffer:
         changes = []
         
         # Group directives by type
-        def group_directives(directives):
-            grouped = {}
+        def group_directives(directives: List[Dict[str, Any]]) -> Dict[str, List[str]]:
+            grouped: Dict[str, List[str]] = {}
             for d in directives:
                 dir_type = d.get('type', '')
                 if dir_type not in grouped:

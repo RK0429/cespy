@@ -81,8 +81,8 @@ class RawFileStreamer:
         self._raw_reader = RawRead(raw_file, headeronly=True)
         
         # Get file information
-        self.num_traces = len(self._raw_reader.traces)
-        self.num_steps = self._raw_reader.nSteps
+        self.num_traces = len(self._raw_reader._traces)
+        self.num_steps = len(list(self._raw_reader.get_steps())) if self._raw_reader.steps else 1
         self.num_points = self._raw_reader.nPoints
         
         # Calculate actual chunk parameters
@@ -203,7 +203,7 @@ class RawFileStreamer:
 class MinMaxProcessor(StreamProcessor):
     """Stream processor that tracks min/max values."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize min/max processor."""
         self.results: Dict[str, Dict[int, Tuple[float, float]]] = {}
     
@@ -233,7 +233,7 @@ class MinMaxProcessor(StreamProcessor):
 class AverageProcessor(StreamProcessor):
     """Stream processor that calculates averages."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize average processor."""
         self.sums: Dict[str, Dict[int, float]] = {}
         self.counts: Dict[str, Dict[int, int]] = {}
@@ -257,7 +257,7 @@ class AverageProcessor(StreamProcessor):
     
     def finalize(self) -> Dict[str, Dict[int, float]]:
         """Calculate and return averages."""
-        results = {}
+        results: Dict[str, Dict[int, float]] = {}
         
         for trace_name in self.sums:
             results[trace_name] = {}
@@ -390,7 +390,7 @@ class DataSamplerProcessor(StreamProcessor):
     
     def finalize(self) -> Dict[str, Dict[int, Tuple[NDArray, NDArray]]]:
         """Convert lists to arrays and return."""
-        results = {}
+        results: Dict[str, Dict[int, Tuple[NDArray, NDArray]]] = {}
         
         for trace_name in self.samples:
             results[trace_name] = {}

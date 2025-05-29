@@ -46,7 +46,7 @@ def deprecated(
     """
     def decorator(func: F) -> F:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             # Format deprecation message
             message = f"{func.__name__} is deprecated since version {version}: {reason}"
             if replacement:
@@ -65,15 +65,15 @@ def deprecated(
             return func(*args, **kwargs)
         
         # Add deprecation metadata
-        wrapper.__deprecated__ = True
-        wrapper.__deprecation_info__ = {
+        setattr(wrapper, '__deprecated__', True)
+        setattr(wrapper, '__deprecation_info__', {
             'version': version,
             'reason': reason,
             'replacement': replacement,
             'level': level
-        }
+        })
         
-        return wrapper
+        return wrapper  # type: ignore
     return decorator
 
 
@@ -88,7 +88,7 @@ def standardize_parameters(parameter_map: Dict[str, str]) -> Callable[[F], F]:
     """
     def decorator(func: F) -> F:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             # Convert old parameter names to new ones
             new_kwargs = {}
             for key, value in kwargs.items():
@@ -114,7 +114,7 @@ def standardize_parameters(parameter_map: Dict[str, str]) -> Callable[[F], F]:
             
             return func(*args, **new_kwargs)
         
-        return wrapper
+        return wrapper  # type: ignore
     return decorator
 
 
@@ -275,7 +275,7 @@ def create_compatibility_wrapper(
             reason=f"Name changed from {old_name} to {new_name}",
             replacement=new_name
         )
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             return original(*args, **kwargs)
         
         # Copy attributes for classes
@@ -289,7 +289,7 @@ def create_compatibility_wrapper(
 class ParameterValidator:
     """Validator for standardizing and validating function parameters."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.standardizer = APIStandardizer()
     
     def validate_file_path_parameter(self, file_path: Any) -> Union[str, None]:
@@ -396,7 +396,7 @@ def ensure_api_consistency(func: F) -> F:
     validator = ParameterValidator()
     
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> Any:
         # Get function signature for parameter validation
         import inspect
         sig = inspect.signature(func)
@@ -411,9 +411,11 @@ def ensure_api_consistency(func: F) -> F:
                 if 'file' in param_name.lower() or 'path' in param_name.lower():
                     validated_kwargs[param_name] = validator.validate_file_path_parameter(param_value)
                 elif 'timeout' in param_name.lower():
-                    validated_kwargs[param_name] = validator.validate_timeout_parameter(param_value)
+                    timeout_val = validator.validate_timeout_parameter(param_value)
+                    validated_kwargs[param_name] = timeout_val
                 elif param.annotation == bool or 'bool' in str(param.annotation).lower():
-                    validated_kwargs[param_name] = validator.validate_boolean_parameter(param_value, param_name)
+                    bool_val = validator.validate_boolean_parameter(param_value, param_name)
+                    validated_kwargs[param_name] = bool_val
                 else:
                     validated_kwargs[param_name] = param_value
             else:
@@ -421,7 +423,7 @@ def ensure_api_consistency(func: F) -> F:
         
         return func(*args, **validated_kwargs)
     
-    return wrapper
+    return wrapper  # type: ignore
 
 
 # Pre-defined compatibility wrappers for common renames

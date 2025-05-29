@@ -103,7 +103,7 @@ class PlatformManager:
             cls._instance = super().__new__(cls)
         return cls._instance
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize platform manager."""
         if not hasattr(self, '_initialized'):
             self._initialized = True
@@ -114,6 +114,7 @@ class PlatformManager:
         """Get platform information."""
         if self._platform_info is None:
             self._detect_platform()
+        assert self._platform_info is not None
         return self._platform_info
     
     def _detect_platform(self) -> None:
@@ -436,13 +437,13 @@ class PlatformManager:
             _logger.debug("Failed to check process status: %s", e)
             return False
     
-    def get_performance_hints(self) -> Dict[str, Union[str, int, bool]]:
+    def get_performance_hints(self) -> Dict[str, Union[str, int, bool, float]]:
         """Get platform-specific performance optimization hints.
         
         Returns:
             Dictionary of performance hints
         """
-        hints = {
+        hints: Dict[str, Union[str, int, bool, float]] = {
             'recommended_workers': self.info.recommended_workers,
             'memory_per_worker_gb': self.info.memory_per_worker_gb,
             'use_memory_mapping': self.info.is_unix_like,
@@ -458,7 +459,7 @@ class PlatformManager:
         
         if self.info.supports_wine:
             hints['wine_available'] = True
-            hints['wine_prefix'] = str(self.info.wine_prefix) if self.info.wine_prefix else None
+            hints['wine_prefix'] = str(self.info.wine_prefix) if self.info.wine_prefix else ""
         
         return hints
 
