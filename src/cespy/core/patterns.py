@@ -197,3 +197,6 @@ VERSION_PATTERN: Pattern[str] = re.compile(r"^VERSION ")
 ENG_NOTATION_PATTERN: Pattern[str] = re.compile(
     r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[TGMkmuµnpf]?"
 )
+
+# Float number pattern (alias for engineering notation)
+FLOAT_NUMBER_PATTERN: Pattern[str] = ENG_NOTATION_PATTERN

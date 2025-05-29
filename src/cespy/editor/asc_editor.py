@@ -60,6 +60,7 @@ from .base_schematic import (
 from .ltspice_utils import (
     ASC_INV_ROTATION_DICT,
     ASC_ROTATION_DICT,
+    END_LINE_TERM,
     TEXT_REGEX,
     TEXT_REGEX_ALIGN,
     TEXT_REGEX_SIZE,
