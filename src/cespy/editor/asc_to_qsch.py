@@ -69,6 +69,7 @@ def main() -> None:
     convert_asc_to_qsch(asc_file, qsch_file, search_paths)
 
 
+# pylint: disable=too-many-locals
 def convert_asc_to_qsch(
     asc_file: str, qsch_file: str, search_paths: list[str] | None = None
 ) -> None:

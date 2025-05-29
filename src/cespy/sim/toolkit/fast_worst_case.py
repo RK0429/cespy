@@ -36,6 +36,7 @@ _logger = logging.getLogger("cespy.SimAnalysis")
 
 
 class WorstCaseType(IntEnum):
+    """Enumeration for worst case analysis types."""
     nom = 0
     max = 1
     min = 2
@@ -81,6 +82,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
     run_analysis() method.
     """
 
+    # pylint: disable=too-many-arguments
     def run_testbench(
         self,
         *,
@@ -95,6 +97,8 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
     ) -> None:
         raise NotImplementedError("run_testbench() is not implemented in this class")
 
+    # pylint: disable=too-many-positional-arguments,too-many-locals
+    # pylint: disable=too-many-branches,too-many-statements,too-many-return-statements
     def run_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
@@ -137,20 +141,17 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             if dev.typ == DeviationType.tolerance:
                 if to == WorstCaseType.max:
                     return val * (1 + dev.max_val)
-                elif to == WorstCaseType.min:
+                if to == WorstCaseType.min:
                     return val * (1 - dev.max_val)
-                else:
-                    return val
-            elif dev.typ == DeviationType.minmax:
+                return val
+            if dev.typ == DeviationType.minmax:
                 if to == WorstCaseType.max:
                     return dev.max_val
-                elif to == WorstCaseType.min:
+                if to == WorstCaseType.min:
                     return dev.min_val
-                else:
-                    return val
-            else:
-                _logger.warning("Unknown deviation type")
                 return val
+            _logger.warning("Unknown deviation type")
+            return val
 
         def set_ref_to(ref: str, to: WorstCaseType) -> None:
             val, dev, typ = worst_case_elements[ref]
@@ -191,7 +192,7 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
 
         for ref in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(ref)
-            if dev.typ == DeviationType.tolerance or dev.typ == DeviationType.minmax:
+            if dev.typ in (DeviationType.tolerance, DeviationType.minmax):
                 worst_case_elements[ref] = val, dev, "parameter"
                 self.elements_analysed.append(ref)
 
@@ -239,8 +240,8 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             )
         self.wait_completion()
         # Need to set this to True, so that the next step can be executed
-        self.analysis_executed = True
-        self.testbench_executed = True  # Idem
+        self.testbench.analysis_executed = True
+        self.testbench.executed = True  # Idem
         # Get the results from the simulation
         log_data = self.read_logfiles()
         nominal = cast(float, log_data.get_measure_value(measure, 0))
@@ -261,10 +262,8 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
         # Set all components with a positive impact to the maximum value and
         # all components with a negative impact to the minimum value
         component_changed = False
-        for ref in max_setting:
-            if not max_setting[
-                ref
-            ]:  # Set the negative impact components to the minimum value
+        for ref, is_max in max_setting.items():
+            if not is_max:  # Set the negative impact components to the minimum value
                 set_ref_to(ref, WorstCaseType.min)
                 component_changed = True
 

@@ -117,8 +117,8 @@ class WorstCaseAnalysis(ToleranceDeviations):
         self.editor.set_parameter("run", -1)  # in case the step is commented.
         self.testbench.prepared = True
 
-    # pylint: disable-next=too-many-positional-arguments,too-many-locals
-    # pylint: disable-next=too-many-branches,too-many-statements
+    # pylint: disable=too-many-positional-arguments,too-many-locals
+    # pylint: disable=too-many-branches,too-many-statements
     def run_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,

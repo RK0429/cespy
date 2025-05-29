@@ -131,7 +131,7 @@ class Axis(DataSet):
         if k != len(self.step_info):
             raise SpiceReadException(
                 "The file a different number of steps than expected.\n"
-                + "Expecting %d got %d" % (len(self.step_offsets), k)
+                + f"Expecting {len(self.step_offsets)} got {k}"
             )
 
     def step_offset(self, step: int) -> int:
@@ -283,6 +283,7 @@ class TraceRead(DataSet):
     is available the get_wave() method will return a numpy array.
     """
 
+    # pylint: disable=too-many-positional-arguments
     def __init__(
         self,
         name: str,
@@ -380,8 +381,7 @@ class TraceRead(DataSet):
                     return complex(val)
                 return float(val)
             raise IndexError(f"The highest index is {last_item}. Received {pos}")
-        else:
-            return self.get_point(pos, step)
+        return self.get_point(pos, step)
 
     def get_len(self, step: int = 0) -> int:
         """Returns the length of the axis.
@@ -406,6 +406,7 @@ class TraceRead(DataSet):
         return len(self.data)
 
 
+# pylint: disable=too-few-public-methods
 class DummyTrace:
     """Dummy Trace for bypassing traces while reading."""
 

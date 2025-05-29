@@ -214,6 +214,7 @@ class SimRunnerConfigError(Exception):
 class AnyRunner(Protocol):
     """Protocol for any runner that can execute simulations."""
 
+    # pylint: disable=too-many-arguments
     def run(
         self,
         netlist: Union[str, Path, BaseEditor],
@@ -248,6 +249,7 @@ class AnyRunner(Protocol):
         raise NotImplementedError
 
 
+# pylint: disable=too-many-instance-attributes
 class SimRunner(AnyRunner):
     """The SimRunner class implements all the methods required for launching batches of
     Spice simulations.
@@ -508,6 +510,7 @@ class SimRunner(AnyRunner):
         _logger.error("Timeout waiting for resources for simulation %s", self.stats.run_count)
         return False
 
+    # pylint: disable=too-many-arguments
     def run(
         self,
         netlist: Union[str, Path, BaseEditor],

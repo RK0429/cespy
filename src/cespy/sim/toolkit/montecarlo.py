@@ -70,6 +70,7 @@ class Montecarlo(ToleranceDeviations):
     when it is prone to crashes and stalls.
     """
 
+    # pylint: disable=too-many-branches,too-many-statements
     def prepare_testbench(self, **kwargs: Any) -> None:
         """Prepares the simulation by setting the tolerances for the components :keyword
         num_runs: Number of runs to be performed.
@@ -88,15 +89,12 @@ class Montecarlo(ToleranceDeviations):
             )  # get there present value
             new_val = val
             if dev.typ == DeviationType.tolerance:
-                tolstr = ("%g" % dev.max_val).rstrip("0").rstrip(".")
+                tolstr = f"{dev.max_val:g}".rstrip("0").rstrip(".")
                 if dev.distribution == "uniform":
-                    new_val = "{utol(%s,%s)}" % (
-                        val,
-                        tolstr,
-                    )  # calculate expression for new value
+                    new_val = f"{{utol({val},{tolstr})}}"  # calculate expression for new value
                     tol_uni_func = True
                 elif dev.distribution == "normal":
-                    new_val = "{ntol(%s,%s)}" % (val, tolstr)
+                    new_val = f"{{ntol({val},{tolstr})}}"
                     tol_norm_func = True
             elif dev.typ == DeviationType.minmax:
                 if dev.distribution == "uniform":
@@ -207,9 +205,9 @@ class Montecarlo(ToleranceDeviations):
             "num_runs",
             self.last_run_number if self.last_run_number != 0 else 1000,
         )
-        self.editor.add_instruction(".step param run -1 %d 1" % self.last_run_number)
+        self.editor.add_instruction(f".step param run -1 {self.last_run_number} 1")
         self.editor.set_parameter("run", -1)
-        self.testbench_prepared = True
+        self.testbench.prepared = True
 
     @staticmethod
     def _get_sim_value(value: float, dev: ComponentDeviation) -> float:
@@ -236,6 +234,7 @@ class Montecarlo(ToleranceDeviations):
             _logger.warning("Unknown deviation type")
         return new_val
 
+    # pylint: disable=too-many-positional-arguments
     def run_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
@@ -296,7 +295,7 @@ class Montecarlo(ToleranceDeviations):
                 if rt is not None:
                     callback_rets.append(rt.get_results())
             self.simulation_results["callback_returns"] = callback_rets
-        self.analysis_executed = True
+        self.testbench.analysis_executed = True
 
     def analyse_measurement(self, meas_name: str) -> Optional[Any]:
         """Returns the measurement data for the given measurement name.
@@ -306,7 +305,7 @@ class Montecarlo(ToleranceDeviations):
         to calculate the mean and standard deviation of the data. It is also usual to
         consider max and min as 3 sigma, which is 99.7% of the data.
         """
-        if not self.analysis_executed:
+        if not self.testbench.analysis_executed:
             _logger.warning(
                 "The analysis was not executed. Please run the analysis before calling"
                 " this method"
@@ -317,5 +316,4 @@ class Montecarlo(ToleranceDeviations):
         if meas_data is None:
             _logger.warning("Measurement %s not found in log files", meas_name)
             return None
-        else:
-            return meas_data
+        return meas_data

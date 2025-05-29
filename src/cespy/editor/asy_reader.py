@@ -59,9 +59,10 @@ class SymbolElements:
     attributes: Dict[str, str] = field(default_factory=OrderedDict)
 
 
-class AsyReader(object):
+class AsyReader:
     """Symbol parser."""
 
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def __init__(
         self, asy_file: Union[Path, str], encoding: str = "autodetect"
     ) -> None:
@@ -260,6 +261,7 @@ class AsyReader(object):
             if pin is not None:
                 self.elements.pins.append(pin)
 
+    # pylint: disable=too-many-locals,too-many-statements
     def to_qsch(self, *args: str) -> QschTag:
         """Create a QschTag representing a component symbol."""
         spice_prefix = self.elements.attributes["Prefix"]
@@ -316,7 +318,7 @@ class AsyReader(object):
                 shape_tag, _ = QschTag.parse(
                     f"«arc3p ({x1},{y1}) ({x2},{y2}) ({x3},{y3}) 0 0 0xff0000 -1 -1»"
                 )
-            elif shape.name == "CIRCLE" or shape.name == "ellipse":
+            elif shape.name in ("CIRCLE", "ellipse"):
                 x1 = int(shape.points[0].X * SCALE_X)
                 y1 = int(shape.points[0].Y * SCALE_Y)
                 x2 = int(shape.points[1].X * SCALE_X)
@@ -354,6 +356,10 @@ class AsyReader(object):
         return symbol
 
     def is_subcircuit(self) -> bool:
+        """Check if the symbol represents a subcircuit.
+        
+        Returns True if the symbol type is BLOCK or has prefix X.
+        """
         # Prefix is guaranteed to be uppercase
         return self.symbol_type == "BLOCK" or self.elements.attributes.get("Prefix") == "X"
 

@@ -433,7 +433,7 @@ class QschEditor(BaseSchematic):
             if "_SUBCKT" in component.attributes:
                 sub_circuit = component.attributes["_SUBCKT"]
                 if sub_circuit is not None and sub_circuit.updated:
-                    sub_circuit.save_as(sub_circuit._qsch_file_path)
+                    sub_circuit.save_as(sub_circuit.circuit_file)
 
     def write_spice_to_file(self, netlist_file: TextIO) -> None:
         """Appends the netlist to a file buffer.

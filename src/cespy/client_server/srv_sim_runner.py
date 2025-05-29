@@ -106,22 +106,22 @@ class ServerSimRunner(threading.Thread):
             if tasks_attr and hasattr(tasks_attr, 'completed_tasks'):
                 while len(tasks_attr.completed_tasks) > 0:
                     task = tasks_attr.completed_tasks.pop(0)
-                zip_filename = task.callback_return
-                self.completed_tasks.append(
-                    {
-                        "runno": task.runno,
-                        "retcode": task.retcode,
-                        "circuit": task.netlist_file,
-                        "raw": task.raw_file,
-                        "log": task.log_file,
-                        "zipfile": zip_filename,
-                        "start": task.start_time,
-                        "stop": task.stop_time,
-                    }
-                )
-                _logger.debug("Task %s is finished", task)
-                _logger.debug(self.completed_tasks[-1])
-                _logger.debug(len(self.completed_tasks))
+                    zip_filename = task.callback_return
+                    self.completed_tasks.append(
+                        {
+                            "runno": task.runno,
+                            "retcode": task.retcode,
+                            "circuit": task.netlist_file,
+                            "raw": task.raw_file,
+                            "log": task.log_file,
+                            "zipfile": zip_filename,
+                            "start": task.start_time,
+                            "stop": task.stop_time,
+                        }
+                    )
+                    _logger.debug("Task %s is finished", task)
+                    _logger.debug(self.completed_tasks[-1])
+                    _logger.debug(len(self.completed_tasks))
 
             time.sleep(0.2)
             if self._stop is True:

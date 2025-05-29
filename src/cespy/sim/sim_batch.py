@@ -100,6 +100,7 @@ terminated just after the simulation is finished.
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2020, Fribourg Switzerland"
 
+import inspect
 import logging
 import os
 from pathlib import Path
@@ -259,14 +260,13 @@ class SimCommander(SpiceEditor):
             elif callable(callback):
                 # Check if the callback expects string parameters (legacy)
                 # If so, adapt it to accept Path objects
-                import inspect
                 sig = inspect.signature(callback)
                 params = list(sig.parameters.values())
                 if len(params) >= 2:
                     # Create a wrapper that ensures Path objects are passed
                     def adapted_callback_wrapper(raw_file: Path, log_file: Path) -> Any:
                         # Convert Path objects to strings for legacy callbacks
-                        return callback(str(raw_file), str(log_file))
+                        return callback(str(raw_file), str(log_file))  # type: ignore
                     adapted_callback = adapted_callback_wrapper
                 else:
                     adapted_callback = callback

@@ -58,38 +58,39 @@ class ERotation(enum.IntEnum):
     M270 = 360 + 270  # Mirror 270 Rotation
     M315 = 360 + 315  # Mirror 315 Rotation
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     def __str__(self) -> str:
         if self.value == 0:
             return "0 Rotation"
-        elif self.value == 45:
+        if self.value == 45:
             return "45 Rotation"
-        elif self.value == 90:
+        if self.value == 90:
             return "90 Rotation"
-        elif self.value == 135:
+        if self.value == 135:
             return "135 Rotation"
-        elif self.value == 180:
+        if self.value == 180:
             return "180 Rotation"
-        elif self.value == 225:
+        if self.value == 225:
             return "225 Rotation"
-        elif self.value == 270:
+        if self.value == 270:
             return "270 Rotation"
-        elif self.value == 315:
+        if self.value == 315:
             return "315 Rotation"
-        elif self.value == 360 + 0:
+        if self.value == 360 + 0:
             return "Mirror 0 Rotation"
-        elif self.value == 360 + 45:
+        if self.value == 360 + 45:
             return "Mirror 45 Rotation"
-        elif self.value == 360 + 90:
+        if self.value == 360 + 90:
             return "Mirror 90 Rotation"
-        elif self.value == 360 + 135:
+        if self.value == 360 + 135:
             return "Mirror 135 Rotation"
-        elif self.value == 360 + 180:
+        if self.value == 360 + 180:
             return "Mirror 180 Rotation"
-        elif self.value == 360 + 225:
+        if self.value == 360 + 225:
             return "Mirror 225 Rotation"
-        elif self.value == 360 + 270:
+        if self.value == 360 + 270:
             return "Mirror 270 Rotation"
-        elif self.value == 360 + 315:
+        if self.value == 360 + 315:
             return "Mirror 315 Rotation"
         return super().__str__()
 
@@ -156,6 +157,7 @@ class LineStyle:
         self.pattern: str = pattern
 
 
+# pylint: disable=too-few-public-methods
 class Point:
     """X, Y coordinates."""
 
@@ -164,6 +166,7 @@ class Point:
         self.Y = Y
 
 
+# pylint: disable=too-few-public-methods
 class Line:
     """X1, Y1, X2, Y2 coordinates."""
 
@@ -225,6 +228,7 @@ class Line:
         return False
 
 
+# pylint: disable=too-few-public-methods
 class Shape:
     """Polygon object.
 
@@ -319,7 +323,9 @@ class SchematicComponent(Component):
 @dataclasses.dataclass
 class SchematicElements:
     """Groups schematic elements to reduce instance attributes."""
-    components: OrderedDict[str, SchematicComponent] = dataclasses.field(default_factory=OrderedDict)
+    components: OrderedDict[str, SchematicComponent] = dataclasses.field(
+        default_factory=OrderedDict
+    )
     wires: List[Line] = dataclasses.field(default_factory=list)
     labels: List[Text] = dataclasses.field(default_factory=list)
     directives: List[Text] = dataclasses.field(default_factory=list)
@@ -397,8 +403,7 @@ class BaseSchematic(BaseEditor):
             subcircuit_any = subckt.attributes["_SUBCKT"]
             subcircuit = cast(BaseSchematic, subcircuit_any)
             return subcircuit, sub_comp
-        else:
-            return self, reference
+        return self, reference
 
     def set_updated(self, reference: str) -> None:
         """:meta private:"""
@@ -417,13 +422,12 @@ class BaseSchematic(BaseEditor):
 
         if sub_circuit != self:  # The component is in a subcircuit
             return sub_circuit.get_component(ref)
-        else:
-            if ref not in sub_circuit.components:
-                _logger.error("Component %s not found", reference)
-                raise ComponentNotFoundError(
-                    f"Component {reference} not found in Schematic file"
-                )
-            return sub_circuit.components[ref]
+        if ref not in sub_circuit.components:
+            _logger.error("Component %s not found", reference)
+            raise ComponentNotFoundError(
+                f"Component {reference} not found in Schematic file"
+            )
+        return sub_circuit.components[ref]
 
     def get_component_position(self, reference: str) -> Tuple[Point, ERotation]:
         """Returns the position and rotation of the component."""

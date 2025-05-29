@@ -57,6 +57,7 @@ class NGspiceSimulator(Simulator):
     process_name: str = ""
 
     # determine the executable to use
+    exe = None  # Initialize to avoid unbound variable
     for exe in _spice_exe_paths:
         if exe.startswith("~"):
             exe = os.path.expanduser(exe)
@@ -70,7 +71,8 @@ class NGspiceSimulator(Simulator):
 
     # The following variables are not needed anymore. This also makes sphinx
     # not mention them in the documentation.
-    del exe
+    if exe is not None:
+        del exe
 
     # fall through
     if len(spice_exe) == 0:

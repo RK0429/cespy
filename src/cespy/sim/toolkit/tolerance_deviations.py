@@ -303,6 +303,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
         """
         raise NotImplementedError("Subclasses must implement prepare_testbench")
 
+    # pylint: disable=too-many-arguments
     def run_testbench(
         self,
         *,
@@ -358,8 +359,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
         for sim_no in range(-1, self.testbench.last_run_number + 1, runs_per_sim):
             last_no = sim_no + runs_per_sim - 1
-            if last_no > self.testbench.last_run_number:
-                last_no = self.testbench.last_run_number
+            last_no = min(last_no, self.testbench.last_run_number)
 
             run_stepping = f".step param run {sim_no} {last_no} 1"
             self.editor.add_instruction(run_stepping)
@@ -424,40 +424,42 @@ class ToleranceDeviations(SimAnalysis, ABC):
             return None
 
         # Safely check and process stepset and dataset attributes
-        if hasattr(log_results, "stepset") and hasattr(log_results, "dataset"):
-            stepset = getattr(log_results, "stepset", {})
-            dataset = getattr(log_results, "dataset", {})
+        if not (hasattr(log_results, "stepset") and hasattr(log_results, "dataset")):
+            return self.log_data.update(log_results)
+        
+        stepset = getattr(log_results, "stepset", {})
+        dataset = getattr(log_results, "dataset", {})
 
-            if len(stepset) == 0:
-                if "run" in dataset and len(dataset["run"]) > 0:
-                    if isinstance(dataset["run"][0], LTComplex):
-                        log_results.stepset = {
-                            "run": [round(val.real) for val in dataset["run"]]
-                        }
-                    else:
-                        log_results.stepset = {"run": dataset["run"]}
-                else:
-                    # auto assign a step starting from 0 and incrementing by 1
-                    # will use the size of the first element found in the
-                    # dataset
-                    if dataset and len(dataset) > 0:
-                        any_meas = next(iter(dataset.values()))
+        if len(stepset) > 0:
+            return self.log_data.update(log_results)
+            
+        # Handle empty stepset
+        if "run" in dataset and len(dataset["run"]) > 0:
+            if isinstance(dataset["run"][0], LTComplex):
+                log_results.stepset = {
+                    "run": [round(val.real) for val in dataset["run"]]
+                }
+            else:
+                log_results.stepset = {"run": dataset["run"]}
+        elif dataset and len(dataset) > 0:
+            # auto assign a step starting from 0 and incrementing by 1
+            # will use the size of the first element found in the dataset
+            any_meas = next(iter(dataset.values()))
 
-                        # Safely access self.log_data.stepset
-                        run_start = 0
-                        if hasattr(self.log_data, "stepset"):
-                            stepset_data = getattr(self.log_data, "stepset", {})
-                            if "run" in stepset_data and len(stepset_data["run"]) > 0:
-                                run_start = stepset_data["run"][-1] + 1
+            # Safely access self.log_data.stepset
+            run_start = 0
+            if hasattr(self.log_data, "stepset"):
+                stepset_data = getattr(self.log_data, "stepset", {})
+                if "run" in stepset_data and len(stepset_data["run"]) > 0:
+                    run_start = stepset_data["run"][-1] + 1
 
-                        log_results.stepset = {
-                            "run": list(range(run_start, run_start + len(any_meas)))
-                        }
+            log_results.stepset = {
+                "run": list(range(run_start, run_start + len(any_meas)))
+            }
 
-            # Set step_count if stepset exists and log_results has that
-            # attribute
-            if hasattr(log_results, "stepset") and hasattr(log_results, "step_count"):
-                log_results.step_count = len(log_results.stepset)
+        # Set step_count if stepset exists and log_results has that attribute
+        if hasattr(log_results, "stepset") and hasattr(log_results, "step_count"):
+            log_results.step_count = len(log_results.stepset)
 
         self.add_log_data(log_results)
         return log_results
@@ -498,6 +500,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
         return self.log_data
 
     @abstractmethod
+    # pylint: disable=too-many-positional-arguments
     def run_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,

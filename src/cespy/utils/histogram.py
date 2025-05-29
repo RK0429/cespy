@@ -21,7 +21,7 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
     :return: Dictionary mapping measurement names to lists of values
     """
     try:
-        log_reader = LTSpiceLogReader(log_file)
+        log_reader = LTSpiceLogReader(str(log_file))
         measurements = {}
 
         # Extract measurement data from dataset
@@ -71,14 +71,14 @@ def create_histogram(
 
     # Add vertical lines for mean and median
     ax.axvline(
-        mean_val,
+        float(mean_val),
         color="red",
         linestyle="dashed",
         linewidth=2,
         label=f"Mean: {mean_val:.3e}",
     )
     ax.axvline(
-        median_val,
+        float(median_val),
         color="green",
         linestyle="dashed",
         linewidth=2,
