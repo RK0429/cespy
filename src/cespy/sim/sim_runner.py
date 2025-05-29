@@ -422,14 +422,12 @@ class SimRunner(AnyRunner):
                     if pos > 1:
                         if param not in callback_args:
                             raise ValueError(
-                                "Callback argument '%s' not found in callback_args"
-                                % param
+                                f"Callback argument '{param}' not found in callback_args"
                             )
 
             if len(args) - 2 != len(callback_args):
                 raise ValueError(
-                    "Callback function has %d arguments, but %d callback_args are given"
-                    % (len(args), len(callback_args))
+                    f"Callback function has {len(args)} arguments, but {len(callback_args)} callback_args are given"
                 )
             if isinstance(callback_args, tuple):
                 # Convert into a dictionary

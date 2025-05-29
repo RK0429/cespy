@@ -206,6 +206,7 @@ class SimStepper:
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
         switches: Optional[List[str]] = None,
+        *,
         timeout: Optional[float] = None,
         use_loadbias: str = "Auto",
         wait_completion: bool = True,

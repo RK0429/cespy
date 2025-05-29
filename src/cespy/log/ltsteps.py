@@ -556,14 +556,14 @@ class LTSpiceLogReader(LogfileData):
                     "Signal\tN-Periods\tDC"
                     " Component\tFundamental\tN-Harmonics\tPHD\tTHD\n"
                 )
-                for signal in self.fourier:
+                for signal, fourier_analyses in self.fourier.items():
                     if self.step_count > 0:
                         for step_no in range(self.step_count):
                             step_values = [
                                 f"{values[step_no]}"
                                 for key, values in self.stepset.items()
                             ]
-                            for analysis in self.fourier[signal]:
+                            for analysis in fourier_analyses:
                                 if analysis.step == step_no:
                                     fout.write("\t".join(step_values) + "\t")
                                     if analysis.n_periods < 1:

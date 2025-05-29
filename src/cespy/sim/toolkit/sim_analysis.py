@@ -26,11 +26,12 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 from ...editor.base_editor import BaseEditor
+from ...editor.spice_editor import SpiceEditor
 from ...log.logfile_data import LogfileData
 from ...log.ltsteps import LTSpiceLogReader
 from ...log.qspice_log_reader import QspiceLogReader
 from ...utils.detect_encoding import EncodingDetectError
-from ..sim_runner import AnyRunner, ProcessCallback, RunTask
+from ..sim_runner import AnyRunner, ProcessCallback, RunTask, SimRunner
 
 _logger = logging.getLogger("cespy.SimAnalysis")
 
@@ -50,7 +51,6 @@ class SimAnalysis:
         circuit_file: Union[str, BaseEditor],
         runner: Optional[AnyRunner] = None,
     ):
-        from ...editor.spice_editor import SpiceEditor
 
         self.editor: BaseEditor
         if isinstance(circuit_file, str):
@@ -71,8 +71,6 @@ class SimAnalysis:
     @property
     def runner(self) -> AnyRunner:
         if self._runner is None:
-            from ...sim.sim_runner import SimRunner
-
             self._runner = SimRunner()
         return self._runner
 
@@ -246,5 +244,5 @@ class SimAnalysis:
     ) -> None:
         """Configures a measurement to be done in the simulation."""
         self.editor.add_instruction(
-            ".meas {} {} {}".format(meas_type, meas_name, meas_expression)
+            f".meas {meas_type} {meas_name} {meas_expression}"
         )

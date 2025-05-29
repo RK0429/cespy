@@ -1160,7 +1160,7 @@ class RawRead:
                         ll = step_dict.get(key, None)
                         if ll is None:
                             break
-                        elif kwargs[key] != ll:
+                        if kwargs[key] != ll:
                             break
                     else:
                         ret_steps.append(i)  # All the step parameters match

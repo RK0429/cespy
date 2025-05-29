@@ -129,12 +129,12 @@ def format_eng(value: float) -> str:
     """
     if value == 0.0:
         # This avoids a problematic log(0), and the int and float conversions
-        return "{:g}".format(value)
+        return f"{value:g}"
     e = floor(log(abs(value), 1000))
     if -5 <= e < 0:
         suffix = "fpnum"[e]
     elif e == 0:
-        return "{:g}".format(value)
+        return f"{value:g}"
     elif e == 1:
         suffix = "k"
     elif e == 2:
@@ -144,8 +144,8 @@ def format_eng(value: float) -> str:
     elif e == 4:
         suffix = "t"
     else:
-        return "{:E}".format(value)
-    return "{:g}{:}".format(value * 1000**-e, suffix)
+        return f"{value:E}"
+    return f"{value * 1000**-e:g}{suffix}"
 
 
 def scan_eng(value: str) -> float:
@@ -865,7 +865,6 @@ class BaseEditor(ABC):
                 "The prepare_for_simulator method requires a simulator object"
             )
         cls.simulator_lib_paths = simulator.get_default_library_paths()
-        return
 
     @classmethod
     def _check_and_append_custom_library_path(cls, path: str) -> None:

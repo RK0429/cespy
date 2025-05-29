@@ -581,7 +581,8 @@ class AscEditor(BaseSchematic):
                     "This function may not work as expected.",
                     device,
                 )
-                return sub_circuit.set_component_value(ref, value)
+                sub_circuit.set_component_value(ref, value)
+                return
             component = self.get_component(device)
             if "Value" in component.attributes:
                 if isinstance(value, str):

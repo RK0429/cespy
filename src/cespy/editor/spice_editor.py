@@ -285,10 +285,12 @@ def get_line_command(line: Union[str, "SpiceCircuit"]) -> str:
                         j += 1
                     return line[i:j].upper()
                 raise SyntaxError(f'Unrecognized command in line: "{line}"')
+        # If we get here, the line contains only spaces/tabs
+        return "*"  # Treat as blank line
     elif isinstance(line, SpiceCircuit):
         return ".SUBCKT"
     else:
-        raise SyntaxError('Unrecognized command in line "{}"'.format(line))
+        raise SyntaxError(f'Unrecognized command in line "{line}"')
 
 
 def _first_token_upped(line: str) -> str:
@@ -1350,8 +1352,7 @@ class SpiceCircuit(BaseEditor):
                 if _is_unique_instruction(line):
                     self.netlist[i] = instruction
                     break
-                else:
-                    i += 1
+                i += 1
         elif get_line_command(instruction) == ".PARAM":
             raise RuntimeError(
                 'The .PARAM instruction should be added using the "set_parameter"'
@@ -1580,8 +1581,7 @@ class SpiceEditor(SpiceCircuit):
                 if _is_unique_instruction(line):
                     self.netlist[i] = instruction
                     break
-                else:
-                    i += 1
+                i += 1
         elif get_line_command(instruction) == ".PARAM":
             raise RuntimeError(
                 'The .PARAM instruction should be added using the "set_parameter"'
@@ -1699,6 +1699,7 @@ class SpiceEditor(SpiceCircuit):
         wait_resource: bool = True,
         callback: Optional[Union[Type[Any], Callable[[Path, Path], Any]]] = None,
         timeout: Optional[float] = None,
+        *,
         run_filename: Optional[str] = None,
         simulator: Optional[Any] = None,
     ) -> Any:
