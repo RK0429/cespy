@@ -146,7 +146,6 @@ except ImportError:
 from ..editor.base_editor import BaseEditor
 from ..sim.run_task import RunTask, clock_function
 from ..sim.simulator import Simulator
-from ..simulators.ltspice_simulator import LTspice as CustomLTspice
 from .process_callback import ProcessCallback
 
 _logger = logging.getLogger("cespy.SimRunner")
@@ -327,12 +326,18 @@ class SimRunner(AnyRunner):
 
         # Gets a simulator.
         if simulator is None:
+            # Lazy import to avoid circular dependency
+            from ..simulators.ltspice_simulator import LTspice as CustomLTspice
             simulator = CustomLTspice
         elif isinstance(simulator, (str, Path)):
+            # Lazy import to avoid circular dependency
+            from ..simulators.ltspice_simulator import LTspice as CustomLTspice
             simulator = CustomLTspice.create_from(simulator)
         elif issubclass(simulator, Simulator):
             pass
         else:
+            # Lazy import to avoid circular dependency
+            from ..simulators.ltspice_simulator import LTspice as CustomLTspice
             simulator = CustomLTspice
         self.simulator = simulator
         _logger.info("SimRunner initialized")
