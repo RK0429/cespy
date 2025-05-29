@@ -134,13 +134,10 @@ class ProcessManager:
             process_env.update(env)
 
         # Prepare stdout/stderr
-        stdout_handle = None
-        stderr_handle = None
-
+        stdout_handle: Optional[Union[IO[str], int]] = None
+        stderr_handle: Optional[Union[IO[str], int]] = None
+        
         try:
-            stdout_handle: Union[IO[str], int]
-            stderr_handle: Union[IO[str], int]
-            
             if stdout_file:
                 stdout_handle = open(stdout_file, "w", encoding="utf-8")
             else:
@@ -186,7 +183,7 @@ class ProcessManager:
                 self._set_process_priority(process.pid, priority)
 
             # Track with psutil if available
-            if HAS_PSUTIL:
+            if HAS_PSUTIL and psutil is not None:
                 try:
                     process_info.psutil_process = psutil.Process(process.pid)
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -244,9 +241,9 @@ class ProcessManager:
 
         finally:
             # Close file handles if we opened them
-            if stdout_handle and stdout_file:
+            if stdout_handle is not None and stdout_file and not isinstance(stdout_handle, int):
                 stdout_handle.close()
-            if stderr_handle and stderr_file:
+            if stderr_handle is not None and stderr_file and not isinstance(stderr_handle, int):
                 stderr_handle.close()
 
     def terminate_process(self, process_id: int) -> bool:
@@ -294,7 +291,7 @@ class ProcessManager:
                         result[pid]["memory_mb"] = (
                             info.psutil_process.memory_info().rss / 1024 / 1024
                         )
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
                         pass
 
             return result
@@ -318,7 +315,7 @@ class ProcessManager:
                             info.psutil_process.memory_info().rss / 1024 / 1024
                         )
                         process_count += 1
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
                         pass
 
         return {
@@ -337,7 +334,7 @@ class ProcessManager:
         Returns:
             Number of zombie processes cleaned up
         """
-        if not HAS_PSUTIL:
+        if not HAS_PSUTIL or psutil is None:
             return 0
 
         cleaned = 0
@@ -358,7 +355,7 @@ class ProcessManager:
                         )
                         proc.kill()
                         cleaned += 1
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
+            except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
                 pass
 
         return cleaned
@@ -402,7 +399,7 @@ class ProcessManager:
             pid: Process ID
             priority: Priority value (platform-specific)
         """
-        if HAS_PSUTIL:
+        if HAS_PSUTIL and psutil is not None:
             try:
                 proc = psutil.Process(pid)
                 if sys.platform == "win32":
@@ -418,7 +415,7 @@ class ProcessManager:
                 else:
                     # Unix nice values (-20 to 19)
                     proc.nice(priority)
-            except (psutil.NoSuchProcess, psutil.AccessDenied, OSError):
+            except (psutil.NoSuchProcess, psutil.AccessDenied, OSError) if psutil else Exception:
                 pass
 
     def _terminate_process(self, process_info: ProcessInfo) -> None:

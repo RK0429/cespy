@@ -416,20 +416,25 @@ class CallbackManager:
 
             result = None
 
+            # Convert Path objects to strings for callbacks
+            raw_file_str = str(raw_file)
+            log_file_str = str(log_file)
+
             if callback_info.callback_type == CallbackType.PROCESS_CALLBACK_CLASS:
                 # Instantiate and run ProcessCallback
-                instance = callback_info.callback(raw_file, log_file)
+                instance = callback_info.callback(raw_file_str, log_file_str)
                 instance.run()
                 result = instance
 
             elif callback_info.callback_type == CallbackType.SIMPLE_FUNCTION:
                 # Call simple function
-                result = callback_info.callback(raw_file, log_file)
+                result = callback_info.callback(raw_file_str, log_file_str)
 
             elif callback_info.callback_type == CallbackType.PARAMETERIZED_FUNCTION:
                 # Call with additional parameters
-                all_args = (raw_file, log_file) + callback_info.args
-                result = callback_info.callback(*all_args, **callback_info.kwargs)
+                all_args = (raw_file_str, log_file_str) + callback_info.args
+                kwargs = callback_info.kwargs or {}
+                result = callback_info.callback(*all_args, **kwargs)
 
             # Reset error count on success
             with self._lock:

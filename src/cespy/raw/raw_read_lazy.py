@@ -18,7 +18,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .raw_read import RawRead, read_float32, read_float64, read_complex
-from .raw_classes import Axis, TraceRead, SpiceReadException
+from .raw_classes import Axis, TraceRead, DummyTrace, SpiceReadException
 from ..core import constants as core_constants
 
 _logger = logging.getLogger("cespy.RawReadLazy")
@@ -282,7 +282,7 @@ class RawReadLazy(RawRead):
 
             self._lazy_traces[trace_name] = lazy_trace
 
-    def get_trace(self, trace_ref: Union[str, int]) -> Union[Axis, TraceRead, DummyTrace, LazyTrace]:
+    def get_trace(self, trace_ref: Union[str, int]) -> Union[Axis, TraceRead, DummyTrace, LazyTrace]:  # type: ignore[override]
         """Get a trace by name.
 
         Returns LazyTrace instead of TraceRead for lazy loading.

@@ -16,6 +16,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .raw_read import RawRead, read_float32, read_float64, read_complex
+from .raw_classes import DummyTrace
 from ..core import constants as core_constants
 
 _logger = logging.getLogger("cespy.RawStream")
@@ -174,16 +175,16 @@ class RawFileStreamer:
         time_trace = self._raw_reader.get_trace("time")
         
         # Handle different trace types
-        from .raw_classes import DummyTrace
         if isinstance(time_trace, DummyTrace):
-            time_data = time_trace.get_wave()
-        else:
-            time_data = time_trace.get_wave(step)
+            # DummyTrace doesn't have actual data, skip
+            raise ValueError("Cannot stream from DummyTrace - no data available")
             
         if isinstance(trace, DummyTrace):
-            trace_data = trace.get_wave()
-        else:
-            trace_data = trace.get_wave(step)
+            # DummyTrace doesn't have actual data, skip
+            raise ValueError("Cannot stream from DummyTrace - no data available")
+            
+        time_data = time_trace.get_wave(step)
+        trace_data = trace.get_wave(step)
 
         # Yield chunks
         for chunk_idx in range(self.num_chunks):
