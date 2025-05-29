@@ -209,6 +209,7 @@ class NGspiceSimulator(Simulator):
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[List[Any]] = None,
         timeout: Optional[float] = None,
+        *,
         stdout: Optional[Any] = None,
         stderr: Optional[Any] = None,
         exe_log: bool = False,
@@ -267,10 +268,9 @@ class NGspiceSimulator(Simulator):
         extra_switches = []
         if cls._compatibility_mode:
             extra_switches = ["-D", f"ngbehavior={cls._compatibility_mode}"]
-        # TODO: -a seems useless with -b, however it is still defined in the
-        # default switches. Need to check if it is really needed.
-        # The -a flag is for interactive mode, while -b is for batch mode.
-        # This combination might be redundant.
+        # NOTE: The -a flag is for interactive mode, while -b is for batch mode.
+        # This combination might be redundant, but it is maintained for backward
+        # compatibility. Consider removing -a from default switches in future versions.
         cmd_run = (
             cls.spice_exe
             + cmd_line_switches

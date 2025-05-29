@@ -707,8 +707,7 @@ def main() -> None:
         # Export step data if available
         if log_reader.step_count > 0:
             print(f"Found {log_reader.step_count} steps")
-            with open(fname_out, "w", encoding="utf-8") as fout:
-                log_reader.export_data(fout)
+            log_reader.export_data(fname_out)
             print(f"Data exported to {fname_out}")
         else:
             print("No step data found in log file")

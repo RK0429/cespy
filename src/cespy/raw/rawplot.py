@@ -11,6 +11,7 @@ from typing import List, Optional
 import matplotlib.pyplot as plt
 
 from cespy.raw.raw_read import RawRead
+from cespy.raw.raw_classes import DummyTrace
 
 
 def plot_traces(
@@ -32,12 +33,18 @@ def plot_traces(
         # Get the x-axis data (usually time or frequency)
         # First trace is usually the x-axis
         x_trace = raw_data.get_trace_names()[0]
-        x_data = raw_data.get_trace(x_trace).get_wave()
+        x_trace_obj = raw_data.get_trace(x_trace)
+        if isinstance(x_trace_obj, DummyTrace):
+            raise ValueError(f"X-axis trace '{x_trace}' contains no data")
+        x_data = x_trace_obj.get_wave()
 
         # Plot each requested trace
         for trace_name in traces:
             try:
                 trace = raw_data.get_trace(trace_name)
+                if isinstance(trace, DummyTrace):
+                    print(f"Warning: Trace '{trace_name}' contains no data, skipping")
+                    continue
                 y_data = trace.get_wave()
 
                 # Handle complex data (AC analysis)

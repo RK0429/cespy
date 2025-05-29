@@ -37,9 +37,8 @@ class LTComplex(complex):
             if match.group("degrees") is None:
                 # This is the cartesian format
                 return super().__new__(cls, mag, ph)
-
+            # This is the polar format
             if match.group("dB") is not None:
-                # This is the polar format
                 mag = 10 ** (mag / 20)
             return super().__new__(
                 cls,

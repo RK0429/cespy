@@ -267,29 +267,27 @@ def get_line_command(line: Union[str, "SpiceCircuit"]) -> str:
     directive or a component.
     """
     if isinstance(line, str):
-        for i in range(len(line)):
-            ch = line[i]
+        for i, ch in enumerate(line):
             if ch in (" ", "\t"):
                 continue
             ch = ch.upper()
             if ch in REPLACE_REGEXS:  # A circuit element
                 return ch
-                if ch == "+":
-                    return "+"  # This is a line continuation.
-                if ch in "#;*\n\r":  # It is a comment or a blank line
-                    return "*"
-                if ch == ".":  # this is a directive
-                    j = i + 1
-                    while j < len(line) and (line[j] not in (" ", "\t", "\r", "\n")):
-                        j += 1
-                    return line[i:j].upper()
-                raise SyntaxError(f'Unrecognized command in line: "{line}"')
+            if ch == "+":
+                return "+"  # This is a line continuation.
+            if ch in "#;*\n\r":  # It is a comment or a blank line
+                return "*"
+            if ch == ".":  # this is a directive
+                j = i + 1
+                while j < len(line) and (line[j] not in (" ", "\t", "\r", "\n")):
+                    j += 1
+                return line[i:j].upper()
+            raise SyntaxError(f'Unrecognized command in line: "{line}"')
         # If we get here, the line contains only spaces/tabs
         return "*"  # Treat as blank line
-    elif isinstance(line, SpiceCircuit):
+    if isinstance(line, SpiceCircuit):
         return ".SUBCKT"
-    else:
-        raise SyntaxError(f'Unrecognized command in line "{line}"')
+    raise SyntaxError(f'Unrecognized command in line "{line}"')
 
 
 def _first_token_upped(line: str) -> str:
@@ -302,7 +300,7 @@ def _first_token_upped(line: str) -> str:
     while i < len(line) and line[i] in (" ", "\t"):
         i += 1
     j = i
-    while i < len(line) and not (line[i] in (" ", "\t")):
+    while i < len(line) and line[i] not in (" ", "\t"):
         i += 1
     return line[j:i].upper()
 
@@ -514,10 +512,12 @@ class SpiceCircuit(BaseEditor):
                 sub_circuit = SpiceCircuit(self)
                 sub_circuit.netlist.append(line)
                 # Advance to the next non nested .ENDS
+                # pylint: disable=protected-access
                 finished = sub_circuit._add_lines(line_iter)
+                # pylint: enable=protected-access
                 if finished:
                     self.netlist.append(sub_circuit)
-                else:
+                if not finished:
                     return False
             elif cmd == "+":
                 assert (
@@ -548,14 +548,18 @@ class SpiceCircuit(BaseEditor):
         # This helper function writes the contents of sub-circuit to the file f
         for command in self.netlist:
             if isinstance(command, SpiceCircuit):
+                # pylint: disable=protected-access
                 command._write_lines(f)
+                # pylint: enable=protected-access
             else:
                 # Writes the modified sub-circuits at the end just before the .END
                 # clause
                 if command.upper().startswith(".ENDS"):
                     # write here the modified sub-circuits
                     for sub in self.modified_subcircuits.values():
+                        # pylint: disable=protected-access
                         sub._write_lines(f)
+                        # pylint: enable=protected-access
                 f.write(command)
 
     def _get_param_named(self, param_name: str) -> Tuple[int, Optional[Match[str]]]:
@@ -586,7 +590,7 @@ class SpiceCircuit(BaseEditor):
             None,
         )  # If it fails, it returns an invalid line number and No match
 
-    def get_all_parameter_names(self) -> List[str]:
+    def get_all_parameter_names(self, param: str = "") -> List[str]:
         # docstring inherited from BaseEditor
         param_names = []
         search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
@@ -738,9 +742,11 @@ class SpiceCircuit(BaseEditor):
                 else:
                     raise ComponentNotFoundError(reference)
             # Update the component
+            # pylint: disable=protected-access
             sub_circuit._set_component_attribute(
                 SUBCKT_DIVIDER.join(component_split[1:]), attribute, value
             )
+            # pylint: enable=protected-access
         else:
             line_no, match = self._get_component_line_and_regex(reference)
             if attribute in ("value", "model"):
@@ -1024,9 +1030,7 @@ class SpiceCircuit(BaseEditor):
         component = self.get_component(reference)
         if isinstance(component, SpiceComponent):
             return str(component.attributes.get(attribute, ""))
-        raise KeyError(
-            f"Attribute '{attribute}' not found in component '{reference}'"
-        )
+        raise KeyError(f"Attribute '{attribute}' not found in component '{reference}'")
 
     @staticmethod
     def _parse_params(params_str: str) -> dict[str, Any]:
@@ -1386,7 +1390,11 @@ class SpiceCircuit(BaseEditor):
             _logger.error('Instruction "%s" not found.', instruction)
 
     def remove_Xinstruction(self, search_pattern: str) -> None:
-        # docstring is in the parent class
+        """Remove all instructions matching the given search pattern.
+        
+        Args:
+            search_pattern: Regular expression pattern to match instructions to remove.
+        """
         regex = re.compile(search_pattern, re.IGNORECASE)
         i = 0
         instr_removed = False
@@ -1449,10 +1457,14 @@ class SpiceCircuit(BaseEditor):
                     sub_circuit = SpiceCircuit()
                     sub_circuit.netlist.append(line)
                     # Advance to the next non nested .ENDS
+                    # pylint: disable=protected-access
                     finished = sub_circuit._add_lines(lib)
+                    # pylint: enable=protected-access
                     if finished:
                         # if this is from a lib, don't allow modifications
+                        # pylint: disable=protected-access
                         sub_circuit._readonly = True
+                        # pylint: enable=protected-access
                         return sub_circuit
         #  3. Return an instance of SpiceCircuit
         return None
@@ -1499,6 +1511,13 @@ class SpiceCircuit(BaseEditor):
             # try searching on parent netlists
             return self.parent.find_subckt_in_included_libs(subcircuit_name)
         return None
+
+    def remove_x_instruction(self, search_pattern: str) -> None:
+        """Removes a SPICE instruction from the netlist based on a search pattern.
+
+        This method calls remove_Xinstruction for backward compatibility.
+        """
+        self.remove_Xinstruction(search_pattern)
 
 
 class SpiceEditor(SpiceCircuit):
@@ -1615,7 +1634,11 @@ class SpiceEditor(SpiceCircuit):
             _logger.error('Instruction "%s" not found.', instruction)
 
     def remove_Xinstruction(self, search_pattern: str) -> None:
-        # docstring is in the parent class
+        """Remove all instructions matching the given search pattern.
+        
+        Args:
+            search_pattern: Regular expression pattern to match instructions to remove.
+        """
         regex = re.compile(search_pattern, re.IGNORECASE)
         i = 0
         instr_removed = False
@@ -1649,14 +1672,18 @@ class SpiceEditor(SpiceCircuit):
             lines = iter(self.netlist)
             for line in lines:
                 if isinstance(line, SpiceCircuit):
+                    # pylint: disable=protected-access
                     line._write_lines(f)
+                    # pylint: enable=protected-access
                 else:
                     # Writes the modified sub-circuits at the end just before the .END
                     # clause
                     if line.upper().startswith(".END"):
                         # write here the modified sub-circuits
                         for sub in self.modified_subcircuits.values():
+                            # pylint: disable=protected-access
                             sub._write_lines(f)
+                            # pylint: enable=protected-access
                     f.write(line)
 
     def reset_netlist(self, create_blank: bool = False) -> None:

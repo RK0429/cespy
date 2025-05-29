@@ -50,15 +50,17 @@ _logger = logging.getLogger("cespy.SimStepper")
 
 
 class RunnerProtocol(AnyRunner, Protocol):
-    """Protocol for runner used in SimStepper, includes okSim and runno attributes."""
+    """Protocol for runner used in SimStepper, includes ok_sim and runno attributes."""
 
     @property
-    def okSim(self) -> int:
+    def ok_sim(self) -> int:
         """Return the number of successful simulations."""
+        raise NotImplementedError("ok_sim must be implemented by subclass")
 
     @property
     def runno(self) -> int:
         """Return the total number of simulations run."""
+        raise NotImplementedError("runno must be implemented by subclass")
 
 
 class StepInfo:

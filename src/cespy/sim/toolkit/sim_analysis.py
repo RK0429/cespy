@@ -171,12 +171,17 @@ class SimAnalysis:
             elif instruction[0] == "remove_instruction":
                 self.editor.remove_instruction(instruction[1])
             elif instruction[0] == "remove_Xinstruction":
-                self.editor.remove_Xinstruction(instruction[1])
+                self.editor.remove_x_instruction(instruction[1])
             else:
                 raise ValueError("Unknown instruction")
         self.instructions_added = True
 
     def save_netlist(self, filename: str) -> None:
+        """Save the netlist to a file after applying all recorded instructions.
+        
+        Args:
+            filename: Path to save the netlist to.
+        """
         self.play_instructions()
         self.editor.save_netlist(filename)
 

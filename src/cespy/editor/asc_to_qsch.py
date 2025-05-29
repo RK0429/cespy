@@ -70,7 +70,7 @@ def main() -> None:
 
 
 def convert_asc_to_qsch(
-    asc_file: str, qsch_file: str, search_paths: list[str] = None
+    asc_file: str, qsch_file: str, search_paths: list[str] | None = None
 ) -> None:
     """Converts an ASC file to a QSCH schematic."""
     if search_paths is None:

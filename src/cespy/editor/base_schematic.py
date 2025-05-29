@@ -23,6 +23,7 @@ rotation/alignment enumerations used across different schematic formats.
 # -------------------------------------------------------------------------------
 
 
+from copy import deepcopy
 import dataclasses
 import enum
 import logging
@@ -263,7 +264,7 @@ class Shape:
 # the Shape class to define them. We will only store the list of points that
 # are provided by the tool.
 
-#  TODO: The following code is commented out because it is not used in the
+# Note: The following code is commented out because it is not used in the
 # current implementation. It is kept here for
 # when we decode how ARCs are stored and we could use it to update them.
 # @dataclasses.dataclass
@@ -315,41 +316,76 @@ class SchematicComponent(Component):
         return f"{self.reference} {self.position.X} {self.position.Y} {self.rotation}"
 
 
+@dataclasses.dataclass
+class SchematicElements:
+    """Groups schematic elements to reduce instance attributes."""
+    components: OrderedDict[str, SchematicComponent] = dataclasses.field(default_factory=OrderedDict)
+    wires: List[Line] = dataclasses.field(default_factory=list)
+    labels: List[Text] = dataclasses.field(default_factory=list)
+    directives: List[Text] = dataclasses.field(default_factory=list)
+    ports: List[Port] = dataclasses.field(default_factory=list)
+    lines: List[Line] = dataclasses.field(default_factory=list)
+    shapes: List[Shape] = dataclasses.field(default_factory=list)
+
+
 class BaseSchematic(BaseEditor):
     """This defines the primitives (protocol) to be used for both SpiceEditor and
     AscEditor classes."""
 
     def __init__(self) -> None:
-        self.components: OrderedDict[str, SchematicComponent] = OrderedDict()
-        self.wires: List[Line] = []
-        self.labels: List[Text] = []
-        self.directives: List[Text] = []
-        self.ports: List[Port] = []
-        self.lines: List[Line] = []
-        self.shapes: List[Shape] = []
+        self.elements = SchematicElements()
         self.updated = False  # indicates if an edit was done and the file has
         # to be written back to disk
 
+    # Properties for backward compatibility
+    @property
+    def components(self) -> OrderedDict[str, SchematicComponent]:
+        """Access to components dictionary."""
+        return self.elements.components
+
+    @property
+    def wires(self) -> List[Line]:
+        """Access to wires list."""
+        return self.elements.wires
+
+    @property
+    def labels(self) -> List[Text]:
+        """Access to labels list."""
+        return self.elements.labels
+
+    @property
+    def directives(self) -> List[Text]:
+        """Access to directives list."""
+        return self.elements.directives
+
+    @property
+    def ports(self) -> List[Port]:
+        """Access to ports list."""
+        return self.elements.ports
+
+    @property
+    def lines(self) -> List[Line]:
+        """Access to lines list."""
+        return self.elements.lines
+
+    @property
+    def shapes(self) -> List[Shape]:
+        """Access to shapes list."""
+        return self.elements.shapes
+
     def reset_netlist(self, create_blank: bool = False) -> None:
         """Resets the netlist to the original state."""
-        self.components.clear()
-        self.wires.clear()
-        self.labels.clear()
-        self.directives.clear()
-        self.lines.clear()
-        self.shapes.clear()
+        self.elements.components.clear()
+        self.elements.wires.clear()
+        self.elements.labels.clear()
+        self.elements.directives.clear()
+        self.elements.lines.clear()
+        self.elements.shapes.clear()
         self.updated = False
 
     def copy_from(self, editor: "BaseSchematic") -> None:
         """Clones the contents of the given editor."""
-        from copy import deepcopy
-
-        self.components = deepcopy(editor.components)
-        self.wires = deepcopy(editor.wires)
-        self.labels = deepcopy(editor.labels)
-        self.directives = deepcopy(editor.directives)
-        self.lines = deepcopy(editor.lines)
-        self.shapes = deepcopy(editor.shapes)
+        self.elements = deepcopy(editor.elements)
         self.updated = True
 
     def _get_parent(self, reference: str) -> Tuple["BaseSchematic", str]:

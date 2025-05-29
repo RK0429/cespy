@@ -68,9 +68,9 @@ class Qspice(Simulator):
     if sys.platform in ("linux", "darwin"):
         # status mid 2024: Qspice has limited support for running under
         # linux+wine, and none for MacOS+wine
-        # TODO: when the situation gets more mature, add support for wine.
-        # See LTspice for an example of Wine support implementation.
-        # Track QSpice Wine compatibility at: https://www.qspice.com/
+        # NOTE: QSpice currently has limited support for Wine on Linux and
+        # no support for Wine on macOS. Wine support may be added in future
+        # when QSpice's cross-platform compatibility improves.
         spice_exe = []
         process_name = ""
     else:  # Windows (well, also aix, wasi, emscripten,... where it will fail.)
@@ -181,6 +181,7 @@ class Qspice(Simulator):
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[list[Any]] = None,
         timeout: Optional[float] = None,
+        *,
         stdout: Optional[IO[Any]] = None,
         stderr: Optional[IO[Any]] = None,
         exe_log: bool = False,

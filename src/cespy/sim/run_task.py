@@ -65,9 +65,9 @@ def format_time_difference(time_diff: float) -> str:
     hours, remainder = divmod(seconds_difference, 3600)
     minutes, seconds = divmod(remainder, 60)
 
+    if hours == 0 and minutes == 0:
+        return f"{int(seconds):02d}.{milliseconds:04d} secs"
     if hours == 0:
-        if minutes == 0:
-            return f"{int(seconds):02d}.{milliseconds:04d} secs"
         return f"{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
     return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
 
@@ -137,7 +137,7 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
         if self.verbose:
             print(f"{time.asctime()} {logger_fun.__name__}: {message}{END_LINE_TERM}")
 
-    def run(self) -> None:
+    def run(self) -> None:  # pylint: disable=too-many-branches,too-many-statements
         """Execute the simulation task."""
         # Running the Simulation
         self.start_time = clock_function()
@@ -150,7 +150,12 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
             get_default_exec = getattr(self.simulator, "get_default_executable", None)
             if callable(get_default_exec):
                 default_exec = get_default_exec()
-                self.simulator = self.simulator.create_from(default_exec)
+                if isinstance(default_exec, (str, Path)):
+                    self.simulator = self.simulator.create_from(default_exec)
+                else:
+                    _logger.warning(
+                        f"get_default_executable returned unexpected type: {type(default_exec)}"
+                    )
         # start execution
         self.retcode = self.simulator.run(
             self.netlist_file.absolute().as_posix(),

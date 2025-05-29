@@ -719,8 +719,9 @@ class RawRead:
 
         if self.verbose:
             _logger.info(
-                f"File contains {ivar} traces, reading"
-                f" {len([trace for trace in self._traces if not isinstance(trace, DummyTrace)])}."
+                "File contains %d traces, reading %d.",
+                ivar,
+                len([trace for trace in self._traces if not isinstance(trace, DummyTrace)])
             )
 
         if self.raw_type == "Binary:":
@@ -771,7 +772,7 @@ class RawRead:
                 # Fast access means that the traces are grouped together.
                 for i, var in enumerate(self._traces):
                     if isinstance(var, DummyTrace):
-                        # TODO: replace this by a seek
+                        # NOTE: Consider replacing this with a seek operation for better performance
                         raw_file.read(self.nPoints * self.data_size)
                     elif isinstance(var, (Axis, TraceRead)):
                         if var.numerical_type == "double":
@@ -865,8 +866,9 @@ class RawRead:
                 self._load_step_information(raw_filename_path)
             except SpiceReadException as err:
                 _logger.warning(
-                    f"{str(err)}\nError in auto-detecting steps in"
-                    f" '{raw_filename_path}'"
+                    "%s\nError in auto-detecting steps in '%s'",
+                    str(err),
+                    raw_filename_path
                 )
                 if has_axis and self.axis is not None:
                     number_of_steps = 0
@@ -894,10 +896,9 @@ class RawRead:
         """
         if property_name is None:
             return self.raw_params
-        elif property_name in self.raw_params.keys():
+        if property_name in self.raw_params.keys():
             return self.raw_params[property_name]
-        else:
-            raise ValueError("Invalid property. Use %s" % str(self.raw_params.keys()))
+        raise ValueError(f"Invalid property. Use {str(self.raw_params.keys())}")
 
     def get_trace_names(self) -> List[str]:
         """Returns a list of exiting trace names of the RAW file.
@@ -977,8 +978,8 @@ class RawRead:
                 f'{self} doesn\'t contain trace "{trace_ref}"\n'
                 f"Valid traces are {[trc.name for trc in self._traces]}"
             )
-        else:
-            return self._traces[trace_ref]
+        # Handle integer index
+        return self._traces[trace_ref]
 
     def get_wave(self, trace_ref: Union[str, int], step: int = 0) -> NDArray[Any]:
         """Retrieves the trace data with the requested name (trace_ref), optionally
@@ -1023,8 +1024,7 @@ class RawRead:
             axis = self.get_trace(0)
             assert isinstance(axis, Axis), "This RAW file does not have an axis."
             return axis.get_wave(step)
-        else:
-            raise RuntimeError("This RAW file does not have an axis.")
+        raise RuntimeError("This RAW file does not have an axis.")
 
     def get_len(self, step: int = 0) -> int:
         """Returns the length of the data at the give step index.
@@ -1063,14 +1063,14 @@ class RawRead:
                 )
                 log = open(logfile, "r", errors="replace", encoding=encoding)
             except OSError as exc:
-                raise SpiceReadException("Log file '%s' not found" % logfile) from exc
+                raise SpiceReadException(f"Log file '{logfile}' not found") from exc
             except UnicodeError as exc:
                 raise SpiceReadException(
-                    "Unable to parse log file '%s'" % logfile
+                    f"Unable to parse log file '{logfile}'"
                 ) from exc
             except EncodingDetectError as exc:
                 raise SpiceReadException(
-                    "Unable to parse log file '%s'" % logfile
+                    f"Unable to parse log file '{logfile}'"
                 ) from exc
 
             for line in log:
@@ -1096,10 +1096,10 @@ class RawRead:
             try:
                 log = open(logfile, "r", errors="replace", encoding="utf-8")
             except OSError as exc:
-                raise SpiceReadException("Log file '%s' not found" % logfile) from exc
+                raise SpiceReadException(f"Log file '{logfile}' not found") from exc
             except UnicodeError as exc:
                 raise SpiceReadException(
-                    "Unable to parse log file '%s'" % logfile
+                    f"Unable to parse log file '{logfile}'"
                 ) from exc
 
             step_regex = re.compile(r"^(\d+) of \d+ steps:\s+\.step (.*)$")
@@ -1110,7 +1110,7 @@ class RawRead:
                     step_info: Dict[str, Any] = {}
                     step = int(match.group(1))
                     stepset = match.group(2)
-                    _logger.debug(f"Found step {step} with stepset {stepset}.")
+                    _logger.debug("Found step %d with stepset %s.", step, stepset)
 
                     tokens = stepset.strip("\r\n").split(" ")
                     for tok in tokens:
@@ -1151,23 +1151,21 @@ class RawRead:
         """
         if self.steps is None:
             return [0]  # returns a single step
-        else:
-            if len(kwargs) > 0:
-                ret_steps = []  # Initializing an empty array
-                i = 0
-                for step_dict in self.steps:
-                    for key in kwargs:
-                        ll = step_dict.get(key, None)
-                        if ll is None:
-                            break
-                        if kwargs[key] != ll:
-                            break
-                    else:
-                        ret_steps.append(i)  # All the step parameters match
-                    i += 1
-                return ret_steps
-            else:
-                return range(len(self.steps))  # Returns all the steps
+        if len(kwargs) > 0:
+            ret_steps = []  # Initializing an empty array
+            i = 0
+            for step_dict in self.steps:
+                for key, value in kwargs.items():
+                    ll = step_dict.get(key, None)
+                    if ll is None:
+                        break
+                    if value != ll:
+                        break
+                else:
+                    ret_steps.append(i)  # All the step parameters match
+                i += 1
+            return ret_steps
+        return range(len(self.steps))  # Returns all the steps
 
     def export(
         self,

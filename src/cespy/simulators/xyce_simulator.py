@@ -242,10 +242,9 @@ class XyceSimulator(Simulator):
                     ret = [switch_list[0], parameter]
                 elif param_token == "<param_options>":
                     # Check for [device [level [<inst|mod>]]] syntax ??
-                    # TODO: this will probably not work, need to separate the parameters
-                    # The current implementation passes the parameter as-is, but Xyce might
-                    # expect separate arguments for device, level, and inst/mod
-                    # options
+                    # NOTE: This implementation passes the parameter as-is, but Xyce might
+                    # expect separate arguments for device, level, and inst/mod options.
+                    # This may need to be revisited if issues arise with parameter parsing.
                     ret = [
                         switch_list[0],
                         parameter,
@@ -298,6 +297,7 @@ class XyceSimulator(Simulator):
         netlist_file: Union[str, Path],
         cmd_line_switches: Optional[list[Any]] = None,
         timeout: Optional[float] = None,
+        *,
         stdout: Optional[Any] = None,
         stderr: Optional[Any] = None,
         exe_log: bool = False,

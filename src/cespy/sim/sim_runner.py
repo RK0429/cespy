@@ -105,6 +105,8 @@ __copyright__ = "Copyright 2020, Fribourg Switzerland"
 
 __all__ = [
     "SimRunner",
+    "SimRunnerConfig",
+    "RunConfig",
     "SimRunnerTimeoutError",
     "SimRunnerConfigError",
     "AnyRunner",
@@ -119,6 +121,7 @@ import logging
 import shutil
 import sys
 from concurrent.futures import Future, ThreadPoolExecutor
+from dataclasses import dataclass, field
 from pathlib import Path
 from time import sleep
 from time import thread_time as clock
@@ -154,6 +157,50 @@ CallbackType = Union[
     Type[ProcessCallback],
     Callable[[Path, Path], Any],
 ]
+
+
+@dataclass
+class SimRunnerConfig:
+    """Configuration class for SimRunner initialization.
+
+    Groups related parameters to reduce the number of arguments in SimRunner constructor.
+    """
+    simulator: Optional[Union[str, Path, Type[Simulator]]] = None
+    parallel_sims: int = 4
+    timeout: float = 600.0
+    verbose: bool = False
+    output_folder: Optional[str] = None
+
+
+@dataclass
+class RunConfig:
+    """Configuration class for SimRunner.run() method.
+
+    Groups related parameters to reduce the number of arguments in the run method.
+    """
+    wait_resource: bool = True
+    callback: Optional[CallbackType] = None
+    callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]] = None
+    switches: Optional[List[str]] = None
+    timeout: Optional[float] = None
+    run_filename: Optional[str] = None
+    exe_log: bool = False
+
+
+@dataclass
+class SimulationStats:
+    """Groups simulation statistics to reduce instance attributes."""
+    run_count: int = 0
+    failed_simulations: int = 0
+    successful_simulations: int = 0
+    iterator_counter: int = 0
+
+
+@dataclass
+class TaskManager:
+    """Groups task management related attributes."""
+    active_tasks: List[Tuple[RunTask, Future[RunTask]]] = field(default_factory=list)
+    completed_tasks: List[RunTask] = field(default_factory=list)
 
 
 class SimRunnerTimeoutError(TimeoutError):
@@ -225,15 +272,30 @@ class SimRunner(AnyRunner):
     def __init__(
         self,
         *,
+        config: Optional[SimRunnerConfig] = None,
         simulator: Optional[Union[str, Path, Type[Simulator]]] = None,
-        parallel_sims: int = 4,
-        timeout: float = 600.0,
-        verbose: bool = False,
+        parallel_sims: Optional[int] = None,
+        timeout: Optional[float] = None,
+        verbose: Optional[bool] = None,
         output_folder: Optional[str] = None,
     ) -> None:
         # The '*' in the parameter list forces the user to use named parameters for the
         # rest of the parameters.
         # This is a good practice to avoid confusion.
+
+        # If config is provided, use it as defaults, otherwise use default values
+        if config is not None:
+            simulator = simulator if simulator is not None else config.simulator
+            parallel_sims = parallel_sims if parallel_sims is not None else config.parallel_sims
+            timeout = timeout if timeout is not None else config.timeout
+            verbose = verbose if verbose is not None else config.verbose
+            output_folder = output_folder if output_folder is not None else config.output_folder
+        else:
+            # Use default values if not provided
+            parallel_sims = parallel_sims if parallel_sims is not None else 4
+            timeout = timeout if timeout is not None else 600.0
+            verbose = verbose if verbose is not None else False
+
         self.verbose = verbose
         self.timeout = timeout
         self.cmdline_switches: List[str] = []
@@ -252,16 +314,12 @@ class SimRunner(AnyRunner):
         self._executor: ThreadPoolExecutor = concurrent.futures.ThreadPoolExecutor(
             max_workers=self.parallel_sims
         )
-        # track pairs of (task, future)
-        self.active_tasks: List[Tuple[RunTask, Future[RunTask]]] = []
-        self.completed_tasks: List[RunTask] = []
-        self._iterator_counter = 0  # Note: Nested iterators are not supported
 
-        self.run_count: int = 0  # number of total runs
-        self.failed_simulations: int = 0  # number of failed simulations
-        self.successful_simulations: int = (
-            0  # number of successful completed simulations
-        )
+        # Group task management into a single object
+        self.tasks = TaskManager()
+
+        # Group statistics into a single object
+        self.stats = SimulationStats()
         # self.failParam = []  # collects for later user investigation of failed
         # parameter sets
 
@@ -359,7 +417,7 @@ class SimRunner(AnyRunner):
             # The Qsch files can't be simulated, so, they have to be converted to
             # netlist first.
             netlist = netlist.with_suffix(".net")
-        return f"{netlist.stem}_{self.run_count}{netlist.suffix}"
+        return f"{netlist.stem}_{self.stats.run_count}{netlist.suffix}"
 
     def _prepare_sim(
         self,
@@ -368,7 +426,7 @@ class SimRunner(AnyRunner):
     ) -> Path:
         """Internal function."""
         # update number of simulation
-        self.run_count += 1  # Incrementing internal simulation number
+        self.stats.run_count += 1  # Incrementing internal simulation number
         # Harmonize the netlist into a Path object pointing to a netlist file on
         # the right output folder
         if isinstance(netlist, BaseEditor):
@@ -447,7 +505,7 @@ class SimRunner(AnyRunner):
             if not wait_resource or (self.active_threads() < self.parallel_sims):
                 return True
             sleep(0.1)
-        _logger.error("Timeout waiting for resources for simulation %s", self.run_count)
+        _logger.error("Timeout waiting for resources for simulation %s", self.stats.run_count)
         return False
 
     def run(
@@ -527,7 +585,7 @@ class SimRunner(AnyRunner):
         # Wait for an available resource slot or timeout
         if not self._wait_for_resources(wait_resource, timeout):
             if self.verbose:
-                _logger.warning("Timeout on launching simulation %s.", self.run_count)
+                _logger.warning("Timeout on launching simulation %s.", self.stats.run_count)
             return None
 
         # Prepare command-line switches
@@ -540,7 +598,7 @@ class SimRunner(AnyRunner):
         # Launch the simulation task via ThreadPoolExecutor
         t = RunTask(
             simulator=self.simulator,
-            runno=self.run_count,
+            runno=self.stats.run_count,
             netlist_file=run_netlist_file,
             callback=actual_callback,
             callback_args=callback_kwargs,
@@ -550,7 +608,7 @@ class SimRunner(AnyRunner):
             exe_log=exe_log,
         )
         future = self._executor.submit(t)
-        self.active_tasks.append((t, future))
+        self.tasks.active_tasks.append((t, future))
         _logger.debug(
             "RunTask submitted: runno=%d, netlist_file=%s",
             t.runno,
@@ -615,7 +673,7 @@ class SimRunner(AnyRunner):
 
         t = RunTask(
             simulator=self.simulator,
-            runno=self.run_count,
+            runno=self.stats.run_count,
             netlist_file=run_netlist_file,
             callback=dummy_callback,
             callback_args=None,
@@ -632,12 +690,12 @@ class SimRunner(AnyRunner):
             t.raw_file,
             t.log_file,
         )
-        self.completed_tasks.append(t)
+        self.tasks.completed_tasks.append(t)
         if t.retcode == 0:
-            self.successful_simulations += 1
+            self.stats.successful_simulations += 1
         else:
             # simulation failed
-            self.failed_simulations += 1
+            self.stats.failed_simulations += 1
         return t.raw_file, t.log_file  # Returns the raw and log file
 
     def active_threads(self) -> int:
@@ -647,7 +705,7 @@ class SimRunner(AnyRunner):
             int: Number of simulation tasks currently running
         """
         self.update_completed()
-        return len(self.active_tasks)
+        return len(self.tasks.active_tasks)
 
     def update_completed(self) -> None:
         """Update active and completed simulation task lists.
@@ -657,21 +715,21 @@ class SimRunner(AnyRunner):
         """
         _logger.debug(
             "update_completed: active=%d, completed=%d",
-            len(self.active_tasks),
-            len(self.completed_tasks),
+            len(self.tasks.active_tasks),
+            len(self.tasks.completed_tasks),
         )
         i = 0
-        while i < len(self.active_tasks):
-            task, future = self.active_tasks[i]
+        while i < len(self.tasks.active_tasks):
+            task, future = self.tasks.active_tasks[i]
             if not future.done():
                 i += 1
             else:
                 if task.retcode == 0:
-                    self.successful_simulations += 1
+                    self.stats.successful_simulations += 1
                 else:
-                    self.failed_simulations += 1
-                self.active_tasks.pop(i)
-                self.completed_tasks.append(task)
+                    self.stats.failed_simulations += 1
+                self.tasks.active_tasks.pop(i)
+                self.tasks.completed_tasks.append(task)
                 _logger.debug(
                     "Task %d moved from active to completed (retcode=%d)",
                     task.runno,
@@ -708,7 +766,7 @@ class SimRunner(AnyRunner):
         :rtype: float or None
         """
         alarm: Optional[float] = None
-        for task, _ in self.active_tasks:
+        for task, _ in self.tasks.active_tasks:
             # Skip tasks without a start time
             if task.start_time is None:
                 continue
@@ -751,7 +809,7 @@ class SimRunner(AnyRunner):
         stop_time: Optional[float] = None
         if timeout is not None:
             stop_time = clock_function() + timeout
-        while len(self.active_tasks) > 0:
+        while len(self.tasks.active_tasks) > 0:
             sleep(1)
             self.update_completed()
             if timeout is None:
@@ -764,8 +822,8 @@ class SimRunner(AnyRunner):
                         self.kill_all_spice()
                     return False
 
-        _logger.debug("wait_completion returning %s", self.failed_simulations == 0)
-        return self.failed_simulations == 0
+        _logger.debug("wait_completion returning %s", self.stats.failed_simulations == 0)
+        return self.stats.failed_simulations == 0
 
     @staticmethod
     def _del_file_if_exists(workfile: Optional[Path]) -> None:
@@ -799,7 +857,7 @@ class SimRunner(AnyRunner):
         """
         self.update_completed()  # Updates the active_tasks and completed_tasks lists
 
-        for task in self.completed_tasks:
+        for task in self.tasks.completed_tasks:
             netlistfile = task.netlist_file
             self._del_file_if_exists(
                 netlistfile
@@ -847,7 +905,7 @@ class SimRunner(AnyRunner):
             >>> for result_file in runner:
             ...     print(f"Simulation completed: {result_file}")
         """
-        self._iterator_counter = (
+        self.stats.iterator_counter = (
             0  # Reset the iterator counter. Note: nested iterators are not supported
         )
         return self
@@ -864,15 +922,15 @@ class SimRunner(AnyRunner):
         while True:
             self.update_completed()  # update active and completed tasks
             # First go through the completed tasks
-            if self._iterator_counter < len(self.completed_tasks):
-                ret = self.completed_tasks[self._iterator_counter]
-                self._iterator_counter += 1
+            if self.stats.iterator_counter < len(self.tasks.completed_tasks):
+                ret = self.tasks.completed_tasks[self.stats.iterator_counter]
+                self.stats.iterator_counter += 1
                 if ret.retcode == 0:
                     return ret.get_results()
                 _logger.error("Skipping %s because simulation failed.", ret.runno)
 
             # Then check if there are any active tasks
-            if len(self.active_tasks) == 0:
+            if len(self.tasks.active_tasks) == 0:
                 raise StopIteration
 
             # Then go through the active tasks to get the maximum timeout
@@ -913,9 +971,9 @@ class SimRunner(AnyRunner):
     @property
     def ok_sim(self) -> int:
         """Number of successful simulations completed."""
-        return self.successful_simulations
+        return self.stats.successful_simulations
 
     @property
     def runno(self) -> int:
         """Total number of simulation runs executed."""
-        return self.run_count
+        return self.stats.run_count

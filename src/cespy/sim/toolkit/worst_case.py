@@ -67,18 +67,10 @@ class WorstCaseAnalysis(ToleranceDeviations):
             return False  # no need to set the deviation
         new_val = val
         if dev.typ == DeviationType.tolerance:
-            new_val = "{wc(%s,%g,%d)}" % (
-                val,
-                dev.max_val,
-                index,
-            )  # calculate expression for new value
+            new_val = f"{{wc({val},{dev.max_val:g},{index})}}"  # calculate expression for new value
         elif dev.typ == DeviationType.minmax:
-            new_val = "{wc1(%s,%g,%g,%d)}" % (
-                val,
-                dev.min_val,
-                dev.max_val,
-                index,
-            )  # calculate expression for new value
+            # calculate expression for new value
+            new_val = f"{{wc1({val},{dev.min_val:g},{dev.max_val:g},{index})}}"
 
         if new_val != val:
             self.set_component_value(ref, str(new_val))  # update the value
@@ -96,18 +88,10 @@ class WorstCaseAnalysis(ToleranceDeviations):
             val, dev = self.get_parameter_value_deviation_type(ref)
             new_val = val
             if dev.typ == DeviationType.tolerance:
-                new_val = "{wc(%s,%g,%d)}" % (
-                    val,
-                    dev.max_val,
-                    index,
-                )  # calculate expression for new value
+                # calculate expression for new value
+                new_val = f"{{wc({val},{dev.max_val:g},{index})}}"
             elif dev.typ == DeviationType.minmax:
-                new_val = "{wc1(%s,%g,%g,%d)}" % (
-                    val,
-                    dev.min_val,
-                    dev.max_val,
-                    index,
-                )
+                new_val = f"{{wc1({val},{dev.min_val:g},{dev.max_val:g},{index})}}"
             if new_val != val:
                 self.editor.set_parameter(ref, new_val)
             index += 1
@@ -129,10 +113,12 @@ class WorstCaseAnalysis(ToleranceDeviations):
             ".func wc1(nom,min,max,idx) {if(run<0, nom, if(binary(run,idx),max,min))}"
         )
         self.last_run_number = 2**index - 1
-        self.editor.add_instruction(".step param run -1 %d 1" % self.last_run_number)
+        self.editor.add_instruction(f".step param run -1 {self.last_run_number} 1")
         self.editor.set_parameter("run", -1)  # in case the step is commented.
-        self.testbench_prepared = True
+        self.testbench.prepared = True
 
+    # pylint: disable-next=too-many-positional-arguments,too-many-locals
+    # pylint: disable-next=too-many-branches,too-many-statements
     def run_analysis(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
@@ -268,7 +254,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
                 if rt is not None:
                     callback_rets.append(rt.get_results())
             self.simulation_results["callback_returns"] = callback_rets
-        self.analysis_executed = True
+        self.testbench.analysis_executed = True
 
         return None
 
@@ -279,7 +265,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
 
         See SPICE .MEAS primitive documentation.
         """
-        if not self.analysis_executed:
+        if not self.testbench.analysis_executed:
             _logger.warning(
                 "The analysis was not executed. Please run the analysis before calling"
                 " this method"
@@ -291,15 +277,14 @@ class WorstCaseAnalysis(ToleranceDeviations):
         if meas_data is None:
             _logger.warning("Measurement %s not found in log files", meas_name)
             return None
-        elif len(meas_data) != len(self.simulations):
+        if len(meas_data) != len(self.simulations):
             _logger.warning(
                 "Missing log files. Results may not be reliable. Probable cause are:\n"
                 "  - Failed simulations.\n"
                 "  - Measurement couldn't be done in simulation results."
             )
             return None
-        else:
-            return min(meas_data), max(meas_data)
+        return min(meas_data), max(meas_data)
 
     def make_sensitivity_analysis(
         self, measure: str, ref: str = "*"
@@ -324,9 +309,9 @@ class WorstCaseAnalysis(ToleranceDeviations):
             tuples.
         """
         if (
-            self.testbench_prepared
-            and self.testbench_executed
-            or self.analysis_executed
+            self.testbench.prepared
+            and self.testbench.executed
+            or self.testbench.analysis_executed
         ):
             # Read the log files
             log_data: LogfileData = self.read_logfiles()
@@ -342,7 +327,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
                 given bit."""
                 bit_updated = 1 << bit_index
                 diffs = []
-                for run in range(len(wc_data)):
+                for run, _ in enumerate(wc_data):
                     if run & bit_updated == 0:
                         diffs.append(abs(wc_data[run] - wc_data[run | bit_updated]))
                 mean = sum(diffs) / len(diffs)
@@ -363,16 +348,14 @@ class WorstCaseAnalysis(ToleranceDeviations):
             if ref == "*":
                 # Returns a dictionary with all the references sensitivity
                 answer = {}
-                for ref, (sens, sigma) in sensitivities.items():
-                    answer[ref] = sens / total * 100, sigma / total * 100
+                for ref_comp, (sens, sigma) in sensitivities.items():
+                    answer[ref_comp] = sens / total * 100, sigma / total * 100
                 return answer
-            else:
-                # Calculates the sensitivity for the given component
-                sens, sigma = sensitivities[ref]
-                return sens / total * 100, sigma / total * 100
-        else:
-            _logger.warning(
-                "The analysis was not executed. Please run the run_analysis(...) or"
-                " run_testbench(...) before calling this method"
-            )
-            return None
+            # Calculates the sensitivity for the given component
+            sens, sigma = sensitivities[ref]
+            return sens / total * 100, sigma / total * 100
+        _logger.warning(
+            "The analysis was not executed. Please run the run_analysis(...) or"
+            " run_testbench(...) before calling this method"
+        )
+        return None

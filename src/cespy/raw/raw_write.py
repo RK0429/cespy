@@ -30,6 +30,7 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple, Union, cast
 from numpy import array, float32, zeros
 from numpy.typing import NDArray
 
+from dataclasses import dataclass, field
 from .raw_classes import DataSet, DummyTrace
 from .raw_read import RawRead
 
@@ -91,6 +92,16 @@ class Trace(DataSet):
             self.data[:] = data[:]  # This way the dtype is kept
 
 
+@dataclass
+class RawFlags:
+    """Groups RAW file flags to reduce instance attributes."""
+    numtype: str = "auto"
+    forward: bool = False
+    log: bool = False
+    stepped: bool = False
+    fastaccess: bool = True
+
+
 class RawWrite:
     """Represents a RAW data file being generated for SPICE simulation output.
 
@@ -111,12 +122,11 @@ class RawWrite:
         numtype: str = "auto",
         encoding: str = "utf_16_le",
     ) -> None:
-        self._traces: List[Trace] = list()
-        self.flag_numtype: str = numtype
-        self.flag_forward: bool = False
-        self.flag_log: bool = False
-        self.flag_stepped: bool = False
-        self.flag_fastaccess: bool = fastacces
+        self._traces: List[Trace] = []
+        self.flags = RawFlags(
+            numtype=numtype,
+            fastaccess=fastacces
+        )
         self.plot_name: Optional[str] = plot_name
         self.offset: float = 0.0
         self.encoding: str = encoding
@@ -128,14 +138,14 @@ class RawWrite:
 
         Returns:     str: Space-separated string of enabled flags
         """
-        flags = [self.flag_numtype]
-        if self.flag_forward:
+        flags = [self.flags.numtype]
+        if self.flags.forward:
             flags.append("forward")
-        if self.flag_log:
+        if self.flags.log:
             flags.append("log")
-        if self.flag_stepped:
+        if self.flags.stepped:
             flags.append("stepped")
-        if self.flag_fastaccess:
+        if self.flags.fastaccess:
             flags.append("fastaccess")
         return " ".join(flags)
 
@@ -160,7 +170,7 @@ class RawWrite:
                 flag_numtype = "real"
             elif trace.whattype == "frequency":
                 if (
-                    trace.numerical_type != "complex" and self.flag_numtype != "complex"
+                    trace.numerical_type != "complex" and self.flags.numtype != "complex"
                 ) or "Noise" in str(self.plot_name):
                     self.plot_name = (
                         self.plot_name or "Noise Spectral Density - (V/Hz½ or A/Hz½)"
@@ -181,8 +191,8 @@ class RawWrite:
                     " 'voltage' or '...'"
                 )
 
-            if self.flag_numtype == "auto":
-                self.flag_numtype = flag_numtype
+            if self.flags.numtype == "auto":
+                self.flags.numtype = flag_numtype
         else:
             if len(self._traces[0]) != len(trace):
                 raise IndexError("The trace needs to be the same size as trace 0")
@@ -200,7 +210,7 @@ class RawWrite:
         Note:     If there are any imported data that need to be consolidated, this will
         happen     automatically before saving.
         """
-        if len(self._imported_data):
+        if self._imported_data:
             self._consolidate()
         f = open(filename, "wb")
         f.write("Title: * cespy RawWrite\n".encode(self.encoding))
@@ -230,7 +240,7 @@ class RawWrite:
         total_bytes = 0
         f.write("Binary:\n".encode(self.encoding))
         if (
-            self.flag_fastaccess and self.flag_numtype != "complex"
+            self.flags.fastaccess and self.flags.numtype != "complex"
         ):  # Don't know why, but complex RAW files aren't
             # converted to FastAccess
             for trace in self._traces:
@@ -329,11 +339,11 @@ class RawWrite:
         else:
             other_flag_num_type = "real"
 
-        if len(self._traces):  # there are already traces
-            if self.flag_numtype != other_flag_num_type:
+        if self._traces:  # there are already traces
+            if self.flags.numtype != other_flag_num_type:
                 raise ValueError(
                     "The two instances should have the same type:\nSource is"
-                    f" {other_flag_num_type} and Destination is {self.flag_numtype}"
+                    f" {other_flag_num_type} and Destination is {self.flags.numtype}"
                 )
             if self._traces[0].whattype != other.get_trace(0).whattype:
                 raise ValueError(
@@ -346,9 +356,9 @@ class RawWrite:
 
         else:  # No traces are present
             # if no X axis is present, copy from the first one
-            self.flag_numtype = other_flag_num_type
-            self.flag_log = "log" in other_flags
-            self.flag_forward = "forward" in other_flags
+            self.flags.numtype = other_flag_num_type
+            self.flags.log = "log" in other_flags
+            self.flags.forward = "forward" in other_flags
             self.plot_name = other.get_raw_property("Plotname")
             oaxis = other.get_trace(0)
             new_axis = Trace(

@@ -21,12 +21,25 @@
 # -------------------------------------------------------------------------------
 
 from collections import OrderedDict
-from typing import Any, Dict, Iterable, Optional, Type, Union
+from dataclasses import dataclass, field
+from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from ...editor.base_editor import BaseEditor, ComponentNotFoundError
 from ..sim_runner import AnyRunner, RunTask
 from ..simulator import Simulator
 from .sim_analysis import SimAnalysis
+
+
+@dataclass
+class ComponentSets:
+    """Groups different component types to reduce instance attributes."""
+    resistors: List[str] = field(default_factory=list)
+    capacitors: List[str] = field(default_factory=list)
+    inductors: List[str] = field(default_factory=list)
+    diodes: List[str] = field(default_factory=list)
+    bipolars: List[str] = field(default_factory=list)
+    mosfets: List[str] = field(default_factory=list)
+    subcircuits: List[str] = field(default_factory=list)
 
 
 class FailureMode(SimAnalysis):
@@ -57,13 +70,16 @@ class FailureMode(SimAnalysis):
     ):
         SimAnalysis.__init__(self, circuit_file, runner)
         self.simulator = simulator
-        self.resistors = self.editor.get_components("R")
-        self.capacitors = self.editor.get_components("C")
-        self.inductors = self.editor.get_components("L")
-        self.diodes = self.editor.get_components("D")
-        self.bipolars = self.editor.get_components("Q")
-        self.mosfets = self.editor.get_components("M")
-        self.subcircuits = self.editor.get_components("X")
+        # Group components in a single dataclass
+        self.components = ComponentSets(
+            resistors=list(self.editor.get_components("R")),
+            capacitors=list(self.editor.get_components("C")),
+            inductors=list(self.editor.get_components("L")),
+            diodes=list(self.editor.get_components("D")),
+            bipolars=list(self.editor.get_components("Q")),
+            mosfets=list(self.editor.get_components("M")),
+            subcircuits=list(self.editor.get_components("X"))
+        )
         self.user_failure_modes: Dict[str, Dict[str, Any]] = OrderedDict()
         # Mapping of failure names to RunTask instances
         self.failure_simulations: Dict[str, Optional[RunTask]] = {}
@@ -86,10 +102,10 @@ class FailureMode(SimAnalysis):
             raise RuntimeError(
                 "The failure modes addition only works with sub circuits"
             )
-        if component not in self.subcircuits:
+        if component not in self.components.subcircuits:
             raise ComponentNotFoundError()
         _ = sub_circuit
-        raise NotImplementedError("TODO")  # TODO: Implement this
+        raise NotImplementedError("This feature is not yet implemented")
 
     def add_failure_mode(
         self,
@@ -111,11 +127,11 @@ class FailureMode(SimAnalysis):
         """
         if not component.startswith("X"):
             raise RuntimeError("The failure modes addition only works with subcircuits")
-        if component not in self.subcircuits:
+        if component not in self.components.subcircuits:
             raise ComponentNotFoundError()
         _ = short_pins
         _ = open_pins
-        raise NotImplementedError("TODO")  # TODO: Implement this
+        raise NotImplementedError("This feature is not yet implemented")
 
     def run_all(self) -> None:
         """Run failure mode analysis for all components in the circuit.
@@ -124,7 +140,7 @@ class FailureMode(SimAnalysis):
         for resistors, capacitors, diodes, bipolar transistors, and MOSFETs.
         Results are stored in self.failure_simulations.
         """
-        for resistor in self.resistors:
+        for resistor in self.components.resistors:
             # Short Circuit: set near-zero resistance
             self.editor.set_component_value(resistor, "1f")
             self.failure_simulations[f"{resistor}_S"] = self.run()
@@ -133,7 +149,11 @@ class FailureMode(SimAnalysis):
             self.failure_simulations[f"{resistor}_O"] = self.run()
             self.editor.reset_netlist()
 
-        for two_pin_comps in (self.capacitors, self.inductors, self.diodes):
+        for two_pin_comps in (
+            self.components.capacitors,
+            self.components.inductors,
+            self.components.diodes,
+        ):
             for two_pin_component in two_pin_comps:
                 cinfo = self.editor.get_component(two_pin_component)
                 # Open Circuit: remove component

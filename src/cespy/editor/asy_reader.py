@@ -26,8 +26,9 @@ associated metadata.
 import logging
 import re
 from collections import OrderedDict
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .base_schematic import (
@@ -48,6 +49,16 @@ SCALE_X = 6.25
 SCALE_Y = -6.25
 
 
+@dataclass
+class SymbolElements:
+    """Groups symbol elements to reduce instance attributes."""
+    pins: List = field(default_factory=list)
+    lines: List = field(default_factory=list)
+    shapes: List = field(default_factory=list)
+    windows: List = field(default_factory=list)
+    attributes: Dict[str, str] = field(default_factory=OrderedDict)
+
+
 class AsyReader(object):
     """Symbol parser."""
 
@@ -57,13 +68,9 @@ class AsyReader(object):
         super().__init__()
         self.version: str = "4"  # Store version as string
         self.symbol_type = None
-        self.pins = []
-        self.lines = []
-        self.shapes = []
-        # Store attributes as strings
-        self.attributes: Dict[str, str] = OrderedDict()
+        self.elements = SymbolElements()
         self._asy_file_path = Path(asy_file)
-        self.windows = []
+        self.encoding: str = ""
         pin = None
         if not self._asy_file_path.exists():
             raise FileNotFoundError(f"File {asy_file} not found")
@@ -79,7 +86,7 @@ class AsyReader(object):
             self.encoding = encoding
 
         with open(self._asy_file_path, "r", encoding=self.encoding) as asc_file:
-            _logger.info(f"Parsing ASY file {self._asy_file_path}")
+            _logger.info("Parsing ASY file %s", self._asy_file_path)
             for line_text in asc_file:
                 if line_text.startswith("WINDOW"):
                     (
@@ -98,7 +105,7 @@ class AsyReader(object):
                         type=TextTypeEnum.ATTRIBUTE,
                     )
                     text_obj = asc_text_align_set(text_obj, alignment)
-                    self.windows.append(text_obj)
+                    self.elements.windows.append(text_obj)
                 elif line_text.startswith("SYMATTR"):
                     tokens = line_text.split(maxsplit=2)
                     if len(tokens) == 3:
@@ -113,7 +120,7 @@ class AsyReader(object):
                     # of places
                     if ref.upper() == "PREFIX":
                         attr_text = attr_text.upper()
-                    self.attributes[ref] = attr_text
+                    self.elements.attributes[ref] = attr_text
                 elif line_text.startswith("Version"):
                     _, version = line_text.split()
                     assert version in [
@@ -131,7 +138,7 @@ class AsyReader(object):
                     pin.text += f"{attribute}={value};"
                 elif line_text.startswith("PIN"):
                     if pin is not None:
-                        self.pins.append(pin)
+                        self.elements.pins.append(pin)
                     _, x, y, justification, offset = line_text.split()
                     coord = Point(int(x), int(y))
                     angle = ERotation.R0
@@ -195,12 +202,12 @@ class AsyReader(object):
                         line_obj = Line(Point(x1, y1), Point(x2, y2))
                         if len(line_elements) == 7:
                             line_obj.style.pattern = line_elements[6]
-                        self.lines.append(line_obj)
+                        self.elements.lines.append(line_obj)
                     if line_elements[0] in ("RECTANGLE", "CIRCLE"):
                         shape = Shape(line_elements[0], [Point(x1, y1), Point(x2, y2)])
                         if len(line_elements) == 7:
                             shape.line_style.pattern = line_elements[6]
-                        self.shapes.append(shape)
+                        self.elements.shapes.append(shape)
 
                 elif line_text.startswith("ARC"):
                     # I don't support editing yet, so why make it complicated
@@ -219,7 +226,7 @@ class AsyReader(object):
                     arc = Shape("ARC", points)
                     if len(line_elements) == 11:
                         arc.line_style.pattern = line_elements[10]
-                    self.shapes.append(arc)
+                    self.elements.shapes.append(arc)
 
                 elif line_text.startswith("TEXT "):
                     line_elements = line_text.split()
@@ -234,13 +241,13 @@ class AsyReader(object):
                             type=TextTypeEnum.COMMENT,
                             textAlignment=HorAlign(line_elements[3]),
                         )
-                        self.windows.append(text_obj)
+                        self.elements.windows.append(text_obj)
                     else:
                         # Text in asy not supported however non-critical and not
                         # neccesary to crash the program.
                         _logger.warning(
                             "Cosmetic text in ASY format not supported, text skipped."
-                            f" ASY file: {self._asy_file_path}"
+                            " ASY file: %s", self._asy_file_path
                         )
                 else:
                     # In order to avoid crashing the program, 1) add the missing
@@ -251,16 +258,16 @@ class AsyReader(object):
                         f" {self._asy_file_path}. Contact the author to add support."
                     )
             if pin is not None:
-                self.pins.append(pin)
+                self.elements.pins.append(pin)
 
     def to_qsch(self, *args: str) -> QschTag:
         """Create a QschTag representing a component symbol."""
-        spice_prefix = self.attributes["Prefix"]
+        spice_prefix = self.elements.attributes["Prefix"]
         symbol = QschTag("symbol", spice_prefix[0])
         symbol.items.append(QschTag("type:", spice_prefix))
-        symbol.items.append(QschTag("description:", self.attributes["Description"]))
+        symbol.items.append(QschTag("description:", self.elements.attributes["Description"]))
         symbol.items.append(QschTag("shorted pins:", "false"))
-        for line in self.lines:
+        for line in self.elements.lines:
             x1 = int(line.V1.X * SCALE_X)
             y1 = int(line.V1.Y * SCALE_Y)
             x2 = int(line.V2.X * SCALE_X)
@@ -270,7 +277,7 @@ class AsyReader(object):
             )
             symbol.items.append(segment)
 
-        for shape in self.shapes:
+        for shape in self.elements.shapes:
             if shape.name == "RECTANGLE":
                 x1 = int(shape.points[0].X * SCALE_X)
                 y1 = int(shape.points[0].Y * SCALE_Y)
@@ -321,7 +328,7 @@ class AsyReader(object):
                 raise ValueError(f"Shape {shape.name} not supported")
             symbol.items.append(shape_tag)
 
-        for i, attr in enumerate(self.windows):
+        for i, attr in enumerate(self.elements.windows):
             coord = attr.coord
             x = coord.X * SCALE_X
             y = coord.Y * SCALE_Y
@@ -330,7 +337,7 @@ class AsyReader(object):
             )
             symbol.items.append(text)
 
-        for pin in self.pins:
+        for pin in self.elements.pins:
             coord = pin.coord
             attr_dict = {}
             for pair in pin.text.split(";"):
@@ -348,7 +355,7 @@ class AsyReader(object):
 
     def is_subcircuit(self) -> bool:
         # Prefix is guaranteed to be uppercase
-        return self.symbol_type == "BLOCK" or self.attributes.get("Prefix") == "X"
+        return self.symbol_type == "BLOCK" or self.elements.attributes.get("Prefix") == "X"
 
     def get_library(self) -> Optional[str]:
         """Returns the library name of the model.
@@ -366,12 +373,12 @@ class AsyReader(object):
             "Value",
             "Value2",
         ):
-            if attr in self.attributes and (
-                self.attributes[attr].lower().endswith(suffixes)
+            if attr in self.elements.attributes and (
+                self.elements.attributes[attr].lower().endswith(suffixes)
             ):
-                return self.attributes[attr]
+                return self.elements.attributes[attr]
         # Default to None if there is no library file attribute
-        return self.attributes.get("SpiceModel")
+        return self.elements.attributes.get("SpiceModel")
 
     def get_model(self) -> str:
         """Returns the model name of the component.
@@ -388,8 +395,8 @@ class AsyReader(object):
             "SpiceLine2",
             "Def_Sub",
         ):
-            if attr in self.attributes:
-                return self.attributes[attr]
+            if attr in self.elements.attributes:
+                return self.elements.attributes[attr]
         raise ValueError("No Value or Value2 attribute found")
 
     def get_value(self) -> Union[int, float, str]:

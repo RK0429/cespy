@@ -103,12 +103,12 @@ __copyright__ = "Copyright 2020, Fribourg Switzerland"
 import logging
 import os
 from pathlib import Path
-from typing import Any, Callable, Optional, Type, Union, cast
+from typing import Any, Callable, Optional, Type, Union
 
 from ..editor.spice_editor import SpiceEditor
 from ..simulators.ltspice_simulator import LTspice
 from .process_callback import ProcessCallback
-from .sim_runner import RunTask, SimRunner
+from .sim_runner import SimRunner
 from .simulator import Simulator
 
 _logger = logging.getLogger("cespy.SimBatch")
@@ -233,11 +233,12 @@ class SimCommander(SpiceEditor):
     def run(
         self,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        timeout: Optional[float] = 600,
+        callback: Optional[Union[Type[Any], Callable[[Path, Path], Any]]] = None,
+        timeout: Optional[float] = None,
+        *,
         run_filename: Optional[str] = None,
-        simulator: Optional[Union[str, Type[Simulator]]] = None,
-    ) -> Optional[RunTask]:
+        simulator: Optional[Any] = None,
+    ) -> Any:
         """Run the simulation with the updated netlist.
 
         This overrides the parent class method to maintain backward compatibility.
@@ -250,25 +251,27 @@ class SimCommander(SpiceEditor):
         :return: A RunTask object
         """
         # Adapt callback if necessary
-        adapted_callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = (
-            None
-        )
+        adapted_callback: Optional[Union[Type[Any], Callable[[Path, Path], Any]]] = None
 
         if callback is not None:
             if isinstance(callback, type) and issubclass(callback, ProcessCallback):
                 adapted_callback = callback
             elif callable(callback):
-                # Create a wrapper function that adapts the callback to the expected
-                # signature
-                # For backward compatibility, convert Path objects to strings
-                def adapted_callback_wrapper(raw_file: Path, log_file: Path) -> Any:
-                    # Convert Path objects to strings for legacy callbacks
-                    func = cast(Callable[[str, str], Any], callback)
-                    return func(str(raw_file), str(log_file))
+                # Check if the callback expects string parameters (legacy)
+                # If so, adapt it to accept Path objects
+                import inspect
+                sig = inspect.signature(callback)
+                params = list(sig.parameters.values())
+                if len(params) >= 2:
+                    # Create a wrapper that ensures Path objects are passed
+                    def adapted_callback_wrapper(raw_file: Path, log_file: Path) -> Any:
+                        # Convert Path objects to strings for legacy callbacks
+                        return callback(str(raw_file), str(log_file))
+                    adapted_callback = adapted_callback_wrapper
+                else:
+                    adapted_callback = callback
 
-                adapted_callback = adapted_callback_wrapper
-
-        # Use non-None timeout
+        # Use default timeout if None
         actual_timeout = float(timeout) if timeout is not None else 600.0
 
         # If simulator is None, we'll use the default one from the runner
@@ -306,18 +309,17 @@ class SimCommander(SpiceEditor):
     @property
     def runno(self) -> int:
         """*(Deprecated)* Legacy property returning total runs."""
-        return self.runner.run_count
+        return self.runner.stats.run_count
 
-    @property
     @property
     def ok_sim(self) -> int:
         """*(Deprecated)* Legacy property returning successful simulations."""
-        return self.runner.successful_simulations
+        return self.runner.stats.successful_simulations
 
     @property
     def failSim(self) -> int:  # pylint: disable=invalid-name
         """*(Deprecated)* Legacy property returning failed simulations."""
-        return self.runner.failed_simulations
+        return self.runner.stats.failed_simulations
 
 
 if __name__ == "__main__":
@@ -346,7 +348,7 @@ if __name__ == "__main__":
     # Sim Statistics
     _logger.info("Successful/Total Simulations: %s/%s", LTC.ok_sim, LTC.runno)
 
-    def callback_function(raw_file: str, log_file: str) -> None:
+    def callback_function(raw_file: Path, log_file: Path) -> None:
         """Example callback function for handling simulation data."""
         _logger.debug(
             "Handling the simulation data of %s, log file %s",
@@ -379,7 +381,9 @@ if __name__ == "__main__":
 
 
 # Legacy aliases for backward compatibility
-SimCommander.setLTspiceRunCommand = SimCommander.set_ltspice_run_command
-SimCommander.add_LTspiceRunCmdLineSwitches = (
-    SimCommander.add_ltspice_run_cmd_line_switches
+setattr(SimCommander, "setLTspiceRunCommand", SimCommander.set_ltspice_run_command)
+setattr(
+    SimCommander,
+    "add_LTspiceRunCmdLineSwitches",
+    SimCommander.add_ltspice_run_cmd_line_switches,
 )

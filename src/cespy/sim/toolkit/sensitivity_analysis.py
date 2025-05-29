@@ -47,10 +47,10 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
             val, dev = self.get_component_value_deviation_type(comp)
             new_val = val
             if dev.typ == DeviationType.tolerance:
-                new_val = "{satol(%s,%g,%d)}" % (val, dev.max_val, no)
+                new_val = f"{{satol({val},{dev.max_val:g},{no})}}"
             elif dev.typ == DeviationType.minmax:
                 used_value = dev.min_val if use_min else dev.max_val
-                new_val = "{sammx(%s,%g,%d)}" % (val, used_value, no)
+                new_val = f"{{sammx({val},{used_value:g},{no})}}"
 
             if new_val != val:
                 self.set_component_value(comp, str(new_val))
@@ -67,9 +67,9 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                 ".func satol(nom,tol,idx) nom*if(run==idx,1+tol,1)"
             )
         self.editor.add_instruction(".func sammx(nom,val,idx) if(run==idx,val,nom)")
-        self.editor.add_instruction(".step param run -1 %d 1" % self.last_run_number)
+        self.editor.add_instruction(f".step param run -1 {self.last_run_number} 1")
         self.editor.set_parameter("run", -1)  # in case the step is commented.
-        self.testbench_prepared = True
+        self.testbench.prepared = True
 
     def get_sensitivity_data(
         self, ref: str, measure: str
@@ -93,9 +93,9 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
             component
         """
         if (
-            self.testbench_prepared
-            and self.testbench_executed
-            or self.analysis_executed
+            self.testbench.prepared
+            and self.testbench.executed
+            or self.testbench.analysis_executed
         ):
             log_data: LogfileData = self.read_logfiles()
             nominal_data = log_data.get_measure_value(measure, run=-1)
@@ -123,15 +123,13 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                     ref: error_data[idx] / total_error * 100 if total_error != 0 else 0
                     for idx, ref in enumerate(self.elements_analysed)
                 }
-            else:
-                idx = self.elements_analysed.index(ref)
-                return error_data[idx] / total_error * 100 if total_error != 0 else 0
-        else:
-            _logger.warning(
-                "The analysis was not executed. Please run the run_analysis(...) or"
-                " run_testbench(...) before calling this method"
-            )
-            return None
+            idx = self.elements_analysed.index(ref)
+            return error_data[idx] / total_error * 100 if total_error != 0 else 0
+        _logger.warning(
+            "The analysis was not executed. Please run the run_analysis(...) or"
+            " run_testbench(...) before calling this method"
+        )
+        return None
 
     def run_analysis(
         self,
@@ -171,7 +169,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
 
         for ref in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(ref)
-            if dev.typ == DeviationType.tolerance or dev.typ == DeviationType.minmax:
+            if dev.typ in (DeviationType.tolerance, DeviationType.minmax):
                 worst_case_elements[ref] = val, dev, "parameter"
                 self.elements_analysed.append(ref)
 
@@ -265,7 +263,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
                     continue
                 callback_rets.append(rt.get_results())
             self.simulation_results["callback_returns"] = callback_rets
-        self.analysis_executed = True
+        self.testbench.analysis_executed = True
         # Force already the reading of logfiles
         log_data: LogfileData = self.read_logfiles()
         # if applicable, the run parameter shall be transformed into an int

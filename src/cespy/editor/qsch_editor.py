@@ -874,9 +874,10 @@ class QschEditor(BaseSchematic):
                             return tag, match
         return None, None
 
-    def get_all_parameter_names(self) -> List[str]:
+    def get_all_parameter_names(self, param: str = "") -> List[str]:
         """Returns all parameter names from the netlist.
 
+        :param param: Unused parameter for API compatibility
         :return: A list of parameter names found in the netlist
         :rtype: List[str]
         """
@@ -1136,6 +1137,10 @@ class QschEditor(BaseSchematic):
         appended."""
         assert self.schematic is not None
         first = True
+        min_x = 0
+        max_x = 0
+        min_y = 0
+        max_y = 0
         for tag in self.schematic.items:
             if tag.tag in ("component", "net", "text"):
                 x1, y1 = tag.get_attr(1)
