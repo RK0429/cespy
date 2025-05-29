@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # coding=utf-8
 
+"""Base classes and utilities for circuit simulation analysis."""
+
 # -------------------------------------------------------------------------------
 #
-"""Base classes and utilities for circuit simulation analysis."""
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
 #  ██╔════╝██╔══██╗██║██╔════╝██╔════╝██║     ██║██╔══██╗
 #  ███████╗██████╔╝██║██║     █████╗  ██║     ██║██████╔╝
