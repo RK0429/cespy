@@ -427,7 +427,8 @@ class SimRunner(AnyRunner):
 
             if len(args) - 2 != len(callback_args):
                 raise ValueError(
-                    f"Callback function has {len(args)} arguments, but {len(callback_args)} callback_args are given"
+                    f"Callback function has {len(args)} arguments, "
+                    f"but {len(callback_args)} callback_args are given"
                 )
             if isinstance(callback_args, tuple):
                 # Convert into a dictionary

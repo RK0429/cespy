@@ -269,12 +269,11 @@ def get_line_command(line: Union[str, "SpiceCircuit"]) -> str:
     if isinstance(line, str):
         for i in range(len(line)):
             ch = line[i]
-            if ch == " " or ch == "\t":
+            if ch in (" ", "\t"):
                 continue
-            else:
-                ch = ch.upper()
-                if ch in REPLACE_REGEXS:  # A circuit element
-                    return ch
+            ch = ch.upper()
+            if ch in REPLACE_REGEXS:  # A circuit element
+                return ch
                 if ch == "+":
                     return "+"  # This is a line continuation.
                 if ch in "#;*\n\r":  # It is a comment or a blank line
@@ -500,7 +499,7 @@ class SpiceCircuit(BaseEditor):
             line_upcase = _first_token_upped(line)
             if line_upcase == substr_upper:
                 return line_no
-        error_msg = "line starting with '%s' not found in netlist" % substr
+        error_msg = f"line starting with '{substr}' not found in netlist"
         _logger.error(error_msg)
         raise ComponentNotFoundError(error_msg)
 
@@ -817,7 +816,7 @@ class SpiceCircuit(BaseEditor):
                 #     for _ in lines:  # Consuming the rest of the file.
                 #         pass  # print("Ignoring %s" % _)
         elif hasattr(self, "netlist_file"):
-            _logger.error(f"Netlist file not found: {self.netlist_file}")
+            _logger.error("Netlist file not found: %s", self.netlist_file)
 
     def clone(self, **kwargs: Any) -> "SpiceCircuit":
         """Creates a new copy of the SpiceCircuit. Changes done at the new copy do not
@@ -845,16 +844,14 @@ class SpiceCircuit(BaseEditor):
 
         :rtype: str
         """
-        if len(self.netlist):
+        if self.netlist:
             for line in self.netlist:
                 if isinstance(line, str):
                     m = subckt_regex.search(line)
                     if m:
                         return m.group("name")
-            else:
-                raise RuntimeError("Unable to find .SUBCKT clause in subcircuit")
-        else:
-            raise RuntimeError("Empty Subcircuit")
+            raise RuntimeError("Unable to find .SUBCKT clause in subcircuit")
+        raise RuntimeError("Empty Subcircuit")
 
     def setname(self, new_name: str) -> None:
         """Renames the sub-circuit to a new name. No check is done to the new name. It
@@ -864,7 +861,7 @@ class SpiceCircuit(BaseEditor):
         :type new_name: str
         :return: Nothing
         """
-        if len(self.netlist):
+        if self.netlist:
             lines = len(self.netlist)
             line_no = 0
             while line_no < lines:
@@ -897,8 +894,8 @@ class SpiceCircuit(BaseEditor):
         else:
             # Avoiding exception by creating an empty sub-circuit
             self.netlist.append("* SpiceEditor Created this sub-circuit")
-            self.netlist.append(".SUBCKT %s%s" % (new_name, END_LINE_TERM))
-            self.netlist.append(".ENDS %s%s" % (new_name, END_LINE_TERM))
+            self.netlist.append(f".SUBCKT {new_name}{END_LINE_TERM}")
+            self.netlist.append(f".ENDS {new_name}{END_LINE_TERM}")
 
     def get_component(self, reference: str) -> Component:
         """Returns an object representing the given reference in the schematic file.
@@ -1692,7 +1689,7 @@ class SpiceEditor(SpiceCircuit):
                 #     for _ in lines:  # Consuming the rest of the file.
                 #         pass  # print("Ignoring %s" % _)
         elif hasattr(self, "netlist_file"):
-            _logger.error(f"Netlist file not found: {self.netlist_file}")
+            _logger.error("Netlist file not found: %s", self.netlist_file)
 
     def run(
         self,

@@ -580,7 +580,7 @@ class LTSpiceLogReader(LogfileData):
                                         f"{analysis.thd}\n"
                                     )
                     else:
-                        for analysis in self.fourier[signal]:
+                        for analysis in fourier_analyses:
                             if analysis.n_periods == -1:
                                 n_periods_str = "all"
                             else:

@@ -70,6 +70,7 @@ class SimAnalysis:
 
     @property
     def runner(self) -> AnyRunner:
+        """Get the simulation runner instance."
         if self._runner is None:
             self._runner = SimRunner()
         return self._runner
@@ -109,6 +110,7 @@ class SimAnalysis:
         return None
 
     def wait_completion(self) -> None:
+        """Wait for all simulations to complete."
         self.runner.wait_completion()
 
     @wraps(BaseEditor.reset_netlist)
@@ -129,24 +131,31 @@ class SimAnalysis:
         self.instructions_added = False
 
     def set_component_value(self, ref: str, new_value: str) -> None:
+        """Record instruction to set a component value."
         self.received_instructions.append(("set_component_value", ref, new_value))
 
     def set_element_model(self, ref: str, new_model: str) -> None:
+        """Record instruction to set an element model."
         self.received_instructions.append(("set_element_model", ref, new_model))
 
     def set_parameter(self, ref: str, new_value: str) -> None:
+        """Record instruction to set a parameter value."
         self.received_instructions.append(("set_parameter", ref, new_value))
 
     def add_instruction(self, new_instruction: str) -> None:
+        """Record instruction to add a SPICE directive."
         self.received_instructions.append(("add_instruction", new_instruction))
 
     def remove_instruction(self, instruction: str) -> None:
+        """Record instruction to remove a SPICE directive."
         self.received_instructions.append(("remove_instruction", instruction))
 
     def remove_Xinstruction(self, search_pattern: str) -> None:
+        """Record instruction to remove directives matching a pattern."
         self.received_instructions.append(("remove_Xinstruction", search_pattern))
 
     def play_instructions(self) -> None:
+        """Execute all recorded instructions on the editor."
         if self.instructions_added:
             return  # Nothing to do
         for instruction in self.received_instructions:

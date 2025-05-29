@@ -71,6 +71,17 @@ class FailureMode(SimAnalysis):
     def add_failure_circuit(
         self, component: str, sub_circuit: Union[str, BaseEditor]
     ) -> None:
+        """Add a failure circuit to replace a component during failure mode analysis.
+
+        Args:
+            component: The component reference to replace (must start with 'X').
+            sub_circuit: The subcircuit to use as replacement.
+
+        Raises:
+            RuntimeError: If component does not start with 'X'.
+            ComponentNotFoundError: If component is not found in the circuit.
+            NotImplementedError: Method is not yet implemented.
+        """
         if not component.startswith("X"):
             raise RuntimeError(
                 "The failure modes addition only works with sub circuits"
@@ -86,6 +97,18 @@ class FailureMode(SimAnalysis):
         short_pins: Iterable[str],
         open_pins: Iterable[str],
     ) -> None:
+        """Add a custom failure mode for a component.
+
+        Args:
+            component: The component reference (must start with 'X').
+            short_pins: Pins to short together in this failure mode.
+            open_pins: Pins to leave open in this failure mode.
+
+        Raises:
+            RuntimeError: If component does not start with 'X'.
+            ComponentNotFoundError: If component is not found in the circuit.
+            NotImplementedError: Method is not yet implemented.
+        """
         if not component.startswith("X"):
             raise RuntimeError("The failure modes addition only works with subcircuits")
         if component not in self.subcircuits:
@@ -95,6 +118,12 @@ class FailureMode(SimAnalysis):
         raise NotImplementedError("TODO")  # TODO: Implement this
 
     def run_all(self) -> None:
+        """Run failure mode analysis for all components in the circuit.
+
+        This method systematically tests short and open circuit failures
+        for resistors, capacitors, diodes, bipolar transistors, and MOSFETs.
+        Results are stored in self.failure_simulations.
+        """
         for resistor in self.resistors:
             # Short Circuit: set near-zero resistance
             self.editor.set_component_value(resistor, "1f")
