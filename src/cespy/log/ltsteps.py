@@ -117,7 +117,7 @@ def reformat_LTSpice_export(export_file: str, tabular_file: str) -> None:
 # pylint: enable=invalid-name,too-many-locals
 
 
-class LTSpiceExport:
+class LTSpiceExport:  # pylint: disable=too-few-public-methods
     """Opens and reads LTSpice export data when using the "Export data as text" in the
     File Menu on the waveform window.
 
@@ -458,24 +458,23 @@ class LTSpiceLogReader(LogfileData):
             while line:
                 line = line.strip("\r\n")
                 if line.startswith("Measurement: "):
-                    if meas_name:  # If previous measurement was saved
+                    if meas_name and measurements:  # If previous measurement was saved
                         # store the info
-                        if measurements:
-                            _logger.debug(
-                                "Storing Measurement %s (count %d)",
-                                meas_name,
-                                len(measurements),
-                            )
-                            self.measure_count += len(measurements)
-                            for k, title in enumerate(headers):
-                                if title is None:
-                                    continue
-                                key = title.lower()
-                                self.dataset[key] = [
-                                    measure[k] for measure in measurements
-                                ]
-                        headers = []
-                        measurements = []
+                        _logger.debug(
+                            "Storing Measurement %s (count %d)",
+                            meas_name,
+                            len(measurements),
+                        )
+                        self.measure_count += len(measurements)
+                        for k, title in enumerate(headers):
+                            if title is None:
+                                continue
+                            key = title.lower()
+                            self.dataset[key] = [
+                                measure[k] for measure in measurements
+                            ]
+                    headers = []
+                    measurements = []
                     # text which is after "Measurement: ". len("Measurement: ")
                     # -> 13
                     meas_name = line[13:]
@@ -561,7 +560,8 @@ class LTSpiceLogReader(LogfileData):
                     if self.step_count > 0:
                         for step_no in range(self.step_count):
                             step_values = [
-                                f"{values[step_no]}" for _, values in self.stepset.items()
+                                f"{values[step_no]}" 
+                                for _, values in self.stepset.items()
                             ]
                             for analysis in self.fourier[signal]:
                                 if analysis.step == step_no:

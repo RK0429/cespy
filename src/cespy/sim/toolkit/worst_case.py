@@ -172,7 +172,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
 
         for ref in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(ref)
-            if dev.typ == DeviationType.tolerance or dev.typ == DeviationType.minmax:
+            if dev.typ in (DeviationType.tolerance, DeviationType.minmax):
                 worst_case_elements[ref] = val, dev, "parameter"
                 self.elements_analysed.append(ref)
 
@@ -344,7 +344,7 @@ class WorstCaseAnalysis(ToleranceDeviations):
                     if run & bit_updated == 0:
                         diffs.append(abs(wc_data[run] - wc_data[run | bit_updated]))
                 mean = sum(diffs) / len(diffs)
-                variance = sum([(diff - mean) ** 2 for diff in diffs]) / len(diffs)
+                variance = sum((diff - mean) ** 2 for diff in diffs) / len(diffs)
                 std_div = variance**0.5
                 return mean, std_div
 

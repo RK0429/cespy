@@ -72,7 +72,7 @@ def format_time_difference(time_diff: float) -> str:
     return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}.{milliseconds:04d}"
 
 
-class RunTask:
+class RunTask:  # pylint: disable=too-many-instance-attributes
     """This is an internal Class and should not be used directly by the User."""
 
     # Instance variable annotations for type checking
@@ -93,7 +93,7 @@ class RunTask:
     exe_log: bool
     logger: Any
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         simulator: Type[Simulator],
         runno: int,
@@ -271,13 +271,11 @@ class RunTask:
         if self.retcode == 0:  # All finished OK
             if self.callback:
                 return self.callback_return
-            else:
-                return self.raw_file, self.log_file
-        else:
-            if self.callback:
-                return None
-            else:
-                return self.raw_file, self.log_file
+            return self.raw_file, self.log_file
+        
+        if self.callback:
+            return None
+        return self.raw_file, self.log_file
 
     def wait_results(self) -> Union[Any, Tuple[str, str]]:
         """Waits for the completion of the task and returns a tuple with the raw and log

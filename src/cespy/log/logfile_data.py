@@ -623,6 +623,7 @@ class LogfileData:
         **kwargs: Any,
     ) -> None:
         """Plots a histogram of the parameter."""
+        # pylint: disable=import-outside-toplevel
         import matplotlib.pyplot as plt
         import numpy as np
 

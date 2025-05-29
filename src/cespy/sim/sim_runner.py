@@ -159,6 +159,8 @@ class SimRunnerConfigError(Exception):
 
 
 class AnyRunner(Protocol):
+    """Protocol for any runner that can execute simulations."""
+    
     def run(
         self,
         netlist: Union[str, Path, BaseEditor],
@@ -603,7 +605,6 @@ class SimRunner(AnyRunner):
             """Dummy call back that does nothing."""
             _ = raw
             _ = log
-            return None
 
         t = RunTask(
             simulator=self.simulator,
@@ -808,7 +809,7 @@ class SimRunner(AnyRunner):
                 task.raw_file
             )  # Delete the raw file if was created
 
-            if netlistfile.suffix == ".net" or netlistfile.suffix == ".asc":
+            if netlistfile.suffix in (".net", ".asc"):
                 # Delete the files that have been potentially created by
                 # LTSpice
                 for ext in (".log.raw", ".op.raw"):

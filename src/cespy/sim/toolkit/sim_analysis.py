@@ -34,7 +34,7 @@ from ..sim_runner import AnyRunner, ProcessCallback, RunTask
 _logger = logging.getLogger("cespy.SimAnalysis")
 
 
-class SimAnalysis(object):
+class SimAnalysis:
     """Base class for making Monte-Carlo, Extreme Value Analysis (EVA) or Failure Mode
     and Effects Analysis. As a base class, a certain number of assertions must be made
     on the simulation results that will make the pass/fail.

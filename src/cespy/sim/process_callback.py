@@ -29,7 +29,7 @@ from typing import Any
 class ProcessCallback(Process):
     """Wrapper for the callback function."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         raw: str,
         log: str,

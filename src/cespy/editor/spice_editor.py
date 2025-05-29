@@ -1645,6 +1645,13 @@ class SpiceEditor(SpiceCircuit):
                 search_pattern,
             )
 
+    def remove_x_instruction(self, search_pattern: str) -> None:
+        """Removes a SPICE instruction from the netlist based on a search pattern.
+        
+        This method calls remove_Xinstruction for backward compatibility.
+        """
+        self.remove_Xinstruction(search_pattern)
+
     def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
         # docstring is in the parent class
         if isinstance(run_netlist_file, str):
