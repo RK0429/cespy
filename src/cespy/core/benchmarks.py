@@ -6,14 +6,13 @@ This module provides a comprehensive benchmarking suite to monitor performance
 over time and detect regressions in critical code paths.
 """
 
-import functools
 import logging
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Union
 
-from .performance import benchmark_function, PerformanceMonitor
+from .performance import PerformanceMonitor
 
 _logger = logging.getLogger("cespy.Benchmarks")
 
@@ -135,7 +134,7 @@ class BenchmarkSuite:
             # Benchmark file reading
             start_time = time.perf_counter()
             with open(test_file, "r") as f:
-                read_content = f.read()
+                f.read()
             end_time = time.perf_counter()
             results["file_read_time"] = end_time - start_time
 
@@ -165,7 +164,7 @@ class BenchmarkSuite:
 
         start_time = time.perf_counter()
         for simulator in simulators:
-            path = get_simulator_path(simulator)
+            get_simulator_path(simulator)
         end_time = time.perf_counter()
         results["simulator_detection_time"] = (end_time - start_time) / len(simulators)
 
@@ -199,11 +198,11 @@ class BenchmarkSuite:
         for line in component_lines:
             match = pattern.match(line)
             if match:
-                ref = match.group(1)
+                match.group(1)
                 # Simple value extraction
                 parts = line.split()
                 if len(parts) >= 4:
-                    value = parts[3]
+                    parts[3]
         end_time = time.perf_counter()
         results["component_parsing_time"] = (end_time - start_time) / len(
             component_lines
@@ -496,7 +495,7 @@ def create_performance_test(
 
             if comparison["status"] == "failed":
                 regressions = comparison["regressions"]
-                failure_msg = f"Performance regressions detected:\n"
+                failure_msg = "Performance regressions detected:\n"
                 for reg in regressions:
                     failure_msg += (
                         f"  {reg['benchmark']}.{reg['metric']}: "

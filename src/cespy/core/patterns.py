@@ -15,7 +15,8 @@ COMPONENT_REF_PATTERN: Pattern[str] = re.compile(r"^[RLCVIJKEFHGBDMOQSTUWXZ]\w+"
 # Parameter patterns
 PARAM_PATTERN: Pattern[str] = re.compile(r"\.param\s+(\w+)\s*=\s*(.+)", re.IGNORECASE)
 PARAM_ASSIGNMENT_PATTERN: Pattern[str] = re.compile(
-    r"(?P<name>\w+)\s*[= ]\s*(?P<value>(?P<cb>\{)?(?(cb)[^\}]*\}|[\d\.\+\-Ee]+[a-zA-Z%]*))"
+    r"(?P<name>\w+)\s*[= ]\s*(?P<value>(?P<cb>\{)?"
+    r"(?(cb)[^\}]*\}|[\d\.\+\-Ee]+[a-zA-Z%]*))"
 )
 
 # Voltage/Current/Power reference patterns
@@ -65,7 +66,8 @@ SPICE_PATTERNS: Dict[str, Pattern[str]] = {
     # Capacitor
     "C": re.compile(
         r"^(?P<designator>C§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
-        r"(?P<value>(?P<formula>{)?(?(formula).*}|[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[muµnpfgt]?F?))"
+        r"(?P<value>(?P<formula>{)?(?(formula).*}|"
+        r"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[muµnpfgt]?F?))"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\{\}\(\)\-\+\*\/%\.]+)?)*)?"
     ),
     # Diode
@@ -77,7 +79,8 @@ SPICE_PATTERNS: Dict[str, Pattern[str]] = {
     "E": re.compile(r"^(?P<designator>E§?\w+)(?P<nodes>(\s+\S+){2})(?P<value>.*)$"),
     # Current controlled current source
     "F": re.compile(
-        r"^(?P<designator>F§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)\s+(?P<factor>[\+\-]?\d*\.?\d*[eE]?[\+\-]?\d*)"
+        r"^(?P<designator>F§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>\w+)\s+"
+        r"(?P<factor>[\+\-]?\d*\.?\d*[eE]?[\+\-]?\d*)"
     ),
     # Voltage controlled current source
     "G": re.compile(r"^(?P<designator>G§?\w+)(?P<nodes>(\s+\S+){2})(?P<value>.*)$"),
@@ -102,7 +105,8 @@ SPICE_PATTERNS: Dict[str, Pattern[str]] = {
     # Inductor
     "L": re.compile(
         r"^(?P<designator>L§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
-        r"(?P<value>(?P<formula>{)?(?(formula).*}|[\+\-]?[0-9]*\.?[0-9]+([eE][\+\-]?[0-9]+)?[muµnpfk]?H?))"
+        r"(?P<value>(?P<formula>{)?(?(formula).*}|"
+        r"[\+\-]?[0-9]*\.?[0-9]+([eE][\+\-]?[0-9]+)?[muµnpfk]?H?))"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # MOSFET
@@ -123,7 +127,8 @@ SPICE_PATTERNS: Dict[str, Pattern[str]] = {
     # Resistor
     "R": re.compile(
         r"^(?P<designator>R§?\w+)(?P<nodes>(\s+\S+){2})(?P<model>\s+\w+)?\s+"
-        r"(?P<value>(?P<formula>\{)?(?(formula).*\}|[\+\-]?[0-9\.E]+\s*[TGMkmuµnp]?(?P<unit>[Ω☐■◘]|ohm)?))"
+        r"(?P<value>(?P<formula>\{)?(?(formula).*\}|"
+        r"[\+\-]?[0-9\.E]+\s*[TGMkmuµnp]?(?P<unit>[Ω☐■◘]|ohm)?))"
         r"(?P<params>(\s+\w+\s*(=\s*[\w\-\+\*\/%\{\}\(\)\.]+)?)*)?"
     ),
     # Voltage controlled switch
@@ -132,9 +137,9 @@ SPICE_PATTERNS: Dict[str, Pattern[str]] = {
         r"(?P<params>.*)?"
     ),
     # Transmission line
-    "T": re.compile(r"^(?P<designator>T§?\w+)(?P<nodes>(\s+\S+){4})" r"(?P<params>.*)"),
+    "T": re.compile(r"^(?P<designator>T§?\w+)(?P<nodes>(\s+\S+){4})(?P<params>.*)"),
     # Uniform RC line
-    "U": re.compile(r"^(?P<designator>U§?\w+)(?P<nodes>(\s+\S+){3})" r"(?P<model>.*)"),
+    "U": re.compile(r"^(?P<designator>U§?\w+)(?P<nodes>(\s+\S+){3})(?P<model>.*)"),
     # Voltage source
     "V": re.compile(r"^(?P<designator>V§?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$"),
     # Current controlled switch

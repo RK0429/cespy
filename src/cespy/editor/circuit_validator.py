@@ -14,9 +14,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
-from ..core import constants as core_constants
 from ..core import patterns as core_patterns
-from ..exceptions import InvalidComponentError, ValidationError
 
 _logger = logging.getLogger("cespy.CircuitValidator")
 
@@ -120,7 +118,10 @@ class ValidationResult:
         if self.is_valid:
             return f"Validation passed with {self.warning_count} warnings"
         else:
-            return f"Validation failed: {self.error_count} errors, {self.warning_count} warnings"
+            return (
+                f"Validation failed: {self.error_count} errors, "
+                f"{self.warning_count} warnings"
+            )
 
 
 class CircuitValidator:
@@ -514,7 +515,8 @@ class CircuitValidator:
         if not analyses:
             result.add_info(
                 None,
-                "No analysis directive found (.tran, .ac, .dc, etc.). Add analysis directive to run simulation",
+                "No analysis directive found (.tran, .ac, .dc, etc.). Add "
+                "analysis directive to run simulation",
             )
 
     def _check_common_mistakes(
@@ -536,7 +538,7 @@ class CircuitValidator:
                     )
 
         # Check for current sources in series
-        current_sources = [c for c in components if c["type"] == "I"]
+        [c for c in components if c["type"] == "I"]
         # This is more complex - would need full circuit analysis
 
         # Check for missing DC path to ground
@@ -554,7 +556,8 @@ class CircuitValidator:
             # Simple check - more than 2 capacitors might form a loop
             result.add_info(
                 None,
-                "Multiple capacitors detected - check for capacitor loops. Capacitor loops require initial conditions",
+                "Multiple capacitors detected - check for capacitor loops. "
+                "Capacitor loops require initial conditions",
             )
 
     def _check_custom_rules(
@@ -620,5 +623,5 @@ class CircuitValidator:
                     return float(base) * mult
 
             return float(value)
-        except:
+        except (ValueError, AttributeError):
             return None

@@ -30,7 +30,6 @@ __version__ = "0.1.0"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
 
 import logging
-import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from math import floor, log
@@ -38,14 +37,13 @@ from pathlib import Path
 from typing import Any, List, Optional, Union
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
 from ..core import paths as core_paths
 from ..sim.simulator import Simulator
 
 _logger = logging.getLogger("cespy.BaseEditor")
 
-#: This controls the sub-circuit divider when setting component values inside sub-circuits.
+#: This controls the sub-circuit divider when setting component values
+#: inside sub-circuits.
 SUBCKT_DIVIDER = ":"
 # Ex: Editor.set_component_value('XU1:R1', '1k')
 
@@ -909,7 +907,8 @@ class BaseEditor(ABC):
             cls.custom_lib_paths.append(expanded_path)
         else:
             _logger.warning(
-                "Cannot add path '%s' to the custom library path list, as it does not exist",
+                "Cannot add path '%s' to the custom library path list, as it "
+                "does not exist",
                 expanded_path,
             )
 

@@ -12,11 +12,10 @@ import os
 import platform
 import shutil
 import subprocess
-import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 from .constants import Simulators
 from .paths import get_wine_prefix, is_wine_available
@@ -156,7 +155,7 @@ class PlatformManager:
         try:
             if os_type == OSType.LINUX:
                 # Read from /proc/meminfo
-                with open("/proc/meminfo", "r") as f:
+                with open("/proc/meminfo", "r", encoding="utf-8") as f:
                     for line in f:
                         if line.startswith("MemTotal:"):
                             kb = int(line.split()[1])
@@ -169,6 +168,7 @@ class PlatformManager:
                     capture_output=True,
                     text=True,
                     timeout=5,
+                    check=False,
                 )
                 if result.returncode == 0:
                     bytes_mem = int(result.stdout.strip())
@@ -180,6 +180,7 @@ class PlatformManager:
                     capture_output=True,
                     text=True,
                     timeout=5,
+                    check=False,
                 )
                 if result.returncode == 0:
                     for line in result.stdout.split("\n"):
@@ -187,7 +188,8 @@ class PlatformManager:
                             bytes_mem = int(line.split("=")[1])
                             total_memory_gb = bytes_mem / (1024**3)
                             break
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, 
+                FileNotFoundError, ValueError, OSError) as e:
             _logger.debug("Failed to detect memory size: %s", e)
 
         # Check Wine availability
@@ -380,8 +382,7 @@ class PlatformManager:
             # Limit based on memory (assume 1GB per process minimum)
             max_by_memory = max(1, int(self.info.total_memory_gb))
             return min(self.info.recommended_workers, max_by_memory)
-        else:
-            return self.info.recommended_workers
+        return self.info.recommended_workers
 
     def setup_process_environment(self, wine_mode: bool = False) -> Dict[str, str]:
         """Setup environment variables for subprocess execution.
@@ -421,8 +422,7 @@ class PlatformManager:
         """
         if self.info.is_windows:
             return [".exe", ".bat", ".cmd"]
-        else:
-            return [""]  # No extension on Unix-like systems
+        return [""]  # No extension on Unix-like systems
 
     def find_executable(
         self, name: str, search_paths: Optional[List[Path]] = None
@@ -449,7 +449,7 @@ class PlatformManager:
                 if search_path.is_file():
                     # Direct path to file
                     return search_path
-                elif search_path.is_dir():
+                if search_path.is_dir():
                     # Directory - search for executable
                     for ext in extensions:
                         exe_path = search_path / f"{name}{ext}"
@@ -474,17 +474,20 @@ class PlatformManager:
                     capture_output=True,
                     text=True,
                     timeout=10,
+                    check=False,
                 )
                 return process_name.lower() in result.stdout.lower()
-            else:
-                result = subprocess.run(
-                    ["pgrep", "-f", process_name],
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
-                )
-                return result.returncode == 0
-        except Exception as e:
+            
+            result = subprocess.run(
+                ["pgrep", "-f", process_name],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, 
+                FileNotFoundError, OSError) as e:
             _logger.debug("Failed to check process status: %s", e)
             return False
 

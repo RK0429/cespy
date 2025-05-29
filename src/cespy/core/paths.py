@@ -139,7 +139,7 @@ def convert_wine_path(path: str, c_drive: Optional[str] = None) -> str:
     # Handle various Windows path formats
     if path.startswith("C:\\") or path.startswith("c:\\"):
         return os.path.join(c_drive, path[3:].replace("\\", "/"))
-    elif path.startswith("C:/") or path.startswith("c:/"):
+    if path.startswith("C:/") or path.startswith("c:/"):
         return os.path.join(c_drive, path[3:])
 
     # Already a Unix path
@@ -391,7 +391,7 @@ def extract_to_temp(archive_path: str, filename: str) -> Optional[str]:
             if filename in zf.namelist():
                 zf.extract(filename, temp_dir)
                 return os.path.join(temp_dir, filename)
-    except Exception:
+    except (zipfile.BadZipFile, FileNotFoundError, KeyError):
         pass
 
     return None
@@ -431,7 +431,9 @@ if is_windows():
 
             try:
                 # GetShortPathNameW returns required buffer size
-                GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW  # type: ignore[attr-defined]
+                GetShortPathNameW = (  # type: ignore[attr-defined]
+                    ctypes.windll.kernel32.GetShortPathNameW
+                )
                 GetShortPathNameW.argtypes = [
                     wintypes.LPCWSTR,
                     wintypes.LPWSTR,

@@ -28,8 +28,6 @@ class CespyError(Exception):
 class SimulatorError(CespyError):
     """Base class for errors related to simulator execution."""
 
-    pass
-
 
 class SimulatorNotFoundError(SimulatorError):
     """Raised when a simulator executable cannot be found."""

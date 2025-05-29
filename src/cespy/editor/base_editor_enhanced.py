@@ -10,18 +10,14 @@ This module extends the BaseEditor with additional functionality including:
 - Validation integration
 """
 
-import copy
 import logging
-from abc import abstractmethod
 from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
-from ..exceptions import ComponentNotFoundError, ParameterNotFoundError, ValidationError
-from .base_editor import BaseEditor, Component, Primitive
+from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
+from .base_editor import BaseEditor, Component
 from .circuit_validator import CircuitValidator, ValidationResult
 from .component_factory import ComponentFactory, ComponentType
 from .schematic_differ import SchematicDiffer, SchematicDiff
@@ -362,7 +358,7 @@ class BaseEditorEnhanced(BaseEditor):
         temp_file = Path("temp_validation.net")
         try:
             self.save_netlist(temp_file)
-            with open(temp_file, "r") as f:
+            with open(temp_file, "r", encoding="utf-8") as f:
                 netlist_content = f.read()
 
             result = self._validator.validate_netlist(netlist_content)

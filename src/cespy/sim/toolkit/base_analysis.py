@@ -24,6 +24,7 @@ from ...editor.base_editor import BaseEditor
 from ...editor.spice_editor import SpiceEditor
 from ...log.logfile_data import LogfileData
 from ..sim_runner import AnyRunner, ProcessCallback, RunTask, SimRunner
+from .sim_analysis import SimAnalysis
 
 _logger = logging.getLogger("cespy.BaseAnalysis")
 

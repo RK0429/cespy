@@ -11,7 +11,7 @@ import logging
 import re
 import time
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Pattern, TypeVar, Union
 
 _logger = logging.getLogger("cespy.Performance")
@@ -427,7 +427,8 @@ class PerformanceOptimizer:
                         {
                             "pattern": pattern,
                             "issue": "Multiple .* can cause backtracking",
-                            "suggestion": "Use more specific patterns or possessive quantifiers",
+                            "suggestion": "Use more specific patterns or "
+                            "possessive quantifiers",
                         }
                     )
 
@@ -437,7 +438,8 @@ class PerformanceOptimizer:
                     optimizations.append(
                         {
                             "pattern": pattern,
-                            "optimization": "Consider anchoring with ^ or $ if possible",
+                            "optimization": "Consider anchoring with ^ or $ "
+                            "if possible",
                         }
                     )
 
@@ -447,7 +449,8 @@ class PerformanceOptimizer:
                     optimizations.append(
                         {
                             "pattern": pattern,
-                            "optimization": "Consider splitting complex alternations",
+                            "optimization": "Consider splitting complex "
+                            "alternations",
                         }
                     )
 

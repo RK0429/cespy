@@ -33,9 +33,6 @@ License: GPL-3.0
 import sys
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import ctypes
-    from ctypes import wintypes
 
 
 def get_short_path_name(long_name: str) -> str:

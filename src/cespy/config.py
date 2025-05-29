@@ -167,9 +167,9 @@ class CespyConfig:
             with open(filepath, "r", encoding="utf-8") as f:
                 config_dict = json.load(f)
         except json.JSONDecodeError as e:
-            raise InvalidConfigurationError(f"Invalid JSON in configuration file: {e}")
+            raise InvalidConfigurationError(f"Invalid JSON in configuration file: {e}") from e
         except Exception as e:
-            raise ConfigurationError(f"Failed to read configuration file: {e}")
+            raise ConfigurationError(f"Failed to read configuration file: {e}") from e
 
         config = cls()
         config.update_from_dict(config_dict)
@@ -231,7 +231,7 @@ class CespyConfig:
                     else:
                         setattr(config, attr_path, converted_value)
                 except (ValueError, AttributeError) as e:
-                    logging.warning(f"Failed to set {attr_path} from {env_var}: {e}")
+                    logging.warning("Failed to set %s from %s: %s", attr_path, env_var, e)
 
         # Handle simulator-specific paths
         for sim in Simulators.ALL:
@@ -254,7 +254,7 @@ def get_config() -> CespyConfig:
     Returns:
         Global CespyConfig instance
     """
-    global _global_config
+    global _global_config  # pylint: disable=global-statement
     if _global_config is None:
         _global_config = CespyConfig.from_environment()
     return _global_config
@@ -267,7 +267,7 @@ def set_config(config: CespyConfig) -> None:
     Args:
         config: CespyConfig instance to use globally
     """
-    global _global_config
+    global _global_config  # pylint: disable=global-statement
     _global_config = config
 
 

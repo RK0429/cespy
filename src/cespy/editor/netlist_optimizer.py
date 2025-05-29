@@ -285,7 +285,7 @@ class NetlistOptimizer:
     def _remove_dangling_components(self, lines: List[str]) -> Tuple[List[str], int]:
         """Remove components with unconnected nodes."""
         # First, collect all nodes
-        all_nodes = set(["0", "GND"])  # Ground nodes
+        set(["0", "GND"])  # Ground nodes
         node_connections = defaultdict(int)
 
         # Count node connections

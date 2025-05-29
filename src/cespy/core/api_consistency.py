@@ -8,6 +8,7 @@ deprecation warnings for old APIs.
 """
 
 import functools
+import inspect
 import logging
 import warnings
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
@@ -85,7 +86,8 @@ def deprecated(
 
 
 def standardize_parameters(parameter_map: Dict[str, str]) -> Callable[[F], F]:
-    """Decorator to standardize parameter names while maintaining backward compatibility.
+    """Decorator to standardize parameter names while maintaining backward
+    compatibility.
 
     Args:
         parameter_map: Mapping from old parameter names to new names
@@ -114,7 +116,8 @@ def standardize_parameters(parameter_map: Dict[str, str]) -> Callable[[F], F]:
                     else:
                         # Only old name provided - convert and warn
                         warnings.warn(
-                            f"Parameter '{key}' is deprecated. Use '{new_key}' instead.",
+                            f"Parameter '{key}' is deprecated. "
+                            f"Use '{new_key}' instead.",
                             DeprecationWarning,
                             stacklevel=2,
                         )
@@ -346,8 +349,8 @@ class ParameterValidator:
                 if value <= 0:
                     raise ValueError("Timeout must be positive")
                 return value
-            except ValueError:
-                raise ValueError(f"Invalid timeout format: {timeout}")
+            except ValueError as exc:
+                raise ValueError(f"Invalid timeout format: {timeout}") from exc
 
         raise TypeError(f"Invalid timeout type: {type(timeout)}")
 
@@ -374,10 +377,9 @@ class ParameterValidator:
             lower_val = value.lower()
             if lower_val in ("true", "1", "yes", "on", "enable", "enabled"):
                 return True
-            elif lower_val in ("false", "0", "no", "off", "disable", "disabled"):
+            if lower_val in ("false", "0", "no", "off", "disable", "disabled"):
                 return False
-            else:
-                raise ValueError(f"Invalid boolean value for {param_name}: {value}")
+            raise ValueError(f"Invalid boolean value for {param_name}: {value}")
 
         raise TypeError(f"Cannot convert {type(value)} to boolean for {param_name}")
 
@@ -398,7 +400,6 @@ def ensure_api_consistency(func: F) -> F:
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         # Get function signature for parameter validation
-        import inspect
 
         sig = inspect.signature(func)
 

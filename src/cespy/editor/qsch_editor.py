@@ -935,7 +935,7 @@ class QschEditor(BaseSchematic):
         _, match = self._get_param_named(param)
         if match is not None:
             return match.group("value")
-        raise ParameterNotFoundError(f"Parameter {param} not found in QSCH file")
+        raise ParameterNotFoundError("QSCH file", param)
 
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
         # docstring inherited from BaseEditor

@@ -2,28 +2,25 @@
 # coding=utf-8
 """Visualization helpers for circuit simulation analysis results.
 
-This module provides utilities for creating plots and visualizations from 
+This module provides utilities for creating plots and visualizations from
 analysis results, including histograms, scatter plots, correlation matrices,
 and statistical summaries.
 """
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from numpy.typing import NDArray
 
-from .base_analysis import AnalysisResult, StatisticalAnalysis
+from .base_analysis import StatisticalAnalysis
 
 _logger = logging.getLogger("cespy.Visualization")
 
 # Optional plotting imports (graceful degradation if not available)
 try:
     import matplotlib.pyplot as plt
-    import matplotlib.patches as mpatches
     from matplotlib.figure import Figure
-    from matplotlib.axes import Axes
 
     HAS_MATPLOTLIB = True
 except ImportError:
@@ -31,7 +28,7 @@ except ImportError:
     _logger.warning("Matplotlib not available - plotting functionality disabled")
 
 try:
-    import seaborn as sns
+    import seaborn as sns  # noqa: F401
 
     HAS_SEABORN = True
 except ImportError:
