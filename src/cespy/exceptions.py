@@ -5,13 +5,13 @@ This module defines a comprehensive exception hierarchy for all error
 conditions that can occur in the cespy library.
 """
 
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 class CespyError(Exception):
     """Base exception for all cespy errors."""
 
-    def __init__(self, message: str, details: Optional[dict] = None):
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize CespyError.
 
@@ -21,20 +21,20 @@ class CespyError(Exception):
         """
         super().__init__(message)
         self.message = message
-        self.details = details or {}
+        self.details: Dict[str, Any] = details or {}
 
 
 # Simulator-related exceptions
 class SimulatorError(CespyError):
     """Base class for errors related to simulator execution."""
 
-    pass
-
 
 class SimulatorNotFoundError(SimulatorError):
     """Raised when a simulator executable cannot be found."""
 
-    def __init__(self, simulator_name: str, search_paths: Optional[list] = None):
+    def __init__(
+        self, simulator_name: str, search_paths: Optional[List[str]] = None
+    ) -> None:
         """
         Initialize SimulatorNotFoundError.
 
@@ -50,13 +50,15 @@ class SimulatorNotFoundError(SimulatorError):
 class SimulatorNotInstalledError(SimulatorError):
     """Raised when a simulator is not properly installed."""
 
-    pass
+
+class InvalidSimulatorError(SimulatorError):
+    """Raised when an invalid simulator type or configuration is specified."""
 
 
 class SimulationTimeoutError(SimulatorError):
     """Raised when a simulation exceeds its timeout."""
 
-    def __init__(self, timeout: float, netlist: Optional[str] = None):
+    def __init__(self, timeout: float, netlist: Optional[str] = None) -> None:
         """
         Initialize SimulationTimeoutError.
 
@@ -77,7 +79,7 @@ class SimulationFailedError(SimulatorError):
         message: str,
         exit_code: Optional[int] = None,
         stderr: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize SimulationFailedError.
 
@@ -94,31 +96,25 @@ class SimulationFailedError(SimulatorError):
 class FileFormatError(CespyError):
     """Base class for file format related errors."""
 
-    pass
-
 
 class InvalidNetlistError(FileFormatError):
     """Raised when a netlist file is invalid or corrupted."""
-
-    pass
 
 
 class InvalidSchematicError(FileFormatError):
     """Raised when a schematic file is invalid or corrupted."""
 
-    pass
-
 
 class InvalidRawFileError(FileFormatError):
     """Raised when a raw simulation output file is invalid."""
-
-    pass
 
 
 class UnsupportedFormatError(FileFormatError):
     """Raised when a file format is not supported."""
 
-    def __init__(self, file_format: str, supported_formats: Optional[list] = None):
+    def __init__(
+        self, file_format: str, supported_formats: Optional[List[str]] = None
+    ) -> None:
         """
         Initialize UnsupportedFormatError.
 
@@ -135,13 +131,13 @@ class UnsupportedFormatError(FileFormatError):
 class ComponentError(CespyError):
     """Base class for component-related errors."""
 
-    pass
-
 
 class ComponentNotFoundError(ComponentError):
     """Raised when a component reference is not found in the circuit."""
 
-    def __init__(self, component_ref: str, available_components: Optional[list] = None):
+    def __init__(
+        self, component_ref: str, available_components: Optional[List[str]] = None
+    ) -> None:
         """
         Initialize ComponentNotFoundError.
 
@@ -157,7 +153,7 @@ class ComponentNotFoundError(ComponentError):
 class InvalidComponentError(ComponentError):
     """Raised when a component has invalid parameters or configuration."""
 
-    def __init__(self, component_ref: str, reason: str):
+    def __init__(self, component_ref: str, reason: str) -> None:
         """
         Initialize InvalidComponentError.
 
@@ -173,7 +169,7 @@ class InvalidComponentError(ComponentError):
 class ParameterError(ComponentError):
     """Raised when there's an error with component parameters."""
 
-    def __init__(self, parameter_name: str, value: Any, reason: str):
+    def __init__(self, parameter_name: str, value: Any, reason: str) -> None:
         """
         Initialize ParameterError.
 
@@ -190,7 +186,7 @@ class ParameterError(ComponentError):
 class ParameterNotFoundError(ComponentError):
     """Raised when a parameter is not found in a component."""
 
-    def __init__(self, component_ref: str, parameter_name: str):
+    def __init__(self, component_ref: str, parameter_name: str) -> None:
         """
         Initialize ParameterNotFoundError.
 
@@ -210,8 +206,8 @@ class ValidationError(ComponentError):
         self,
         message: str,
         component_ref: Optional[str] = None,
-        validation_errors: Optional[list] = None,
-    ):
+        validation_errors: Optional[List[str]] = None,
+    ) -> None:
         """
         Initialize ValidationError.
 
@@ -228,13 +224,11 @@ class ValidationError(ComponentError):
 class AnalysisError(CespyError):
     """Base class for analysis-related errors."""
 
-    pass
-
 
 class OptimizationError(AnalysisError):
     """Raised when an optimization operation fails."""
 
-    def __init__(self, message: str, optimization_type: Optional[str] = None):
+    def __init__(self, message: str, optimization_type: Optional[str] = None) -> None:
         """
         Initialize OptimizationError.
 
@@ -249,26 +243,20 @@ class OptimizationError(AnalysisError):
 class ConvergenceError(AnalysisError):
     """Raised when a simulation fails to converge."""
 
-    pass
-
 
 class InsufficientDataError(AnalysisError):
     """Raised when there's not enough data for analysis."""
 
-    pass
-
 
 # I/O exceptions
-class IOError(CespyError):
+class CespyIOError(CespyError):
     """Base class for I/O related errors."""
 
-    pass
 
-
-class FileNotFoundError(IOError):
+class CespyFileNotFoundError(CespyIOError):
     """Raised when a required file is not found."""
 
-    def __init__(self, filepath: str):
+    def __init__(self, filepath: str) -> None:
         """
         Initialize FileNotFoundError.
 
@@ -280,18 +268,16 @@ class FileNotFoundError(IOError):
         super().__init__(message, details)
 
 
-class PermissionError(IOError):
+class CespyPermissionError(CespyIOError):
     """Raised when there's insufficient permission to access a file."""
 
-    pass
 
-
-class EncodingError(IOError):
+class EncodingError(CespyIOError):
     """Raised when there's an encoding/decoding error."""
 
     def __init__(
         self, filepath: str, encoding: str, original_error: Optional[Exception] = None
-    ):
+    ) -> None:
         """
         Initialize EncodingError.
 
@@ -313,51 +299,37 @@ class EncodingError(IOError):
 class ConfigurationError(CespyError):
     """Base class for configuration-related errors."""
 
-    pass
-
 
 class InvalidConfigurationError(ConfigurationError):
     """Raised when configuration is invalid."""
 
-    pass
-
 
 class MissingConfigurationError(ConfigurationError):
     """Raised when required configuration is missing."""
-
-    pass
 
 
 # Server/Client exceptions
 class ServerError(CespyError):
     """Base class for server-related errors."""
 
-    pass
-
 
 class ServerNotRunningError(ServerError):
     """Raised when trying to connect to a server that's not running."""
-
-    pass
 
 
 class ServerConnectionError(ServerError):
     """Raised when unable to connect to the server."""
 
-    pass
-
 
 class ServerTimeoutError(ServerError):
     """Raised when a server operation times out."""
-
-    pass
 
 
 # Deprecated functionality
 class DeprecationError(CespyError):
     """Raised when using deprecated functionality."""
 
-    def __init__(self, old_feature: str, new_feature: Optional[str] = None):
+    def __init__(self, old_feature: str, new_feature: Optional[str] = None) -> None:
         """
         Initialize DeprecationError.
 

@@ -20,6 +20,7 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
     """
     try:
         from cespy.log.ltsteps import LTSpiceLogReader
+
         log_reader = LTSpiceLogReader(str(log_file))
         measurements = {}
 

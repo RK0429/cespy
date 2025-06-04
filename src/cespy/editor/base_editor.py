@@ -30,22 +30,20 @@ __version__ = "0.1.0"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
 
 import logging
-import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from math import floor, log
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
 from ..core import paths as core_paths
 from ..sim.simulator import Simulator
 
 _logger = logging.getLogger("cespy.BaseEditor")
 
-#: This controls the sub-circuit divider when setting component values inside sub-circuits.
+#: This controls the sub-circuit divider when setting component values
+#: inside sub-circuits.
 SUBCKT_DIVIDER = ":"
 # Ex: Editor.set_component_value('XU1:R1', '1k')
 
@@ -285,13 +283,13 @@ def to_float(value: str, accept_invalid: bool = True) -> Union[float, str]:
 
 class ComponentNotFoundError(Exception):
     """Component Not Found Error.
-    
+
     This exception is raised when a component reference is not found in the circuit.
     """
-    
-    def __init__(self, component_ref: str, message: str = None):
+
+    def __init__(self, component_ref: str, message: Optional[str] = None):
         """Initialize ComponentNotFoundError.
-        
+
         Args:
             component_ref: The component reference that was not found
             message: Optional custom message
@@ -304,13 +302,13 @@ class ComponentNotFoundError(Exception):
 
 class ParameterNotFoundError(Exception):
     """Parameter Not Found Error.
-    
+
     This exception is raised when a parameter is not found in the circuit.
     """
 
-    def __init__(self, parameter: str, message: str = None) -> None:
+    def __init__(self, parameter: str, message: Optional[str] = None) -> None:
         """Initialize ParameterNotFoundError.
-        
+
         Args:
             parameter: The parameter name that was not found
             message: Optional custom message
@@ -900,14 +898,17 @@ class BaseEditor(ABC):
     @classmethod
     def _check_and_append_custom_library_path(cls, path: str) -> None:
         """:meta private:"""
-        expanded_path = core_paths.expand_user_path(path)
+        expanded_path = core_paths.get_absolute_path(path)
 
         if core_paths.is_valid_directory(expanded_path):
-            _logger.debug("Adding path '%s' to the custom library path list", expanded_path)
+            _logger.debug(
+                "Adding path '%s' to the custom library path list", expanded_path
+            )
             cls.custom_lib_paths.append(expanded_path)
         else:
             _logger.warning(
-                "Cannot add path '%s' to the custom library path list, as it does not exist",
+                "Cannot add path '%s' to the custom library path list, as it "
+                "does not exist",
                 expanded_path,
             )
 

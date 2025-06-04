@@ -164,6 +164,7 @@ class SimRunnerConfig:
 
     Groups related parameters to reduce the number of arguments in SimRunner constructor.
     """
+
     simulator: Optional[Union[str, Path, Type[Simulator]]] = None
     parallel_sims: int = 4
     timeout: float = 600.0
@@ -177,6 +178,7 @@ class RunConfig:
 
     Groups related parameters to reduce the number of arguments in the run method.
     """
+
     wait_resource: bool = True
     callback: Optional[CallbackType] = None
     callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]] = None
@@ -189,6 +191,7 @@ class RunConfig:
 @dataclass
 class SimulationStats:
     """Groups simulation statistics to reduce instance attributes."""
+
     run_count: int = 0
     failed_simulations: int = 0
     successful_simulations: int = 0
@@ -198,6 +201,7 @@ class SimulationStats:
 @dataclass
 class TaskManager:
     """Groups task management related attributes."""
+
     active_tasks: List[Tuple[RunTask, Future[RunTask]]] = field(default_factory=list)
     completed_tasks: List[RunTask] = field(default_factory=list)
 
@@ -287,10 +291,14 @@ class SimRunner(AnyRunner):
         # If config is provided, use it as defaults, otherwise use default values
         if config is not None:
             simulator = simulator if simulator is not None else config.simulator
-            parallel_sims = parallel_sims if parallel_sims is not None else config.parallel_sims
+            parallel_sims = (
+                parallel_sims if parallel_sims is not None else config.parallel_sims
+            )
             timeout = timeout if timeout is not None else config.timeout
             verbose = verbose if verbose is not None else config.verbose
-            output_folder = output_folder if output_folder is not None else config.output_folder
+            output_folder = (
+                output_folder if output_folder is not None else config.output_folder
+            )
         else:
             # Use default values if not provided
             parallel_sims = parallel_sims if parallel_sims is not None else 4
@@ -328,16 +336,19 @@ class SimRunner(AnyRunner):
         if simulator is None:
             # Lazy import to avoid circular dependency
             from ..simulators.ltspice_simulator import LTspice as CustomLTspice
+
             simulator = CustomLTspice
         elif isinstance(simulator, (str, Path)):
             # Lazy import to avoid circular dependency
             from ..simulators.ltspice_simulator import LTspice as CustomLTspice
+
             simulator = CustomLTspice.create_from(simulator)
         elif issubclass(simulator, Simulator):
             pass
         else:
             # Lazy import to avoid circular dependency
             from ..simulators.ltspice_simulator import LTspice as CustomLTspice
+
             simulator = CustomLTspice
         self.simulator = simulator
         _logger.info("SimRunner initialized")
@@ -512,7 +523,9 @@ class SimRunner(AnyRunner):
             if not wait_resource or (self.active_threads() < self.parallel_sims):
                 return True
             sleep(0.1)
-        _logger.error("Timeout waiting for resources for simulation %s", self.stats.run_count)
+        _logger.error(
+            "Timeout waiting for resources for simulation %s", self.stats.run_count
+        )
         return False
 
     # pylint: disable=too-many-arguments
@@ -593,7 +606,9 @@ class SimRunner(AnyRunner):
         # Wait for an available resource slot or timeout
         if not self._wait_for_resources(wait_resource, timeout):
             if self.verbose:
-                _logger.warning("Timeout on launching simulation %s.", self.stats.run_count)
+                _logger.warning(
+                    "Timeout on launching simulation %s.", self.stats.run_count
+                )
             return None
 
         # Prepare command-line switches
@@ -830,7 +845,9 @@ class SimRunner(AnyRunner):
                         self.kill_all_spice()
                     return False
 
-        _logger.debug("wait_completion returning %s", self.stats.failed_simulations == 0)
+        _logger.debug(
+            "wait_completion returning %s", self.stats.failed_simulations == 0
+        )
         return self.stats.failed_simulations == 0
 
     @staticmethod

@@ -267,6 +267,7 @@ class SimCommander(SpiceEditor):
                     def adapted_callback_wrapper(raw_file: Path, log_file: Path) -> Any:
                         # Convert Path objects to strings for legacy callbacks
                         return callback(str(raw_file), str(log_file))  # type: ignore
+
                     adapted_callback = adapted_callback_wrapper
                 else:
                     adapted_callback = callback

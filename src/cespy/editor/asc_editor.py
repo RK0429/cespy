@@ -30,8 +30,6 @@ from typing import Any, Dict, List, Match, Optional, Tuple, Union, cast
 
 # Core imports
 from ..core import constants as core_constants
-from ..core import patterns as core_patterns
-from ..core import paths as core_paths
 
 from ..log.logfile_data import try_convert_value
 from ..simulators.ltspice_simulator import LTspice
@@ -140,7 +138,9 @@ class AscEditor(BaseSchematic):
     def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
         if isinstance(run_netlist_file, str):
             run_netlist_file = Path(run_netlist_file)
-        run_netlist_file = run_netlist_file.with_suffix(core_constants.FileExtensions.ASC)
+        run_netlist_file = run_netlist_file.with_suffix(
+            core_constants.FileExtensions.ASC
+        )
         with open(run_netlist_file, "w", encoding=self.encoding) as asc:
             _logger.info("Writing ASC file %s", run_netlist_file)
 
@@ -223,7 +223,8 @@ class AscEditor(BaseSchematic):
 
     def reset_netlist(self, create_blank: bool = False) -> None:
         super().reset_netlist()
-        # create_blank parameter is not used in ASC files - they are always reset from file
+        # create_blank parameter is not used in ASC files - they are always
+        # reset from file
         with open(self.asc_file_path, "r", encoding=self.encoding) as asc_file:
             _logger.info("Parsing ASC file %s", self.asc_file_path)
             component = None
@@ -536,7 +537,7 @@ class AscEditor(BaseSchematic):
         if match:
             # match.group returns Any, ensure str
             return str(match.group("value"))
-        raise ParameterNotFoundError(f"Parameter {param} not found in ASC file")
+        raise ParameterNotFoundError(param, f"Parameter {param} not found in ASC file")
 
     def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
         """Sets a parameter value in the ASC file.
@@ -713,7 +714,8 @@ class AscEditor(BaseSchematic):
                 value_str = format_eng(value)
             params = self.get_component_parameters(element, as_dicts=True)
             if key in params:
-                # I only have the LTSPICE_PARAMETERS as keys here, so when I match, i can overwrite
+                # I only have the LTSPICE_PARAMETERS as keys here, so when I
+                # match, i can overwrite
                 # I do not support delete here, as some of the keys are
                 # mandatory
                 component.attributes[key] = value_str

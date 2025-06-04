@@ -50,7 +50,7 @@ from cespy.core.performance import (
 __all__ = [
     # Patterns
     "COMPONENT_VALUE_PATTERN",
-    "COMPONENT_REF_PATTERN", 
+    "COMPONENT_REF_PATTERN",
     "PARAM_PATTERN",
     "SPICE_PATTERNS",
     # Constants
@@ -60,7 +60,7 @@ __all__ = [
     "SPICE_EXTENSIONS",
     # Platform management
     "OSType",
-    "Architecture", 
+    "Architecture",
     "PlatformInfo",
     "PlatformManager",
     "get_platform_info",

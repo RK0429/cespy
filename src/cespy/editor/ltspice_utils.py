@@ -19,8 +19,6 @@
 #
 # -------------------------------------------------------------------------------
 
-import re
-
 # Core imports
 from ..core import constants as core_constants
 from ..core import patterns as core_patterns

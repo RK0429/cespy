@@ -323,6 +323,7 @@ class SchematicComponent(Component):
 @dataclasses.dataclass
 class SchematicElements:
     """Groups schematic elements to reduce instance attributes."""
+
     components: OrderedDict[str, SchematicComponent] = dataclasses.field(
         default_factory=OrderedDict
     )

@@ -31,6 +31,8 @@ License: GPL-3.0
 # From
 # https://stackoverflow.com/questions/23598289/how-to-get-windows-short-file-name-in-python
 import sys
+from typing import TYPE_CHECKING
+
 
 
 def get_short_path_name(long_name: str) -> str:
@@ -42,8 +44,9 @@ def get_short_path_name(long_name: str) -> str:
         # On non-Windows platforms, just return the original path
         return long_name
 
-    # Import Windows-specific modules
-    import ctypes  # pylint: disable=import-outside-toplevel
+    # Windows-specific implementation
+    # Import Windows-specific modules only on Windows
+    import ctypes  # pylint: disable=import-outside-toplevel  # type: ignore[unreachable]
     from ctypes import wintypes  # pylint: disable=import-outside-toplevel
 
     # Get the Windows API function
@@ -70,5 +73,5 @@ def get_short_path_name(long_name: str) -> str:
         output_buf = ctypes.create_unicode_buffer(output_buf_size)
         needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
         if output_buf_size >= needed:
-            return output_buf.value
+            return output_buf.value or long_name
         output_buf_size = needed

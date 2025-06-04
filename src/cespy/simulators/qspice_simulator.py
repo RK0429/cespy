@@ -55,7 +55,9 @@ class Qspice(Simulator):
     # windows paths (that are also valid for wine)
     # Please note that os.path.expanduser and os.path.join are sensitive to the style of slash.
     # Placed in order of preference. The first to be found will be used.
-    _spice_exe_win_paths = core_paths.get_default_simulator_paths(core_constants.Simulators.QSPICE)
+    _spice_exe_win_paths = core_paths.get_default_simulator_paths(
+        core_constants.Simulators.QSPICE
+    )
 
     # the default lib paths, as used by get_default_library_paths
     _default_lib_paths = ["C:/Program Files/QSPICE", "~/Documents/QSPICE"]
@@ -179,7 +181,7 @@ class Qspice(Simulator):
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[list[Any]] = None,
+        cmd_line_switches: Optional[Union[list[Any], str]] = None,
         timeout: Optional[float] = None,
         *,
         stdout: Optional[IO[Any]] = None,
@@ -235,7 +237,9 @@ class Qspice(Simulator):
         # need absolute path, as early 2025 qspice has a strange repetition bug
         netlist_file = Path(netlist_file).absolute()
 
-        log_file = Path(netlist_file).with_suffix(core_constants.FileExtensions.LOG).as_posix()
+        log_file = (
+            Path(netlist_file).with_suffix(core_constants.FileExtensions.LOG).as_posix()
+        )
         cmd_run = (
             cls.spice_exe
             + ["-o", log_file]
@@ -244,8 +248,12 @@ class Qspice(Simulator):
         )
         # start execution
         if exe_log:
-            log_exe_file = netlist_file.with_suffix(".exe" + core_constants.FileExtensions.LOG)
-            with open(log_exe_file, "w", encoding=core_constants.Encodings.UTF8) as outfile:
+            log_exe_file = netlist_file.with_suffix(
+                ".exe" + core_constants.FileExtensions.LOG
+            )
+            with open(
+                log_exe_file, "w", encoding=core_constants.Encodings.UTF8
+            ) as outfile:
                 error = run_function(
                     cmd_run,
                     timeout=timeout,

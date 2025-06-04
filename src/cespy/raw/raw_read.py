@@ -505,7 +505,9 @@ class RawRead:
             sz_enc = 2
             line = "Tit"
         else:
-            raise EncodingError(str(raw_filename_path), "unknown", RuntimeError("Unrecognized encoding"))
+            raise EncodingError(
+                str(raw_filename_path), "unknown", RuntimeError("Unrecognized encoding")
+            )
         if self.verbose:
             _logger.debug("Reading the file with encoding: '%s'", self.encoding)
         # Storing the filename as part of the dictionary
@@ -682,7 +684,9 @@ class RawRead:
         for line in header[i + 1 : -1]:  # Parse the variable names
             line_elmts = line.lstrip().split("\t")
             if len(line_elmts) < 3:
-                raise InvalidRawFileError(f"Invalid line in the Variables section: {line}")
+                raise InvalidRawFileError(
+                    f"Invalid line in the Variables section: {line}"
+                )
             name = line_elmts[1]
             var_type = line_elmts[2]
             if ivar == 0:  # If it has an axis, it should be always read
@@ -731,7 +735,13 @@ class RawRead:
             _logger.info(
                 "File contains %d traces, reading %d.",
                 ivar,
-                len([trace for trace in self._traces if not isinstance(trace, DummyTrace)])
+                len(
+                    [
+                        trace
+                        for trace in self._traces
+                        if not isinstance(trace, DummyTrace)
+                    ]
+                ),
             )
 
         if self.raw_type == "Binary:":
@@ -878,7 +888,7 @@ class RawRead:
                 _logger.warning(
                     "%s\nError in auto-detecting steps in '%s'",
                     str(err),
-                    raw_filename_path
+                    raw_filename_path,
                 )
                 if has_axis and self.axis is not None:
                     number_of_steps = 0
@@ -1104,7 +1114,12 @@ class RawRead:
             # it should have a .log file with the same name
             logfile = filename.with_suffix(core_constants.FileExtensions.LOG)
             try:
-                log = open(logfile, "r", errors="replace", encoding=core_constants.Encodings.UTF8)
+                log = open(
+                    logfile,
+                    "r",
+                    errors="replace",
+                    encoding=core_constants.Encodings.UTF8,
+                )
             except OSError as exc:
                 raise SpiceReadException(f"Log file '{logfile}' not found") from exc
             except UnicodeError as exc:

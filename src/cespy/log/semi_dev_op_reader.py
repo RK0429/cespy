@@ -164,9 +164,9 @@ def op_log_reader(
                     if (
                         where is not None
                     ):  # Ensure where is not None before using lower()
-                        dataset[where.lower()] = (
-                            {}
-                        )  # Creates a dictionary for each component type
+                        dataset[
+                            where.lower()
+                        ] = {}  # Creates a dictionary for each component type
                 else:
                     cols = re.split(r"\s+", line.rstrip("\r\n"))
                     if len(cols) > 1 and (
@@ -197,6 +197,8 @@ def op_log_reader(
                                     dataset[where.lower()][devices[i]][param] = value
 
     return dataset
+
+
 # pylint: enable=too-many-locals,too-many-branches,too-many-nested-blocks
 
 

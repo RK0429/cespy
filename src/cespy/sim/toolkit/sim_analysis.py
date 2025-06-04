@@ -52,7 +52,6 @@ class SimAnalysis:
         circuit_file: Union[str, BaseEditor],
         runner: Optional[AnyRunner] = None,
     ):
-
         self.editor: BaseEditor
         if isinstance(circuit_file, str):
             self.editor = SpiceEditor(circuit_file)

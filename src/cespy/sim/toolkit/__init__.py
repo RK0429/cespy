@@ -14,7 +14,11 @@ from .montecarlo import Montecarlo as MonteCarloAnalysis
 from .sensitivity_analysis import QuickSensitivityAnalysis as SensitivityAnalysis
 from .sim_analysis import SimAnalysis
 from .tolerance_deviations import ToleranceDeviations
-from .visualization import AnalysisVisualizer, check_plotting_availability, create_simple_histogram
+from .visualization import (
+    AnalysisVisualizer,
+    check_plotting_availability,
+    create_simple_histogram,
+)
 from .worst_case import WorstCaseAnalysis
 
 __all__ = [

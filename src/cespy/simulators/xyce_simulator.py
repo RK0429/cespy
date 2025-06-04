@@ -45,7 +45,9 @@ class XyceSimulator(Simulator):
     """Stores the simulator location and command line options and runs simulations."""
 
     # Placed in order of preference. The first to be found will be used.
-    _spice_exe_paths = core_paths.get_default_simulator_paths(core_constants.Simulators.XYCE)
+    _spice_exe_paths = core_paths.get_default_simulator_paths(
+        core_constants.Simulators.XYCE
+    )
 
     # the default lib paths, as used by get_default_library_paths
     # none
@@ -298,7 +300,7 @@ class XyceSimulator(Simulator):
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[list[Any]] = None,
+        cmd_line_switches: Optional[Union[list[Any], str]] = None,
         timeout: Optional[float] = None,
         *,
         stdout: Optional[Any] = None,
@@ -366,7 +368,9 @@ class XyceSimulator(Simulator):
         )
         # start execution
         if exe_log:
-            log_exe_file = netlist_file.with_suffix(".exe" + core_constants.FileExtensions.LOG)
+            log_exe_file = netlist_file.with_suffix(
+                ".exe" + core_constants.FileExtensions.LOG
+            )
             with open(log_exe_file, "w", encoding="utf-8") as outfile:
                 error = run_function(
                     cmd_run,

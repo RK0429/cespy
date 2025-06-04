@@ -91,7 +91,8 @@ NumericType = Union[int, float, complex, LTComplex]
 class Comparable(Protocol):
     """Protocol for types that support less-than comparison."""
 
-    def __lt__(self, other: Any) -> bool: ...
+    def __lt__(self, other: Any) -> bool:
+        ...
 
     def dummy_method(self) -> None:
         """Dummy method to satisfy pylint's too-few-public-methods requirement."""
@@ -513,7 +514,11 @@ class LogfileData:
             return
 
         if encoding is None:
-            encoding = self.encoding if hasattr(self, "encoding") else core_constants.Encodings.UTF8
+            encoding = (
+                self.encoding
+                if hasattr(self, "encoding")
+                else core_constants.Encodings.UTF8
+            )
 
         with open(export_file, mode, encoding=encoding) as fout:
             if (
@@ -574,7 +579,9 @@ class LogfileData:
                     step_data = [
                         self.stepset[param][index] for param in self.stepset.keys()
                     ]
-                meas_data = [self.dataset[param][index] for param in self.dataset.keys()]
+                meas_data = [
+                    self.dataset[param][index] for param in self.dataset.keys()
+                ]
 
                 if (
                     append_with_line_prefix is not None

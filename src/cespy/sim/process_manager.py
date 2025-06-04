@@ -15,13 +15,14 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union, IO
 
 try:
     import psutil
+    from types import ModuleType
     HAS_PSUTIL = True
 except ImportError:
-    psutil = None
+    psutil = None  # type: ignore[assignment]
     HAS_PSUTIL = False
 
 from ..core import constants as core_constants
@@ -32,19 +33,21 @@ _logger = logging.getLogger("cespy.ProcessManager")
 @dataclass
 class ProcessInfo:
     """Information about a running process."""
+
     pid: int
     command: List[str]
     start_time: float
     working_directory: Path
     stdout_file: Optional[Path] = None
     stderr_file: Optional[Path] = None
-    process: Optional[subprocess.Popen] = None
+    process: Optional[subprocess.Popen[bytes]] = None
     psutil_process: Optional[Any] = None  # psutil.Process if available
 
 
 @dataclass
 class ProcessResult:
     """Result of a process execution."""
+
     return_code: int
     stdout_path: Optional[Path]
     stderr_path: Optional[Path]
@@ -55,7 +58,7 @@ class ProcessResult:
 
 class ProcessManager:
     """Manages subprocess execution for simulations.
-    
+
     This class handles:
     - Process launching with proper resource management
     - Timeout enforcement
@@ -63,33 +66,33 @@ class ProcessManager:
     - Zombie process prevention
     - Resource usage tracking
     """
-    
+
     def __init__(self, max_processes: int = 4, cleanup_interval: float = 60.0):
         """Initialize process manager.
-        
+
         Args:
             max_processes: Maximum number of concurrent processes
             cleanup_interval: Interval for cleaning up zombie processes (seconds)
         """
         self.max_processes = max_processes
         self.cleanup_interval = cleanup_interval
-        
+
         # Process tracking
         self._processes: Dict[int, ProcessInfo] = {}
         self._lock = threading.Lock()
         self._process_counter = 0
-        
+
         # Resource monitoring
         self._cpu_percent_history: List[float] = []
         self._memory_usage_history: List[float] = []
-        
+
         # Cleanup thread
-        self._cleanup_thread = None
+        self._cleanup_thread: Optional[threading.Thread] = None
         self._stop_cleanup = threading.Event()
         self._start_cleanup_thread()
-        
+
         _logger.info("ProcessManager initialized with max_processes=%d", max_processes)
-    
+
     def execute(
         self,
         command: List[str],
@@ -98,10 +101,10 @@ class ProcessManager:
         env: Optional[Dict[str, str]] = None,
         stdout_file: Optional[Path] = None,
         stderr_file: Optional[Path] = None,
-        priority: Optional[int] = None
+        priority: Optional[int] = None,
     ) -> Tuple[int, ProcessResult]:
         """Execute a command as a subprocess.
-        
+
         Args:
             command: Command and arguments to execute
             working_directory: Working directory for the process
@@ -110,10 +113,10 @@ class ProcessManager:
             stdout_file: File to redirect stdout (None for pipe)
             stderr_file: File to redirect stderr (None for pipe)
             priority: Process priority (nice value on Unix, priority class on Windows)
-            
+
         Returns:
             Tuple of (process_id, ProcessResult)
-            
+
         Raises:
             RuntimeError: If process limit is reached
             OSError: If process cannot be started
@@ -121,35 +124,37 @@ class ProcessManager:
         with self._lock:
             if len(self._processes) >= self.max_processes:
                 raise RuntimeError(f"Process limit ({self.max_processes}) reached")
-            
+
             process_id = self._process_counter
             self._process_counter += 1
-        
+
         # Prepare process environment
         process_env = os.environ.copy()
         if env:
             process_env.update(env)
-        
+
         # Prepare stdout/stderr
-        stdout_handle = None
-        stderr_handle = None
+        stdout_handle: Optional[Union[IO[str], int]] = None
+        stderr_handle: Optional[Union[IO[str], int]] = None
         
         try:
             if stdout_file:
-                stdout_handle = open(stdout_file, 'w', encoding='utf-8')
+                stdout_handle = open(stdout_file, "w", encoding="utf-8")
             else:
                 stdout_handle = subprocess.PIPE
-            
+
             if stderr_file:
-                stderr_handle = open(stderr_file, 'w', encoding='utf-8')
+                stderr_handle = open(stderr_file, "w", encoding="utf-8")
             else:
                 stderr_handle = subprocess.PIPE
-            
+
             # Start process
             start_time = time.time()
-            
-            _logger.debug("Starting process: %s in %s", ' '.join(command), working_directory)
-            
+
+            _logger.debug(
+                "Starting process: %s in %s", " ".join(command), working_directory
+            )
+
             process = subprocess.Popen(
                 command,
                 cwd=str(working_directory),
@@ -157,9 +162,11 @@ class ProcessManager:
                 stdout=stdout_handle,
                 stderr=stderr_handle,
                 # Prevent console window on Windows
-                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+                if sys.platform == "win32"
+                else 0,
             )
-            
+
             # Create process info
             process_info = ProcessInfo(
                 pid=process.pid,
@@ -168,31 +175,33 @@ class ProcessManager:
                 working_directory=working_directory,
                 stdout_file=stdout_file,
                 stderr_file=stderr_file,
-                process=process
+                process=process,
             )
-            
+
             # Set process priority if requested
             if priority is not None:
                 self._set_process_priority(process.pid, priority)
-            
+
             # Track with psutil if available
-            if HAS_PSUTIL:
+            if HAS_PSUTIL and psutil is not None:
                 try:
                     process_info.psutil_process = psutil.Process(process.pid)
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
-            
+
             # Store process info
             with self._lock:
                 self._processes[process_id] = process_info
-            
+
             # Wait for completion with timeout
             try:
                 return_code = process.wait(timeout=timeout)
                 terminated = False
                 error_message = None
             except subprocess.TimeoutExpired:
-                _logger.warning("Process %d timed out after %s seconds", process_id, timeout)
+                _logger.warning(
+                    "Process %d timed out after %s seconds", process_id, timeout
+                )
                 self._terminate_process(process_info)
                 return_code = -1
                 terminated = True
@@ -203,10 +212,10 @@ class ProcessManager:
                 return_code = -1
                 terminated = True
                 error_message = str(e)
-            
+
             # Calculate duration
             duration = time.time() - start_time
-            
+
             # Create result
             result = ProcessResult(
                 return_code=return_code,
@@ -214,50 +223,54 @@ class ProcessManager:
                 stderr_path=stderr_file,
                 duration=duration,
                 terminated=terminated,
-                error_message=error_message
+                error_message=error_message,
             )
-            
+
             # Clean up
             with self._lock:
                 del self._processes[process_id]
-            
-            _logger.debug("Process %d completed with code %d in %.2f seconds", 
-                         process_id, return_code, duration)
-            
+
+            _logger.debug(
+                "Process %d completed with code %d in %.2f seconds",
+                process_id,
+                return_code,
+                duration,
+            )
+
             return process_id, result
-            
+
         finally:
             # Close file handles if we opened them
-            if stdout_handle and stdout_file:
+            if stdout_handle is not None and stdout_file and not isinstance(stdout_handle, int):
                 stdout_handle.close()
-            if stderr_handle and stderr_file:
+            if stderr_handle is not None and stderr_file and not isinstance(stderr_handle, int):
                 stderr_handle.close()
-    
+
     def terminate_process(self, process_id: int) -> bool:
         """Terminate a running process.
-        
+
         Args:
             process_id: ID of the process to terminate
-            
+
         Returns:
             True if process was terminated, False if not found
         """
         with self._lock:
             if process_id not in self._processes:
                 return False
-            
+
             process_info = self._processes[process_id]
-        
+
         self._terminate_process(process_info)
-        
+
         with self._lock:
             del self._processes[process_id]
-        
+
         return True
-    
+
     def get_active_processes(self) -> Dict[int, Dict[str, Any]]:
         """Get information about active processes.
-        
+
         Returns:
             Dictionary mapping process IDs to process information
         """
@@ -266,94 +279,105 @@ class ProcessManager:
             for pid, info in self._processes.items():
                 result[pid] = {
                     "pid": info.pid,
-                    "command": ' '.join(info.command),
+                    "command": " ".join(info.command),
                     "duration": time.time() - info.start_time,
-                    "working_directory": str(info.working_directory)
+                    "working_directory": str(info.working_directory),
                 }
-                
+
                 # Add resource usage if available
                 if HAS_PSUTIL and info.psutil_process:
                     try:
                         result[pid]["cpu_percent"] = info.psutil_process.cpu_percent()
-                        result[pid]["memory_mb"] = info.psutil_process.memory_info().rss / 1024 / 1024
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        result[pid]["memory_mb"] = (
+                            info.psutil_process.memory_info().rss / 1024 / 1024
+                        )
+                    except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
                         pass
-            
+
             return result
-    
+
     def get_resource_usage(self) -> Dict[str, float]:
         """Get current resource usage statistics.
-        
+
         Returns:
             Dictionary with resource usage metrics
         """
         total_cpu = 0.0
         total_memory_mb = 0.0
         process_count = 0
-        
+
         with self._lock:
             for info in self._processes.values():
                 if HAS_PSUTIL and info.psutil_process:
                     try:
                         total_cpu += info.psutil_process.cpu_percent()
-                        total_memory_mb += info.psutil_process.memory_info().rss / 1024 / 1024
+                        total_memory_mb += (
+                            info.psutil_process.memory_info().rss / 1024 / 1024
+                        )
                         process_count += 1
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
                         pass
-        
+
         return {
             "process_count": process_count,
             "total_cpu_percent": total_cpu,
             "total_memory_mb": total_memory_mb,
             "avg_cpu_percent": total_cpu / process_count if process_count > 0 else 0.0,
-            "avg_memory_mb": total_memory_mb / process_count if process_count > 0 else 0.0
+            "avg_memory_mb": total_memory_mb / process_count
+            if process_count > 0
+            else 0.0,
         }
-    
+
     def cleanup_zombies(self) -> int:
         """Clean up zombie processes.
-        
+
         Returns:
             Number of zombie processes cleaned up
         """
-        if not HAS_PSUTIL:
+        if not HAS_PSUTIL or psutil is None:
             return 0
-        
+
         cleaned = 0
-        
+
         # Find zombie processes matching our simulator patterns
-        for proc in psutil.process_iter(['pid', 'name', 'status']):
+        for proc in psutil.process_iter(["pid", "name", "status"]):
             try:
-                if proc.info['status'] == psutil.STATUS_ZOMBIE:
+                if proc.info["status"] == psutil.STATUS_ZOMBIE:
                     # Check if it's one of our simulators
-                    if any(sim in proc.info['name'].lower() for sim in 
-                          ['ltspice', 'ngspice', 'qspice', 'xyce']):
-                        _logger.info("Cleaning up zombie process %d (%s)", 
-                                   proc.info['pid'], proc.info['name'])
+                    if any(
+                        sim in proc.info["name"].lower()
+                        for sim in ["ltspice", "ngspice", "qspice", "xyce"]
+                    ):
+                        _logger.info(
+                            "Cleaning up zombie process %d (%s)",
+                            proc.info["pid"],
+                            proc.info["name"],
+                        )
                         proc.kill()
                         cleaned += 1
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
+            except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
                 pass
-        
+
         return cleaned
-    
+
     def shutdown(self, timeout: float = 10.0) -> None:
         """Shutdown the process manager.
-        
+
         Args:
             timeout: Maximum time to wait for processes to terminate
         """
         _logger.info("Shutting down ProcessManager")
-        
+
         # Stop cleanup thread
         self._stop_cleanup_thread()
-        
+
         # Terminate all running processes
         with self._lock:
             processes_to_terminate = list(self._processes.values())
-        
+
         for process_info in processes_to_terminate:
             self._terminate_process(process_info)
-        
+
         # Wait for processes to terminate
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -361,21 +385,21 @@ class ProcessManager:
                 if not self._processes:
                     break
             time.sleep(0.1)
-        
+
         # Force kill any remaining processes
         with self._lock:
             for process_info in self._processes.values():
                 self._kill_process(process_info)
             self._processes.clear()
-    
+
     def _set_process_priority(self, pid: int, priority: int) -> None:
         """Set process priority.
-        
+
         Args:
             pid: Process ID
             priority: Priority value (platform-specific)
         """
-        if HAS_PSUTIL:
+        if HAS_PSUTIL and psutil is not None:
             try:
                 proc = psutil.Process(pid)
                 if sys.platform == "win32":
@@ -385,18 +409,18 @@ class ProcessManager:
                         -1: psutil.BELOW_NORMAL_PRIORITY_CLASS,
                         0: psutil.NORMAL_PRIORITY_CLASS,
                         1: psutil.ABOVE_NORMAL_PRIORITY_CLASS,
-                        2: psutil.HIGH_PRIORITY_CLASS
+                        2: psutil.HIGH_PRIORITY_CLASS,
                     }.get(priority, psutil.NORMAL_PRIORITY_CLASS)
                     proc.nice(priority_class)
                 else:
                     # Unix nice values (-20 to 19)
                     proc.nice(priority)
-            except (psutil.NoSuchProcess, psutil.AccessDenied, OSError):
+            except (psutil.NoSuchProcess, psutil.AccessDenied, OSError) if psutil else Exception:
                 pass
-    
+
     def _terminate_process(self, process_info: ProcessInfo) -> None:
         """Terminate a process gracefully.
-        
+
         Args:
             process_info: Process to terminate
         """
@@ -410,10 +434,10 @@ class ProcessManager:
                 self._kill_process(process_info)
             except Exception as e:
                 _logger.error("Error terminating process %d: %s", process_info.pid, e)
-    
+
     def _kill_process(self, process_info: ProcessInfo) -> None:
         """Force kill a process.
-        
+
         Args:
             process_info: Process to kill
         """
@@ -425,7 +449,7 @@ class ProcessManager:
                     os.kill(process_info.pid, signal.SIGKILL)
             except Exception as e:
                 _logger.error("Error killing process %d: %s", process_info.pid, e)
-    
+
     def _cleanup_thread_func(self) -> None:
         """Background thread for cleaning up zombie processes."""
         while not self._stop_cleanup.is_set():
@@ -434,36 +458,41 @@ class ProcessManager:
                 cleaned = self.cleanup_zombies()
                 if cleaned > 0:
                     _logger.info("Cleaned up %d zombie processes", cleaned)
-                
+
                 # Update resource tracking
                 usage = self.get_resource_usage()
                 if usage["process_count"] > 0:
                     self._cpu_percent_history.append(usage["total_cpu_percent"])
                     self._memory_usage_history.append(usage["total_memory_mb"])
-                    
+
                     # Keep only recent history
                     max_history = 100
                     if len(self._cpu_percent_history) > max_history:
-                        self._cpu_percent_history = self._cpu_percent_history[-max_history:]
+                        self._cpu_percent_history = self._cpu_percent_history[
+                            -max_history:
+                        ]
                     if len(self._memory_usage_history) > max_history:
-                        self._memory_usage_history = self._memory_usage_history[-max_history:]
-                
+                        self._memory_usage_history = self._memory_usage_history[
+                            -max_history:
+                        ]
+
             except Exception as e:
                 _logger.error("Error in cleanup thread: %s", e)
-            
+
             # Wait for next cleanup or stop signal
             self._stop_cleanup.wait(self.cleanup_interval)
-    
+
     def _start_cleanup_thread(self) -> None:
         """Start the cleanup thread."""
         if HAS_PSUTIL:
             self._cleanup_thread = threading.Thread(
                 target=self._cleanup_thread_func,
                 daemon=True,
-                name="ProcessManager-Cleanup"
+                name="ProcessManager-Cleanup",
             )
-            self._cleanup_thread.start()
-    
+            if self._cleanup_thread:
+                self._cleanup_thread.start()
+
     def _stop_cleanup_thread(self) -> None:
         """Stop the cleanup thread."""
         if self._cleanup_thread:
