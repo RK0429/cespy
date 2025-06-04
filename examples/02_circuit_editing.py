@@ -12,8 +12,7 @@ from pathlib import Path
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, SimRunner
-from cespy.editor import AscEditor, SpiceEditor
+from cespy.editor import AscEditor, SpiceEditor  # noqa: E402
 
 
 def example_asc_editor() -> None:

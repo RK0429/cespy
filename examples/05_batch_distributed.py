@@ -6,22 +6,19 @@ This example demonstrates batch processing, distributed simulation,
 client-server architecture, and performance optimization techniques.
 """
 
-import multiprocessing
 import os
 import sys
-import threading
 import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Dict, Tuple
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator
-from cespy.client_server import ServerSimRunner, SimClient, SimServer
-from cespy.editor import SpiceEditor
-from cespy.sim import SimBatch, SimRunner
+from cespy import LTspice  # noqa: E402
+from cespy.client_server import ServerSimRunner, SimClient, SimServer  # noqa: E402
+from cespy.editor import SpiceEditor  # noqa: E402
+from cespy.sim import SimBatch, SimRunner  # noqa: E402
 
 
 def example_basic_batch_simulation():
@@ -102,7 +99,7 @@ C1 vout 0 {C_val}
         successful_jobs = [job for job in results if job["status"] == "success"]
         failed_jobs = [job for job in results if job["status"] == "failed"]
 
-        print(f"Results summary:")
+        print("Results summary:")
         print(f"  Successful: {len(successful_jobs)}")
         print(f"  Failed: {len(failed_jobs)}")
         print(f"  Success rate: {len(successful_jobs)/len(results)*100:.1f}%")
@@ -219,7 +216,7 @@ C1 vout 0 1n
         successful_threaded = sum(1 for r in threaded_results if r["success"])
         successful_process = sum(1 for r in process_results if r["success"])
 
-        print(f"Success rates:")
+        print("Success rates:")
         print(f"  Sequential: {successful_sequential}/{len(sequential_results)}")
         print(f"  Threaded: {successful_threaded}/{len(threaded_results)}")
         print(f"  Process-based: {successful_process}/{len(process_results)}")

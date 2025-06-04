@@ -12,15 +12,14 @@ import platform
 import shutil
 import sys
 import time
-import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator
-from cespy.utils import detect_encoding
+from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator  # noqa: E402
+from cespy.utils import detect_encoding  # noqa: E402
 
 
 def example_platform_detection() -> None:
@@ -66,7 +65,7 @@ def example_platform_detection() -> None:
         print(f"Error in platform detection: {e}")
 
 
-def example_simulator_detection() -> None:
+def example_simulator_detection() -> Dict[str, Any]:
     """Demonstrate automatic simulator detection across platforms."""
     print("\n=== Simulator Detection Example ===")
 
@@ -160,20 +159,21 @@ def example_simulator_detection() -> None:
                     found_path = path_location
                     print(f"    ✓ Found in PATH: {found_path}")
                 elif not found_path:
-                    print(f"    ✗ Not found in PATH")
+                    print("    ✗ Not found in PATH")
 
                 detected_simulators[simulator] = found_path
 
         # Initialize simulators with detected paths
         print("\nInitializing simulators...")
 
-        available_simulators = {}
+        available_simulators: Dict[str, Any] = {}
 
         # LTSpice
         try:
             if detected_simulators.get("ltspice"):
                 ltspice_sim = LTspice()
-                # Optionally set custom path: ltspice_sim.set_executable_path(detected_simulators['ltspice'])
+                # Optionally set custom path:
+                # ltspice_sim.set_executable_path(detected_simulators['ltspice'])
                 available_simulators["LTSpice"] = ltspice_sim
                 print("  ✓ LTSpice initialized")
             else:
@@ -342,7 +342,7 @@ def example_path_handling() -> None:
             "~/circuits/amplifier.asc",  # Home directory relative
         ]
 
-        print(f"\nNormalizing paths:")
+        print("\nNormalizing paths:")
         for path_str in test_paths:
             # Convert to Path object for normalization
             path_obj = Path(path_str)
@@ -381,7 +381,7 @@ def example_path_handling() -> None:
             print(f"  Created file: {file_path}")
 
         # Test file operations
-        print(f"\nTesting file operations...")
+        print("\nTesting file operations...")
 
         # List files recursively
         all_files = list(test_dir.rglob("*"))
@@ -399,7 +399,7 @@ def example_path_handling() -> None:
             print(f"  {file_path.name}: {stat_info.st_size} bytes")
 
         # Test relative path operations
-        print(f"\nRelative path operations:")
+        print("\nRelative path operations:")
         base_path = test_dir / "circuits"
         for file_path in test_files[:2]:  # First two files
             relative = file_path.relative_to(test_dir)
@@ -413,7 +413,7 @@ def example_path_handling() -> None:
             import shutil
 
             shutil.rmtree(test_dir)
-            print(f"Cleaned up test directory")
+            print("Cleaned up test directory")
 
 
 def example_api_compatibility() -> None:
@@ -430,7 +430,7 @@ def example_api_compatibility() -> None:
         print("  Testing legacy simulator initialization...")
         try:
             # This simulates how users might have used older versions
-            ltspice_old_style = LTspice()
+            _ltspice_old_style = LTspice()
             print("    ✓ LTSpice (old style) - compatible")
         except (IOError, OSError, ValueError) as e:
             print(f"    ✗ LTSpice (old style) - error: {e}")
@@ -438,7 +438,7 @@ def example_api_compatibility() -> None:
         # New pattern: Modern API
         print("  Testing modern API...")
         try:
-            from cespy import simulate  # Modern unified interface
+            from cespy import simulate  # Modern unified interface  # noqa: F401
 
             print("    ✓ Modern unified simulate() function available")
         except ImportError:
@@ -476,23 +476,23 @@ def example_api_compatibility() -> None:
             }
 
             new_params = {}
-            warnings = []
+            migration_warnings = []
 
             for old_key, value in old_params.items():
                 if old_key in migration_map:
                     new_key = migration_map[old_key]
                     new_params[new_key] = value
-                    warnings.append(
+                    migration_warnings.append(
                         f"Parameter '{old_key}' deprecated, use '{new_key}'"
                     )
                 else:
                     new_params[old_key] = value
 
-            return new_params, warnings
+            return new_params, migration_warnings
 
-        migrated_params, warnings = migrate_parameters(old_style_params)
+        migrated_params, migration_warnings = migrate_parameters(old_style_params)
         print(f"    Migrated parameters: {list(migrated_params.keys())}")
-        for warning in warnings:
+        for warning in migration_warnings:
             print(f"    Warning: {warning}")
 
         # Test version compatibility
@@ -534,16 +534,16 @@ def example_api_compatibility() -> None:
 
             return available_features
 
-        available_features = check_version_compatibility()
+        _available_features = check_version_compatibility()
 
         # Test deprecated function warnings
         print("\nTesting deprecation warnings...")
 
-        import warnings
+        import warnings as warning_module
 
         def deprecated_function() -> str:
             """Example of a deprecated function."""
-            warnings.warn(
+            warning_module.warn(
                 "This function is deprecated and will be removed in version 3.0. "
                 "Use new_function() instead.",
                 DeprecationWarning,
@@ -556,9 +556,9 @@ def example_api_compatibility() -> None:
             return "new_result"
 
         # Capture warnings
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            result = deprecated_function()
+        with warning_module.catch_warnings(record=True) as w:
+            warning_module.simplefilter("always")
+            _result = deprecated_function()
 
             if w:
                 print(f"    ✓ Deprecation warning captured: {w[0].message}")
@@ -579,13 +579,13 @@ def example_environment_configuration() -> None:
         print("Environment configuration and setup...")
 
         # Check Python environment
-        print(f"\nPython Environment:")
+        print("\nPython Environment:")
         print(f"  Python executable: {sys.executable}")
         print(f"  Python path: {sys.path[:3]}...")  # Show first 3 entries
         print(f"  Site packages: {[p for p in sys.path if 'site-packages' in p][:2]}")
 
         # Check required packages
-        print(f"\nRequired packages check:")
+        print("\nRequired packages check:")
         required_packages = ["numpy", "matplotlib", "scipy", "pandas"]
 
         for package in required_packages:
@@ -596,7 +596,7 @@ def example_environment_configuration() -> None:
                 print(f"  ✗ {package} not available")
 
         # Environment variables for simulator paths
-        print(f"\nSimulator environment variables:")
+        print("\nSimulator environment variables:")
         simulator_env_vars = [
             "LTSPICE_PATH",
             "NGSPICE_PATH",
@@ -610,7 +610,7 @@ def example_environment_configuration() -> None:
             print(f"  {var}: {value}")
 
         # Create configuration file template
-        print(f"\nCreating configuration template...")
+        print("\nCreating configuration template...")
 
         config_template = """# CESPy Configuration File
 # Platform: {platform}
@@ -654,7 +654,7 @@ line_endings = {line_endings}
         print(f"  ✓ Configuration template created: {config_path}")
 
         # Test configuration loading
-        print(f"\nTesting configuration loading...")
+        print("\nTesting configuration loading...")
 
         try:
             import configparser
@@ -675,7 +675,7 @@ line_endings = {line_endings}
             print(f"  ✗ Configuration loading failed: {e}")
 
         # Setup script example
-        print(f"\nCreating setup script example...")
+        print("\nCreating setup script example...")
 
         setup_script = """#!/usr/bin/env python3
 '''

@@ -9,7 +9,7 @@ lazy loading, streaming, caching, and visualization of simulation results.
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,16 +17,15 @@ import numpy as np
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-# removed unused imports
-from cespy.raw import (
-    OptimizedBinaryParser,
+from cespy.raw import (  # noqa: E402
     RawDataCache,
     RawFileStreamer,
     RawRead,
     RawReadLazy,
     RawWrite,
+    Trace,
 )
-from cespy.utils import Histogram
+from cespy.utils import Histogram  # noqa: E402
 
 
 def create_sample_raw_data() -> Dict[str, Any]:
@@ -68,12 +67,12 @@ def example_basic_raw_operations() -> None:
         raw_writer = RawWrite()
 
         # Configure transient analysis data
-        raw_writer.add_trace("time", sample_data["transient"]["time"])
-        raw_writer.add_trace("V(vin)", sample_data["transient"]["vin"])
-        raw_writer.add_trace("V(vout)", sample_data["transient"]["vout"])
+        raw_writer.add_trace(Trace("time", sample_data["transient"]["time"]))
+        raw_writer.add_trace(Trace("V(vin)", sample_data["transient"]["vin"]))
+        raw_writer.add_trace(Trace("V(vout)", sample_data["transient"]["vout"]))
 
         raw_file_path = Path("sample_transient.raw")
-        raw_writer.write_to_file(str(raw_file_path))
+        raw_writer.save(raw_file_path)
         print(f"✓ Raw data written to {raw_file_path}")
 
         # Read raw data back
@@ -82,13 +81,13 @@ def example_basic_raw_operations() -> None:
 
         # Get basic information
         print(f"Number of traces: {len(raw_reader.get_trace_names())}")
-        print(f"Number of points: {len(raw_reader.get_trace('time'))}")
+        print(f"Number of points: {len(raw_reader.get_trace('time').data)}")
         print(f"Traces available: {raw_reader.get_trace_names()}")
 
         # Get specific traces
-        time_data = raw_reader.get_trace("time")
-        vin_data = raw_reader.get_trace("V(vin)")
-        vout_data = raw_reader.get_trace("V(vout)")
+        time_data = raw_reader.get_trace("time").data
+        vin_data = raw_reader.get_trace("V(vin)").data
+        vout_data = raw_reader.get_trace("V(vout)").data
 
         print(f"Time range: {time_data[0]:.2e} to {time_data[-1]:.2e} seconds")
         print(f"Vin range: {min(vin_data):.3f} to {max(vin_data):.3f} V")
@@ -124,11 +123,11 @@ def example_lazy_loading() -> None:
 
         # Write large raw file
         raw_writer = RawWrite()
-        raw_writer.add_trace("time", large_time)
-        raw_writer.add_trace("V(signal)", large_signal)
+        raw_writer.add_trace(Trace("time", large_time))
+        raw_writer.add_trace(Trace("V(signal)", large_signal))
 
         large_raw_path = Path("large_dataset.raw")
-        raw_writer.write_to_file(str(large_raw_path))
+        raw_writer.save(large_raw_path)
         file_size = large_raw_path.stat().st_size / (1024 * 1024)  # MB
         print(f"✓ Large file created: {file_size:.1f} MB")
 
@@ -138,7 +137,7 @@ def example_lazy_loading() -> None:
         # Normal loading
         start_time = time.time()
         normal_reader = RawRead(str(large_raw_path))
-        normal_data = normal_reader.get_trace("V(signal)")
+        normal_data = normal_reader.get_trace("V(signal)").data
         normal_time = time.time() - start_time
         print(f"Normal loading: {normal_time:.3f} seconds")
 
@@ -378,14 +377,14 @@ def example_histogram_analysis() -> None:
         # Lognormal distribution (failure times)
         lognormal_data = np.random.lognormal(5, 0.5, 10000)  # Mean log=5, std log=0.5
 
-        # Mixed distribution (measurement errors)
-        mixed_data = np.concatenate(
-            [
-                np.random.normal(0, 0.01, 8000),  # Main measurement
-                np.random.normal(0.05, 0.005, 1500),  # Systematic error
-                np.random.normal(-0.03, 0.002, 500),  # Calibration offset
-            ]
-        )
+        # Mixed distribution (measurement errors) - for future use
+        # mixed_data = np.concatenate(
+        #     [
+        #         np.random.normal(0, 0.01, 8000),  # Main measurement
+        #         np.random.normal(0.05, 0.005, 1500),  # Systematic error
+        #         np.random.normal(-0.03, 0.002, 500),  # Calibration offset
+        #     ]
+        # )
 
         # Create histogram analyzer
         histogram_analyzer = Histogram()

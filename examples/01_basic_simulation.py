@@ -12,8 +12,8 @@ from pathlib import Path
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, RawRead, SimRunner, XyceSimulator
-from cespy.editor import SpiceEditor
+from cespy import LTspice, NGspiceSimulator, Qspice, RawRead, SimRunner, XyceSimulator  # noqa: E402
+from cespy.editor import SpiceEditor  # noqa: E402
 
 
 def example_ltspice_simulation() -> None:
