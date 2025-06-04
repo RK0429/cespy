@@ -38,7 +38,7 @@ class AnalysisStatus(Enum):
 
 
 @dataclass
-class AnalysisResult:
+class AnalysisResult:  # pylint: disable=too-many-instance-attributes
     """Container for analysis results."""
 
     run_id: int
@@ -64,7 +64,7 @@ class AnalysisResult:
         return self.status == AnalysisStatus.COMPLETED
 
 
-class ProgressReporter:
+class ProgressReporter:  # pylint: disable=too-few-public-methods
     """Interface for progress reporting during analysis."""
 
     def __init__(self, callback: Optional[Callable[[int, int, str], None]] = None):
@@ -168,7 +168,7 @@ class BaseAnalysis(SimAnalysis):
         Returns:
             List of parameter dictionaries for each run
         """
-        pass
+        ...
 
     @abstractmethod
     def apply_parameters(self, parameters: Dict[str, Any]) -> None:
@@ -177,7 +177,7 @@ class BaseAnalysis(SimAnalysis):
         Args:
             parameters: Parameters to apply
         """
-        pass
+        ...
 
     @abstractmethod
     def extract_results(self, run_task: RunTask) -> Dict[str, Any]:
@@ -189,7 +189,7 @@ class BaseAnalysis(SimAnalysis):
         Returns:
             Dictionary of measurements
         """
-        pass
+        ...
 
     def run_analysis(self) -> List[AnalysisResult]:
         """Run the complete analysis.

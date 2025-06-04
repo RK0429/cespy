@@ -358,10 +358,10 @@ if __name__ == "__main__":
         )
 
     LTC = SimCommander(meAbsPath + "\\test_files\\testfile.asc", parallel_sims=1)
-    tstart = 0
-    bias_file = None  # Initialize bias_file to prevent undefined variable error
+    tstart = 0  # pylint: disable=invalid-name
+    bias_file = None  # pylint: disable=invalid-name # Initialize bias_file to prevent undefined variable error
     for tstop in (2, 5, 8, 10):
-        tduration = tstop - tstart
+        tduration = tstop - tstart  # pylint: disable=invalid-name
         LTC.add_instruction(
             f".tran {tduration}",
         )
@@ -369,9 +369,9 @@ if __name__ == "__main__":
             LTC.add_instruction(f".loadbias {bias_file}")
             # Put here your parameter modifications
             # LTC.set_parameters(param1=1, param2=2, param3=3)
-        bias_file = f"sim_loadbias_{tstop}.txt"
+        bias_file = f"sim_loadbias_{tstop}.txt"  # pylint: disable=invalid-name
         LTC.add_instruction(f".savebias {bias_file} internal time={tduration}")
-        tstart = tstop
+        tstart = tstop  # pylint: disable=invalid-name
         LTC.run(callback=callback_function)
 
     LTC.reset_netlist()

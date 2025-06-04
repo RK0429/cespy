@@ -18,6 +18,7 @@ from .constants import Simulators
 from .patterns import SPICE_PATTERNS
 from .performance import PerformanceMonitor, cached_regex
 from .platform import get_simulator_path
+from ..sim.toolkit import MonteCarloAnalysis
 
 _logger = logging.getLogger("cespy.Benchmarks")
 
@@ -223,8 +224,6 @@ class BenchmarkSuite:
             # Test Monte Carlo analysis setup
             start_time = time.perf_counter()
             for _ in range(100):
-                from ..sim.toolkit import MonteCarloAnalysis
-
                 mc = MonteCarloAnalysis(circuit_file, num_runs=10)
                 mc.set_tolerance("R1", 0.05)
             end_time = time.perf_counter()
@@ -277,7 +276,7 @@ class BenchmarkSuite:
 
         return self.results
 
-    def compare_with_baseline(self, tolerance: float = 0.1) -> Dict[str, Any]:
+    def compare_with_baseline(self, tolerance: float = 0.1) -> Dict[str, Any]:  # pylint: disable=too-many-branches
         """Compare current results with baseline performance.
 
         Args:

@@ -224,7 +224,7 @@ class SimulatorAdapter(ISimulator):
             if key not in ["timeout", "threads"]:
                 try:
                     self.simulator_class.valid_switch(key, value)
-                except Exception as e:
+                except (ValueError, TypeError, AttributeError) as e:
                     errors.append(f"Invalid option {key}: {str(e)}")
 
         return len(errors) == 0, errors

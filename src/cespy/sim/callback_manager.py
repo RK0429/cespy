@@ -153,7 +153,6 @@ class CallbackManager:
         callback_id: str,
         raw_file: Path,
         log_file: Path,
-        context: Optional[Dict[str, Any]] = None,
     ) -> Tuple[bool, Optional[Any]]:
         """Execute a specific callback.
 
@@ -161,7 +160,6 @@ class CallbackManager:
             callback_id: ID of callback to execute
             raw_file: Path to simulation raw file
             log_file: Path to simulation log file
-            context: Optional context data
 
         Returns:
             Tuple of (success, result)
@@ -179,14 +177,13 @@ class CallbackManager:
 
         # Execute outside lock to avoid blocking
         return self._execute_callback(
-            callback_id, callback_info, raw_file, log_file, context
+            callback_id, callback_info, raw_file, log_file
         )
 
     def execute_all(
         self,
         raw_file: Path,
         log_file: Path,
-        context: Optional[Dict[str, Any]] = None,
         stop_on_error: bool = False,
     ) -> Dict[str, Tuple[bool, Optional[Any]]]:
         """Execute all registered callbacks.
@@ -213,7 +210,7 @@ class CallbackManager:
         # Execute callbacks
         for callback_id, callback_info in callbacks_to_execute:
             success, result = self._execute_callback(
-                callback_id, callback_info, raw_file, log_file, context
+                callback_id, callback_info, raw_file, log_file
             )
             results[callback_id] = (success, result)
 
@@ -401,7 +398,6 @@ class CallbackManager:
         callback_info: CallbackInfo,
         raw_file: Path,
         log_file: Path,
-        context: Optional[Dict[str, Any]],
     ) -> Tuple[bool, Optional[Any]]:
         """Execute a single callback with error handling.
 

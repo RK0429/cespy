@@ -282,7 +282,7 @@ class SimulatorLocator:
 
         except subprocess.TimeoutExpired:
             return False, "Timeout while checking version"
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError) as e:
             return False, f"Error: {str(e)}"
 
     def _parse_version(self, output: str) -> Optional[str]:

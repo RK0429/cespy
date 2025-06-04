@@ -42,7 +42,7 @@ class Architecture(Enum):
 
 
 @dataclass
-class PlatformInfo:
+class PlatformInfo:  # pylint: disable=too-many-instance-attributes
     """Information about the current platform."""
 
     os_type: OSType
@@ -119,7 +119,7 @@ class PlatformManager:
         assert self._platform_info is not None
         return self._platform_info
 
-    def _detect_platform(self) -> None:
+    def _detect_platform(self) -> None:  # pylint: disable=too-many-branches
         """Detect current platform characteristics."""
         # Detect OS type
         system = platform.system().lower()

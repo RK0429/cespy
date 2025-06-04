@@ -47,7 +47,7 @@ class SimRunner(SimRunnerRefactored):
 
     # Deprecated attribute access
     @property
-    def failSim(self) -> int:
+    def failSim(self) -> int:  # pylint: disable=invalid-name
         """Deprecated: Use fail_sim instead."""
         warnings.warn(
             "failSim is deprecated, use fail_sim instead",
@@ -57,7 +57,7 @@ class SimRunner(SimRunnerRefactored):
         return self.fail_sim
 
     @property
-    def okSim(self) -> int:
+    def okSim(self) -> int:  # pylint: disable=invalid-name
         """Deprecated: Use ok_sim instead."""
         warnings.warn(
             "okSim is deprecated, use ok_sim instead", DeprecationWarning, stacklevel=2
@@ -75,7 +75,7 @@ class SimRunner(SimRunnerRefactored):
         return self._result_collector
 
     # Deprecated methods
-    def setSimulator(self, spice_tool: Any) -> None:
+    def setSimulator(self, spice_tool: Any) -> None:  # pylint: disable=invalid-name
         """Deprecated: Use set_simulator instead."""
         warnings.warn(
             "setSimulator is deprecated, use set_simulator instead",
@@ -84,7 +84,7 @@ class SimRunner(SimRunnerRefactored):
         )
         self.set_simulator(spice_tool)
 
-    def add_LTspiceRunCmdLineSwitches(self, *args: Any) -> None:
+    def add_LTspiceRunCmdLineSwitches(self, *args: Any) -> None:  # pylint: disable=invalid-name
         """Deprecated: Use add_command_line_switch instead."""
         warnings.warn(
             "add_LTspiceRunCmdLineSwitches is deprecated, "
@@ -95,7 +95,7 @@ class SimRunner(SimRunnerRefactored):
         for arg in args:
             self.add_command_line_switch(arg)
 
-    def run_all(self, *args: Any, **kwargs: Any) -> None:
+    def run_all(self, *args: Any, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Deprecated: Use run() in a loop instead."""
         warnings.warn(
             "run_all is deprecated, use run() in a loop instead",
@@ -112,7 +112,7 @@ class SimRunner(SimRunnerRefactored):
         Returns:
             List of SimulationResult objects
         """
-        return list(self._result_collector._results.values())
+        return list(self._result_collector._results.values())  # pylint: disable=protected-access
 
     def get_successful_results(self) -> list[Any]:
         """Get successful simulation results.

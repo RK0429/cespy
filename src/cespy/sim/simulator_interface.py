@@ -89,7 +89,7 @@ class ISimulator(ABC):
             SimulatorNotInstalledError: If simulator is not properly installed
             InvalidSimulatorError: If simulator is found but invalid
         """
-        pass
+        ...
 
     @abstractmethod
     def get_version(self) -> str:
@@ -101,7 +101,7 @@ class ISimulator(ABC):
         Raises:
             SimulatorNotInstalledError: If simulator is not available
         """
-        pass
+        ...
 
     @abstractmethod
     def prepare_command(
@@ -126,7 +126,7 @@ class ISimulator(ABC):
         Raises:
             ValueError: If invalid options are provided
         """
-        pass
+        ...
 
     @abstractmethod
     def parse_arguments(self, args: List[str]) -> Dict[str, Any]:
@@ -141,7 +141,7 @@ class ISimulator(ABC):
         Returns:
             Dictionary of parsed options
         """
-        pass
+        ...
 
     @abstractmethod
     def create_netlist(
@@ -164,7 +164,7 @@ class ISimulator(ABC):
             FileNotFoundError: If schematic file doesn't exist
             RuntimeError: If netlist generation fails
         """
-        pass
+        ...
 
     @abstractmethod
     def get_default_options(self) -> Dict[str, Any]:
@@ -173,7 +173,7 @@ class ISimulator(ABC):
         Returns:
             Dictionary of default options with their values
         """
-        pass
+        ...
 
     @abstractmethod
     def validate_options(self, options: Dict[str, Any]) -> Tuple[bool, List[str]]:
@@ -185,7 +185,7 @@ class ISimulator(ABC):
         Returns:
             Tuple of (is_valid, list_of_error_messages)
         """
-        pass
+        ...
 
     def is_analysis_supported(self, analysis_type: str) -> bool:
         """Check if a specific analysis type is supported.

@@ -66,7 +66,7 @@ class TaskInfo:
         return NotImplemented
 
 
-class TaskQueue:
+class TaskQueue:  # pylint: disable=too-many-instance-attributes
     """Manages simulation tasks with priorities and dependencies.
 
     This class provides a thread-safe queue for simulation tasks with:

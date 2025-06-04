@@ -25,7 +25,7 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 @dataclass
-class PerformanceMetrics:
+class PerformanceMetrics:  # pylint: disable=too-many-instance-attributes
     """Container for performance measurement data."""
 
     function_name: str

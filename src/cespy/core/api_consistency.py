@@ -18,7 +18,7 @@ _logger = logging.getLogger("cespy.APIConsistency")
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-class DeprecationLevel:
+class DeprecationLevel:  # pylint: disable=too-few-public-methods
     """Deprecation levels for API changes."""
 
     INFO = "info"  # Informational, will be deprecated
