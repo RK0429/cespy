@@ -277,8 +277,7 @@ class SimulatorLocator:
 
             if version:
                 return True, version
-            else:
-                return False, "Could not determine version"
+            return False, "Could not determine version"
 
         except subprocess.TimeoutExpired:
             return False, "Timeout while checking version"

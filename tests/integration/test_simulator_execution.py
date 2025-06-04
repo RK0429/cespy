@@ -329,6 +329,7 @@ C1 out 0 1u
 
         # Define callback to capture output
         output_lines = []
+
         def capture_output(line):
             output_lines.append(line)
 

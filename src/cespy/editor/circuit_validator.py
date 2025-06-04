@@ -538,8 +538,9 @@ class CircuitValidator:
                     )
 
         # Check for current sources in series
-        [c for c in components if c["type"] == "I"]
+        current_sources = [c for c in components if c["type"] == "I"]
         # This is more complex - would need full circuit analysis
+        # TODO: Implement current source series detection
 
         # Check for missing DC path to ground
         inductors = [c for c in components if c["type"] == "L"]

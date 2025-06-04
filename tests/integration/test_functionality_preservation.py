@@ -72,7 +72,8 @@ C1 out 0 1u
     def test_asc_editor_operations(self, temp_dir: Path):
         """Test AscEditor schematic manipulation."""
         # Find a test .asc file
-        test_asc = Path(__file__).parent.parent.parent.parent / "kupicelib/examples/testfiles/TRAN.asc"
+        test_asc = (Path(__file__).parent.parent.parent.parent /
+                    "kupicelib/examples/testfiles/TRAN.asc")
         if not test_asc.exists():
             pytest.skip("Test .asc file not found")
 
@@ -111,7 +112,8 @@ C1 out 0 1u
     def test_qsch_editor_operations(self, temp_dir: Path):
         """Test QschEditor schematic manipulation."""
         # Find a test .qsch file
-        test_qsch = Path(__file__).parent.parent.parent.parent / "kupicelib/examples/testfiles/DC sweep.qsch"
+        test_qsch = (Path(__file__).parent.parent.parent.parent /
+                     "kupicelib/examples/testfiles/DC sweep.qsch")
         if not test_qsch.exists():
             pytest.skip("Test .qsch file not found")
 
@@ -407,10 +409,10 @@ class TestBackwardCompatibility:
         """Test that common kupicelib imports still work."""
         # These imports should work if backward compatibility is maintained
         try:
-            from cespy.editor import SpiceEditor
-            from cespy.simulators import LTspice
-            from cespy.sim import SimRunner
-            from cespy.raw import RawRead, RawWrite
+            from cespy.editor import SpiceEditor  # noqa: F401
+            from cespy.simulators import LTspice  # noqa: F401
+            from cespy.sim import SimRunner  # noqa: F401
+            from cespy.raw import RawRead, RawWrite  # noqa: F401
             # All imports successful
             assert True
         except ImportError as e:

@@ -5,7 +5,7 @@
 import tempfile
 import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from cespy.sim.toolkit import (
     MonteCarloAnalysis,
@@ -200,7 +200,8 @@ class TestMonteCarloAnalysisIntegration:
 
                 def mock_deviation(ref):
                     if ref == 'R1':
-                        return 1000.0, ComponentDeviation(DeviationType.TOLERANCE, 0.05, 0, "uniform")
+                        return (1000.0,
+                                ComponentDeviation(DeviationType.TOLERANCE, 0.05, 0, "uniform"))
                     elif ref == 'C1':
                         return 1e-6, ComponentDeviation(DeviationType.TOLERANCE, 0.10, 0, "normal")
                     return 0, ComponentDeviation(DeviationType.NONE, 0, 0, "uniform")
@@ -264,7 +265,7 @@ class TestAnalysisVisualizationIntegration:
         assert isinstance(availability['seaborn'], bool)
 
     @pytest.mark.skipif(not check_plotting_availability()['matplotlib'],
-                       reason="Matplotlib not available")
+                        reason="Matplotlib not available")
     def test_visualizer_creation(self, sample_circuit_file):
         """Test AnalysisVisualizer creation and basic functionality."""
         visualizer = AnalysisVisualizer()
@@ -275,7 +276,7 @@ class TestAnalysisVisualizationIntegration:
         assert hasattr(visualizer, 'create_analysis_report')
 
     @pytest.mark.skipif(not check_plotting_availability()['matplotlib'],
-                       reason="Matplotlib not available")
+                        reason="Matplotlib not available")
     def test_histogram_plotting_integration(self, sample_circuit_file):
         """Test histogram plotting with real analysis data."""
         # Create analysis with mock results
@@ -357,7 +358,8 @@ class TestErrorHandlingIntegration:
         # Add mix of successful and failed results
         results = [
             AnalysisResult(run_id=0, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.0}),
-            AnalysisResult(run_id=1, status=AnalysisStatus.FAILED, error_message="Simulation failed"),
+            AnalysisResult(run_id=1, status=AnalysisStatus.FAILED,
+                           error_message="Simulation failed"),
             AnalysisResult(run_id=2, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.1}),
             AnalysisResult(run_id=3, status=AnalysisStatus.CANCELLED),
             AnalysisResult(run_id=4, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.2}),
@@ -384,11 +386,11 @@ class TestErrorHandlingIntegration:
         # Add results with inconsistent measurements
         results = [
             AnalysisResult(run_id=0, status=AnalysisStatus.COMPLETED,
-                         measurements={"Vout": 2.0, "Iout": 0.001}),
+                           measurements={"Vout": 2.0, "Iout": 0.001}),
             AnalysisResult(run_id=1, status=AnalysisStatus.COMPLETED,
-                         measurements={"Vout": 2.1}),  # Missing Iout
+                           measurements={"Vout": 2.1}),  # Missing Iout
             AnalysisResult(run_id=2, status=AnalysisStatus.COMPLETED,
-                         measurements={"Iout": 0.002}),  # Missing Vout
+                           measurements={"Iout": 0.002}),  # Missing Vout
         ]
 
         analysis.results = results

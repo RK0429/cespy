@@ -4,7 +4,7 @@
 
 import warnings
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from cespy.core.api_consistency import (
     DeprecationLevel,

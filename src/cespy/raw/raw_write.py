@@ -521,7 +521,7 @@ class RawWrite:
         return self.get_trace(item)
 
 
-def tobytes_for_trace(trace: Trace) -> Callable[[Any], bytes]:
+def tobytes_for_trace(trace: Trace) -> Callable[[Any], bytes]:  # pylint: disable=unused-argument
     """Create a function that converts trace data values to bytes.
 
     This is a higher-order function that returns a specialized function for converting

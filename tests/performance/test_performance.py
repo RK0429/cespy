@@ -56,7 +56,8 @@ class TestRawFilePerformance:
         mem_increase = mem_after - mem_before
         assert mem_increase < 1000  # Should not use more than 1GB additional memory
 
-        print(f"Write time: {write_time:.2f}s, File size: {file_size_mb:.1f}MB, Memory increase: {mem_increase:.1f}MB")
+        print(f"Write time: {write_time:.2f}s, File size: {file_size_mb:.1f}MB, "
+              f"Memory increase: {mem_increase:.1f}MB")
 
     def test_large_raw_file_read(self, temp_dir: Path):
         """Test reading large raw files."""
@@ -192,7 +193,8 @@ class TestEditorPerformance:
         assert change_time < 0.5  # 100 changes should be quick
         assert save_time < 1.0  # Save should be fast
 
-        print(f"Large netlist - Load: {load_time:.3f}s, Access: {access_time:.3f}s, Change: {change_time:.3f}s, Save: {save_time:.3f}s")
+        print(f"Large netlist - Load: {load_time:.3f}s, Access: {access_time:.3f}s, "
+              f"Change: {change_time:.3f}s, Save: {save_time:.3f}s")
 
     def test_parameter_search_performance(self, temp_dir: Path):
         """Test performance of parameter searches in large netlists."""
@@ -370,4 +372,5 @@ C1 out 0 1u
         # Should not have significant memory increase
         assert mem_increase < 100  # Less than 100MB increase
 
-        print(f"Memory usage - Baseline: {mem_baseline:.1f}MB, After: {mem_after:.1f}MB, Increase: {mem_increase:.1f}MB")
+        print(f"Memory usage - Baseline: {mem_baseline:.1f}MB, After: {mem_after:.1f}MB, "
+              f"Increase: {mem_increase:.1f}MB")

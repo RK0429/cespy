@@ -2,7 +2,7 @@
 
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch, Mock
 from cespy.sim.sim_runner import SimRunner
 from cespy.sim.run_task import RunTask
 from cespy.sim.process_callback import ProcessCallback

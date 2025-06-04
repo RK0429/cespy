@@ -24,8 +24,9 @@ class TestCLIEntryPoints:
         for command in commands:
             # Test that command exists and shows help
             try:
-                result = subprocess.run(
-                    [sys.executable, "-c", f"import subprocess; subprocess.run(['{command}', '--help'])"],
+                subprocess.run(
+                    [sys.executable, "-c",
+                     f"import subprocess; subprocess.run(['{command}', '--help'])"],
                     capture_output=True,
                     text=True,
                     timeout=10
@@ -89,7 +90,7 @@ TEXT 32 200 Left 2 !.tran 1m
 
         # Test that the entry point can be called (may fail due to missing implementation)
         try:
-            result = subprocess.run(
+            subprocess.run(
                 [sys.executable, "-m", "cespy.editor.asc_to_qsch", str(asc_file)],
                 capture_output=True,
                 text=True,
@@ -106,7 +107,9 @@ TEXT 32 200 Left 2 !.tran 1m
         """Test that server entry point can show help."""
         try:
             result = subprocess.run(
-                [sys.executable, "-c", "from cespy.client_server.run_server import main; print('Server module imported successfully')"],
+                [sys.executable, "-c",
+                 "from cespy.client_server.run_server import main; "
+                 "print('Server module imported successfully')"],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -123,8 +126,9 @@ TEXT 32 200 Left 2 !.tran 1m
         raw_file.write_bytes(b"Binary data placeholder")
 
         try:
-            result = subprocess.run(
-                [sys.executable, "-c", "from cespy.raw.raw_convert import main; print('Raw convert module imported')"],
+            subprocess.run(
+                [sys.executable, "-c",
+                 "from cespy.raw.raw_convert import main; print('Raw convert module imported')"],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -136,8 +140,9 @@ TEXT 32 200 Left 2 !.tran 1m
     def test_histogram_entry_point(self):
         """Test histogram entry point."""
         try:
-            result = subprocess.run(
-                [sys.executable, "-c", "from cespy.utils.histogram import main; print('Histogram module imported')"],
+            subprocess.run(
+                [sys.executable, "-c",
+                 "from cespy.utils.histogram import main; print('Histogram module imported')"],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -156,8 +161,9 @@ TEXT 32 200 Left 2 !.tran 1m
 
         for command, args in test_cases:
             try:
-                result = subprocess.run(
-                    [sys.executable, "-c", f"import subprocess; subprocess.run(['{command}'] + {args})"],
+                subprocess.run(
+                    [sys.executable, "-c",
+                     f"import subprocess; subprocess.run(['{command}'] + {args})"],
                     capture_output=True,
                     text=True,
                     timeout=10
@@ -172,7 +178,9 @@ TEXT 32 200 Left 2 !.tran 1m
         """Test that the package is properly installed and entry points work."""
         # Test basic package import
         result = subprocess.run(
-            [sys.executable, "-c", "import cespy; print(f'cespy version: {getattr(cespy, \"__version__\", \"unknown\")}')"],
+            [sys.executable, "-c",
+             "import cespy; "
+             "print(f'cespy version: {getattr(cespy, \"__version__\", \"unknown\")}')"],
             capture_output=True,
             text=True,
             timeout=5
@@ -210,4 +218,5 @@ TEXT 32 200 Left 2 !.tran 1m
                 entry_point = scripts[script]
                 assert ":" in entry_point, f"Invalid entry point format for {script}: {entry_point}"
                 module, function = entry_point.split(":")
-                assert module.startswith("cespy."), f"Entry point should start with cespy.: {entry_point}"
+                assert module.startswith("cespy."), (
+                    f"Entry point should start with cespy.: {entry_point}")

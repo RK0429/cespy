@@ -1,8 +1,6 @@
 """Unit tests for LTSpice simulator functionality."""
 
 import pytest
-import sys
-from pathlib import Path
 from unittest.mock import patch, mock_open
 from cespy.simulators.ltspice_simulator import LTspice
 from cespy.sim.simulator import SpiceSimulatorError
@@ -48,7 +46,8 @@ class TestLTspiceSimulator:
     def test_macos_native_sim_detection(self):
         """Test macOS native simulator detection."""
         # Mock macOS with native LTspice
-        with patch.object(LTspice, 'spice_exe', ["/Applications/LTspice.app/Contents/MacOS/LTspice"]):
+        with patch.object(LTspice, 'spice_exe',
+                          ["/Applications/LTspice.app/Contents/MacOS/LTspice"]):
             assert LTspice.using_macos_native_sim() is True
 
         # Mock macOS with wine
@@ -65,11 +64,13 @@ class TestLTspiceSimulator:
     def test_guess_process_name(self):
         """Test process name guessing from executable path."""
         # Test Windows paths
-        assert LTspice.guess_process_name("C:/Program Files/ADI/LTspice/LTspice.exe") == "LTspice.exe"
+        assert (LTspice.guess_process_name("C:/Program Files/ADI/LTspice/LTspice.exe")
+                == "LTspice.exe")
         assert LTspice.guess_process_name("/path/to/XVIIx64.exe") == "XVIIx64.exe"
 
         # Test Unix paths
-        assert LTspice.guess_process_name("/Applications/LTspice.app/Contents/MacOS/LTspice") == "LTspice"
+        assert (LTspice.guess_process_name("/Applications/LTspice.app/Contents/MacOS/LTspice")
+                == "LTspice")
 
     @patch('os.path.exists')
     def test_detect_executable_windows(self, mock_exists):
@@ -201,9 +202,12 @@ class TestLTspiceSimulator:
 
         with patch.object(LTspice, 'is_available', return_value=True):
             with patch.object(LTspice, 'using_macos_native_sim', return_value=True):
-                with patch.object(LTspice, 'spice_exe', ["/Applications/LTspice.app/Contents/MacOS/LTspice"]):
+                with patch.object(LTspice, 'spice_exe',
+                                  ["/Applications/LTspice.app/Contents/MacOS/LTspice"]):
                     # Should fail for .asc files
-                    with pytest.raises(NotImplementedError, match="MacOS native LTspice cannot run simulations on '.asc' files"):
+                    with pytest.raises(
+                            NotImplementedError,
+                            match="MacOS native LTspice cannot run simulations on '.asc' files"):
                         LTspice.run("test.asc")
 
                     # Should work for .net files
@@ -213,7 +217,9 @@ class TestLTspiceSimulator:
     def test_create_netlist_macos_native_error(self):
         """Test netlist creation error on macOS native."""
         with patch.object(LTspice, 'using_macos_native_sim', return_value=True):
-            with pytest.raises(NotImplementedError, match="MacOS native LTspice does not have netlist generation"):
+            with pytest.raises(
+                    NotImplementedError,
+                    match="MacOS native LTspice does not have netlist generation"):
                 LTspice.create_netlist("test.asc")
 
     @patch('cespy.sim.simulator.run_function')

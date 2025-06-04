@@ -318,7 +318,7 @@ class SpiceComponent(Component):
             self.set_params(**{key: value})
 
 
-class SpiceCircuit(BaseEditor):
+class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
     """Represents sub-circuits within a SPICE circuit.
 
     Since sub-circuits can have sub-circuits inside them, it serves as base for the top

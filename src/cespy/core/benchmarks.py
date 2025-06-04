@@ -8,6 +8,7 @@ over time and detect regressions in critical code paths.
 
 import json
 import logging
+import re
 import tempfile
 import time
 from pathlib import Path
@@ -57,10 +58,8 @@ class BenchmarkSuite:
             return
 
         try:
-            import json
-
             self.baseline_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.baseline_file, "w") as f:
+            with open(self.baseline_file, "w", encoding="utf-8") as f:
                 json.dump(self.results, f, indent=2)
             _logger.info("Saved baseline data with %d benchmarks", len(self.results))
         except Exception as e:
@@ -68,7 +67,6 @@ class BenchmarkSuite:
 
     def benchmark_regex_performance(self) -> Dict[str, float]:
         """Benchmark regex pattern compilation and matching performance."""
-        import re
         from .patterns import SPICE_PATTERNS
 
         results = {}
@@ -102,7 +100,7 @@ class BenchmarkSuite:
 
         start_time = time.perf_counter()
         for _ in range(1000):
-            for pattern_name, pattern_obj in SPICE_PATTERNS.items():
+            for pattern_obj in SPICE_PATTERNS.values():
                 cached_pattern = cached_regex(pattern_obj.pattern)
                 cached_pattern.findall(test_text)
         end_time = time.perf_counter()
@@ -125,14 +123,14 @@ class BenchmarkSuite:
 
             # Benchmark file writing
             start_time = time.perf_counter()
-            with open(test_file, "w") as f:
+            with open(test_file, "w", encoding="utf-8") as f:
                 f.write(content)
             end_time = time.perf_counter()
             results["file_write_time"] = end_time - start_time
 
             # Benchmark file reading
             start_time = time.perf_counter()
-            with open(test_file, "r") as f:
+            with open(test_file, "r", encoding="utf-8") as f:
                 f.read()
             end_time = time.perf_counter()
             results["file_read_time"] = end_time - start_time
@@ -140,7 +138,7 @@ class BenchmarkSuite:
             # Benchmark line-by-line reading
             start_time = time.perf_counter()
             lines = []
-            with open(test_file, "r") as f:
+            with open(test_file, "r", encoding="utf-8") as f:
                 for line in f:
                     lines.append(line)
             end_time = time.perf_counter()
@@ -189,19 +187,17 @@ class BenchmarkSuite:
 
         component_pattern = SPICE_PATTERNS.get("component", r"(\S+)\s+(\S+.*)")
 
-        import re
-
         pattern = re.compile(component_pattern)
 
         start_time = time.perf_counter()
         for line in component_lines:
             match = pattern.match(line)
             if match:
-                match.group(1)
+                _ = match.group(1)  # Extract component name
                 # Simple value extraction
                 parts = line.split()
                 if len(parts) >= 4:
-                    parts[3]
+                    _ = parts[3]  # Extract component value
         end_time = time.perf_counter()
         results["component_parsing_time"] = (end_time - start_time) / len(
             component_lines

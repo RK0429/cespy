@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+# pylint: disable=unnecessary-ellipsis
 """Component interface protocol for editor components.
 
 This module defines the standard interface that all circuit components

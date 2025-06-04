@@ -731,7 +731,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         switches: Optional[list[str]] = None,
         timeout: Optional[float] = None,
         exe_log: bool = True,
-        measure: Optional[str] = None,
+        measure: Optional[str] = None,  # pylint: disable=unused-argument
         num_runs: Optional[int] = None,
     ) -> Optional[
         Tuple[

@@ -19,7 +19,8 @@ class TestRawFileParsing:
         traces = [
             Trace("time", "time", data=np.linspace(0, 1e-3, 100)),
             Trace("V(out)", "voltage", data=np.sin(2 * np.pi * 1000 * np.linspace(0, 1e-3, 100))),
-            Trace("I(R1)", "current", data=np.sin(2 * np.pi * 1000 * np.linspace(0, 1e-3, 100)) / 1000)
+            Trace("I(R1)", "current",
+                  data=np.sin(2 * np.pi * 1000 * np.linspace(0, 1e-3, 100)) / 1000)
         ]
 
         raw_file = temp_dir / "test_tran.raw"
@@ -265,7 +266,7 @@ Date: Mon Jan 01 12:00:00 2024
         log_file.write_text(log_content)
 
         # Parse semiconductor operating points
-        reader = SemiDevOpReader(log_file)
+        reader = opLogReader(log_file)
 
         # Get MOSFET data
         mosfets = reader.get_mosfets()

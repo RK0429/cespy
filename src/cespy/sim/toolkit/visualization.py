@@ -562,7 +562,7 @@ class AnalysisVisualizer:
 
         # Create summary statistics file
         stats_file = output_path / f"{report_name}_statistics.txt"
-        with open(stats_file, "w") as f:
+        with open(stats_file, "w", encoding="utf-8") as f:
             f.write(f"Analysis Report: {report_name}\n")
             f.write("=" * 50 + "\n\n")
 
@@ -591,7 +591,7 @@ class AnalysisVisualizer:
 
         # Create index file
         index_file = output_path / f"{report_name}_index.html"
-        with open(index_file, "w") as f:
+        with open(index_file, "w", encoding="utf-8") as f:
             f.write(
                 f"""
 <!DOCTYPE html>

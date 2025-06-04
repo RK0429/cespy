@@ -390,7 +390,7 @@ class SimRunnerRefactored:
         # would validate argument counts and convert tuples to dicts
         if isinstance(callback_args, dict):
             return callback_args
-        elif isinstance(callback_args, tuple):
+        if isinstance(callback_args, tuple):
             # Convert to dict (simplified - would need parameter names)
             return {"args": callback_args}
         return {}

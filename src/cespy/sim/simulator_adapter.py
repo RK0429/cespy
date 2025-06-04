@@ -175,8 +175,7 @@ class SimulatorAdapter(ISimulator):
                 cmd_line_switches=options.get("switches", []) if options else None,
                 timeout=options.get("timeout") if options else None,
             )
-        else:
-            raise NotImplementedError(
+        raise NotImplementedError(
                 f"{self.simulator_name} does not support netlist creation from schematics"
             )
 

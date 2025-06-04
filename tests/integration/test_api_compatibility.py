@@ -126,6 +126,7 @@ C1 out 0 1u
         assert callable(SpiceEditor)
         assert callable(AscEditor)
         assert callable(RawRead)
+        assert callable(LTspice)
         assert callable(SimRunner)
 
     def test_editor_file_format_support(self, temp_dir: Path):
@@ -139,7 +140,7 @@ C1 out 0 1u
 
         # Test create_blank functionality
         blank_file = temp_dir / "blank.net"
-        _blank_editor = SpiceEditor(blank_file, create_blank=True)
+        SpiceEditor(blank_file, create_blank=True)
         assert blank_file.exists()
 
     def test_error_handling_compatibility(self, temp_dir: Path):

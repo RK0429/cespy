@@ -195,8 +195,7 @@ class Simulator(ABC):
                 # For MacOS wine, there will be no process called "wine". Use
                 # "wine-preloader"
                 return "wine-preloader"
-            else:
-                return Path(exe).stem
+            return Path(exe).stem
         else:
             return Path(exe).name
 

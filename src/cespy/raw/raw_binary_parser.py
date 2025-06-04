@@ -183,7 +183,7 @@ class OptimizedBinaryParser:
         traces = []
         byte_offset = 0
 
-        for trace_idx, fmt in enumerate(trace_formats):
+        for _, fmt in enumerate(trace_formats):
             fmt_info = BINARY_FORMATS[fmt]
             trace_data = np.zeros(num_points, dtype=fmt_info.numpy_dtype)
 
@@ -238,7 +238,7 @@ class OptimizedBinaryParser:
         traces = []
         current_offset = offset
 
-        for trace_idx, fmt in enumerate(trace_formats):
+        for _, fmt in enumerate(trace_formats):
             # Read entire trace at once
             trace_data = self.read_block(current_offset, num_points, fmt, byte_order)
             traces.append(trace_data)

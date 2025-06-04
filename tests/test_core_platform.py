@@ -2,7 +2,6 @@
 # coding=utf-8
 """Tests for core platform management functionality."""
 
-import os
 import platform
 import pytest
 from pathlib import Path

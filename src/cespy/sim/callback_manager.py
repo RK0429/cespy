@@ -346,8 +346,7 @@ class CallbackManager:
             # Simple function with just raw_file and log_file
             if len(params) == 2:
                 return CallbackType.SIMPLE_FUNCTION
-            else:
-                return CallbackType.PARAMETERIZED_FUNCTION
+            return CallbackType.PARAMETERIZED_FUNCTION
 
         raise TypeError(f"Unsupported callback type: {type(callback)}")
 

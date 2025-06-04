@@ -5,7 +5,7 @@
 import re
 import time
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from cespy.core.performance import (
     PerformanceMetrics,
@@ -332,16 +332,16 @@ class TestRegexCache:
         cache = RegexCache(max_size=2)
 
         # Fill cache to capacity
-        pattern1 = cache.get_pattern(r'pattern1')
-        pattern2 = cache.get_pattern(r'pattern2')
+        cache.get_pattern(r'pattern1')
+        cache.get_pattern(r'pattern2')
         assert len(cache.cache) == 2
 
         # Adding third pattern should evict first (FIFO)
-        pattern3 = cache.get_pattern(r'pattern3')
+        cache.get_pattern(r'pattern3')
         assert len(cache.cache) == 2
 
         # First pattern should have been evicted
-        pattern1_new = cache.get_pattern(r'pattern1')
+        cache.get_pattern(r'pattern1')
         assert cache.miss_count == 4  # Original 3 + 1 for re-compilation
 
     def test_cache_stats(self):

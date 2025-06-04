@@ -279,9 +279,9 @@ class RawReadLazy(RawRead):
 
             self._lazy_traces[trace_name] = lazy_trace
 
-    def get_trace(
+    def get_trace(  # type: ignore[override]
         self, trace_ref: Union[str, int]
-    ) -> Union[Axis, TraceRead, DummyTrace, LazyTrace]:  # type: ignore
+    ) -> Union[Axis, TraceRead, DummyTrace, LazyTrace]:
         """Get a trace by name.
 
         Returns LazyTrace instead of TraceRead for lazy loading.

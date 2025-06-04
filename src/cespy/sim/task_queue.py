@@ -58,7 +58,6 @@ class TaskInfo:
     def __post_init__(self) -> None:
         """Post-initialization hook."""
         # task_id is always initialized by default_factory
-        pass
 
     def __lt__(self, other: Any) -> bool:
         """Enable comparison for priority queue."""

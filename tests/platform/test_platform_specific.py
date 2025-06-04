@@ -123,7 +123,7 @@ class TestSimulatorPlatformCompatibility:
                     result = subprocess.run(['which', 'mpirun'], capture_output=True, text=True)
                     has_mpi = result.returncode == 0
                     print(f"MPI available: {has_mpi}")
-                except:
+                except Exception:
                     pass
 
 
@@ -277,7 +277,7 @@ class TestPlatformSpecificPaths:
         wine_program_files.mkdir(parents=True, exist_ok=True)
 
         # Test Wine path conversion
-        windows_path = "C:/Program Files/LTC/LTspiceXVII/XVIIx64.exe"
+        # "C:/Program Files/LTC/LTspiceXVII/XVIIx64.exe"
 
         # LTspice should handle this conversion internally
         ltspice = LTspice()

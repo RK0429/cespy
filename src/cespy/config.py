@@ -55,7 +55,7 @@ class ServerConfig:
 
 
 @dataclass
-class CespyConfig:
+class CespyConfig:  # pylint: disable=too-many-instance-attributes
     """Main configuration class for cespy."""
 
     # General settings

@@ -4,9 +4,7 @@ import pytest
 from pathlib import Path
 import numpy as np
 from cespy.sim.toolkit import MonteCarloAnalysis, WorstCaseAnalysis, SensitivityAnalysis
-from cespy.editor.spice_editor import SpiceEditor
 from cespy.simulators import LTspice
-from cespy.sim import SimRunner
 from cespy.raw.raw_read import RawRead
 
 
@@ -86,7 +84,7 @@ C1 out 0 1u
             measurements=["rise_time"]
         )
 
-        _results = mc.run()
+        mc.run()
         measurements = mc.get_measurements()
 
         # Should have rise_time measurements
@@ -260,7 +258,7 @@ R2 out 0 10k
             calculate_sensitivity=True
         )
 
-        results = wc.run()
+        wc.run()
         sensitivities = wc.get_sensitivities()
 
         # Should have sensitivity for each component
@@ -374,7 +372,7 @@ R4 out 0 100k
             analysis_type="dc"
         )
 
-        results = sa.run()
+        sa.run()
         ranked = sa.get_ranked_sensitivities()
 
         # Should return components ranked by absolute sensitivity
@@ -421,16 +419,15 @@ R2 out 0 10k
             simulator=LTspice()
         )
 
-        _mc_results = mc.run()
-        mc_stats = mc.get_statistics()
+        mc.run()
+        mc.get_statistics()
 
         # Identify worst-case directions from Monte Carlo
-        _delay_mean = mc_stats["delay"]["mean"]
         delay_values = mc.get_measurements()["delay"]
 
         # Find runs with min/max delays
-        _min_idx = np.argmin(delay_values)
-        _max_idx = np.argmax(delay_values)
+        np.argmin(delay_values)
+        np.argmax(delay_values)
 
         # Now run targeted worst-case analysis
         wc = WorstCaseAnalysis(
