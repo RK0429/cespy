@@ -1,12 +1,14 @@
 """Integration tests for simulator execution across different SPICE engines."""
 
-import pytest
-from pathlib import Path
 import shutil
-from cespy.simulators import LTspice, NGspice, Qspice, Xyce
-from cespy.sim import SimRunner
-from cespy.raw.raw_read import RawRead
+from pathlib import Path
+
+import pytest
+
 from cespy.log.ltsteps import LTSpiceLogReader
+from cespy.raw.raw_read import RawRead
+from cespy.sim import SimRunner
+from cespy.simulators import LTspice, NGspice, Qspice, Xyce
 
 
 class TestLTSpiceExecution:

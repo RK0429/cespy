@@ -1,7 +1,9 @@
 """Integration tests for complete simulation workflows."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from cespy import simulate
 from cespy.editor.spice_editor import SpiceEditor
 from cespy.raw.raw_read import RawRead

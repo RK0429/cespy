@@ -4,19 +4,19 @@
 
 import tempfile
 from pathlib import Path
-from typing import Generator, List, Tuple, Any
+from typing import Any, Generator, List, Tuple
 from unittest.mock import patch
 
 import pytest
 
 from cespy.sim.toolkit import (
-    MonteCarloAnalysis,
-    BaseAnalysis,
-    StatisticalAnalysis,
     AnalysisResult,
     AnalysisStatus,
-    ProgressReporter,
     AnalysisVisualizer,
+    BaseAnalysis,
+    MonteCarloAnalysis,
+    ProgressReporter,
+    StatisticalAnalysis,
     check_plotting_availability,
 )
 
@@ -50,7 +50,7 @@ class TestBaseAnalysisIntegration:
         """Test that BaseAnalysis enforces abstract methods."""
         # Can't instantiate BaseAnalysis directly
         with pytest.raises(TypeError):
-            BaseAnalysis(sample_circuit_file)
+            BaseAnalysis(str(sample_circuit_file))
 
     def test_progress_reporter_integration(self) -> None:
         """Test ProgressReporter integration."""
@@ -76,15 +76,17 @@ class TestStatisticalAnalysisIntegration:
 
     def test_statistical_analysis_creation(self, sample_circuit_file: Path) -> None:
         """Test StatisticalAnalysis instantiation."""
-        analysis = StatisticalAnalysis(sample_circuit_file, num_runs=10, seed=42)
+        analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=10, seed=42)
 
         assert analysis.num_runs == 10
         assert analysis.seed == 42
         assert len(analysis.results) == 0
 
-    def test_statistics_calculation_with_mock_results(self, sample_circuit_file: Path) -> None:
+    def test_statistics_calculation_with_mock_results(
+        self, sample_circuit_file: Path
+    ) -> None:
         """Test statistics calculation with mock results."""
-        analysis = StatisticalAnalysis(sample_circuit_file, num_runs=5)
+        analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=5)
 
         # Add mock results
         for i in range(5):
@@ -129,7 +131,7 @@ class TestStatisticalAnalysisIntegration:
 
     def test_correlation_matrix_calculation(self, sample_circuit_file: Path) -> None:
         """Test correlation matrix calculation."""
-        analysis = StatisticalAnalysis(sample_circuit_file, num_runs=5)
+        analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=5)
 
         # Add mock results with correlated measurements
         for i in range(5):
@@ -160,18 +162,20 @@ class TestMonteCarloAnalysisIntegration:
     """Test enhanced MonteCarloAnalysis integration."""
 
     @patch("cespy.sim.toolkit.montecarlo.SimRunner")
-    def test_monte_carlo_dual_mode_creation(self, mock_runner: Any, sample_circuit_file: Path) -> None:
+    def test_monte_carlo_dual_mode_creation(
+        self, mock_runner: Any, sample_circuit_file: Path
+    ) -> None:
         """Test MonteCarloAnalysis creation with both modes."""
         # Testbench mode (default)
         mc_testbench = MonteCarloAnalysis(
-            sample_circuit_file, num_runs=100, use_testbench_mode=True
+            str(sample_circuit_file), num_runs=100, use_testbench_mode=True
         )
         assert mc_testbench.use_testbench_mode is True
         assert mc_testbench.num_runs == 100
 
         # Separate run mode
         mc_separate = MonteCarloAnalysis(
-            sample_circuit_file,
+            str(sample_circuit_file),
             num_runs=50,
             use_testbench_mode=False,
             parallel=True,
@@ -187,7 +191,7 @@ class TestMonteCarloAnalysisIntegration:
     ) -> None:
         """Test tolerance setting and parameter generation."""
         mc = MonteCarloAnalysis(
-            sample_circuit_file, num_runs=10, use_testbench_mode=False, seed=42
+            str(sample_circuit_file), num_runs=10, use_testbench_mode=False, seed=42
         )
 
         # Set component tolerances
@@ -208,14 +212,25 @@ class TestMonteCarloAnalysisIntegration:
                         return (
                             1000.0,
                             ComponentDeviation(
-                                max_val=0.05, min_val=0, typ=DeviationType.TOLERANCE, distribution="uniform"
+                                max_val=0.05,
+                                min_val=0,
+                                typ=DeviationType.TOLERANCE,
+                                distribution="uniform",
                             ),
                         )
                     elif ref == "C1":
                         return 1e-6, ComponentDeviation(
-                            max_val=0.10, min_val=0, typ=DeviationType.TOLERANCE, distribution="normal"
+                            max_val=0.10,
+                            min_val=0,
+                            typ=DeviationType.TOLERANCE,
+                            distribution="normal",
                         )
-                    return 0, ComponentDeviation(max_val=0, min_val=0, typ=DeviationType.NONE, distribution="uniform")
+                    return 0, ComponentDeviation(
+                        max_val=0,
+                        min_val=0,
+                        typ=DeviationType.NONE,
+                        distribution="uniform",
+                    )
 
                 mock_get_dev.side_effect = mock_deviation
 
@@ -326,7 +341,9 @@ class TestAnalysisVisualizationIntegration:
 class TestPerformanceIntegration:
     """Test performance monitoring integration with analysis."""
 
-    def test_analysis_with_performance_monitoring(self, sample_circuit_file: Path) -> None:
+    def test_analysis_with_performance_monitoring(
+        self, sample_circuit_file: Path
+    ) -> None:
         """Test analysis with performance monitoring enabled."""
         from cespy.core import enable_performance_monitoring, get_performance_report
 
@@ -366,7 +383,7 @@ class TestErrorHandlingIntegration:
 
     def test_analysis_with_failed_runs(self, sample_circuit_file: Path) -> None:
         """Test analysis behavior with some failed simulation runs."""
-        analysis = StatisticalAnalysis(sample_circuit_file, num_runs=5)
+        analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=5)
 
         # Add mix of successful and failed results
         results = [
@@ -439,7 +456,7 @@ class TestCrossModuleIntegration:
 
     def test_platform_aware_analysis(self, sample_circuit_file: Path) -> None:
         """Test that analysis uses platform information for optimization."""
-        from cespy.core import get_platform_info, get_optimal_workers
+        from cespy.core import get_optimal_workers, get_platform_info
 
         platform_info = get_platform_info()
         optimal_workers = get_optimal_workers()

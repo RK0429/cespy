@@ -1,13 +1,15 @@
 """Integration tests for parsing simulation results (.raw and .log files)."""
 
-import pytest
 from pathlib import Path
+
 import numpy as np
+import pytest
+
+from cespy.log.ltsteps import LTSpiceLogReader
+from cespy.log.qspice_log_reader import QspiceLogReader
+from cespy.log.semi_dev_op_reader import opLogReader
 from cespy.raw.raw_read import RawRead
 from cespy.raw.raw_write import RawWrite, Trace
-from cespy.log.ltsteps import LTSpiceLogReader
-from cespy.log.semi_dev_op_reader import opLogReader
-from cespy.log.qspice_log_reader import QspiceLogReader
 
 
 class TestRawFileParsing:
@@ -19,7 +21,7 @@ class TestRawFileParsing:
         time_data = np.linspace(0, 1e-3, 100)
         voltage_data = np.sin(2 * np.pi * 1000 * time_data)
         current_data = voltage_data / 1000
-        
+
         traces = [
             Trace(name="time", data=time_data),
             Trace(name="V(out)", data=voltage_data),
@@ -31,7 +33,7 @@ class TestRawFileParsing:
             writer = RawWrite(str(raw_file), binary=False, title="transient")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, 'write'):
+            if hasattr(writer, "write"):
                 writer.write()
         except Exception:
             # Skip if RawWrite API is different
@@ -42,7 +44,7 @@ class TestRawFileParsing:
             reader = RawRead(raw_file)
 
             # Verify header info
-            if hasattr(reader, 'get_raw_property'):
+            if hasattr(reader, "get_raw_property"):
                 assert reader.get_raw_property("No. Variables") == 3
                 assert reader.get_raw_property("Plotname") == "transient"
 
@@ -54,7 +56,7 @@ class TestRawFileParsing:
 
             # Verify data
             time_trace = reader.get_trace("time")
-            if hasattr(time_trace, 'data') and time_trace.data is not None:
+            if hasattr(time_trace, "data") and time_trace.data is not None:
                 time_data = time_trace.data
                 assert len(time_data) == 100
                 assert time_data[0] == 0
@@ -62,7 +64,7 @@ class TestRawFileParsing:
 
             # Verify voltage trace
             voltage_trace = reader.get_trace("V(out)")
-            if hasattr(voltage_trace, 'data') and voltage_trace.data is not None:
+            if hasattr(voltage_trace, "data") and voltage_trace.data is not None:
                 voltage_data = voltage_trace.data
                 assert len(voltage_data) == 100
                 # Check it's a sine wave (starts at 0, goes positive)
@@ -91,7 +93,7 @@ class TestRawFileParsing:
             writer = RawWrite(str(raw_file), binary=False, title="AC Analysis")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, 'write'):
+            if hasattr(writer, "write"):
                 writer.write()
         except Exception:
             # Skip if RawWrite API is different
@@ -102,15 +104,15 @@ class TestRawFileParsing:
             reader = RawRead(raw_file)
 
             # Verify it's AC analysis (complex data)
-            if hasattr(reader, 'get_raw_property'):
+            if hasattr(reader, "get_raw_property"):
                 assert reader.get_raw_property("Flags") == "complex"
 
             # Get frequency axis
             try:
                 freq_axis = reader.get_axis()
-                if hasattr(freq_axis, 'name'):
+                if hasattr(freq_axis, "name"):
                     assert freq_axis.name == "frequency"
-                if hasattr(freq_axis, 'data'):
+                if hasattr(freq_axis, "data"):
                     assert len(freq_axis.data) == 50
             except Exception:
                 # Skip if axis access is different
@@ -118,11 +120,11 @@ class TestRawFileParsing:
 
             # Get complex voltage data
             voltage_trace = reader.get_trace("V(out)")
-            if hasattr(voltage_trace, 'data') and voltage_trace.data is not None:
+            if hasattr(voltage_trace, "data") and voltage_trace.data is not None:
                 assert voltage_trace.data.dtype == complex
 
             # Verify magnitude decreases with frequency (RC filter behavior)
-            if hasattr(voltage_trace, 'data') and voltage_trace.data is not None:
+            if hasattr(voltage_trace, "data") and voltage_trace.data is not None:
                 magnitudes = np.abs(voltage_trace.data)
                 assert magnitudes[0] > magnitudes[-1]
         except Exception:
@@ -153,13 +155,13 @@ class TestRawFileParsing:
         raw_file = temp_dir / "test_stepped.raw"
         try:
             writer = RawWrite(str(raw_file), binary=False, title="Transient Analysis")
-            if hasattr(writer, 'set_no_points'):
+            if hasattr(writer, "set_no_points"):
                 writer.set_no_points(num_points)
-            if hasattr(writer, 'set_no_steps'):
+            if hasattr(writer, "set_no_steps"):
                 writer.set_no_steps(num_steps)
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, 'write'):
+            if hasattr(writer, "write"):
                 writer.write()
         except Exception:
             # Skip if RawWrite API is different
@@ -171,14 +173,14 @@ class TestRawFileParsing:
         # Verify step information
         try:
             assert reader.get_raw_property("No. Points") == num_points
-            if hasattr(reader, 'nsteps'):
+            if hasattr(reader, "nsteps"):
                 assert reader.nsteps == num_steps
 
             # Get data for each step
             for step in range(num_steps):
                 try:
                     step_data = reader.get_trace("V(out)")
-                    if hasattr(step_data, 'data') and step_data.data is not None:
+                    if hasattr(step_data, "data") and step_data.data is not None:
                         assert len(step_data.data) >= num_points
                         # Verify amplitude increases with step
                         max_voltage = np.max(np.abs(step_data.data))
@@ -204,7 +206,7 @@ class TestRawFileParsing:
             writer = RawWrite(str(raw_file), binary=False, title="Operating Point")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, 'write'):
+            if hasattr(writer, "write"):
                 writer.write()
         except Exception:
             # Skip if RawWrite API is different
@@ -216,13 +218,13 @@ class TestRawFileParsing:
 
             # Operating point should have single values
             v_in_trace = reader.get_trace("V(in)")
-            if hasattr(v_in_trace, 'data') and v_in_trace.data is not None:
+            if hasattr(v_in_trace, "data") and v_in_trace.data is not None:
                 v_in = v_in_trace.data
                 assert len(v_in) == 1
                 assert v_in[0] == 5.0
 
             v_out_trace = reader.get_trace("V(out)")
-            if hasattr(v_out_trace, 'data') and v_out_trace.data is not None:
+            if hasattr(v_out_trace, "data") and v_out_trace.data is not None:
                 v_out = v_out_trace.data
                 assert len(v_out) == 1
                 assert v_out[0] == 2.5
@@ -263,7 +265,7 @@ solver = Normal
             reader = LTSpiceLogReader(str(log_file))
 
             # Check basic info
-            if hasattr(reader, 'get_parameter'):
+            if hasattr(reader, "get_parameter"):
                 assert reader.get_parameter("tnom") == 27
                 assert reader.get_parameter("temp") == 27
                 assert reader.get_parameter("method") == "trap"
@@ -296,7 +298,7 @@ Total elapsed time: 0.456 seconds.
             reader = LTSpiceLogReader(str(log_file))
 
             # Get steps
-            if hasattr(reader, 'get_steps'):
+            if hasattr(reader, "get_steps"):
                 steps = reader.get_steps()
                 assert len(steps) == 3
 
@@ -345,7 +347,7 @@ Date: Mon Jan 01 12:00:00 2024
             reader = opLogReader(str(log_file))
 
             # Get MOSFET data
-            if hasattr(reader, 'get_mosfets'):
+            if hasattr(reader, "get_mosfets"):
                 mosfets = reader.get_mosfets()
                 assert len(mosfets) == 1
                 assert mosfets[0]["name"] == "m1"
@@ -354,7 +356,7 @@ Date: Mon Jan 01 12:00:00 2024
                 assert mosfets[0]["Vth"] == pytest.approx(0.75)
 
             # Get BJT data
-            if hasattr(reader, 'get_bjts'):
+            if hasattr(reader, "get_bjts"):
                 bjts = reader.get_bjts()
                 assert len(bjts) == 1
                 assert bjts[0]["name"] == "q1"
@@ -394,7 +396,7 @@ Total simulation time: 0.567s
             reader = QspiceLogReader(str(log_file))
 
             # Get measurements
-            if hasattr(reader, 'get_measurements'):
+            if hasattr(reader, "get_measurements"):
                 measurements = reader.get_measurements()
                 assert "vout_rms" in measurements
                 assert measurements["vout_rms"] == pytest.approx(0.707)
@@ -424,10 +426,12 @@ class TestRawFileCompatibility:
         # Write as "NGSpice" style
         ngspice_raw = temp_dir / "ngspice.raw"
         try:
-            writer = RawWrite(str(ngspice_raw), binary=False, title="Transient Analysis")
+            writer = RawWrite(
+                str(ngspice_raw), binary=False, title="Transient Analysis"
+            )
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, 'write'):
+            if hasattr(writer, "write"):
                 writer.write()
         except Exception:
             # Skip if RawWrite API is different
@@ -464,7 +468,7 @@ class TestRawFileCompatibility:
             writer_bin = RawWrite(str(binary_raw), binary=True, title="Transient")
             for trace in traces:
                 writer_bin.add_trace(trace)
-            if hasattr(writer_bin, 'write'):
+            if hasattr(writer_bin, "write"):
                 writer_bin.write()
         except Exception:
             # Skip if RawWrite API is different
@@ -476,7 +480,7 @@ class TestRawFileCompatibility:
             writer_asc = RawWrite(str(ascii_raw), binary=False, title="Transient")
             for trace in traces:
                 writer_asc.add_trace(trace)
-            if hasattr(writer_asc, 'write'):
+            if hasattr(writer_asc, "write"):
                 writer_asc.write()
         except Exception:
             # Skip if RawWrite API is different
@@ -489,14 +493,26 @@ class TestRawFileCompatibility:
         # Verify both have same data
         time_bin_trace = reader_bin.get_trace("time")
         time_asc_trace = reader_asc.get_trace("time")
-        
-        if (hasattr(time_bin_trace, 'data') and time_bin_trace.data is not None and
-            hasattr(time_asc_trace, 'data') and time_asc_trace.data is not None):
-            np.testing.assert_array_almost_equal(time_bin_trace.data, time_asc_trace.data)
+
+        if (
+            hasattr(time_bin_trace, "data")
+            and time_bin_trace.data is not None
+            and hasattr(time_asc_trace, "data")
+            and time_asc_trace.data is not None
+        ):
+            np.testing.assert_array_almost_equal(
+                time_bin_trace.data, time_asc_trace.data
+            )
 
         voltage_bin_trace = reader_bin.get_trace("V(out)")
         voltage_asc_trace = reader_asc.get_trace("V(out)")
-        
-        if (hasattr(voltage_bin_trace, 'data') and voltage_bin_trace.data is not None and
-            hasattr(voltage_asc_trace, 'data') and voltage_asc_trace.data is not None):
-            np.testing.assert_array_almost_equal(voltage_bin_trace.data, voltage_asc_trace.data)
+
+        if (
+            hasattr(voltage_bin_trace, "data")
+            and voltage_bin_trace.data is not None
+            and hasattr(voltage_asc_trace, "data")
+            and voltage_asc_trace.data is not None
+        ):
+            np.testing.assert_array_almost_equal(
+                voltage_bin_trace.data, voltage_asc_trace.data
+            )

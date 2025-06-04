@@ -23,7 +23,7 @@ def temp_dir(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def sample_netlist(test_files_dir: Path) -> Path:
+def sample_netlist(test_files_dir: Path) -> Path:  # pylint: disable=redefined-outer-name
     """Return path to a sample netlist file."""
     netlist = test_files_dir / "simple_rc.net"
     if not netlist.exists():
@@ -41,7 +41,7 @@ C1 out 0 1u
 
 
 @pytest.fixture
-def sample_asc_file(test_files_dir: Path) -> Path:
+def sample_asc_file(test_files_dir: Path) -> Path:  # pylint: disable=redefined-outer-name
     """Return path to a sample .asc file."""
     asc_file = test_files_dir / "simple_rc.asc"
     # This would contain actual .asc content in a real test
@@ -64,7 +64,8 @@ def pytest_configure(config: pytest.Config) -> None:
     )
 
 
-def pytest_collection_modifyitems(config: pytest.Config, items: List[pytest.Item]) -> None:
+def pytest_collection_modifyitems(config: pytest.Config,  # pylint: disable=unused-argument
+                                 items: List[pytest.Item]) -> None:
     """Skip platform-specific tests on wrong platforms."""
     skip_windows = pytest.mark.skip(reason="Test only runs on Windows")
     skip_linux = pytest.mark.skip(reason="Test only runs on Linux")

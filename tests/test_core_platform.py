@@ -8,6 +8,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+# pylint: disable=import-error
 from cespy.core.platform import (
     Architecture,
     OSType,
@@ -18,6 +19,7 @@ from cespy.core.platform import (
     is_simulator_available,
     get_simulator_path,
 )
+# pylint: disable=import-error
 from cespy.core.constants import Simulators
 
 
@@ -84,6 +86,7 @@ class TestPlatformInfo:
 
 class TestPlatformManager:
     """Test PlatformManager singleton."""
+    # pylint: disable=protected-access
 
     def test_singleton_behavior(self) -> None:
         """Test that PlatformManager is a singleton."""
@@ -340,6 +343,7 @@ class TestPlatformIntegration:
 
 class TestErrorHandling:
     """Test error handling in platform management."""
+    # pylint: disable=protected-access
 
     @patch("subprocess.run")
     def test_memory_detection_failure(self, mock_run: Mock) -> None:

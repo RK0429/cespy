@@ -1,9 +1,10 @@
 """Integration tests for CLI entry points."""
 
-import pytest
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 
 class TestCLIEntryPoints:

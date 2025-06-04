@@ -247,6 +247,7 @@ class TestParameterValidator:
         assert validator.validate_file_path_parameter(None) is None
 
         # Test Path-like object
+        # pylint: disable=import-outside-toplevel
         from pathlib import Path
 
         path_obj = Path("test.txt")
@@ -326,8 +327,8 @@ class TestEnsureAPIConsistency:
     def test_file_path_validation(self) -> None:
         """Test automatic file path validation."""
 
+        # pylint: disable=import-outside-toplevel
         from typing import Optional
-        
         @ensure_api_consistency
         def test_function(file_path: Optional[str] = None) -> Optional[str]:
             return file_path
@@ -337,6 +338,7 @@ class TestEnsureAPIConsistency:
         assert result == "test.txt"
 
         # Test Path object
+        # pylint: disable=import-outside-toplevel
         from pathlib import Path
 
         result = test_function(file_path=str(Path("test.txt")))
@@ -345,8 +347,8 @@ class TestEnsureAPIConsistency:
     def test_timeout_validation(self) -> None:
         """Test automatic timeout validation."""
 
+        # pylint: disable=import-outside-toplevel
         from typing import Optional
-        
         @ensure_api_consistency
         def test_function(timeout: Optional[float] = None) -> Optional[float]:
             return timeout
@@ -381,6 +383,7 @@ class TestCreateCompatibilityWrapper:
     def test_wrapper_creation(self) -> None:
         """Test creation of compatibility wrapper."""
         # Create a mock module dict
+        # pylint: disable=import-outside-toplevel
         from typing import Dict, Any, Callable
         module_dict: Dict[str, Callable[[Any], Any]] = {"NewFunction": lambda x: x * 2}
 
@@ -463,13 +466,14 @@ class TestIntegration:
     def test_class_method_decoration(self) -> None:
         """Test decorating class methods."""
 
-        class TestClass:
+        class TestClass:  # pylint: disable=missing-class-docstring
             @deprecated(version="2.0", reason="Use new method")
-            def old_method(self, value: int) -> int:
+            def old_method(self, value: int) -> int:  # pylint: disable=missing-function-docstring
                 return value * 2
 
             @standardize_parameters({"old_arg": "new_arg"})
-            def standardized_method(self, new_arg: str = "default", **kwargs: str) -> str:
+            def standardized_method(self, new_arg: str = "default",
+                                  **kwargs: str) -> str:  # pylint: disable=missing-function-docstring,unused-argument
                 return new_arg
 
         obj = TestClass()

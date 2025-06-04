@@ -8,6 +8,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
+# pylint: disable=import-error
 from cespy.core.performance import (
     PerformanceMetrics,
     PerformanceMonitor,
@@ -199,6 +200,7 @@ class TestProfilePerformanceDecorator:
 
     def test_basic_profiling(self) -> None:
         """Test basic function profiling."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         # Clear existing metrics
@@ -220,6 +222,7 @@ class TestProfilePerformanceDecorator:
 
     def test_profiling_with_memory(self) -> None:
         """Test profiling with memory monitoring."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         performance_monitor.reset_metrics()
@@ -227,7 +230,7 @@ class TestProfilePerformanceDecorator:
         @profile_performance(include_memory=True)
         def memory_function() -> int:
             # Create some data to use memory
-            data = [i for i in range(1000)]
+            data = list(range(1000))
             return len(data)
 
         result = memory_function()
@@ -239,6 +242,7 @@ class TestProfilePerformanceDecorator:
 
     def test_profiling_disabled(self) -> None:
         """Test profiling when monitoring is disabled."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         # Disable monitoring
@@ -269,6 +273,7 @@ class TestPerformanceTimer:
 
     def test_basic_timing(self) -> None:
         """Test basic timing functionality."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         performance_monitor.reset_metrics()
@@ -283,6 +288,7 @@ class TestPerformanceTimer:
 
     def test_timer_with_exception(self) -> None:
         """Test timer behavior when exception occurs."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         performance_monitor.reset_metrics()
@@ -395,6 +401,7 @@ class TestCachedRegex:
     def test_cached_regex_function(self) -> None:
         """Test module-level cached_regex function."""
         # Clear global cache first
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import regex_cache
 
         regex_cache.clear()
@@ -457,6 +464,7 @@ class TestPerformanceOptimizer:
         """Test memory usage optimization recommendations."""
         # Test with mocked platform info
         with patch("cespy.core.performance.get_platform_info") as mock_get_info:
+            # pylint: disable=import-outside-toplevel,import-error
             from cespy.core.platform import PlatformInfo, OSType, Architecture
 
             mock_info = PlatformInfo(
@@ -523,6 +531,7 @@ class TestModuleFunctions:
 
     def test_enable_performance_monitoring(self) -> None:
         """Test enable/disable performance monitoring."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         original_state = performance_monitor.enabled
@@ -539,6 +548,7 @@ class TestModuleFunctions:
 
     def test_get_performance_report(self) -> None:
         """Test performance report generation."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         performance_monitor.reset_metrics()
@@ -559,6 +569,7 @@ class TestErrorHandling:
 
     def test_profiling_with_exception(self) -> None:
         """Test that profiling handles function exceptions correctly."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         performance_monitor.reset_metrics()
@@ -577,6 +588,7 @@ class TestErrorHandling:
 
     def test_memory_profiling_without_psutil(self) -> None:
         """Test memory profiling when psutil is not available."""
+        # pylint: disable=import-outside-toplevel,import-error
         from cespy.core.performance import performance_monitor
 
         performance_monitor.reset_metrics()

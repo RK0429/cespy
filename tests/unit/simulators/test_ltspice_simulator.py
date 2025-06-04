@@ -114,6 +114,7 @@ class TestLTspiceSimulator:
         with patch("os.path.expanduser") as mock_expand:
             mock_expand.side_effect = lambda x: x.replace("~", "C:/Users/test")
 
+            # pylint: disable=protected-access
             LTspice._detect_windows_executable()
 
             # Should find the first available executable
@@ -137,6 +138,7 @@ class TestLTspiceSimulator:
 
         mock_exists.side_effect = exists_side_effect
 
+        # pylint: disable=protected-access
         LTspice._detect_unix_executable()
 
         # Should detect wine executable

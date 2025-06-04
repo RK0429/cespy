@@ -1,12 +1,14 @@
 """Platform-specific tests to ensure cross-platform compatibility."""
 
-import pytest
-import sys
 import platform
-from pathlib import Path
 import subprocess
-from cespy.simulators import LTspice, NGspice, Qspice, Xyce
+import sys
+from pathlib import Path
+
+import pytest
+
 from cespy.editor import SpiceEditor
+from cespy.simulators import LTspice, NGspice, Qspice, Xyce
 from cespy.utils.file_search import search_file_in_containers
 from cespy.utils.windows_short_names import get_short_path_name
 

@@ -1,11 +1,13 @@
 """Unit tests for SimRunner class functionality."""
 
-import pytest
 from pathlib import Path
-from unittest.mock import patch, Mock
-from cespy.sim.sim_runner import SimRunner
-from cespy.sim.run_task import RunTask
+from unittest.mock import Mock, patch
+
+import pytest
+
 from cespy.sim.process_callback import ProcessCallback
+from cespy.sim.run_task import RunTask
+from cespy.sim.sim_runner import SimRunner
 
 
 class TestSimRunner:
@@ -24,7 +26,7 @@ class TestSimRunner:
         assert runner.timeout == 600.0  # default timeout
         assert runner.verbose is False
         assert runner.runno == 0
-        assert hasattr(runner, '_successful_count') or hasattr(runner, 'successful_simulations')
+        assert hasattr(runner, "ok_sim") or hasattr(runner, "stats")
 
     def test_init_custom_values(self) -> None:
         """Test SimRunner initialization with custom values."""
@@ -41,25 +43,26 @@ class TestSimRunner:
         """Test runno property increments correctly."""
         initial_runno = self.runner.runno
 
-        # Simulate adding a run
-        if hasattr(self.runner, 'run_count'):
-            self.runner.run_count += 1
+        # The runno property is calculated from stats
+        if hasattr(self.runner, "stats"):
+            # Simulate adding a run
+            self.runner.stats.run_count += 1
             assert self.runner.runno == initial_runno + 1
         else:
-            # Skip if implementation doesn't have run_count
+            # Skip if implementation doesn't have stats
             pass
 
     def test_okSim_property(self) -> None:
         """Test okSim property tracks successful simulations."""
-        initial_ok = getattr(self.runner, '_successful_count', 0) or getattr(self.runner, 'successful_simulations', 0)
+        initial_ok = self.runner.ok_sim
 
         # Simulate successful simulation
-        if hasattr(self.runner, 'successful_simulations'):
-            self.runner.successful_simulations += 1
-            new_ok = getattr(self.runner, '_successful_count', 0) or getattr(self.runner, 'successful_simulations', 0)
+        if hasattr(self.runner, "stats"):
+            self.runner.stats.successful_count += 1
+            new_ok = self.runner.ok_sim
             assert new_ok == initial_ok + 1
         else:
-            # Skip if implementation doesn't have successful_simulations
+            # Skip if implementation doesn't have stats
             pass
 
     @patch("cespy.simulators.ltspice_simulator.LTspice.is_available", return_value=True)
@@ -77,7 +80,9 @@ class TestSimRunner:
 
     @patch("cespy.simulators.ltspice_simulator.LTspice.is_available", return_value=True)
     @patch("shutil.copy")
-    def test_run_with_switches(self, mock_copy: Mock, mock_available: Mock) -> None:
+    def test_run_with_switches(
+        self, mock_copy: Mock, mock_available: Mock
+    ) -> None:  # pylint: disable=unused-argument
         """Test running simulation with command line switches."""
         mock_copy.return_value = self.test_netlist
 
@@ -92,7 +97,9 @@ class TestSimRunner:
 
     @patch("cespy.simulators.ltspice_simulator.LTspice.is_available", return_value=True)
     @patch("shutil.copy")
-    def test_run_with_callback(self, mock_copy: Mock, mock_available: Mock) -> None:
+    def test_run_with_callback(
+        self, mock_copy: Mock, mock_available: Mock
+    ) -> None:  # pylint: disable=unused-argument
         """Test running simulation with callback."""
         callback_mock = Mock(spec=ProcessCallback)
         mock_copy.return_value = self.test_netlist
@@ -107,7 +114,9 @@ class TestSimRunner:
 
     @patch("cespy.simulators.ltspice_simulator.LTspice.is_available", return_value=True)
     @patch("shutil.copy")
-    def test_run_with_custom_filename(self, mock_copy: Mock, mock_available: Mock) -> None:
+    def test_run_with_custom_filename(
+        self, mock_copy: Mock, mock_available: Mock
+    ) -> None:  # pylint: disable=unused-argument
         """Test running simulation with custom filename."""
         custom_name = "custom_simulation"
         mock_copy.return_value = self.test_netlist
@@ -129,10 +138,10 @@ class TestSimRunner:
         mock_future.cancel.return_value = False
 
         # Add a future to the internal set to simulate active task
-        if hasattr(self.runner, '_active_futures'):
+        if hasattr(self.runner, "_active_futures"):
             # Access the private attribute directly to set it
-            object.__setattr__(self.runner, '_active_futures', {mock_future})
-        elif hasattr(self.runner, 'active_threads'):
+            object.__setattr__(self.runner, "_active_futures", {mock_future})
+        elif hasattr(self.runner, "active_threads"):
             self.runner.active_threads = {mock_future}  # type: ignore
         else:
             # Skip if implementation doesn't have active futures
@@ -155,6 +164,7 @@ class TestSimRunner:
     def test_abort_all_simulations(self) -> None:
         """Test aborting all running simulations."""
         # Test that executor shutdown is called properly
+        # pylint: disable=protected-access
         with patch.object(self.runner._executor, "shutdown") as mock_shutdown:
             # Simulate destruction/cleanup
             self.runner.__del__()
@@ -169,10 +179,15 @@ class TestSimRunner:
 
         # Check that stats are tracked internally
         # Check that stats are tracked internally
-        assert hasattr(new_runner, 'successful_simulations') or hasattr(new_runner, '_successful_count') or new_runner is not None
+        assert (
+            hasattr(new_runner, "successful_simulations")
+            or hasattr(new_runner, "_successful_count")
+            or new_runner is not None
+        )
 
     def test_set_simulator(self) -> None:
         """Test setting custom simulator."""
+        # pylint: disable=import-outside-toplevel
         from cespy.simulators.ltspice_simulator import LTspice
 
         # Set a custom simulator
@@ -184,6 +199,7 @@ class TestSimRunner:
     def test_simulator_initialization(self) -> None:
         """Test that simulator is properly initialized."""
         # Default should be LTspice
+        # pylint: disable=import-outside-toplevel
         from cespy.simulators.ltspice_simulator import LTspice
 
         runner = SimRunner()
@@ -202,9 +218,10 @@ class TestSimRunner:
         assert isinstance(runner, SimRunner)
 
         # Test manual cleanup
-        if hasattr(runner, '_executor'):
+        if hasattr(runner, "_executor"):
+            # pylint: disable=protected-access
             with patch.object(runner._executor, "shutdown") as mock_shutdown:
-                if hasattr(runner, '__del__'):
+                if hasattr(runner, "__del__"):
                     runner.__del__()
                     mock_shutdown.assert_called()
 
@@ -213,7 +230,8 @@ class TestSimRunner:
         runner = SimRunner(parallel_sims=1)  # Limit to 1 simulation
 
         # Check that max_workers is set correctly
-        if hasattr(runner, '_executor') and hasattr(runner._executor, '_max_workers'):
+        # pylint: disable=protected-access
+        if hasattr(runner, "_executor") and hasattr(runner._executor, "_max_workers"):
             assert runner._executor._max_workers == 1
         else:
             # Skip if internal implementation is different
@@ -225,6 +243,7 @@ class TestRunTask:
 
     def test_runtask_creation(self) -> None:
         """Test RunTask object creation."""
+        # pylint: disable=import-outside-toplevel
         from cespy.simulators.ltspice_simulator import LTspice
 
         task = RunTask(
@@ -245,6 +264,7 @@ class TestRunTask:
 
     def test_runtask_abort(self) -> None:
         """Test aborting a RunTask."""
+        # pylint: disable=import-outside-toplevel
         from cespy.simulators.ltspice_simulator import LTspice
 
         mock_process = Mock()
@@ -253,15 +273,14 @@ class TestRunTask:
             simulator=LTspice, runno=1, netlist_file=Path("test.net"), callback=Mock()
         )
         # Test process access only if attribute exists
-        if hasattr(task, 'process'):
-            task.process = mock_process
-            assert task.process == mock_process
-        else:
-            # Skip if implementation doesn't have process attribute
-            pass
+        # Note: RunTask may not have a process attribute in the refactored version
+        # as it's managed internally
+        assert hasattr(task, "netlist_file")
+        assert task.netlist_file == Path("test.net")
 
     def test_runtask_basic_properties(self) -> None:
         """Test basic RunTask properties."""
+        # pylint: disable=import-outside-toplevel
         from cespy.simulators.ltspice_simulator import LTspice
 
         task = RunTask(

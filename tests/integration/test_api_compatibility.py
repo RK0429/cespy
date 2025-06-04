@@ -1,7 +1,9 @@
 """Integration tests for API compatibility between cespy and original packages."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from cespy import simulate
 from cespy.editor.spice_editor import SpiceEditor
 from cespy.raw.raw_read import RawRead
@@ -70,7 +72,7 @@ C1 out 0 1u
         assert editor.get_parameter("freq") == "1k"
 
         # Test saving
-        editor.save_netlist()
+        editor.save_netlist(str(netlist_path))
 
         # Verify changes persist
         new_editor = SpiceEditor(netlist_path)
@@ -79,8 +81,12 @@ C1 out 0 1u
 
     def test_raw_read_basic_functionality(self, temp_dir: Path) -> None:
         """Test basic RawRead functionality without actual raw files."""
+        # Create a dummy raw file for testing
+        raw_path = temp_dir / "dummy.raw"
+        raw_path.write_bytes(b"Title: Test\nDate: Mon Jan 01 00:00:00 2024\n")
+
         # Test that RawRead can be instantiated and has expected methods
-        raw_reader = RawRead()
+        raw_reader = RawRead(str(raw_path))
 
         # Test essential methods exist
         assert hasattr(raw_reader, "get_trace_names")
@@ -118,10 +124,10 @@ C1 out 0 1u
         assert hasattr(cespy, "__version__")
 
         # Test submodule imports
-        from cespy.editor import SpiceEditor, AscEditor
+        from cespy.editor import AscEditor, SpiceEditor
         from cespy.raw import RawRead
-        from cespy.simulators import LTspice
         from cespy.sim import SimRunner
+        from cespy.simulators import LTspice
 
         # Verify classes are callable
         assert callable(SpiceEditor)
@@ -176,7 +182,7 @@ C1 out 0 1u
         editor.add_instruction("C1 out 0 1u")
         editor.add_instruction(".op")
         editor.add_instruction(".end")
-        editor.save_netlist()
+        editor.save_netlist(str(netlist_path))
 
         # Verify file was created and is readable
         assert netlist_path.exists()
@@ -227,7 +233,7 @@ C1 out 0 1u
         editor.add_instruction("C1 out 0 1u")
         editor.add_instruction(".tran 0 2m 0 1u")
         editor.add_instruction(".end")
-        editor.save_netlist()
+        editor.save_netlist(str(circuit_file))
 
         # Step 2: Verify circuit file is valid
         assert circuit_file.exists()
@@ -240,7 +246,7 @@ C1 out 0 1u
         # Step 4: Modify parameters
         editor2.set_component_value("R1", "2.2k")
         editor2.set_component_value("C1", "100n")
-        editor2.save_netlist()
+        editor2.save_netlist(str(circuit_file))
 
         # Step 5: Verify modifications
         editor3 = SpiceEditor(circuit_file)

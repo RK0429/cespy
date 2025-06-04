@@ -1,15 +1,17 @@
 """Performance tests to ensure no regression in execution speed."""
 
-import pytest
+import os
 import time
 from pathlib import Path
+
 import numpy as np
-from cespy.raw import RawRead, RawWrite, Trace
-from cespy.editor import SpiceEditor
-from cespy.simulators import LTspice
-from cespy.sim import SimRunner
 import psutil
-import os
+import pytest
+
+from cespy.editor import SpiceEditor
+from cespy.raw import RawRead, RawWrite, Trace
+from cespy.sim import SimRunner
+from cespy.simulators import LTspice
 
 
 class TestRawFilePerformance:
@@ -43,7 +45,7 @@ class TestRawFilePerformance:
             writer = RawWrite(str(raw_file), binary=False, title="Performance Test")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, 'write'):
+            if hasattr(writer, "write"):
                 writer.write()
 
             write_time = time.time() - start_time
@@ -85,7 +87,7 @@ class TestRawFilePerformance:
             writer = RawWrite(str(raw_file), binary=False, title="Read Test")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, 'write'):
+            if hasattr(writer, "write"):
                 writer.write()
         except Exception:
             # Skip if RawWrite API is different
@@ -99,7 +101,7 @@ class TestRawFilePerformance:
             # Read all traces
             for trace_name in reader.get_trace_names():
                 trace = reader.get_trace(trace_name)
-                if hasattr(trace, 'data') and trace.data is not None:
+                if hasattr(trace, "data") and trace.data is not None:
                     data = trace.data
                     assert len(data) == num_points
 
@@ -138,13 +140,13 @@ class TestRawFilePerformance:
         try:
             start_time = time.time()
             writer = RawWrite(str(raw_file), binary=False, title="Stepped Test")
-            if hasattr(writer, 'set_no_steps'):
+            if hasattr(writer, "set_no_steps"):
                 writer.set_no_steps(num_steps)
-            if hasattr(writer, 'set_no_points'):
+            if hasattr(writer, "set_no_points"):
                 writer.set_no_points(points_per_step)
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, 'write'):
+            if hasattr(writer, "write"):
                 writer.write()
             write_time = time.time() - start_time
 
@@ -154,7 +156,7 @@ class TestRawFilePerformance:
 
             # Access data from different steps (simplified)
             trace = reader.get_trace("V(out)")
-            if hasattr(trace, 'data') and trace.data is not None:
+            if hasattr(trace, "data") and trace.data is not None:
                 data = trace.data
                 assert len(data) >= points_per_step
 

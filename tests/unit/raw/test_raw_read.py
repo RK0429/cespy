@@ -11,6 +11,7 @@ from cespy.raw.raw_classes import TraceRead, Axis
 def create_mock_raw_reader() -> RawRead:
     """Create a mock RawRead object with necessary attributes initialized."""
     raw_reader = RawRead.__new__(RawRead)
+    # pylint: disable=protected-access
     raw_reader._traces = []
     raw_reader.aliases = {}
     raw_reader.nPoints = 0
@@ -21,6 +22,7 @@ def create_mock_raw_reader() -> RawRead:
 
 class TestRawRead:
     """Test RawRead class functionality."""
+    # pylint: disable=protected-access
 
     def test_raw_read_initialization(self, temp_dir: Path) -> None:
         """Test RawRead initialization with header only."""
