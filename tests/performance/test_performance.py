@@ -127,9 +127,9 @@ class TestRawFilePerformance:
         all_voltage: list[float] = []
 
         for step in range(num_steps):
-            time = np.linspace(0, 1e-3, points_per_step)
-            voltage = (step + 1) * np.sin(2 * np.pi * 1000 * time)
-            all_time.extend(time)
+            time_data = np.linspace(0, 1e-3, points_per_step)
+            voltage = (step + 1) * np.sin(2 * np.pi * 1000 * time_data)
+            all_time.extend(time_data)
             all_voltage.extend(voltage)
 
         traces = [

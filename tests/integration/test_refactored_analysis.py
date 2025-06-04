@@ -50,7 +50,7 @@ class TestBaseAnalysisIntegration:
         """Test that BaseAnalysis enforces abstract methods."""
         # Can't instantiate BaseAnalysis directly
         with pytest.raises(TypeError):
-            BaseAnalysis(str(sample_circuit_file))
+            BaseAnalysis(str(sample_circuit_file))  # type: ignore[abstract]
 
     def test_progress_reporter_integration(self) -> None:
         """Test ProgressReporter integration."""
@@ -78,7 +78,7 @@ class TestStatisticalAnalysisIntegration:
         """Test StatisticalAnalysis instantiation."""
         # StatisticalAnalysis is abstract, can't instantiate directly
         with pytest.raises(TypeError):
-            analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=10, seed=42)
+            analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=10, seed=42)  # type: ignore[abstract]
 
     def test_statistics_calculation_with_mock_results(
         self, sample_circuit_file: Path
@@ -109,7 +109,7 @@ class TestStatisticalAnalysisIntegration:
     def test_histogram_data_generation(self, sample_circuit_file: Path) -> None:
         """Test histogram data generation."""
         # Use MonteCarloAnalysis as a concrete implementation of StatisticalAnalysis
-        analysis = MonteCarloAnalysis(sample_circuit_file, num_runs=10)
+        analysis = MonteCarloAnalysis(str(sample_circuit_file), num_runs=10)
 
         # Add mock results with varied data
         import numpy as np
@@ -251,7 +251,7 @@ class TestMonteCarloAnalysisIntegration:
         """Test that backward compatibility methods work."""
         with patch("cespy.sim.toolkit.montecarlo.SimRunner"):
             mc = MonteCarloAnalysis(
-                sample_circuit_file, num_runs=5, use_testbench_mode=True
+                str(sample_circuit_file), num_runs=5, use_testbench_mode=True
             )
 
             # Test that old methods still exist and work
@@ -309,7 +309,7 @@ class TestAnalysisVisualizationIntegration:
     def test_histogram_plotting_integration(self, sample_circuit_file: Path) -> None:
         """Test histogram plotting with real analysis data."""
         # Create analysis with mock results
-        analysis = StatisticalAnalysis(sample_circuit_file, num_runs=20)
+        analysis = MonteCarloAnalysis(str(sample_circuit_file), num_runs=20)
 
         import numpy as np
 
@@ -355,7 +355,7 @@ class TestPerformanceIntegration:
             # Create analysis (this should be monitored)
             with patch("cespy.sim.toolkit.montecarlo.SimRunner"):
                 mc = MonteCarloAnalysis(
-                    sample_circuit_file, num_runs=5, use_testbench_mode=False
+                    str(sample_circuit_file), num_runs=5, use_testbench_mode=False
                 )
 
                 # Mock the analysis execution
@@ -423,7 +423,7 @@ class TestErrorHandlingIntegration:
     def test_missing_measurement_handling(self, sample_circuit_file: Path) -> None:
         """Test handling of missing measurements in results."""
         # Use MonteCarloAnalysis as a concrete implementation of StatisticalAnalysis
-        analysis = MonteCarloAnalysis(sample_circuit_file, num_runs=3)
+        analysis = MonteCarloAnalysis(str(sample_circuit_file), num_runs=3)
 
         # Add results with inconsistent measurements
         results = [
@@ -466,7 +466,7 @@ class TestCrossModuleIntegration:
 
         with patch("cespy.sim.toolkit.montecarlo.SimRunner"):
             mc = MonteCarloAnalysis(
-                sample_circuit_file,
+                str(sample_circuit_file),
                 num_runs=10,
                 parallel=True,
                 max_workers=optimal_workers,

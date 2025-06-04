@@ -44,7 +44,11 @@ C1 out 0 1u
 
         # Verify time axis
         time_axis = raw_data.get_axis()
-        assert time_axis.data[-1] >= 2e-3  # Should run for at least 2ms
+        if hasattr(time_axis, 'data'):
+            assert time_axis.data[-1] >= 2e-3  # Should run for at least 2ms
+        else:
+            # time_axis is a list[float]
+            assert time_axis[-1] >= 2e-3  # Should run for at least 2ms
 
     @pytest.mark.requires_ltspice
     def test_parameter_sweep_workflow(self, temp_dir: Path) -> None:

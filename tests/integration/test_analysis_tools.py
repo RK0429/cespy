@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 from cespy.raw.raw_read import RawRead
+from cespy.sim import SimRunner
 from cespy.sim.toolkit import MonteCarloAnalysis, SensitivityAnalysis, WorstCaseAnalysis
 from cespy.simulators import LTspice
 
@@ -32,7 +33,7 @@ C1 out 0 1u
         mc = MonteCarloAnalysis(
             str(netlist_path),
             num_runs=10,  # Small number for testing
-            runner=LTspice(),
+            runner=SimRunner(simulator=LTspice),
         )
 
         # Define component tolerances
@@ -74,7 +75,7 @@ C1 out 0 1u
         mc = MonteCarloAnalysis(
             str(netlist_path),
             num_runs=20,
-            runner=LTspice(),
+            runner=SimRunner(simulator=LTspice),
         )
 
         # Define tolerances
@@ -154,7 +155,7 @@ R2 out 0 10k
         netlist_path.write_text(netlist_content)
 
         # Run worst-case analysis
-        wc = WorstCaseAnalysis(str(netlist_path), runner=LTspice())
+        wc = WorstCaseAnalysis(str(netlist_path), runner=SimRunner(simulator=LTspice))
 
         # Define tolerances
         wc.set_tolerance("R1", 0.05)  # ±5%
@@ -198,7 +199,7 @@ R3 n2 0 3k
         netlist_path.write_text(netlist_content)
 
         # Analyze multiple nodes
-        wc = WorstCaseAnalysis(str(netlist_path), runner=LTspice())
+        wc = WorstCaseAnalysis(str(netlist_path), runner=SimRunner(simulator=LTspice))
 
         # Define tolerances
         wc.set_tolerance("R1", 0.1)
@@ -235,7 +236,7 @@ R2 out 0 10k
         netlist_path.write_text(netlist_content)
 
         # Run worst-case with sensitivity analysis
-        wc = WorstCaseAnalysis(str(netlist_path), runner=LTspice())
+        wc = WorstCaseAnalysis(str(netlist_path), runner=SimRunner(simulator=LTspice))
 
         # Define tolerances
         wc.set_tolerance("R1", 0.05)
@@ -280,7 +281,7 @@ R4 out 0 4k
         # Run sensitivity analysis
         sa = SensitivityAnalysis(
             str(netlist_path),
-            runner=LTspice(),
+            runner=SimRunner(simulator=LTspice),
         )
 
         # Set tolerances for components
@@ -340,7 +341,7 @@ C2 out 0 100n
         # Analyze at corner frequency
         sa = SensitivityAnalysis(
             str(netlist_path),
-            runner=LTspice(),
+            runner=SimRunner(simulator=LTspice),
         )
 
         # Set tolerances for components
@@ -395,7 +396,7 @@ R4 out 0 100k
 
         components = ["R1", "R2", "R3", "R4"]
 
-        sa = SensitivityAnalysis(str(netlist_path), runner=LTspice())
+        sa = SensitivityAnalysis(str(netlist_path), runner=SimRunner(simulator=LTspice))
 
         # Set tolerances for components
         for comp in components:
@@ -456,7 +457,7 @@ R2 out 0 10k
         mc = MonteCarloAnalysis(
             str(netlist_path),
             num_runs=50,
-            runner=LTspice(),
+            runner=SimRunner(simulator=LTspice),
         )
 
         # Set tolerances
@@ -479,7 +480,7 @@ R2 out 0 10k
         # Now run targeted worst-case analysis
         wc = WorstCaseAnalysis(
             str(netlist_path),
-            runner=LTspice(),
+            runner=SimRunner(simulator=LTspice),
         )
 
         # Set tolerances
