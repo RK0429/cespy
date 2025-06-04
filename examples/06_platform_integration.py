@@ -12,6 +12,7 @@ import platform
 import shutil
 import sys
 import time
+import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -19,8 +20,6 @@ from typing import Any, Dict, List, Tuple
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator
-
-# Simulator classes are imported through the main cespy package
 from cespy.utils import detect_encoding
 
 
@@ -42,7 +41,7 @@ def example_platform_detection() -> None:
         is_macos = platform.system() == "Darwin"
         is_linux = platform.system() == "Linux"
 
-        print(f"\nPlatform Flags:")
+        print("\nPlatform Flags:")
         print(f"  Windows: {is_windows}")
         print(f"  macOS: {is_macos}")
         print(f"  Linux: {is_linux}")
@@ -52,13 +51,13 @@ def example_platform_detection() -> None:
         print(f"  64-bit: {is_64bit}")
 
         # Environment variables
-        print(f"\nEnvironment Information:")
+        print("\nEnvironment Information:")
         print(f"  PATH entries: {len(os.environ.get('PATH', '').split(os.pathsep))}")
         print(f"  HOME/USERPROFILE: {os.path.expanduser('~')}")
         print(f"  Temp directory: {Path.cwd()}")
 
         # Python-specific platform info
-        print(f"\nPython Platform Details:")
+        print("\nPython Platform Details:")
         print(f"  Platform: {platform.platform()}")
         print(f"  Architecture tuple: {platform.architecture()}")
         print(f"  Executable: {sys.executable}")
@@ -166,16 +165,16 @@ def example_simulator_detection() -> None:
                 detected_simulators[simulator] = found_path
 
         # Initialize simulators with detected paths
-        print(f"\nInitializing simulators...")
+        print("\nInitializing simulators...")
 
         available_simulators = {}
 
         # LTSpice
         try:
             if detected_simulators.get("ltspice"):
-                ltspice = LTspice()
-                # Optionally set custom path: ltspice.set_executable_path(detected_simulators['ltspice'])
-                available_simulators["LTSpice"] = ltspice
+                ltspice_sim = LTspice()
+                # Optionally set custom path: ltspice_sim.set_executable_path(detected_simulators['ltspice'])
+                available_simulators["LTSpice"] = ltspice_sim
                 print("  ✓ LTSpice initialized")
             else:
                 print("  ✗ LTSpice not available")
@@ -185,8 +184,8 @@ def example_simulator_detection() -> None:
         # NGSpice
         try:
             if detected_simulators.get("ngspice"):
-                ngspice = NGspiceSimulator()
-                available_simulators["NGSpice"] = ngspice
+                ngspice_sim = NGspiceSimulator()
+                available_simulators["NGSpice"] = ngspice_sim
                 print("  ✓ NGSpice initialized")
             else:
                 print("  ✗ NGSpice not available")
@@ -196,8 +195,8 @@ def example_simulator_detection() -> None:
         # QSpice
         try:
             if detected_simulators.get("qspice"):
-                qspice = Qspice()
-                available_simulators["QSpice"] = qspice
+                qspice_sim = Qspice()
+                available_simulators["QSpice"] = qspice_sim
                 print("  ✓ QSpice initialized")
             else:
                 print("  ✗ QSpice not available")
@@ -207,8 +206,8 @@ def example_simulator_detection() -> None:
         # Xyce
         try:
             if detected_simulators.get("xyce"):
-                xyce = XyceSimulator()
-                available_simulators["Xyce"] = xyce
+                xyce_sim = XyceSimulator()
+                available_simulators["Xyce"] = xyce_sim
                 print("  ✓ Xyce initialized")
             else:
                 print("  ✗ Xyce not available")
@@ -220,6 +219,7 @@ def example_simulator_detection() -> None:
             print(f"  - {name}")
 
         # Note: This function was meant to return simulators for demo
+        return available_simulators
 
     except (IOError, OSError, ValueError) as e:
         print(f"Error in simulator detection: {e}")

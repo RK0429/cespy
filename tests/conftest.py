@@ -65,7 +65,7 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 def pytest_collection_modifyitems(config: pytest.Config,  # pylint: disable=unused-argument
-                                 items: List[pytest.Item]) -> None:
+                                  items: List[pytest.Item]) -> None:
     """Skip platform-specific tests on wrong platforms."""
     skip_windows = pytest.mark.skip(reason="Test only runs on Windows")
     skip_linux = pytest.mark.skip(reason="Test only runs on Linux")

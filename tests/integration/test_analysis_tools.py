@@ -161,7 +161,7 @@ R2 out 0 10k
         wc.set_tolerance("R1", 0.05)  # ±5%
         wc.set_tolerance("R2", 0.05)  # ±5%
 
-        results = wc.run_testbench()
+        _results = wc.run_testbench()  # noqa: F841
 
         # Add a measurement to track V(out)
         wc.editor.add_instruction(".meas op vout find V(out) when time=0")
@@ -465,7 +465,7 @@ R2 out 0 10k
             mc.set_tolerance(comp, tol, distribution=dist)
 
         mc.run_analysis()
-        delay_stats = mc.get_measurement_statistics("delay")
+        _delay_stats = mc.get_measurement_statistics("delay")  # noqa: F841
 
         # Get individual delay values for comparison
         delay_values = []

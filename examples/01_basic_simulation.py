@@ -6,7 +6,6 @@ This example demonstrates the fundamental simulation workflows using different
 SPICE simulators supported by CESPy.
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -53,7 +52,7 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
 
     # Create temporary netlist file
     netlist_path = Path("temp_rc_circuit.asc")
-    with open(netlist_path, "w") as f:
+    with open(netlist_path, "w", encoding="utf-8") as f:
         f.write(netlist_content)
 
     try:
@@ -243,7 +242,7 @@ TEXT 56 288 Left 2 !.op
 """
 
         netlist_path = Path("temp_sweep.asc")
-        with open(netlist_path, "w") as f:
+        with open(netlist_path, "w", encoding="utf-8") as f:
             f.write(netlist_content)
 
         # Use SpiceEditor to modify parameters

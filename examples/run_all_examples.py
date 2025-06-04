@@ -119,24 +119,24 @@ def main() -> int:
     print(f"Failed: {len(failed)}")
     print(f"Success rate: {len(successful)/len(results)*100:.1f}%")
     print(f"Total execution time: {total_time:.2f} seconds")
-    
-    print(f"\nDetailed Results:")
+
+    print("\nDetailed Results:")
     for result in results:
         status = "✓" if result['success'] else "✗"
         print(f"  {status} {result['file']:<30} {result['time']:>8.2f}s")
-    
+
     if failed:
-        print(f"\nFailed Examples:")
+        print("\nFailed Examples:")
         for result in failed:
             print(f"  - {result['file']}")
-        print(f"\nNote: Some failures may be expected if simulators are not installed.")
-    
+        print("\nNote: Some failures may be expected if simulators are not installed.")
+
     print(f"\n{'='*80}")
     print("Examples completed!")
     print("Check individual example files for detailed functionality.")
     print("See README.md for usage instructions and troubleshooting.")
     print('='*80)
-    
+
     return 0 if len(failed) == 0 else 1
 
 

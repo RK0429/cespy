@@ -333,6 +333,7 @@ class TestEnsureAPIConsistency:
 
         # pylint: disable=import-outside-toplevel
         from typing import Optional
+
         @ensure_api_consistency
         def test_function(file_path: Optional[str] = None) -> Optional[str]:
             return file_path
@@ -353,6 +354,7 @@ class TestEnsureAPIConsistency:
 
         # pylint: disable=import-outside-toplevel
         from typing import Optional
+
         @ensure_api_consistency
         def test_function(timeout: Optional[float] = None) -> Optional[float]:
             return timeout
@@ -476,8 +478,9 @@ class TestIntegration:
                 return value * 2
 
             @standardize_parameters({"old_arg": "new_arg"})
-            def standardized_method(self, new_arg: str = "default",
-                                  **kwargs: str) -> str:  # pylint: disable=missing-function-docstring,unused-argument
+            def standardized_method(
+                self, new_arg: str = "default", **kwargs: str
+            ) -> str:  # pylint: disable=missing-function-docstring,unused-argument
                 return new_arg
 
         obj = TestClass()

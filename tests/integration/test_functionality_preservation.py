@@ -13,7 +13,7 @@ from cespy.log import SemiDevOpReader as op_log_reader
 from cespy.raw import RawRead, RawWrite, Trace
 from cespy.sim import SimBatch, SimRunner
 from cespy.simulators import LTspice, NGspice, Qspice, Xyce
-from cespy.utils import Histogram, sweep_lin, sweep_log  # Note: Histogram is create_histogram function
+from cespy.utils import sweep_lin, sweep_log
 
 
 class TestEditorFunctionality:
@@ -325,7 +325,7 @@ solver = Normal
         log_file.write_text(log_content)
 
         # Test log reader
-        reader = LTSpiceLogReader(str(log_file))
+        _reader = LTSpiceLogReader(str(log_file))  # noqa: F841
 
         # Read and check circuit statistics
         # Note: get_parameter doesn't exist, circuit stats are in the log content
@@ -369,14 +369,13 @@ class TestUtilityFunctionality:
     def test_histogram_functionality(self) -> None:
         """Test Histogram utility functionality."""
         # Create test data
-        data = np.random.normal(0, 1, 1000)
+        _data = np.random.normal(0, 1, 1000)  # noqa: F841
 
         # Note: In current API, Histogram is actually create_histogram function
         # which creates a plot, not a data structure
         # This test is modified to verify the function exists and is callable
         from cespy.utils import Histogram
         assert callable(Histogram)
-        
         # Skip actual histogram creation since it's a plotting function
         # not a data structure class as the test expects
         pytest.skip("Histogram API has changed - it's now a plotting function")

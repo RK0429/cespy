@@ -145,13 +145,13 @@ def example_lazy_loading() -> None:
         # Lazy loading
         start_time = time.time()
         lazy_reader = RawReadLazy(str(large_raw_path))
-        lazy_trace = lazy_reader.get_lazy_trace("V(signal)")
+        lazy_trace = lazy_reader.get_trace("V(signal)")
         lazy_init_time = time.time() - start_time
         print(f"Lazy initialization: {lazy_init_time:.3f} seconds")
 
         # Access subset of data
         start_time = time.time()
-        subset_data = lazy_trace.get_data_range(0, 10000)  # First 10k points
+        subset_data = lazy_trace[:10000]  # First 10k points
         subset_time = time.time() - start_time
         print(f"Subset access (10k points): {subset_time:.3f} seconds")
 
@@ -163,7 +163,7 @@ def example_lazy_loading() -> None:
         for i in range(min(5, total_chunks)):  # Process first 5 chunks
             start_idx = i * chunk_size
             end_idx = min((i + 1) * chunk_size, len(large_time))
-            chunk_data = lazy_trace.get_data_range(start_idx, end_idx)
+            chunk_data = lazy_trace[start_idx:end_idx]
             chunk_mean = np.mean(chunk_data)
             print(
                 f"  Chunk {i+1}: points {start_idx}-{end_idx}, mean = {chunk_mean:.3f}"
@@ -193,11 +193,14 @@ def example_data_streaming() -> None:
             )  # Different frequencies
 
             raw_writer = RawWrite()
-            raw_writer.add_trace("time", time_data)
-            raw_writer.add_trace(f"V(out_{i})", signal_data)
+            time_trace = Trace("time", time_data)
+            signal_trace = Trace(f"V(out_{i})", signal_data)
+
+            raw_writer.add_trace(time_trace)
+            raw_writer.add_trace(signal_trace)
 
             file_path = Path(f"stream_file_{i}.raw")
-            raw_writer.write_to_file(str(file_path))
+            raw_writer.save(file_path)
             file_paths.append(file_path)
 
         print(f"✓ Created {len(file_paths)} files for streaming")
@@ -281,11 +284,14 @@ def example_data_caching() -> None:
             )
 
             raw_writer = RawWrite()
-            raw_writer.add_trace("time", time_data)
-            raw_writer.add_trace("V(decay)", signal_data)
+            time_trace = Trace("time", time_data)
+            decay_trace = Trace("V(decay)", signal_data)
+
+            raw_writer.add_trace(time_trace)
+            raw_writer.add_trace(decay_trace)
 
             file_path = Path(f"cache_test_{i}.raw")
-            raw_writer.write_to_file(str(file_path))
+            raw_writer.save(file_path)
             cache_files.append(file_path)
 
         # Initialize cache system
@@ -314,7 +320,7 @@ def example_data_caching() -> None:
 
         # Cache statistics
         cache_stats = cache_system.get_cache_statistics()
-        print(f"Cache statistics:")
+        print("Cache statistics:")
         print(f"  Hit rate: {cache_stats['hit_rate']:.1f}%")
         print(f"  Memory usage: {cache_stats['memory_usage_mb']:.1f} MB")
         print(f"  Cached items: {cache_stats['cached_items']}")
@@ -324,17 +330,20 @@ def example_data_caching() -> None:
         large_data = np.random.randn(1000000)  # Large array to trigger eviction
 
         raw_writer = RawWrite()
-        raw_writer.add_trace("time", np.linspace(0, 1, len(large_data)))
-        raw_writer.add_trace("V(large)", large_data)
+        time_trace = Trace("time", np.linspace(0, 1, len(large_data)))
+        large_trace = Trace("V(large)", large_data)
+
+        raw_writer.add_trace(time_trace)
+        raw_writer.add_trace(large_trace)
 
         large_file = Path("large_cache_test.raw")
-        raw_writer.write_to_file(str(large_file))
+        raw_writer.save(large_file)
 
         # This should trigger cache eviction
         large_data_cached = cache_system.get_trace_data(str(large_file), "V(large)")
 
         final_stats = cache_system.get_cache_statistics()
-        print(f"After large data:")
+        print("After large data:")
         print(f"  Memory usage: {final_stats['memory_usage_mb']:.1f} MB")
         print(f"  Cached items: {final_stats['cached_items']}")
 
@@ -386,7 +395,7 @@ def example_histogram_analysis() -> None:
             data=normal_data, bins=50, title="Output Voltage Distribution"
         )
 
-        print(f"Normal distribution statistics:")
+        print("Normal distribution statistics:")
         print(f"  Mean: {normal_stats['mean']:.3f}")
         print(f"  Std Dev: {normal_stats['std_dev']:.3f}")
         print(f"  Skewness: {normal_stats['skewness']:.3f}")
@@ -410,7 +419,7 @@ def example_histogram_analysis() -> None:
             data=lognormal_data, bins=50, title="Failure Time Distribution"
         )
 
-        print(f"Lognormal distribution statistics:")
+        print("Lognormal distribution statistics:")
         print(f"  Mean: {lognormal_stats['mean']:.1f}")
         print(f"  Median: {lognormal_stats['median']:.1f}")
         print(f"  Mode: {lognormal_stats['mode']:.1f}")
@@ -438,7 +447,7 @@ def example_histogram_analysis() -> None:
             labels=["First Half", "Second Half"],
         )
 
-        print(f"Distribution comparison:")
+        print("Distribution comparison:")
         print(f"  KS test p-value: {comparison['ks_test_p']:.3f}")
         print(
             f"  Distributions are {'similar' if comparison['ks_test_p'] > 0.05 else 'different'}"

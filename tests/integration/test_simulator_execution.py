@@ -42,7 +42,7 @@ C1 out 0 1u
         # Wait for completion
         success = runner.wait_completion()
         assert success
-        
+
         # Get results from task
         raw_file = task.raw_file
         log_file = task.log_file
@@ -90,7 +90,7 @@ C1 out 0 1u
         assert task is not None
         success = runner.wait_completion()
         assert success
-        
+
         # Get results from task
         raw_file = task.raw_file
         log_file = task.log_file
@@ -134,7 +134,7 @@ R2 out 0 1k
         assert task is not None
         success = runner.wait_completion()
         assert success
-        
+
         # Get results from task
         raw_file = task.raw_file
         log_file = task.log_file
@@ -175,7 +175,7 @@ C1 out 0 1u
         assert task is not None
         success = runner.wait_completion()
         assert success
-        
+
         # Get results from task
         raw_file = task.raw_file
         log_file = task.log_file
@@ -184,7 +184,7 @@ C1 out 0 1u
 
         # Parse log file for steps
         log_reader = LTSpiceLogReader(str(log_file))
-        
+
         # Check step info from stepset property
         assert hasattr(log_reader, 'stepset')
         if log_reader.stepset:
@@ -226,7 +226,7 @@ write ngspice_test.raw
         assert task is not None
         success = runner.wait_completion()
         assert success
-        
+
         # Get results from task
         raw_file = task.raw_file
         log_file = task.log_file
@@ -266,7 +266,7 @@ write ngspice_tran.raw
         assert task is not None
         success = runner.wait_completion()
         assert success
-        
+
         # Get results from task
         raw_file = task.raw_file
         log_file = task.log_file
@@ -314,7 +314,7 @@ C1 out 0 1u
         assert task is not None
         success = runner.wait_completion()
         assert success
-        
+
         # Get results from task
         raw_file = task.raw_file
         log_file = task.log_file
@@ -355,7 +355,7 @@ C1 out 0 1u
         assert task is not None
         success = runner.wait_completion()
         assert success
-        
+
         # Get results from task
         raw_file = task.raw_file
         log_file = task.log_file
@@ -377,7 +377,9 @@ class TestSimulatorWithCallbacks:
     """Test simulator execution with callbacks."""
 
     @pytest.mark.requires_ltspice
-    def test_simulation_with_callback(self, temp_dir: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_simulation_with_callback(
+        self, temp_dir: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Test simulation with process callback."""
         netlist_path = temp_dir / "callback_test.net"
         netlist_content = """* Callback Test
@@ -394,7 +396,7 @@ C1 out 0 1u
 
         def capture_results(raw_file: Path, log_file: Path) -> None:
             """Capture simulation results.
-            
+
             Args:
                 raw_file: Path to raw data file
                 log_file: Path to log file

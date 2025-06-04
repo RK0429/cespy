@@ -78,7 +78,9 @@ class TestStatisticalAnalysisIntegration:
         """Test StatisticalAnalysis instantiation."""
         # StatisticalAnalysis is abstract, can't instantiate directly
         with pytest.raises(TypeError):
-            analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=10, seed=42)  # type: ignore[abstract]
+            _analysis = StatisticalAnalysis(  # type: ignore[abstract]  # noqa: F841
+                str(sample_circuit_file), num_runs=10, seed=42
+            )
 
     def test_statistics_calculation_with_mock_results(
         self, sample_circuit_file: Path
