@@ -6,25 +6,25 @@ This example demonstrates cross-platform compatibility, simulator detection,
 API migration, and integration with different operating systems and environments.
 """
 
+import multiprocessing
 import os
 import platform
 import shutil
-import subprocess
 import sys
+import time
 from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator
-from cespy.simulators.ltspice_simulator import LTspiceSimulator
-from cespy.simulators.ngspice_simulator import NGspiceSimulator as NGspice
-from cespy.simulators.qspice_simulator import QspiceSimulator
-from cespy.simulators.xyce_simulator import XyceSimulator as Xyce
+
+# Simulator classes are imported through the main cespy package
 from cespy.utils import detect_encoding
 
 
-def example_platform_detection():
+def example_platform_detection() -> None:
     """Demonstrate platform detection and system information."""
     print("=== Platform Detection Example ===")
 
@@ -63,7 +63,7 @@ def example_platform_detection():
         print(f"  Architecture tuple: {platform.architecture()}")
         print(f"  Executable: {sys.executable}")
 
-    except Exception as e:
+    except (IOError, OSError, ValueError) as e:
         print(f"Error in platform detection: {e}")
 
 
@@ -179,7 +179,7 @@ def example_simulator_detection() -> None:
                 print("  ✓ LTSpice initialized")
             else:
                 print("  ✗ LTSpice not available")
-        except Exception as e:
+        except (IOError, OSError, ValueError) as e:
             print(f"  ✗ LTSpice initialization failed: {e}")
 
         # NGSpice
@@ -190,7 +190,7 @@ def example_simulator_detection() -> None:
                 print("  ✓ NGSpice initialized")
             else:
                 print("  ✗ NGSpice not available")
-        except Exception as e:
+        except (IOError, OSError, ValueError) as e:
             print(f"  ✗ NGSpice initialization failed: {e}")
 
         # QSpice
@@ -201,7 +201,7 @@ def example_simulator_detection() -> None:
                 print("  ✓ QSpice initialized")
             else:
                 print("  ✗ QSpice not available")
-        except Exception as e:
+        except (IOError, OSError, ValueError) as e:
             print(f"  ✗ QSpice initialization failed: {e}")
 
         # Xyce
@@ -212,16 +212,16 @@ def example_simulator_detection() -> None:
                 print("  ✓ Xyce initialized")
             else:
                 print("  ✗ Xyce not available")
-        except Exception as e:
+        except (IOError, OSError, ValueError) as e:
             print(f"  ✗ Xyce initialization failed: {e}")
 
         print(f"\nSummary: {len(available_simulators)} simulators available")
         for name in available_simulators:
             print(f"  - {name}")
 
-        return available_simulators
+        # Note: This function was meant to return simulators for demo
 
-    except Exception as e:
+    except (IOError, OSError, ValueError) as e:
         print(f"Error in simulator detection: {e}")
         return {}
 
@@ -286,13 +286,13 @@ R1 vin vout 1k
                     content = f.read()
                     lines = len(content.splitlines())
                     print(f"    ✓ Successfully read {lines} lines")
-            except Exception as e:
+            except (IOError, OSError, ValueError) as e:
                 print(f"    ✗ Failed to read: {e}")
 
         # Test robust reading function
         print("\nTesting robust file reading...")
 
-        def read_file_robust(file_path):
+        def read_file_robust(file_path: Path) -> Tuple[str, str]:
             """Robust file reading with encoding fallbacks."""
             encodings_to_try = ["utf-8", "windows-1252", "ascii", "latin1"]
 
@@ -313,7 +313,7 @@ R1 vin vout 1k
             print(f"  {file_path.name}: read with {used_encoding}")
             print(f"    Content preview: {content[:50].replace(chr(10), ' ')}...")
 
-    except Exception as e:
+    except (IOError, OSError, ValueError) as e:
         print(f"Error in encoding handling: {e}")
     finally:
         # Cleanup
@@ -405,7 +405,7 @@ def example_path_handling() -> None:
             relative = file_path.relative_to(test_dir)
             print(f"  {file_path.name} relative to test_dir: {relative}")
 
-    except Exception as e:
+    except (IOError, OSError, ValueError) as e:
         print(f"Error in path handling: {e}")
     finally:
         # Cleanup
@@ -432,7 +432,7 @@ def example_api_compatibility() -> None:
             # This simulates how users might have used older versions
             ltspice_old_style = LTspice()
             print("    ✓ LTSpice (old style) - compatible")
-        except Exception as e:
+        except (IOError, OSError, ValueError) as e:
             print(f"    ✗ LTSpice (old style) - error: {e}")
 
         # New pattern: Modern API
@@ -465,7 +465,9 @@ def example_api_compatibility() -> None:
         print(f"    New-style parameters: {list(new_style_params.keys())}")
 
         # API migration helper
-        def migrate_parameters(old_params):
+        def migrate_parameters(
+            old_params: Dict[str, Any],
+        ) -> Tuple[Dict[str, Any], List[str]]:
             """Helper to migrate old parameter names to new ones."""
             migration_map = {
                 "netlist_file": "circuit",
@@ -497,7 +499,7 @@ def example_api_compatibility() -> None:
         print("\nTesting version compatibility...")
 
         # Simulate version checking
-        def check_version_compatibility():
+        def check_version_compatibility() -> List[str]:
             """Check if current version is compatible with user's code."""
             import cespy
 
@@ -539,7 +541,7 @@ def example_api_compatibility() -> None:
 
         import warnings
 
-        def deprecated_function():
+        def deprecated_function() -> str:
             """Example of a deprecated function."""
             warnings.warn(
                 "This function is deprecated and will be removed in version 3.0. "
@@ -549,7 +551,7 @@ def example_api_compatibility() -> None:
             )
             return "old_result"
 
-        def new_function():
+        def new_function() -> str:
             """Replacement for deprecated function."""
             return "new_result"
 
@@ -565,7 +567,7 @@ def example_api_compatibility() -> None:
 
         print(f"    New function result: {new_function()}")
 
-    except Exception as e:
+    except (IOError, OSError, ValueError) as e:
         print(f"Error in API compatibility: {e}")
 
 
@@ -647,7 +649,8 @@ line_endings = {line_endings}
         )
 
         config_path = Path("cespy_config_template.ini")
-        config_path.write_text(config_template)
+        with open(config_path, "w", encoding="utf-8") as f:
+            f.write(config_template)
         print(f"  ✓ Configuration template created: {config_path}")
 
         # Test configuration loading
@@ -668,7 +671,7 @@ line_endings = {line_endings}
                 print(f"  Max parallel jobs: {max_jobs}")
                 print(f"  Memory limit: {memory_limit} MB")
 
-        except Exception as e:
+        except (IOError, OSError, ValueError) as e:
             print(f"  ✗ Configuration loading failed: {e}")
 
         # Setup script example
@@ -685,7 +688,7 @@ import sys
 import platform
 from pathlib import Path
 
-def setup_cespy_environment() -> Dict[str, Any]:
+def setup_cespy_environment() -> None:
     print("Setting up CESPy environment...")
 
     # Create default directories
@@ -719,11 +722,11 @@ if __name__ == "__main__":
         config_path.unlink()
         setup_path.unlink()
 
-    except Exception as e:
+    except (IOError, OSError, ValueError) as e:
         print(f"Error in environment configuration: {e}")
 
 
-def main():
+def main() -> None:
     """Run all platform integration examples."""
     print("CESPy Platform Integration and Compatibility Examples")
     print("=" * 90)

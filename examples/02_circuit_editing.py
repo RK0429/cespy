@@ -12,9 +12,9 @@ from pathlib import Path
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy.editor import AscEditor, SpiceEditor, QschEditor
+from cespy import LTspice, SimRunner
+from cespy.editor import AscEditor, QschEditor, SpiceEditor
 from cespy.editor.base_editor import ComponentFactory
-from cespy import SimRunner, LTspice
 
 
 def example_asc_editor() -> None:
@@ -48,7 +48,7 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
 
     # Save to temporary file
     asc_path = Path("temp_circuit.asc")
-    with open(asc_path, 'w') as f:
+    with open(asc_path, "w") as f:
         f.write(asc_content)
 
     try:
@@ -62,41 +62,42 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
 
         # Modify component values
         print("\nModifying component values...")
-        editor.set_component_value('R1', '2.2k')
-        editor.set_component_value('C1', '470n')
-        editor.set_component_value('V1', 'SINE(0 5 2k)')
+        editor.set_component_value("R1", "2.2k")
+        editor.set_component_value("C1", "470n")
+        editor.set_component_value("V1", "SINE(0 5 2k)")
 
         # Add a new component (inductor)
         print("Adding inductor...")
-        editor.add_component('ind', 'L1', value='10m',
-                           position1=(350, 80), position2=(450, 80))
+        editor.add_component(
+            "ind", "L1", value="10m", position1=(350, 80), position2=(450, 80)
+        )
 
         # Modify simulation commands
         print("Updating simulation command...")
-        editor.remove_instruction('.tran 0 10m 0 10u')
-        editor.add_instruction('.tran 0 20m 0 20u')
-        editor.add_instruction('.ac dec 10 1 100k')
+        editor.remove_instruction(".tran 0 10m 0 10u")
+        editor.add_instruction(".tran 0 20m 0 20u")
+        editor.add_instruction(".ac dec 10 1 100k")
 
         # Save the modified circuit
-        output_path = asc_path.with_name('modified_circuit.asc')
+        output_path = asc_path.with_name("modified_circuit.asc")
         editor.save_netlist(str(output_path))
 
         print(f"✓ Modified circuit saved to {output_path}")
 
         # Verify changes
         print("\nVerifying changes...")
-        with open(output_path, 'r') as f:
+        with open(output_path, "r") as f:
             content = f.read()
-            if '2.2k' in content and '470n' in content:
+            if "2.2k" in content and "470n" in content:
                 print("✓ Component values updated successfully")
-            if '.tran 0 20m 0 20u' in content:
+            if ".tran 0 20m 0 20u" in content:
                 print("✓ Simulation command updated successfully")
 
     except (IOError, OSError, ValueError) as e:
         print(f"Error in ASC editing: {e}")
     finally:
         # Cleanup
-        for path in [asc_path, Path('modified_circuit.asc')]:
+        for path in [asc_path, Path("modified_circuit.asc")]:
             if path.exists():
                 path.unlink()
 
@@ -130,7 +131,7 @@ E1 out_int 0 in+ in- 100000
 
     # Save to temporary file
     netlist_path = Path("temp_opamp.net")
-    with open(netlist_path, 'w') as f:
+    with open(netlist_path, "w") as f:
         f.write(netlist_content)
 
     try:
@@ -151,25 +152,25 @@ E1 out_int 0 in+ in- 100000
 
         # Modify component values
         print("\nModifying circuit...")
-        editor.set_component_value('R1', '22k')
-        editor.set_component_value('R2', '220k')
-        editor.set_component_value('C1', '10p')
+        editor.set_component_value("R1", "22k")
+        editor.set_component_value("R2", "220k")
+        editor.set_component_value("C1", "10p")
 
         # Add parameters for easy modification
-        editor.set_parameter('gain_R', '220k')
-        editor.set_parameter('input_R', '22k')
+        editor.set_parameter("gain_R", "220k")
+        editor.set_parameter("input_R", "22k")
 
         # Replace fixed values with parameters
-        editor.set_component_value('R1', '{input_R}')
-        editor.set_component_value('R2', '{gain_R}')
+        editor.set_component_value("R1", "{input_R}")
+        editor.set_component_value("R2", "{gain_R}")
 
         # Add analysis commands
-        editor.add_instruction('.param gain_R=220k')
-        editor.add_instruction('.param input_R=22k')
-        editor.add_instruction('.noise v(vout) V1 dec 10 1 1meg')
+        editor.add_instruction(".param gain_R=220k")
+        editor.add_instruction(".param input_R=22k")
+        editor.add_instruction(".noise v(vout) V1 dec 10 1 1meg")
 
         # Save modified netlist
-        output_path = netlist_path.with_name('modified_opamp.net')
+        output_path = netlist_path.with_name("modified_opamp.net")
         editor.save_netlist(str(output_path))
 
         print(f"✓ Modified netlist saved to {output_path}")
@@ -185,7 +186,7 @@ E1 out_int 0 in+ in- 100000
         print(f"Error in SPICE editing: {e}")
     finally:
         # Cleanup
-        for path in [netlist_path, Path('modified_opamp.net')]:
+        for path in [netlist_path, Path("modified_opamp.net")]:
             if path.exists():
                 path.unlink()
 
@@ -202,41 +203,31 @@ def example_component_factory() -> None:
 
         # Create a resistor
         resistor = factory.create_resistor(
-            name='R_load',
-            value='50',
-            nodes=['input', 'output']
+            name="R_load", value="50", nodes=["input", "output"]
         )
         print(f"Resistor: {resistor}")
 
         # Create a capacitor
         capacitor = factory.create_capacitor(
-            name='C_coupling',
-            value='100n',
-            nodes=['signal', 'amp_in']
+            name="C_coupling", value="100n", nodes=["signal", "amp_in"]
         )
         print(f"Capacitor: {capacitor}")
 
         # Create an inductor
         inductor = factory.create_inductor(
-            name='L_choke',
-            value='1m',
-            nodes=['vcc', 'amp_vcc']
+            name="L_choke", value="1m", nodes=["vcc", "amp_vcc"]
         )
         print(f"Inductor: {inductor}")
 
         # Create a voltage source
         voltage_source = factory.create_voltage_source(
-            name='V_supply',
-            value='DC 12',
-            nodes=['vcc', '0']
+            name="V_supply", value="DC 12", nodes=["vcc", "0"]
         )
         print(f"Voltage source: {voltage_source}")
 
         # Create a current source
         current_source = factory.create_current_source(
-            name='I_bias',
-            value='DC 1m',
-            nodes=['bias_node', '0']
+            name="I_bias", value="DC 1m", nodes=["bias_node", "0"]
         )
         print(f"Current source: {current_source}")
 
@@ -245,18 +236,16 @@ def example_component_factory() -> None:
 
         # Create an operational amplifier
         opamp = factory.create_opamp(
-            name='U1',
-            model='LM358',
-            nodes=['in_pos', 'in_neg', 'vcc', 'vee', 'output']
+            name="U1", model="LM358", nodes=["in_pos", "in_neg", "vcc", "vee", "output"]
         )
         print(f"Op-amp: {opamp}")
 
         # Create a MOSFET
         mosfet = factory.create_mosfet(
-            name='M1',
-            model='IRF540',
-            nodes=['drain', 'gate', 'source', 'bulk'],
-            device_type='NMOS'
+            name="M1",
+            model="IRF540",
+            nodes=["drain", "gate", "source", "bulk"],
+            device_type="NMOS",
         )
         print(f"MOSFET: {mosfet}")
 
@@ -306,7 +295,7 @@ Rout out 0 100
 """
 
     netlist_path = Path("temp_parametric.net")
-    with open(netlist_path, 'w') as f:
+    with open(netlist_path, "w") as f:
         f.write(netlist_content)
 
     try:
@@ -319,9 +308,9 @@ Rout out 0 100
 
         # Create design variations
         design_variants = [
-            {'fc': '500', 'Q': '0.5'},    # Lower freq, lower Q
-            {'fc': '2k', 'Q': '1.0'},     # Higher freq, higher Q
-            {'fc': '5k', 'Q': '2.0'},     # Much higher freq, very high Q
+            {"fc": "500", "Q": "0.5"},  # Lower freq, lower Q
+            {"fc": "2k", "Q": "1.0"},  # Higher freq, higher Q
+            {"fc": "5k", "Q": "2.0"},  # Much higher freq, very high Q
         ]
 
         print("\nGenerating design variants...")
@@ -334,7 +323,7 @@ Rout out 0 100
                 editor.set_parameter(param, value)
 
             # Save variant
-            variant_path = netlist_path.with_name(f'filter_variant_{i+1}.net')
+            variant_path = netlist_path.with_name(f"filter_variant_{i+1}.net")
             editor.save_netlist(str(variant_path))
 
             print(f"  ✓ Saved to {variant_path}")
@@ -372,7 +361,7 @@ L1 n1 n2 1m
 """
 
     netlist_path = Path("temp_problematic.net")
-    with open(netlist_path, 'w') as f:
+    with open(netlist_path, "w") as f:
         f.write(problematic_netlist)
 
     try:
@@ -405,20 +394,20 @@ L1 n1 n2 1m
         print("\nFixing circuit issues...")
 
         # Connect the floating node
-        editor.set_component_value('R2', '2k')  # Ensure proper connection
-        editor.add_component('resistor', 'R3',
-                           nodes=['floating_node', '0'], value='10k')
+        editor.set_component_value("R2", "2k")  # Ensure proper connection
+        editor.add_component(
+            "resistor", "R3", nodes=["floating_node", "0"], value="10k"
+        )
 
         # Fix the simulation command
-        editor.remove_instruction('.tran 1m')
-        editor.add_instruction('.tran 0 10m 0 10u')
+        editor.remove_instruction(".tran 1m")
+        editor.add_instruction(".tran 0 10m 0 10u")
 
         # Connect L1 properly
-        editor.add_component('resistor', 'R_load',
-                           nodes=['n2', '0'], value='50')
+        editor.add_component("resistor", "R_load", nodes=["n2", "0"], value="50")
 
         # Save fixed circuit
-        fixed_path = netlist_path.with_name('fixed_circuit.net')
+        fixed_path = netlist_path.with_name("fixed_circuit.net")
         editor.save_netlist(str(fixed_path))
 
         print(f"✓ Fixed circuit saved to {fixed_path}")
@@ -432,7 +421,7 @@ L1 n1 n2 1m
         print(f"Error in circuit validation: {e}")
     finally:
         # Cleanup
-        for path in [netlist_path, Path('fixed_circuit.net')]:
+        for path in [netlist_path, Path("fixed_circuit.net")]:
             if path.exists():
                 path.unlink()
 

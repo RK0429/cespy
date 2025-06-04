@@ -6,14 +6,14 @@ This script runs all example files in sequence, providing a comprehensive
 demonstration of CESPy capabilities.
 """
 
-import os
 import sys
 import time
 import subprocess
 from pathlib import Path
+from typing import Tuple
 
 
-def run_example(example_file):
+def run_example(example_file: Path) -> Tuple[bool, float]:
     """Run a single example file and capture results."""
     print(f"\n{'='*60}")
     print(f"Running: {example_file}")
@@ -43,13 +43,13 @@ def run_example(example_file):
     except subprocess.TimeoutExpired:
         print(f"\n⏰ {example_file.name} timed out after 5 minutes")
         return False, 300
-    except Exception as e:
+    except (subprocess.CalledProcessError, OSError) as e:
         elapsed_time = time.time() - start_time
         print(f"\n💥 {example_file.name} crashed with error: {e}")
         return False, elapsed_time
 
 
-def main():
+def main() -> int:
     """Run all examples in order."""
     print("CESPy Comprehensive Example Suite")
     print("=" * 80)
