@@ -21,7 +21,6 @@ import logging
 # Created:     24-09-2023
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
-import re
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 

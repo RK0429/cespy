@@ -22,7 +22,7 @@ class SimRunner(SimRunnerRefactored):
     with the original SimRunner API, including deprecated methods and attributes.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize with backward compatibility support."""
         # Handle old-style positional arguments if any
         if args:
@@ -42,7 +42,7 @@ class SimRunner(SimRunnerRefactored):
         super().__init__(**kwargs)
 
         # Initialize deprecated attributes for backward compatibility
-        self._deprecated_attrs = {}
+        self._deprecated_attrs: dict[str, Any] = {}
 
     # Deprecated attribute access
     @property
@@ -83,7 +83,7 @@ class SimRunner(SimRunnerRefactored):
         )
         self.set_simulator(spice_tool)
 
-    def add_LTspiceRunCmdLineSwitches(self, *args) -> None:
+    def add_LTspiceRunCmdLineSwitches(self, *args: Any) -> None:
         """Deprecated: Use add_command_line_switch instead."""
         warnings.warn(
             "add_LTspiceRunCmdLineSwitches is deprecated, "
@@ -94,7 +94,7 @@ class SimRunner(SimRunnerRefactored):
         for arg in args:
             self.add_command_line_switch(arg)
 
-    def run_all(self, *args, **kwargs) -> None:
+    def run_all(self, *args: Any, **kwargs: Any) -> None:
         """Deprecated: Use run() in a loop instead."""
         warnings.warn(
             "run_all is deprecated, use run() in a loop instead",
@@ -105,7 +105,7 @@ class SimRunner(SimRunnerRefactored):
         raise NotImplementedError("run_all is no longer supported")
 
     # Additional compatibility methods
-    def get_results(self) -> list:
+    def get_results(self) -> list[Any]:
         """Get all simulation results.
 
         Returns:
@@ -113,7 +113,7 @@ class SimRunner(SimRunnerRefactored):
         """
         return list(self._result_collector._results.values())
 
-    def get_successful_results(self) -> list:
+    def get_successful_results(self) -> list[Any]:
         """Get successful simulation results.
 
         Returns:
@@ -121,7 +121,7 @@ class SimRunner(SimRunnerRefactored):
         """
         return self._result_collector.get_results_by_status(True)
 
-    def get_failed_results(self) -> list:
+    def get_failed_results(self) -> list[Any]:
         """Get failed simulation results.
 
         Returns:
@@ -140,7 +140,7 @@ class SimRunner(SimRunnerRefactored):
         self._result_collector.export_to_csv(Path(filepath))
 
     # Override methods that need special handling
-    def run(self, *args, **kwargs) -> Optional[Any]:
+    def run(self, *args: Any, **kwargs: Any) -> Optional[Any]:
         """Run simulation with backward compatibility."""
         # Handle old-style arguments
         if args and not kwargs.get("netlist"):
@@ -162,7 +162,7 @@ class SimRunner(SimRunnerRefactored):
         # Call parent implementation
         return super().run(**kwargs)
 
-    def wait_completion(self, *args, **kwargs) -> bool:
+    def wait_completion(self, *args: Any, **kwargs: Any) -> bool:
         """Wait for completion with backward compatibility."""
         # Handle old-style timeout as positional argument
         if args and "timeout" not in kwargs:

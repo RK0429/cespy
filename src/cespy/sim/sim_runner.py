@@ -141,7 +141,7 @@ from typing import (
 try:
     import psutil
 except ImportError:
-    psutil = None
+    psutil = None  # type: ignore
 
 from ..editor.base_editor import BaseEditor
 from ..sim.run_task import RunTask, clock_function

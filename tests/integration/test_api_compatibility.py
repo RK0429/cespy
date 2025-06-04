@@ -23,7 +23,7 @@ C1 out 0 1u
 .end
 """
         netlist_path.write_text(netlist_content)
-        
+
         # Test that simulate function is callable with various parameters
         try:
             # This may fail if simulator not available, but should not raise import errors
@@ -53,25 +53,25 @@ C1 out 0 1u
 .end
 """
         netlist_path.write_text(initial_content)
-        
+
         # Test editor creation and basic operations
         editor = SpiceEditor(netlist_path)
-        
+
         # Test component value access
         assert editor.get_component_value("R1") == "1k"
         assert editor.get_component_value("C1") == "1u"
-        
+
         # Test component value modification
         editor.set_component_value("R1", "2.2k")
         assert editor.get_component_value("R1") == "2.2k"
-        
+
         # Test parameter operations
         editor.set_parameter("freq", "1k")
         assert editor.get_parameter("freq") == "1k"
-        
+
         # Test saving
         editor.save_netlist()
-        
+
         # Verify changes persist
         new_editor = SpiceEditor(netlist_path)
         assert new_editor.get_component_value("R1") == "2.2k"
@@ -81,13 +81,13 @@ C1 out 0 1u
         """Test basic RawRead functionality without actual raw files."""
         # Test that RawRead can be instantiated and has expected methods
         raw_reader = RawRead()
-        
+
         # Test essential methods exist
         assert hasattr(raw_reader, 'get_trace_names')
         assert hasattr(raw_reader, 'get_trace')
         assert hasattr(raw_reader, 'get_axis')
         assert hasattr(raw_reader, 'add_trace_alias')
-        
+
         # Test properties exist
         assert hasattr(raw_reader, 'nPoints')
         assert hasattr(raw_reader, 'nPlots')
@@ -100,7 +100,7 @@ C1 out 0 1u
         assert hasattr(LTspice, 'create_netlist')
         assert hasattr(LTspice, 'is_available')
         assert hasattr(LTspice, 'valid_switch')
-        
+
         # Test that simulator detection works
         try:
             LTspice.detect_executable()
@@ -115,13 +115,13 @@ C1 out 0 1u
         import cespy
         assert hasattr(cespy, 'simulate')
         assert hasattr(cespy, '__version__')
-        
+
         # Test submodule imports
         from cespy.editor import SpiceEditor, AscEditor
         from cespy.raw import RawRead
         from cespy.simulators import LTspice
         from cespy.sim import SimRunner
-        
+
         # Verify classes are callable
         assert callable(SpiceEditor)
         assert callable(AscEditor)
@@ -133,29 +133,29 @@ C1 out 0 1u
         # Test .net file support
         net_file = temp_dir / "test.net"
         net_file.write_text("V1 in 0 1\nR1 in out 1k\n.end\n")
-        
+
         editor = SpiceEditor(net_file)
         assert editor.circuit_file == net_file
-        
+
         # Test create_blank functionality
         blank_file = temp_dir / "blank.net"
-        blank_editor = SpiceEditor(blank_file, create_blank=True)
+        _blank_editor = SpiceEditor(blank_file, create_blank=True)
         assert blank_file.exists()
 
     def test_error_handling_compatibility(self, temp_dir: Path):
         """Test that error handling works as expected."""
         # Test file not found error
         non_existent = temp_dir / "non_existent.net"
-        
+
         with pytest.raises(FileNotFoundError):
             SpiceEditor(non_existent)
-        
+
         # Test component not found error
         netlist_path = temp_dir / "test.net"
         netlist_path.write_text("R1 in out 1k\n.end\n")
-        
+
         editor = SpiceEditor(netlist_path)
-        
+
         # Should raise exception for non-existent component
         with pytest.raises(Exception):  # Specific exception type depends on implementation
             editor.get_component_value("non_existent_component")
@@ -164,19 +164,19 @@ C1 out 0 1u
         """Test integration between different modules."""
         # Create a circuit with editor
         netlist_path = temp_dir / "integration_test.net"
-        
+
         # Use editor to create and modify circuit
         editor = SpiceEditor(netlist_path, create_blank=True)
         editor.add_instruction("V1 in 0 DC 1")
-        editor.add_instruction("R1 in out 1k") 
+        editor.add_instruction("R1 in out 1k")
         editor.add_instruction("C1 out 0 1u")
         editor.add_instruction(".op")
         editor.add_instruction(".end")
         editor.save_netlist()
-        
+
         # Verify file was created and is readable
         assert netlist_path.exists()
-        
+
         # Test that the same file can be read by another editor instance
         editor2 = SpiceEditor(netlist_path)
         content = str(editor2)
@@ -195,16 +195,16 @@ C1 out 0 1u
 .end
 """
         netlist_path.write_text(content)
-        
+
         editor = SpiceEditor(netlist_path)
-        
+
         # Test parameter access
         assert editor.get_parameter("res_val") == "1k"
-        
+
         # Test parameter modification
         editor.set_parameter("res_val", "2.2k")
         assert editor.get_parameter("res_val") == "2.2k"
-        
+
         # Verify step directive is preserved
         netlist_content = str(editor)
         assert ".step param res_val" in netlist_content
@@ -214,7 +214,7 @@ C1 out 0 1u
         """Test end-to-end workflow with mocked simulation."""
         # Create initial circuit
         circuit_file = temp_dir / "workflow_test.net"
-        
+
         # Step 1: Create circuit with editor
         editor = SpiceEditor(circuit_file, create_blank=True)
         editor.add_instruction("* RC Circuit Test")
@@ -224,20 +224,20 @@ C1 out 0 1u
         editor.add_instruction(".tran 0 2m 0 1u")
         editor.add_instruction(".end")
         editor.save_netlist()
-        
+
         # Step 2: Verify circuit file is valid
         assert circuit_file.exists()
-        
+
         # Step 3: Read back and verify content
         editor2 = SpiceEditor(circuit_file)
         assert editor2.get_component_value("R1") == "1k"
         assert editor2.get_component_value("C1") == "1u"
-        
+
         # Step 4: Modify parameters
         editor2.set_component_value("R1", "2.2k")
         editor2.set_component_value("C1", "100n")
         editor2.save_netlist()
-        
+
         # Step 5: Verify modifications
         editor3 = SpiceEditor(circuit_file)
         assert editor3.get_component_value("R1") == "2.2k"

@@ -127,7 +127,7 @@ class SimulatorAdapter(ISimulator):
             arguments.extend(raw_switches)
 
         # Prepare environment
-        environment = {}
+        environment: Dict[str, str] = {}
 
         return SimulationCommand(
             executable=executable,
@@ -139,7 +139,7 @@ class SimulatorAdapter(ISimulator):
 
     def parse_arguments(self, args: List[str]) -> Dict[str, Any]:
         """Parse command-line arguments into structured options."""
-        options = {}
+        options: Dict[str, Any] = {}
 
         # Simple parsing for common flags
         i = 0

@@ -78,7 +78,7 @@ def pytest_collection_modifyitems(config, items):
     skip_windows = pytest.mark.skip(reason="Test only runs on Windows")
     skip_linux = pytest.mark.skip(reason="Test only runs on Linux")
     skip_macos = pytest.mark.skip(reason="Test only runs on macOS")
-    
+
     for item in items:
         if "windows" in item.keywords and sys.platform != "win32":
             item.add_marker(skip_windows)

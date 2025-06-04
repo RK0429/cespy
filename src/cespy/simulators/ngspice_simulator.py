@@ -326,3 +326,17 @@ class NGspiceSimulator(Simulator):
         :type mode: str
         """
         cls._compatibility_mode = mode
+
+    @classmethod
+    def create_netlist(
+        cls,
+        circuit_file: Union[str, Path],
+        cmd_line_switches: Optional[List[Any]] = None,
+        timeout: Optional[float] = None,
+        *,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+        exe_log: bool = False,
+    ) -> Path:
+        """Create netlist (not supported by NGspice)."""
+        raise NotImplementedError("NGspice does not support netlist creation")

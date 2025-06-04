@@ -398,7 +398,7 @@ def ensure_api_consistency(func: F) -> F:
     validator = ParameterValidator()
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Any:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         # Get function signature for parameter validation
 
         sig = inspect.signature(func)

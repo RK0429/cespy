@@ -19,13 +19,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union, IO
 
 try:
     import psutil
-    from types import ModuleType
     HAS_PSUTIL = True
 except ImportError:
     psutil = None  # type: ignore[assignment]
     HAS_PSUTIL = False
-
-from ..core import constants as core_constants
 
 _logger = logging.getLogger("cespy.ProcessManager")
 
@@ -136,7 +133,6 @@ class ProcessManager:
         # Prepare stdout/stderr
         stdout_handle: Optional[Union[IO[str], int]] = None
         stderr_handle: Optional[Union[IO[str], int]] = None
-        
         try:
             if stdout_file:
                 stdout_handle = open(stdout_file, "w", encoding="utf-8")

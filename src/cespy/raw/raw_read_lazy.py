@@ -9,7 +9,6 @@ for large simulation files.
 
 import logging
 import mmap
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO
@@ -18,8 +17,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .raw_read import RawRead, read_float32, read_float64, read_complex
-from .raw_classes import Axis, TraceRead, DummyTrace, SpiceReadException
-from ..core import constants as core_constants
+from .raw_classes import Axis, TraceRead, DummyTrace
 
 _logger = logging.getLogger("cespy.RawReadLazy")
 
@@ -61,7 +59,7 @@ class LazyTrace:
         self.is_complex = is_complex
         self.is_float64 = is_float64
         self.mmap_file = mmap_file
-        self._cache: Dict[int, NDArray] = {}  # Cache loaded data by step
+        self._cache: Dict[int, NDArray[np.float64]] = {}  # Cache loaded data by step
 
         # Determine data size
         if is_complex:
@@ -76,7 +74,7 @@ class LazyTrace:
         """Get trace name."""
         return self.info.name
 
-    def get_wave(self, step: int = 0) -> NDArray:
+    def get_wave(self, step: int = 0) -> NDArray[np.float64]:
         """Get waveform data for a specific step.
 
         Args:
@@ -108,11 +106,10 @@ class LazyTrace:
 
         return data
 
-    def _read_from_mmap(self, offset: int, num_points: int) -> NDArray:
+    def _read_from_mmap(self, offset: int, num_points: int) -> NDArray[np.float64]:
         """Read data from memory-mapped file."""
         if self.mmap_file is None:
             raise RuntimeError("Memory-mapped file not available")
-            
         # Calculate byte range
         start_byte = offset
         num_bytes = num_points * self.bytes_per_point
@@ -130,7 +127,7 @@ class LazyTrace:
 
         return np.frombuffer(raw_bytes, dtype=dtype)
 
-    def _read_from_file(self, offset: int, num_points: int) -> NDArray:
+    def _read_from_file(self, offset: int, num_points: int) -> NDArray[Any]:
         """Read data from file."""
         with open(self.file_path, "rb") as f:
             f.seek(offset)
@@ -282,7 +279,9 @@ class RawReadLazy(RawRead):
 
             self._lazy_traces[trace_name] = lazy_trace
 
-    def get_trace(self, trace_ref: Union[str, int]) -> Union[Axis, TraceRead, DummyTrace, LazyTrace]:  # type: ignore[override]
+    def get_trace(
+        self, trace_ref: Union[str, int]
+    ) -> Union[Axis, TraceRead, DummyTrace, LazyTrace]:  # type: ignore
         """Get a trace by name.
 
         Returns LazyTrace instead of TraceRead for lazy loading.
@@ -302,14 +301,14 @@ class RawReadLazy(RawRead):
                 return super().get_trace(trace_ref)
         else:
             trace_name = trace_ref
-            
+
         if trace_name in self._lazy_traces:
             return self._lazy_traces[trace_name]
 
         # Fall back to parent implementation
         return super().get_trace(trace_ref)
 
-    def get_wave(self, trace_ref: Union[str, int], step: int = 0) -> NDArray:
+    def get_wave(self, trace_ref: Union[str, int], step: int = 0) -> NDArray[np.float64]:
         """Get waveform data for a trace.
 
         Args:
@@ -328,7 +327,7 @@ class RawReadLazy(RawRead):
                 return super().get_wave(trace_ref, step)
         else:
             trace_name = trace_ref
-            
+
         if trace_name in self._lazy_traces:
             return self._lazy_traces[trace_name].get_wave(step)
 
@@ -470,5 +469,5 @@ class RawReadLazy(RawRead):
         """Destructor to ensure cleanup."""
         try:
             self.close()
-        except:
+        except Exception:
             pass

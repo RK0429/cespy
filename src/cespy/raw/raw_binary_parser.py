@@ -34,7 +34,7 @@ class BinaryFormat:
 
     format: DataFormat
     bytes_per_value: int
-    numpy_dtype: np.dtype
+    numpy_dtype: np.dtype[Any]
     struct_format: str  # For single value reading
 
 
@@ -98,7 +98,7 @@ class OptimizedBinaryParser:
         count: int,
         format: DataFormat,
         byte_order: str = "<",  # Little-endian by default
-    ) -> NDArray:
+    ) -> NDArray[np.float64]:
         """Read a block of values efficiently.
 
         Args:
@@ -144,7 +144,7 @@ class OptimizedBinaryParser:
         num_points: int,
         trace_formats: List[DataFormat],
         byte_order: str = "<",
-    ) -> List[NDArray]:
+    ) -> List[NDArray[Any]]:
         """Read interleaved trace data efficiently.
 
         This handles the common case where trace data is interleaved:
@@ -218,7 +218,7 @@ class OptimizedBinaryParser:
         num_points: int,
         trace_formats: List[DataFormat],
         byte_order: str = "<",
-    ) -> List[NDArray]:
+    ) -> List[NDArray[Any]]:
         """Read sequential trace data efficiently.
 
         This handles the case where all data for one trace is stored
@@ -256,7 +256,7 @@ class OptimizedBinaryParser:
         num_points: int,
         trace_formats: List[DataFormat],
         byte_order: str = "<",
-    ) -> List[NDArray]:
+    ) -> List[NDArray[Any]]:
         """Read FastAccess format data.
 
         In FastAccess format, data is organized for efficient access:
@@ -337,7 +337,7 @@ class OptimizedBinaryParser:
                             continue
 
                         # Calculate score based on value distribution
-                        score = np.std(real_part) + np.std(imag_part)
+                        score = float(np.std(real_part) + np.std(imag_part))
                     else:
                         # Real values
                         # Check for NaN or Inf
@@ -346,7 +346,7 @@ class OptimizedBinaryParser:
 
                         # Calculate score based on value distribution
                         # Good data typically has some variation but not extreme
-                        score = np.std(values)
+                        score = float(np.std(values))
 
                         # Penalize if all values are zero or very small
                         if np.all(np.abs(values) < 1e-30):
@@ -366,8 +366,12 @@ class OptimizedBinaryParser:
         return best_format, best_order
 
     def create_memory_map(
-        self, offset: int, shape: Tuple[int, ...], dtype: np.dtype, mode: Literal["r", "r+", "w+", "c"] = "r"
-    ) -> np.memmap:
+        self,
+        offset: int,
+        shape: Tuple[int, ...],
+        dtype: np.dtype[Any],
+        mode: Literal["r", "r+", "w+", "c"] = "r",
+    ) -> np.memmap[Any, np.dtype[np.float64]]:
         """Create a memory-mapped array for efficient large file access.
 
         Args:
@@ -389,15 +393,15 @@ class OptimizedBinaryParser:
             self._file_handle.close()
             self._file_handle = None
 
-    def __enter__(self):
+    def __enter__(self) -> "OptimizedBinaryParser":
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Context manager exit."""
         self.close()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Ensure file is closed on deletion."""
         self.close()
 
@@ -426,18 +430,21 @@ def benchmark_parser(
 
         # Test block read
         start = time.time()
-        data = parser.read_block(0, num_traces * num_points, DataFormat.FLOAT32)
+        _data = parser.read_block(0, num_traces * num_points, DataFormat.FLOAT32)
+        del _data  # Only needed for timing
         results["block_read"] = time.time() - start
 
         # Test interleaved read
         formats = [DataFormat.FLOAT32] * num_traces
         start = time.time()
-        traces = parser.read_interleaved(0, num_traces, num_points, formats)
+        _traces = parser.read_interleaved(0, num_traces, num_points, formats)
+        del _traces  # Only needed for timing
         results["interleaved_read"] = time.time() - start
 
         # Test sequential read
         start = time.time()
-        traces = parser.read_sequential(0, num_traces, num_points, formats)
+        _traces = parser.read_sequential(0, num_traces, num_points, formats)
+        del _traces  # Only needed for timing
         results["sequential_read"] = time.time() - start
 
     # Calculate throughput

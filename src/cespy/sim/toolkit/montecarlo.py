@@ -26,11 +26,8 @@ statistical analysis of circuit behavior under component variations.
 
 import logging
 import random
-from collections import defaultdict
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, Union
-
-import numpy as np
-from numpy.typing import NDArray
+from pathlib import Path
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, Union, cast
 
 from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
@@ -78,7 +75,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         num_runs: int = 1000,
         seed: Optional[int] = None,
         use_testbench_mode: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ):
         """Initialize Monte Carlo analysis.
 
@@ -131,7 +128,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         Returns:
             Dictionary of parameters for this run
         """
-        params = {"run_id": run_id}
+        params: Dict[str, Any] = {"run_id": run_id}
 
         # Generate component variations
         for ref in self.get_components("*"):
@@ -410,7 +407,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             actual_callback_args = callback_args if callback_args is not None else {}
             actual_timeout = timeout if timeout is not None else float("inf")
 
-            rt = self.run(
+            self.run(
                 wait_resource=True,
                 callback=actual_callback,
                 callback_args=actual_callback_args,
@@ -477,19 +474,88 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             if callback is not None:
                 self._setup_callback_forwarding(callback, callback_args)
 
-            # Run the analysis using base class method
-            results = super().run_analysis()
+            # Prepare all parameter sets
+            param_sets = self.prepare_runs()
 
-            # Process callback results if needed
-            if callback is not None:
-                self._process_callback_results(results)
+            # Run simulations for each parameter set
+            results = []
+            for params in param_sets:
+                self.apply_parameters(params)
+
+                # Run single simulation
+                run_task = self._create_run_task(
+                    switches=switches,
+                    timeout=timeout,
+                    exe_log=exe_log,
+                )
+
+                # Execute simulation
+                if hasattr(self.runner, "run_now"):
+                    result_tuple = cast(Any, self.runner).run_now(run_task)
+                    if isinstance(result_tuple, tuple) and len(result_tuple) == 2:
+                        raw_file, log_file = result_tuple
+                    else:
+                        raw_file, log_file = None, None
+                else:
+                    # Use run method for compatibility
+                    result_tuple = self.runner.run(run_task.netlist_file)
+                    if isinstance(result_tuple, tuple) and len(result_tuple) == 2:
+                        raw_file, log_file = result_tuple
+                    else:
+                        raw_file, log_file = None, None
+
+                # Create result
+                result = AnalysisResult(
+                    run_id=params.get("run_id", 0),
+                    status=AnalysisStatus.COMPLETED if raw_file else AnalysisStatus.FAILED,
+                    raw_file=raw_file,
+                    log_file=log_file,
+                    parameters=params,
+                )
+
+                # Execute callback if provided
+                if callback is not None and raw_file and log_file:
+                    cb_result = None
+                    try:
+                        if isinstance(callback, type) and issubclass(callback, ProcessCallback):
+                            # ProcessCallback subclass needs raw_file and log_file in constructor
+                            cb_instance = callback(raw_file, log_file)
+                            cb_result = cb_instance.callback(raw_file, log_file)
+                        elif callable(callback):
+                            # Regular callable
+                            if isinstance(callback_args, dict):
+                                cb_result = callback(
+                                    raw_file, log_file, **callback_args
+                                )  # type: ignore[call-arg]
+                            elif isinstance(callback_args, tuple):
+                                cb_result = callback(
+                                    raw_file, log_file, *callback_args
+                                )  # type: ignore[call-arg]
+                            else:
+                                cb_result = callback(raw_file, log_file)  # type: ignore[call-arg]
+                    except Exception as e:
+                        _logger.warning(f"Callback execution failed: {e}")
+
+                    # Store callback result using a custom attribute pattern
+                    if cb_result is not None:
+                        # We'll store it in the measurements dict if possible
+                        if not result.measurements:
+                            result.measurements = {}
+                        result.measurements["_callback_result"] = cb_result
+
+                results.append(result)
+                self.results.append(result)
 
             return results
 
         finally:
             self.use_testbench_mode = original_mode
 
-    def _setup_callback_forwarding(self, callback, callback_args):
+    def _setup_callback_forwarding(
+        self,
+        callback: Union[Type[ProcessCallback], Callable[..., Any]],
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]],
+    ) -> None:
         """Set up callback forwarding for individual runs."""
         # Store original runner callback settings
         self._original_callback = getattr(self.runner, "default_callback", None)
@@ -499,18 +565,48 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
         # Set new callback
         if hasattr(self.runner, "set_default_callback"):
-            self.runner.set_default_callback(callback, callback_args)
+            cast(Any, self.runner).set_default_callback(callback, callback_args)
 
-    def _process_callback_results(self, results: List[AnalysisResult]):
+    def _process_callback_results(self, results: List[AnalysisResult]) -> None:
         """Process callback results from individual runs."""
         callback_returns = []
         for result in results:
-            if result.success and hasattr(result, "callback_result"):
-                callback_returns.append(result.callback_result)
+            if result.success and result.measurements and "_callback_result" in result.measurements:
+                callback_returns.append(result.measurements["_callback_result"])
 
         if not hasattr(self, "simulation_results"):
             self.simulation_results = {}
         self.simulation_results["callback_returns"] = callback_returns
+
+    def _create_run_task(
+        self,
+        switches: Optional[List[str]] = None,
+        timeout: Optional[float] = None,
+        exe_log: bool = True,
+    ) -> RunTask:
+        """Create a run task for simulation execution."""
+        # Save current netlist to a file
+        netlist_file = Path(self.editor.circuit_file).with_suffix('.net')
+        self.editor.save_netlist(netlist_file)
+
+        # Get the simulator class
+        if hasattr(self.runner, "simulator") and isinstance(cast(Any, self.runner).simulator, type):
+            simulator_class = cast(Any, self.runner).simulator
+        else:
+            # Try to get the simulator from the runner's class
+            from ..simulator import Simulator as SimulatorBase
+            simulator_class = SimulatorBase  # Default fallback
+
+        return RunTask(
+            simulator=simulator_class,
+            runno=0,  # Will be set later
+            netlist_file=netlist_file,
+            callback=None,  # Callbacks handled separately
+            callback_args=None,
+            switches=switches,
+            timeout=timeout,
+            verbose=exe_log,
+        )
 
     def analyse_measurement(self, meas_name: str) -> Optional[List[float]]:
         """Returns the measurement data for the given measurement name.
@@ -571,8 +667,64 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
         return self.calculate_statistics(meas_name)
 
+    def run_analysis(  # type: ignore[override]
+        self,
+        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
+        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
+        switches: Optional[List[str]] = None,
+        timeout: Optional[float] = None,
+        exe_log: bool = True,
+        measure: Optional[str] = None,
+        num_runs: Optional[int] = None,
+    ) -> Union[
+        List[AnalysisResult],
+        Optional[
+            Tuple[
+                float,
+                float,
+                Dict[str, Union[str, float]],
+                float,
+                Dict[str, Union[str, float]],
+            ]
+        ],
+    ]:
+        """Run the Monte Carlo analysis.
+
+        This method supports both the new BaseAnalysis interface (no args)
+        and the legacy ToleranceDeviations interface (with args).
+
+        Returns:
+            List of analysis results for new interface,
+            tuple for legacy
+        """
+        # If called without arguments, use new interface
+        if (
+            callback is None
+            and all(arg is None for arg in [callback_args, switches, timeout, measure, num_runs])
+            and exe_log
+        ):
+            if self.use_testbench_mode:
+                # Run testbench mode and convert results
+                self.run_testbench()
+                # Convert stored results to AnalysisResult format
+                return self.results
+            else:
+                # Run separate analysis mode
+                return self.run_separate_analysis()
+        else:
+            # Legacy mode - delegate to run_analysis_legacy
+            return self.run_analysis_legacy(
+                callback=callback,
+                callback_args=callback_args,
+                switches=switches,
+                timeout=timeout,
+                exe_log=exe_log,
+                measure=measure,
+                num_runs=num_runs,
+            )
+
     # Backward compatibility methods
-    def run_analysis(
+    def run_analysis_legacy(
         self,
         callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
         callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,

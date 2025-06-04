@@ -104,7 +104,7 @@ class FailureMode(SimAnalysis):
                 "The failure modes addition only works with sub circuits"
             )
         if component not in self.components.subcircuits:
-            raise ComponentNotFoundError()
+            raise ComponentNotFoundError(component)
         _ = sub_circuit
         raise NotImplementedError("This feature is not yet implemented")
 
@@ -129,7 +129,7 @@ class FailureMode(SimAnalysis):
         if not component.startswith("X"):
             raise RuntimeError("The failure modes addition only works with subcircuits")
         if component not in self.components.subcircuits:
-            raise ComponentNotFoundError()
+            raise ComponentNotFoundError(component)
         _ = short_pins
         _ = open_pins
         raise NotImplementedError("This feature is not yet implemented")

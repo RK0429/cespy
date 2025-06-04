@@ -30,7 +30,7 @@ import subprocess
 # -------------------------------------------------------------------------------
 import sys
 from pathlib import Path
-from typing import IO, Any, Optional, Union
+from typing import IO, Any, List, Optional, Union
 
 # Core imports
 from ..core import constants as core_constants
@@ -263,3 +263,17 @@ class Qspice(Simulator):
         else:
             error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
         return error
+
+    @classmethod
+    def create_netlist(
+        cls,
+        circuit_file: Union[str, Path],
+        cmd_line_switches: Optional[List[Any]] = None,
+        timeout: Optional[float] = None,
+        *,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+        exe_log: bool = False,
+    ) -> Path:
+        """Create netlist (not supported by Qspice)."""
+        raise NotImplementedError("Qspice does not support netlist creation")

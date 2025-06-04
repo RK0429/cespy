@@ -12,10 +12,7 @@ import shutil
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-from ..log.logfile_data import LogfileData
-from ..raw.raw_read import RawRead
+from typing import Any, Dict, List, Optional, Set
 
 _logger = logging.getLogger("cespy.ResultCollector")
 
@@ -314,7 +311,7 @@ class ResultCollector:
             return
 
         # Collect all measurement names
-        all_measurements = set()
+        all_measurements: set[str] = set()
         for result in results:
             all_measurements.update(result.measurements.keys())
 
@@ -447,12 +444,12 @@ class ResultCollector:
                     # Get the first value (for non-stepped simulations)
                     value = log_reader.get_measure_value(meas_name, step=0)
                     measurements[meas_name] = value
-                except:
+                except Exception:
                     # Try without step parameter
                     try:
                         value = log_reader.get_measure_value(meas_name)
                         measurements[meas_name] = value
-                    except:
+                    except Exception:
                         pass
 
             return measurements

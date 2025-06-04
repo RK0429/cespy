@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
+from abc import ABC
 from .base_editor import BaseEditor, Component, scan_eng, format_eng
 from .circuit_validator import CircuitValidator, ValidationResult
 from .component_factory import ComponentFactory, ComponentType
@@ -38,7 +39,7 @@ class EditOperation:
     sub_operations: List["EditOperation"] = field(default_factory=list)
 
 
-class BaseEditorEnhanced(BaseEditor):
+class BaseEditorEnhanced(BaseEditor, ABC):
     """Enhanced base editor with additional editing capabilities.
 
     This class extends BaseEditor with:
@@ -49,7 +50,7 @@ class BaseEditorEnhanced(BaseEditor):
     - Common editing patterns
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize enhanced editor."""
         super().__init__(*args, **kwargs)
 
@@ -527,7 +528,7 @@ class BaseEditorEnhanced(BaseEditor):
         Returns:
             Dictionary with component counts and statistics
         """
-        stats = {
+        stats: Dict[str, Any] = {
             "total": 0,
             "by_type": {},
             "unique_values": set(),
@@ -633,13 +634,13 @@ class BaseEditorEnhanced(BaseEditor):
         mod_type = metadata.get("type", "component_value")
 
         if mod_type == "component_value":
-            super().set_component_value(target, value)
+            self.set_component_value(target, value)
         elif mod_type == "component_params":
-            super().set_component_parameters(target, **value)
+            self.set_component_parameters(target, **value)
         elif mod_type == "parameter":
-            super().set_parameter(target, value)
+            self.set_parameter(target, value)
         elif mod_type == "model":
-            super().set_element_model(target, value)
+            self.set_element_model(target, value)
 
     def _apply_addition(
         self, target: str, value: Any, metadata: Dict[str, Any]
@@ -648,18 +649,18 @@ class BaseEditorEnhanced(BaseEditor):
         add_type = metadata.get("type", "instruction")
 
         if add_type == "component":
-            super().add_component(value)
+            self.add_component(value)
         elif add_type == "instruction":
-            super().add_instruction(value)
+            self.add_instruction(value)
 
     def _apply_removal(self, target: str, metadata: Dict[str, Any]) -> None:
         """Apply a removal without recording it."""
         remove_type = metadata.get("type", "component")
 
         if remove_type == "component":
-            super().remove_component(target)
+            self.remove_component(target)
         elif remove_type == "instruction":
-            super().remove_instruction(target)
+            self.remove_instruction(target)
 
     def _values_match(self, value1: str, value2: Union[str, float]) -> bool:
         """Check if two component values match."""
@@ -683,7 +684,7 @@ class BaseEditorEnhanced(BaseEditor):
         """Capture current circuit state."""
         # This is a simplified implementation
         # A full implementation would capture all circuit details
-        state = {
+        state: Dict[str, Any] = {
             "components": {},
             "parameters": {},
             "instructions": [],
@@ -713,56 +714,45 @@ class BaseEditorEnhanced(BaseEditor):
 
     # === Override Methods to Add Recording ===
 
-    def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
-        """Set component value with undo support."""
-        # Get old value for undo
-        try:
-            old_value = self.get_component_value(device)
-        except ComponentNotFoundError:
-            old_value = None
+    def _record_component_value_change(
+        self, device: str, old_value: Optional[str], new_value: Union[str, int, float]
+    ) -> None:
+        """Record component value change for undo support.
 
-        # Perform the operation
-        super().set_component_value(device, value)
-
-        # Record for undo
+        Call this method from concrete implementations when changing a component value.
+        """
         self._record_operation(
             EditOperation(
                 operation_type="modify",
                 target=device,
                 old_value=old_value,
-                new_value=str(value),
+                new_value=str(new_value),
                 metadata={"type": "component_value"},
             )
         )
 
-    def set_component_parameters(
-        self, element: str, **kwargs: Union[str, int, float]
+    def _record_component_parameters_change(
+        self, element: str, old_params: Dict[str, Any], new_params: Dict[str, Any]
     ) -> None:
-        """Set component parameters with undo support."""
-        # Get old parameters
-        try:
-            old_params = self.get_component_parameters(element)
-        except ComponentNotFoundError:
-            old_params = {}
+        """Record component parameters change for undo support.
 
-        # Perform the operation
-        super().set_component_parameters(element, **kwargs)
-
-        # Record for undo
+        Call this method from concrete implementations when changing component parameters.
+        """
         self._record_operation(
             EditOperation(
                 operation_type="modify",
                 target=element,
                 old_value=old_params,
-                new_value=kwargs,
+                new_value=new_params,
                 metadata={"type": "component_params"},
             )
         )
 
-    def add_component(self, component: Component, **kwargs: Any) -> None:
-        """Add component with undo support."""
-        super().add_component(component, **kwargs)
+    def _record_component_addition(self, component: Component, **kwargs: Any) -> None:
+        """Record component addition for undo support.
 
+        Call this method from concrete implementations after adding a component.
+        """
         self._record_operation(
             EditOperation(
                 operation_type="add",
@@ -772,13 +762,11 @@ class BaseEditorEnhanced(BaseEditor):
             )
         )
 
-    def remove_component(self, designator: str) -> None:
-        """Remove component with undo support."""
-        # Get component before removal
-        component = self.get_component(designator)
+    def _record_component_removal(self, designator: str, component: Component) -> None:
+        """Record component removal for undo support.
 
-        super().remove_component(designator)
-
+        Call this method from concrete implementations before removing a component.
+        """
         self._record_operation(
             EditOperation(
                 operation_type="remove",
@@ -788,10 +776,11 @@ class BaseEditorEnhanced(BaseEditor):
             )
         )
 
-    def add_instruction(self, instruction: str) -> None:
-        """Add instruction with undo support."""
-        super().add_instruction(instruction)
+    def _record_instruction_addition(self, instruction: str) -> None:
+        """Record instruction addition for undo support.
 
+        Call this method from concrete implementations after adding an instruction.
+        """
         self._record_operation(
             EditOperation(
                 operation_type="add",
@@ -801,10 +790,11 @@ class BaseEditorEnhanced(BaseEditor):
             )
         )
 
-    def remove_instruction(self, instruction: str) -> None:
-        """Remove instruction with undo support."""
-        super().remove_instruction(instruction)
+    def _record_instruction_removal(self, instruction: str) -> None:
+        """Record instruction removal for undo support.
 
+        Call this method from concrete implementations before removing an instruction.
+        """
         self._record_operation(
             EditOperation(
                 operation_type="remove",

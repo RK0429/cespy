@@ -23,23 +23,23 @@ C1 out 0 1u
 .end
 """
         netlist_path.write_text(netlist_content)
-        
+
         # Run simulation
         raw_file, log_file = simulate(netlist_path, simulator="ltspice")
-        
+
         # Verify output files exist
         assert raw_file.exists()
         assert log_file.exists()
-        
+
         # Parse and verify results
         raw_data = RawRead(raw_file)
-        
+
         # Check that expected traces exist
         trace_names = raw_data.get_trace_names()
         assert "time" in trace_names
         assert "V(in)" in trace_names
         assert "V(out)" in trace_names
-        
+
         # Verify time axis
         time_axis = raw_data.get_axis()
         assert time_axis.data[-1] >= 2e-3  # Should run for at least 2ms
@@ -59,13 +59,13 @@ C1 out 0 1u
 .end
 """
         netlist_path.write_text(netlist_content)
-        
+
         # Run simulation
         raw_file, log_file = simulate(netlist_path, simulator="ltspice")
-        
+
         # Parse results
         raw_data = RawRead(raw_file)
-        
+
         # Should have multiple steps
         # Note: Implementation would need to handle stepped data
         assert raw_data.get_trace("V(out)") is not None
@@ -82,20 +82,20 @@ C1 out 0 1u
 .end
 """
         netlist_path.write_text(initial_content)
-        
+
         # Edit the circuit
         editor = SpiceEditor(netlist_path)
-        
+
         # Change component values
         editor.set_component_value("R1", "2.2k")
         editor.set_component_value("C1", "100n")
-        
+
         # Add a parameter
         editor.set_parameter("gain", "10")
-        
+
         # Save changes
         editor.save_netlist()
-        
+
         # Verify changes were saved
         new_editor = SpiceEditor(netlist_path)
         assert new_editor.get_component_value("R1") == "2.2k"
@@ -115,16 +115,16 @@ C1 out 0 1u
 .end
 """
         netlist_path.write_text(netlist_content)
-        
+
         # Run simulation with NGSpice
         raw_file, log_file = simulate(netlist_path, simulator="ngspice")
-        
+
         # Verify output
         assert raw_file.exists()
-        
+
         # Parse results
         raw_data = RawRead(raw_file, dialect="ngspice")
-        
+
         # Check for frequency domain data
         trace_names = raw_data.get_trace_names()
         assert "frequency" in trace_names
@@ -154,7 +154,7 @@ C1 out 0 1u
 .end
 """
         netlist_path.write_text(netlist_content)
-        
+
         # This would need implementation to handle multiple analyses
         # For now, we just verify the netlist is valid
         editor = SpiceEditor(netlist_path)

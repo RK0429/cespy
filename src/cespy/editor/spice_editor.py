@@ -56,7 +56,6 @@ from typing import (
     List,
     Match,
     Optional,
-    Pattern,
     Tuple,
     Type,
     Union,
@@ -65,11 +64,7 @@ from typing import (
 # Core imports
 from ..core import constants as core_constants
 from ..core import patterns as core_patterns
-from ..core import paths as core_paths
-from ..exceptions import (
-    FileFormatError,
-    EncodingError,
-)
+from ..exceptions import FileFormatError
 
 # Module imports
 from ..log.logfile_data import try_convert_value

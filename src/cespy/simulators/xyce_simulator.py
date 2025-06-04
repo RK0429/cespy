@@ -30,7 +30,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 # Core imports
 from ..core import constants as core_constants
@@ -381,3 +381,17 @@ class XyceSimulator(Simulator):
         else:
             error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
         return error
+
+    @classmethod
+    def create_netlist(
+        cls,
+        circuit_file: Union[str, Path],
+        cmd_line_switches: Optional[List[Any]] = None,
+        timeout: Optional[float] = None,
+        *,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+        exe_log: bool = False,
+    ) -> Path:
+        """Create netlist (not supported by Xyce)."""
+        raise NotImplementedError("Xyce does not support netlist creation")

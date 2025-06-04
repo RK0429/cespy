@@ -28,7 +28,7 @@ import re
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .base_schematic import (
@@ -53,10 +53,10 @@ SCALE_Y = -6.25
 class SymbolElements:
     """Groups symbol elements to reduce instance attributes."""
 
-    pins: List = field(default_factory=list)
-    lines: List = field(default_factory=list)
-    shapes: List = field(default_factory=list)
-    windows: List = field(default_factory=list)
+    pins: List[Any] = field(default_factory=list)
+    lines: List[Any] = field(default_factory=list)
+    shapes: List[Any] = field(default_factory=list)
+    windows: List[Any] = field(default_factory=list)
     attributes: Dict[str, str] = field(default_factory=OrderedDict)
 
 

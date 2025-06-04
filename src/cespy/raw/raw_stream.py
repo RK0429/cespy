@@ -15,9 +15,8 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 import numpy as np
 from numpy.typing import NDArray
 
-from .raw_read import RawRead, read_float32, read_float64, read_complex
+from .raw_read import RawRead
 from .raw_classes import DummyTrace
-from ..core import constants as core_constants
 
 _logger = logging.getLogger("cespy.RawStream")
 
@@ -38,7 +37,11 @@ class StreamProcessor(ABC):
 
     @abstractmethod
     def process_chunk(
-        self, trace_name: str, step: int, time_data: NDArray, trace_data: NDArray
+        self,
+        trace_name: str,
+        step: int,
+        time_data: NDArray[np.float64],
+        trace_data: NDArray[np.float64],
     ) -> Optional[Any]:
         """Process a chunk of data.
 
@@ -107,7 +110,7 @@ class RawFileStreamer:
         self,
         traces: Optional[Union[str, List[str]]] = None,
         steps: Optional[List[int]] = None,
-    ) -> Iterator[Tuple[str, int, NDArray, NDArray]]:
+    ) -> Iterator[Tuple[str, int, NDArray[np.float64], NDArray[np.float64]]]:
         """Stream trace data in chunks.
 
         Args:
@@ -156,7 +159,7 @@ class RawFileStreamer:
 
     def _stream_trace_step(
         self, trace_name: str, step: int
-    ) -> Iterator[Tuple[str, int, NDArray, NDArray]]:
+    ) -> Iterator[Tuple[str, int, NDArray[np.float64], NDArray[np.float64]]]:
         """Stream a single trace/step combination in chunks.
 
         Args:
@@ -173,16 +176,13 @@ class RawFileStreamer:
         # A true streaming implementation would read chunks directly from disk
         trace = self._raw_reader.get_trace(trace_name)
         time_trace = self._raw_reader.get_trace("time")
-        
         # Handle different trace types
         if isinstance(time_trace, DummyTrace):
             # DummyTrace doesn't have actual data, skip
             raise ValueError("Cannot stream from DummyTrace - no data available")
-            
         if isinstance(trace, DummyTrace):
             # DummyTrace doesn't have actual data, skip
             raise ValueError("Cannot stream from DummyTrace - no data available")
-            
         time_data = time_trace.get_wave(step)
         trace_data = trace.get_wave(step)
 
@@ -229,7 +229,11 @@ class MinMaxProcessor(StreamProcessor):
         self.results: Dict[str, Dict[int, Tuple[float, float]]] = {}
 
     def process_chunk(
-        self, trace_name: str, step: int, time_data: NDArray, trace_data: NDArray
+        self,
+        trace_name: str,
+        step: int,
+        time_data: NDArray[np.float64],
+        trace_data: NDArray[np.float64],
     ) -> None:
         """Process chunk to update min/max values."""
         if trace_name not in self.results:
@@ -261,7 +265,11 @@ class AverageProcessor(StreamProcessor):
         self.counts: Dict[str, Dict[int, int]] = {}
 
     def process_chunk(
-        self, trace_name: str, step: int, time_data: NDArray, trace_data: NDArray
+        self,
+        trace_name: str,
+        step: int,
+        time_data: NDArray[np.float64],
+        trace_data: NDArray[np.float64],
     ) -> None:
         """Process chunk to update running averages."""
         if trace_name not in self.sums:
@@ -309,7 +317,11 @@ class ThresholdCrossingProcessor(StreamProcessor):
         self._last_times: Dict[Tuple[str, int], float] = {}
 
     def process_chunk(
-        self, trace_name: str, step: int, time_data: NDArray, trace_data: NDArray
+        self,
+        trace_name: str,
+        step: int,
+        time_data: NDArray[np.float64],
+        trace_data: NDArray[np.float64],
     ) -> None:
         """Process chunk to find threshold crossings."""
         if trace_name not in self.crossings:
@@ -394,7 +406,11 @@ class DataSamplerProcessor(StreamProcessor):
         self._point_counter: Dict[Tuple[str, int], int] = {}
 
     def process_chunk(
-        self, trace_name: str, step: int, time_data: NDArray, trace_data: NDArray
+        self,
+        trace_name: str,
+        step: int,
+        time_data: NDArray[np.float64],
+        trace_data: NDArray[np.float64],
     ) -> None:
         """Process chunk to sample data."""
         if trace_name not in self.samples:
@@ -415,9 +431,9 @@ class DataSamplerProcessor(StreamProcessor):
                 values.append(float(np.real(trace_data[i])))
             self._point_counter[key] += 1
 
-    def finalize(self) -> Dict[str, Dict[int, Tuple[NDArray, NDArray]]]:
+    def finalize(self) -> Dict[str, Dict[int, Tuple[NDArray[np.float64], NDArray[np.float64]]]]:
         """Convert lists to arrays and return."""
-        results: Dict[str, Dict[int, Tuple[NDArray, NDArray]]] = {}
+        results: Dict[str, Dict[int, Tuple[NDArray[np.float64], NDArray[np.float64]]]] = {}
 
         for trace_name in self.samples:
             results[trace_name] = {}

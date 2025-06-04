@@ -9,7 +9,7 @@ and statistical summaries.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 
 import numpy as np
 
@@ -25,10 +25,16 @@ try:
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
+    plt = None  # type: ignore[assignment]
+
+    if TYPE_CHECKING:
+        from matplotlib.figure import Figure
+    else:
+        Figure = Any  # type: ignore[assignment,misc]
     _logger.warning("Matplotlib not available - plotting functionality disabled")
 
 try:
-    import seaborn as sns  # noqa: F401
+    import seaborn as sns  # type: ignore[import-untyped]  # noqa: F401
 
     HAS_SEABORN = True
 except ImportError:
@@ -38,7 +44,7 @@ except ImportError:
 class AnalysisVisualizer:
     """Visualization helper for analysis results."""
 
-    def __init__(self, style: str = "seaborn-v0_8", figsize: Tuple[int, int] = (10, 6)):
+    def __init__(self, style: str = "seaborn-v0_8", figsize: Tuple[int, int] = (10, 6)) -> None:
         """Initialize visualizer.
 
         Args:
@@ -52,10 +58,11 @@ class AnalysisVisualizer:
         self.figsize = figsize
 
         # Apply style if available
-        try:
-            plt.style.use(style)
-        except Exception:
-            _logger.warning("Style '%s' not available, using default", style)
+        if plt is not None:
+            try:
+                plt.style.use(style)
+            except Exception:
+                _logger.warning("Style '%s' not available, using default", style)
 
     def plot_histogram(
         self,
@@ -65,7 +72,7 @@ class AnalysisVisualizer:
         density: bool = True,
         show_stats: bool = True,
         save_path: Optional[Union[str, Path]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Figure:
         """Create histogram plot for a measurement.
 
@@ -81,6 +88,9 @@ class AnalysisVisualizer:
         Returns:
             Matplotlib figure
         """
+        if not HAS_MATPLOTLIB:
+            raise ImportError("Matplotlib is required for visualization functionality")
+
         # Get histogram data
         counts, bin_edges = analysis.get_histogram_data(measurement_name, bins)
 
@@ -88,12 +98,13 @@ class AnalysisVisualizer:
             raise ValueError(f"No data found for measurement '{measurement_name}'")
 
         # Create figure
+        assert plt is not None, "matplotlib is required for visualization"
         fig, ax = plt.subplots(figsize=self.figsize)
 
         # Plot histogram
         ax.hist(
             bin_edges[:-1],
-            bins=bin_edges,
+            bins=bin_edges.tolist(),  # Convert to list for type compatibility
             weights=counts,
             density=density,
             alpha=0.7,
@@ -148,6 +159,7 @@ class AnalysisVisualizer:
         if show_stats:
             ax.legend()
 
+        assert plt is not None, "matplotlib is required for visualization"
         plt.tight_layout()
 
         if save_path:
@@ -161,7 +173,7 @@ class AnalysisVisualizer:
         measurement_names: List[str],
         show_correlation: bool = True,
         save_path: Optional[Union[str, Path]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Figure:
         """Create scatter plot matrix for multiple measurements.
 
@@ -175,6 +187,9 @@ class AnalysisVisualizer:
         Returns:
             Matplotlib figure
         """
+        if not HAS_MATPLOTLIB:
+            raise ImportError("Matplotlib is required for visualization functionality")
+
         n_measurements = len(measurement_names)
         if n_measurements < 2:
             raise ValueError("At least 2 measurements required for scatter matrix")
@@ -195,6 +210,7 @@ class AnalysisVisualizer:
             data_dict[name] = np.array(values)
 
         # Create figure
+        assert plt is not None, "matplotlib is required for visualization"
         fig, axes = plt.subplots(
             n_measurements,
             n_measurements,
@@ -207,6 +223,8 @@ class AnalysisVisualizer:
             axes = axes.reshape(2, 2)
 
         # Get correlation matrix if requested
+        corr_matrix = np.array([[]])
+        valid_names: List[str] = []
         if show_correlation:
             corr_matrix, valid_names = analysis.get_correlation_matrix(
                 measurement_names
@@ -231,7 +249,7 @@ class AnalysisVisualizer:
                     ax.set_title(name_x)
                 elif i < j:
                     # Upper triangle: correlation coefficient
-                    if show_correlation and len(corr_matrix) > 0:
+                    if show_correlation and corr_matrix.size > 0 and valid_names:
                         # Find indices in valid names
                         try:
                             idx_x = valid_names.index(name_x)
@@ -281,6 +299,7 @@ class AnalysisVisualizer:
                 if j == 0:
                     ax.set_ylabel(name_y)
 
+        assert plt is not None, "matplotlib is required for visualization"
         plt.tight_layout()
 
         if save_path:
@@ -294,7 +313,7 @@ class AnalysisVisualizer:
         measurement_name: str,
         window_size: int = 100,
         save_path: Optional[Union[str, Path]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Figure:
         """Plot convergence of statistics over simulation runs.
 
@@ -308,6 +327,9 @@ class AnalysisVisualizer:
         Returns:
             Matplotlib figure
         """
+        if not HAS_MATPLOTLIB:
+            raise ImportError("Matplotlib is required for visualization functionality")
+
         # Collect data in order
         values = []
         run_ids = []
@@ -337,6 +359,7 @@ class AnalysisVisualizer:
             window_centers[i] = run_ids[i + window_size // 2]
 
         # Create figure with subplots
+        assert plt is not None, "matplotlib is required for visualization"
         fig, (ax1, ax2) = plt.subplots(
             2, 1, figsize=(self.figsize[0], self.figsize[1] * 1.5)
         )
@@ -367,6 +390,7 @@ class AnalysisVisualizer:
         ax2.grid(True, alpha=0.3)
         ax2.legend()
 
+        assert plt is not None, "matplotlib is required for visualization"
         plt.tight_layout()
 
         if save_path:
@@ -376,11 +400,11 @@ class AnalysisVisualizer:
 
     def plot_parameter_sensitivity(
         self,
-        analysis,  # Parametric analysis
+        analysis: Any,  # Parametric analysis
         parameter_name: str,
         measurement_name: str,
         save_path: Optional[Union[str, Path]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Figure:
         """Plot measurement vs parameter for sensitivity analysis.
 
@@ -394,6 +418,9 @@ class AnalysisVisualizer:
         Returns:
             Matplotlib figure
         """
+        if not HAS_MATPLOTLIB:
+            raise ImportError("Matplotlib is required for visualization functionality")
+
         # Collect data
         param_values = []
         meas_values = []
@@ -423,6 +450,7 @@ class AnalysisVisualizer:
         meas_array = np.array(meas_values)
 
         # Create figure
+        assert plt is not None, "matplotlib is required for visualization"
         fig, ax = plt.subplots(figsize=self.figsize)
 
         # Scatter plot
@@ -458,6 +486,7 @@ class AnalysisVisualizer:
         if len(param_values) > 2:
             ax.legend()
 
+        assert plt is not None, "matplotlib is required for visualization"
         plt.tight_layout()
 
         if save_path:
@@ -494,6 +523,7 @@ class AnalysisVisualizer:
                 fig = self.plot_histogram(analysis, measurement, show_stats=True)
                 file_path = output_path / f"{report_name}_{measurement}_histogram.png"
                 fig.savefig(file_path, dpi=300, bbox_inches="tight")
+                assert plt is not None, "matplotlib is required for visualization"
                 plt.close(fig)
                 report_files.append(file_path)
             except Exception as e:
@@ -507,6 +537,7 @@ class AnalysisVisualizer:
                 )
                 file_path = output_path / f"{report_name}_scatter_matrix.png"
                 fig.savefig(file_path, dpi=300, bbox_inches="tight")
+                assert plt is not None, "matplotlib is required for visualization"
                 plt.close(fig)
                 report_files.append(file_path)
             except Exception as e:
@@ -521,6 +552,7 @@ class AnalysisVisualizer:
                         output_path / f"{report_name}_{measurement}_convergence.png"
                     )
                     fig.savefig(file_path, dpi=300, bbox_inches="tight")
+                    assert plt is not None, "matplotlib is required for visualization"
                     plt.close(fig)
                     report_files.append(file_path)
                 except Exception as e:
@@ -627,12 +659,14 @@ def create_simple_histogram(
         _logger.error("Matplotlib not available for plotting")
         return None
 
+    assert plt is not None, "matplotlib is required for visualization"
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.hist(values, bins="auto", alpha=0.7, color="skyblue")
     ax.set_title(title)
     ax.set_xlabel("Value")
     ax.set_ylabel("Frequency")
     ax.grid(True, alpha=0.3)
+    assert plt is not None, "matplotlib is required for visualization"
     plt.tight_layout()
 
     return fig

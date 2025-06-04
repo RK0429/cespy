@@ -11,7 +11,6 @@ import logging
 import threading
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 from uuid import uuid4
 
@@ -57,9 +56,9 @@ class TaskInfo:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        """Initialize task ID if not provided."""
-        if self.task_id is None:  # type: ignore[unreachable]
-            self.task_id = str(uuid4())
+        """Post-initialization hook."""
+        # task_id is always initialized by default_factory
+        pass
 
     def __lt__(self, other: Any) -> bool:
         """Enable comparison for priority queue."""
@@ -366,7 +365,7 @@ class TaskQueue:
         Args:
             completed_task_id: ID of the task that just completed
         """
-        tasks_to_queue: List[str] = []
+        tasks_to_queue: List[TaskInfo] = []
 
         # Find tasks that were waiting on this dependency
         for task_id, deps in list(self._task_dependencies.items()):

@@ -17,14 +17,14 @@ class TestSweepIterators:
         """Test basic sweep functionality."""
         result = list(sweep(0, 10, 2.5))
         expected = [0, 2.5, 5.0, 7.5, 10.0]
-        
+
         assert len(result) == 5
         assert np.allclose(result, expected)
 
     def test_sweep_single_point(self):
         """Test sweep with single point."""
         result = list(sweep(5))
-        
+
         assert len(result) == 1
         assert result[0] == 0  # When only start is provided, it sweeps from 0 to start
 
@@ -32,7 +32,7 @@ class TestSweepIterators:
         """Test sweep with downward direction."""
         result = list(sweep(10, 0, -2.5))
         expected = [10, 7.5, 5.0, 2.5, 0.0]
-        
+
         assert len(result) == 5
         assert np.allclose(result, expected)
 
@@ -40,14 +40,14 @@ class TestSweepIterators:
         """Test sweep with negative range."""
         result = list(sweep(-5, 5, 2.5))
         expected = [-5, -2.5, 0, 2.5, 5.0]
-        
+
         assert len(result) == 5
         assert np.allclose(result, expected)
 
     def test_sweep_n_basic(self):
         """Test sweep_n functionality (n points)."""
         result = list(sweep_n(0, 10, 5))
-        
+
         assert len(result) == 5
         assert result[0] == 0
         assert result[-1] == 10
@@ -55,7 +55,7 @@ class TestSweepIterators:
     def test_sweep_log_basic(self):
         """Test basic logarithmic sweep functionality."""
         result = list(sweep_log(1, 100, 10))
-        
+
         assert len(result) > 0
         assert result[0] == 1
         assert result[-1] <= 100
@@ -63,7 +63,7 @@ class TestSweepIterators:
     def test_sweep_log_n_basic(self):
         """Test logarithmic sweep with n points."""
         result = list(sweep_log_n(1, 100, 3))
-        
+
         assert len(result) == 3
         assert result[0] == 1
         assert result[-1] == 100
@@ -71,7 +71,7 @@ class TestSweepIterators:
     def test_sweep_floating_point(self):
         """Test sweep with floating point precision."""
         result = list(sweep(0.1, 1.0, 0.1))
-        
+
         # Check that we don't have precision issues
         assert all(isinstance(x, float) for x in result)
         assert result[0] == 0.1
@@ -80,7 +80,7 @@ class TestSweepIterators:
     def test_sweep_empty_range(self):
         """Test sweep with empty range."""
         result = list(sweep(5, 5, 1))
-        
+
         # Should include the single point
         assert len(result) >= 1
         assert 5 in result
@@ -88,11 +88,11 @@ class TestSweepIterators:
     def test_sweep_iterator_protocol(self):
         """Test that sweep functions return proper iterators."""
         sweep_iter = sweep(0, 10, 2)
-        
+
         # Should be iterable
         assert hasattr(sweep_iter, '__iter__')
         assert hasattr(sweep_iter, '__next__')
-        
+
         # Should be able to iterate
         list1 = list(sweep_iter)
         assert len(list1) > 0
@@ -105,7 +105,7 @@ class TestSweepIterators:
     def test_sweep_large_range(self):
         """Test sweep with large range."""
         result = list(sweep(0, 1000, 100))
-        
+
         assert len(result) == 11  # 0, 100, 200, ..., 1000
         assert result[0] == 0
         assert result[-1] == 1000
@@ -116,7 +116,7 @@ class TestSweepIterators:
         result = list(sweep_n(5, 5, 1))
         assert len(result) == 1
         assert result[0] == 5
-        
+
         # Two points
         result = list(sweep_n(0, 10, 2))
         assert len(result) == 2
@@ -128,7 +128,7 @@ class TestSweepIterators:
         # Should work with positive values
         result = list(sweep_log(1, 10, 1))
         assert len(result) > 0
-        
+
         # Negative or zero values might raise errors or be handled gracefully
         # This depends on the implementation
         try:
@@ -143,7 +143,7 @@ class TestSweepIterators:
         """Test that sweep results are reproducible."""
         result1 = list(sweep(0, 10, 1))
         result2 = list(sweep(0, 10, 1))
-        
+
         assert result1 == result2
 
     def test_sweep_types(self):
@@ -151,7 +151,7 @@ class TestSweepIterators:
         # Integer inputs
         result_int = list(sweep(0, 10, 2))
         assert all(isinstance(x, (int, float)) for x in result_int)
-        
+
         # Float inputs
         result_float = list(sweep(0.0, 10.0, 2.0))
         assert all(isinstance(x, float) for x in result_float)

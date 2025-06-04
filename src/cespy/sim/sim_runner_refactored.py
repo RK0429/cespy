@@ -15,11 +15,11 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from ..editor.base_editor import BaseEditor
 from ..sim.simulator import Simulator
-from .callback_manager import CallbackManager, CallbackType as CallbackManagerType
+from .callback_manager import CallbackManager
 from .process_callback import ProcessCallback
 from .process_manager import ProcessManager, ProcessResult
-from .result_collector import ResultCollector, SimulationResult
-from .run_task import RunTask, clock_function
+from .result_collector import ResultCollector
+from .run_task import RunTask
 from .task_queue import TaskQueue, TaskPriority
 
 __all__ = [
@@ -236,16 +236,15 @@ class SimRunnerRefactored:
 
         # Create RunTask
         task = RunTask(
-            raw_filename="",  # Will be set by simulator
-            log_filename="",  # Will be set by simulator
-            run_netlist_file=run_netlist_file,
-            run_config=self._prepare_run_config(switches, timeout, exe_log),
             simulator=self.simulator,
-            callback=callback,
-            callback_kwargs=self._validate_callback_args(callback, callback_args),
-            verbose=self.verbose,
             runno=run_number,
+            netlist_file=run_netlist_file,
+            callback=callback,
+            callback_args=self._validate_callback_args(callback, callback_args),
+            switches=switches,
             timeout=timeout or self.timeout,
+            verbose=self.verbose,
+            exe_log=exe_log,
         )
 
         # Check resources if needed
@@ -267,7 +266,7 @@ class SimRunnerRefactored:
             )
 
         # Submit task to queue
-        task_id = self._task_queue.submit(
+        self._task_queue.submit(
             run_task=task,
             priority=priority,
             dependencies=None,  # Could add dependency support later
@@ -408,51 +407,55 @@ class SimRunnerRefactored:
         if not task_info:
             return
 
-        task_id, task = task_info
+        task_id = task_info.task_id
+        task = task_info.run_task
+        # Check if task is valid
+        if task is None:
+            _logger.error("Task %s has no run_task", task_id)
+            self._task_queue.mark_completed(task_id, success=False)
+            return
 
         # Execute simulation
         try:
-            # Mark as running
-            self._task_queue.mark_running(task_id)
+            # Task is already marked as running by get_next()
 
-            # Prepare command
-            cmd = self.simulator.create_command(
-                str(task.run_netlist_file), task.run_config.get("switches", [])
-            )
-
-            # Execute process
-            process_id, result = self._process_manager.execute(
-                command=cmd,
-                working_directory=task.run_netlist_file.parent,
+            # Execute simulation using simulator's run method
+            return_code = task.simulator.run(
+                netlist_file=task.netlist_file,
+                cmd_line_switches=task.switches or [],
                 timeout=task.timeout,
-                stdout_file=task.run_netlist_file.with_suffix(".out")
-                if task.run_config.get("exe_log")
-                else None,
-                stderr_file=task.run_netlist_file.with_suffix(".err")
-                if task.run_config.get("exe_log")
-                else None,
+                exe_log=task.exe_log
+            )
+            # Create a mock result for compatibility with existing code
+            result = ProcessResult(
+                return_code=return_code,
+                stdout_path=None,
+                stderr_path=None,
+                duration=0.0,
+                terminated=False,
+                error_message=None
             )
 
             # Mark complete
-            self._task_queue.mark_complete(task_id)
+            self._task_queue.mark_completed(task_id, success=True)
 
             # Collect result
             self._handle_result(task, result)
 
         except Exception as e:
             _logger.error("Error processing task %s: %s", task_id, e)
-            self._task_queue.mark_failed(task_id, str(e))
+            self._task_queue.mark_completed(task_id, success=False)
 
     def _handle_result(self, task: RunTask, result: ProcessResult) -> None:
         """Handle simulation result."""
         # Determine output files
-        raw_file = task.run_netlist_file.with_suffix(".raw")
-        log_file = task.run_netlist_file.with_suffix(".log")
+        raw_file = task.netlist_file.with_suffix(".raw")
+        log_file = task.netlist_file.with_suffix(".log")
 
         # Add to result collector
         sim_result = self._result_collector.add_result(
             task_id=f"run_{task.runno}",
-            netlist_path=task.run_netlist_file,
+            netlist_path=task.netlist_file,
             raw_file=raw_file if raw_file.exists() else None,
             log_file=log_file if log_file.exists() else None,
             success=result.return_code == 0,
@@ -475,8 +478,8 @@ class SimRunnerRefactored:
 
     def _abort_all(self) -> None:
         """Abort all running and pending tasks."""
-        # Clear pending tasks
-        self._task_queue.clear()
+        # Shutdown queue (cancels pending tasks)
+        self._task_queue.shutdown(wait=False)
 
         # Terminate active processes
         for process_id in list(self._process_manager.get_active_processes().keys()):

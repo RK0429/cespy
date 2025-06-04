@@ -12,11 +12,10 @@ import platform
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 # Core imports
 from ..core import constants as core_constants
-from ..core import paths as core_paths
 
 _logger = logging.getLogger("cespy.SimulatorLocator")
 
@@ -127,10 +126,12 @@ class SimulatorLocator:
         else:
             exe_name = None
 
-        if exe_name and shutil.which(exe_name):
-            path = Path(shutil.which(exe_name))
-            self._cached_location = path
-            return path, False
+        if exe_name:
+            which_result = shutil.which(exe_name)
+            if which_result:
+                path = Path(which_result)
+                self._cached_location = path
+                return path, False
 
         return None, False
 
@@ -297,7 +298,9 @@ class SimulatorLocator:
 
         # Patterns for different simulators
         patterns = {
-            core_constants.Simulators.LTSPICE: r"LTspice\s+(?:IV|XVII|64)?\s*(?:Version\s+)?([0-9.]+)",
+            core_constants.Simulators.LTSPICE: (
+                r"LTspice\s+(?:IV|XVII|64)?\s*(?:Version\s+)?([0-9.]+)"
+            ),
             core_constants.Simulators.NGSPICE: r"ngspice-([0-9]+)",
             core_constants.Simulators.QSPICE: r"QSPICE\s+(?:Version\s+)?([0-9.]+)",
             core_constants.Simulators.XYCE: r"Xyce\s+(?:Version\s+)?([0-9.]+)",

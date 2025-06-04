@@ -9,7 +9,7 @@ support, and result visualization capabilities.
 
 import logging
 import time
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
@@ -21,9 +21,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ...editor.base_editor import BaseEditor
-from ...editor.spice_editor import SpiceEditor
-from ...log.logfile_data import LogfileData
-from ..sim_runner import AnyRunner, ProcessCallback, RunTask, SimRunner
+from ..sim_runner import AnyRunner, RunTask
 from .sim_analysis import SimAnalysis
 
 _logger = logging.getLogger("cespy.BaseAnalysis")
@@ -322,9 +320,9 @@ class BaseAnalysis(SimAnalysis):
             result.end_time = time.time()
 
             # Store file paths if available
-            if hasattr(run_task, "raw_file"):
+            if hasattr(run_task, "raw_file") and run_task.raw_file is not None:
                 result.raw_file = Path(run_task.raw_file)
-            if hasattr(run_task, "log_file"):
+            if hasattr(run_task, "log_file") and run_task.log_file is not None:
                 result.log_file = Path(run_task.log_file)
 
         except Exception as e:
@@ -365,7 +363,7 @@ class BaseAnalysis(SimAnalysis):
         if successful:
             durations = [r.duration for r in successful if r.duration is not None]
             if durations:
-                stats["avg_duration"] = np.mean(durations)
+                stats["avg_duration"] = float(np.mean(durations))
                 stats["min_duration"] = np.min(durations)
                 stats["max_duration"] = np.max(durations)
                 stats["total_duration"] = np.sum(durations)
@@ -387,8 +385,8 @@ class StatisticalAnalysis(BaseAnalysis):
         circuit_file: Union[str, BaseEditor],
         num_runs: int = 1000,
         seed: Optional[int] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Initialize statistical analysis.
 
         Args:
@@ -443,7 +441,7 @@ class StatisticalAnalysis(BaseAnalysis):
 
     def get_histogram_data(
         self, measurement_name: str, bins: Union[int, str] = "auto"
-    ) -> Tuple[NDArray, NDArray]:
+    ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Get histogram data for a measurement.
 
         Args:
@@ -468,7 +466,7 @@ class StatisticalAnalysis(BaseAnalysis):
 
     def get_correlation_matrix(
         self, measurement_names: List[str]
-    ) -> Tuple[NDArray, List[str]]:
+    ) -> Tuple[NDArray[np.floating[Any]], List[str]]:
         """Calculate correlation matrix between measurements.
 
         Args:
@@ -478,7 +476,7 @@ class StatisticalAnalysis(BaseAnalysis):
             Tuple of (correlation_matrix, valid_measurements)
         """
         # Collect data for each measurement
-        data_dict = {name: [] for name in measurement_names}
+        data_dict: Dict[str, List[float]] = {name: [] for name in measurement_names}
 
         for result in self.results:
             if result.success:
@@ -521,8 +519,8 @@ class ParametricAnalysis(BaseAnalysis):
         self,
         circuit_file: Union[str, BaseEditor],
         parameters: Dict[str, List[Any]],
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Initialize parametric analysis.
 
         Args:
@@ -597,7 +595,7 @@ class ParametricAnalysis(BaseAnalysis):
 
     def get_response_surface(
         self, param1_name: str, param2_name: str, measurement_name: str
-    ) -> Tuple[NDArray, NDArray, NDArray]:
+    ) -> Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
         """Get 2D response surface for two parameters.
 
         Args:

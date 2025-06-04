@@ -12,7 +12,7 @@ import time
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 from numpy.typing import NDArray
@@ -24,12 +24,12 @@ _logger = logging.getLogger("cespy.RawDataCache")
 class CacheEntry:
     """Entry in the raw data cache."""
 
-    data: NDArray
+    data: NDArray[np.float64]
     access_count: int = 0
     last_access: float = field(default_factory=time.time)
     size_bytes: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Calculate size after initialization."""
         if isinstance(self.data, np.ndarray):
             self.size_bytes = self.data.nbytes
@@ -150,7 +150,7 @@ class RawDataCache:
             "RawDataCache initialized with %d MB limit", max_size / 1024 / 1024
         )
 
-    def get(self, key: str) -> Optional[NDArray]:
+    def get(self, key: str) -> Optional[NDArray[np.float64]]:
         """Get data from cache.
 
         Args:
@@ -171,7 +171,7 @@ class RawDataCache:
             self._misses += 1
             return None
 
-    def put(self, key: str, data: NDArray) -> None:
+    def put(self, key: str, data: NDArray[np.float64]) -> None:
         """Put data into cache.
 
         Args:
@@ -194,8 +194,8 @@ class RawDataCache:
         _logger.debug("Cached %s (%d bytes)", key, entry.size_bytes)
 
     def get_or_compute(
-        self, key: str, compute_func: Callable[..., NDArray], *args, **kwargs
-    ) -> NDArray:
+        self, key: str, compute_func: Callable[..., NDArray[np.float64]], *args: Any, **kwargs: Any
+    ) -> NDArray[np.float64]:
         """Get from cache or compute if not present.
 
         Args:
@@ -301,7 +301,6 @@ class RawDataCache:
         """Load cache from disk."""
         if self.persist_path is None:
             return
-            
         try:
             with open(self.persist_path, "rb") as f:
                 cache_data = pickle.load(f)
@@ -384,7 +383,7 @@ class MultiLevelCache:
             disk_size / 1024 / 1024 / 1024,
         )
 
-    def get(self, key: str) -> Optional[NDArray]:
+    def get(self, key: str) -> Optional[NDArray[np.float64]]:
         """Get data from cache (checks memory then disk).
 
         Args:
@@ -415,7 +414,7 @@ class MultiLevelCache:
 
         return None
 
-    def put(self, key: str, data: NDArray) -> None:
+    def put(self, key: str, data: NDArray[np.float64]) -> None:
         """Put data into cache.
 
         Args:
@@ -430,7 +429,7 @@ class MultiLevelCache:
         if data_size <= self.disk_size - self._disk_usage:
             self._save_to_disk(key, data)
 
-    def _save_to_disk(self, key: str, data: NDArray) -> None:
+    def _save_to_disk(self, key: str, data: NDArray[np.float64]) -> None:
         """Save data to disk cache.
 
         Args:
@@ -491,7 +490,7 @@ class MultiLevelCache:
         for path in self._disk_index.values():
             try:
                 path.unlink()
-            except:
+            except Exception:
                 pass
 
         self._disk_index.clear()

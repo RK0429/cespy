@@ -1,0 +1,978 @@
+src/cespy/editor/base_editor_enhanced.py:721:1: W293 blank line contains whitespace
+src/cespy/editor/base_editor_enhanced.py:738:1: W293 blank line contains whitespace
+src/cespy/editor/base_editor_enhanced.py:753:1: W293 blank line contains whitespace
+src/cespy/editor/base_editor_enhanced.py:767:1: W293 blank line contains whitespace
+src/cespy/editor/base_editor_enhanced.py:781:1: W293 blank line contains whitespace
+src/cespy/editor/base_editor_enhanced.py:795:1: W293 blank line contains whitespace
+src/cespy/raw/raw_binary_parser.py:369:101: E501 line too long (114 > 100 characters)
+src/cespy/raw/raw_binary_parser.py:429:9: F841 local variable 'data' is assigned to but never used
+src/cespy/raw/raw_binary_parser.py:440:9: F841 local variable 'traces' is assigned to but never used
+src/cespy/raw/raw_data_cache.py:304:1: W293 blank line contains whitespace
+src/cespy/raw/raw_data_cache.py:494:13: E722 do not use bare 'except'
+src/cespy/raw/raw_read.py:1073:101: E501 line too long (103 > 100 characters)
+src/cespy/raw/raw_read.py:1110:101: E501 line too long (104 > 100 characters)
+src/cespy/raw/raw_read_lazy.py:113:1: W293 blank line contains whitespace
+src/cespy/raw/raw_read_lazy.py:283:101: E501 line too long (127 > 100 characters)
+src/cespy/raw/raw_read_lazy.py:303:1: W293 blank line contains whitespace
+src/cespy/raw/raw_read_lazy.py:329:1: W293 blank line contains whitespace
+src/cespy/raw/raw_read_lazy.py:471:9: E722 do not use bare 'except'
+src/cespy/raw/raw_stream.py:40:101: E501 line too long (105 > 100 characters)
+src/cespy/raw/raw_stream.py:175:1: W293 blank line contains whitespace
+src/cespy/raw/raw_stream.py:180:1: W293 blank line contains whitespace
+src/cespy/raw/raw_stream.py:184:1: W293 blank line contains whitespace
+src/cespy/raw/raw_stream.py:231:101: E501 line too long (105 > 100 characters)
+src/cespy/raw/raw_stream.py:263:101: E501 line too long (105 > 100 characters)
+src/cespy/raw/raw_stream.py:311:101: E501 line too long (105 > 100 characters)
+src/cespy/raw/raw_stream.py:396:101: E501 line too long (105 > 100 characters)
+src/cespy/sim/callback_manager.py:249:101: E501 line too long (105 > 100 characters)
+src/cespy/sim/process_manager.py:136:1: W293 blank line contains whitespace
+src/cespy/sim/result_collector.py:447:17: E722 do not use bare 'except'
+src/cespy/sim/result_collector.py:452:21: E722 do not use bare 'except'
+src/cespy/sim/sim_runner_refactored.py:269:9: F841 local variable 'task_id' is assigned to but never used
+src/cespy/sim/sim_runner_refactored.py:412:1: W293 blank line contains whitespace
+src/cespy/sim/sim_runner_refactored.py:430:1: W293 blank line contains whitespace
+src/cespy/sim/simulator_factory.py:107:1: W293 blank line contains whitespace
+src/cespy/sim/simulator_factory.py:126:1: W293 blank line contains whitespace
+src/cespy/sim/simulator_locator.py:301:101: E501 line too long (103 > 100 characters)
+src/cespy/sim/toolkit/montecarlo.py:410:13: F841 local variable 'rt' is assigned to but never used
+src/cespy/sim/toolkit/montecarlo.py:479:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:484:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:491:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:506:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:515:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:527:101: E501 line too long (115 > 100 characters)
+src/cespy/sim/toolkit/montecarlo.py:529:101: E501 line too long (114 > 100 characters)
+src/cespy/sim/toolkit/montecarlo.py:534:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:541:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:544:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:587:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:595:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:670:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:692:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:702:101: E501 line too long (135 > 100 characters)
+src/cespy/sim/toolkit/montecarlo.py:704:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:707:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/montecarlo.py:712:101: E501 line too long (126 > 100 characters)
+src/cespy/sim/toolkit/montecarlo.py:732:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/visualization.py:94:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/visualization.py:191:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/visualization.py:327:1: W293 blank line contains whitespace
+src/cespy/sim/toolkit/visualization.py:416:1: W293 blank line contains whitespace
+tests/conftest.py:81:1: W293 blank line contains whitespace
+tests/conftest.py:88:40: W292 no newline at end of file
+tests/integration/test_analysis_tools.py:29:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:35:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:43:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:45:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:48:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:53:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:58:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:73:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:79:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:88:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:89:9: F841 local variable 'results' is assigned to but never used
+tests/integration/test_analysis_tools.py:91:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:95:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:99:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:107:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:121:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:129:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:136:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:139:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:142:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:147:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:150:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:171:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:177:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:185:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:187:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:191:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:198:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:212:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:218:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:226:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:228:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:234:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:247:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:253:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:262:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:263:9: F841 local variable 'results' is assigned to but never used
+tests/integration/test_analysis_tools.py:265:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:270:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:292:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:295:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:304:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:306:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:312:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:316:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:331:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:333:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:343:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:345:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:348:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:353:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:367:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:369:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:376:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:377:9: F841 local variable 'results' is assigned to but never used
+tests/integration/test_analysis_tools.py:379:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:382:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:386:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:408:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:414:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:423:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:424:9: F841 local variable 'mc_results' is assigned to but never used
+tests/integration/test_analysis_tools.py:426:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:428:9: F841 local variable 'delay_mean' is assigned to but never used
+tests/integration/test_analysis_tools.py:430:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:432:9: F841 local variable 'min_idx' is assigned to but never used
+tests/integration/test_analysis_tools.py:433:9: F841 local variable 'max_idx' is assigned to but never used
+tests/integration/test_analysis_tools.py:434:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:442:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:444:1: W293 blank line contains whitespace
+tests/integration/test_analysis_tools.py:447:63: W292 no newline at end of file
+tests/integration/test_api_compatibility.py:26:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:56:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:59:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:63:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:67:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:71:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:74:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:84:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:90:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:103:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:118:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:124:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:136:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:139:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:142:9: F841 local variable 'blank_editor' is assigned to but never used
+tests/integration/test_api_compatibility.py:149:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:152:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:156:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:158:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:167:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:171:47: W291 trailing whitespace
+tests/integration/test_api_compatibility.py:176:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:179:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:198:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:200:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:203:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:207:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:217:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:227:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:230:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:235:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:240:1: W293 blank line contains whitespace
+tests/integration/test_api_compatibility.py:244:59: W292 no newline at end of file
+tests/integration/test_cli_entry_points.py:16:32: W291 trailing whitespace
+tests/integration/test_cli_entry_points.py:23:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:27:17: F841 local variable 'result' is assigned to but never used
+tests/integration/test_cli_entry_points.py:28:101: E501 line too long (106 > 100 characters)
+tests/integration/test_cli_entry_points.py:46:63: W291 trailing whitespace
+tests/integration/test_cli_entry_points.py:53:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:89:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:92:13: F841 local variable 'result' is assigned to but never used
+tests/integration/test_cli_entry_points.py:109:101: E501 line too long (136 > 100 characters)
+tests/integration/test_cli_entry_points.py:124:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:126:13: F841 local variable 'result' is assigned to but never used
+tests/integration/test_cli_entry_points.py:127:101: E501 line too long (119 > 100 characters)
+tests/integration/test_cli_entry_points.py:139:13: F841 local variable 'result' is assigned to but never used
+tests/integration/test_cli_entry_points.py:140:101: E501 line too long (117 > 100 characters)
+tests/integration/test_cli_entry_points.py:156:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:159:17: F841 local variable 'result' is assigned to but never used
+tests/integration/test_cli_entry_points.py:160:101: E501 line too long (105 > 100 characters)
+tests/integration/test_cli_entry_points.py:175:101: E501 line too long (124 > 100 characters)
+tests/integration/test_cli_entry_points.py:180:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:190:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:195:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:200:37: W291 trailing whitespace
+tests/integration/test_cli_entry_points.py:206:1: W293 blank line contains whitespace
+tests/integration/test_cli_entry_points.py:213:101: E501 line too long (106 > 100 characters)
+tests/integration/test_cli_entry_points.py:213:107: W292 no newline at end of file
+tests/integration/test_functionality_preservation.py:31:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:34:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:39:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:44:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:48:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:54:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:57:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:60:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:63:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:70:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:75:101: E501 line too long (103 > 100 characters)
+tests/integration/test_functionality_preservation.py:78:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:81:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:84:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:88:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:99:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:103:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:106:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:109:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:114:101: E501 line too long (109 > 100 characters)
+tests/integration/test_functionality_preservation.py:117:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:120:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:123:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:127:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:130:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:150:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:153:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:157:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:161:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:175:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:178:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:181:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:184:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:187:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:192:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:199:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:203:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:204:26: W291 trailing whitespace
+tests/integration/test_functionality_preservation.py:206:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:220:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:227:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:234:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:237:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:240:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:244:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:247:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:250:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:261:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:314:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:317:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:323:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:326:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:334:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:352:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:360:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:365:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:368:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:373:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:377:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:391:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:395:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:418:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:429:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:434:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:437:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:440:1: W293 blank line contains whitespace
+tests/integration/test_functionality_preservation.py:444:59: W292 no newline at end of file
+tests/integration/test_refactored_analysis.py:34:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:39:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:46:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:52:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:56:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:59:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:61:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:65:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:74:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:78:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:82:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:86:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:95:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:97:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:103:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:107:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:118:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:120:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:124:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:128:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:141:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:145:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:156:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:168:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:180:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:190:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:194:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:200:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:203:101: E501 line too long (102 > 100 characters)
+tests/integration/test_refactored_analysis.py:207:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:209:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:212:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:218:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:221:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:230:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:235:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:245:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:255:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:259:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:265:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:266:73: W291 trailing whitespace
+tests/integration/test_refactored_analysis.py:271:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:276:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:277:73: W291 trailing whitespace
+tests/integration/test_refactored_analysis.py:283:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:293:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:295:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:300:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:304:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:312:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:316:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:319:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:328:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:336:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:339:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:341:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:345:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:352:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:356:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:360:101: E501 line too long (102 > 100 characters)
+tests/integration/test_refactored_analysis.py:365:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:367:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:372:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:379:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:383:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:386:70: W291 trailing whitespace
+tests/integration/test_refactored_analysis.py:393:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:395:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:399:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:402:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:410:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:414:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:417:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:425:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:429:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:434:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:437:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:441:1: W293 blank line contains whitespace
+tests/integration/test_refactored_analysis.py:449:28: W292 no newline at end of file
+tests/integration/test_result_parsing.py:22:101: E501 line too long (103 > 100 characters)
+tests/integration/test_result_parsing.py:24:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:30:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:33:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:37:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:43:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:49:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:56:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:65:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:70:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:76:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:79:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:82:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:87:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:91:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:95:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:101:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:105:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:111:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:116:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:124:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:127:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:131:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:139:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:148:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:154:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:157:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:162:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:194:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:197:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:203:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:222:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:225:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:229:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:234:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:254:20: W291 trailing whitespace
+tests/integration/test_result_parsing.py:266:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:269:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:277:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:284:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:309:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:312:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:327:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:331:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:336:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:343:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:346:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:350:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:353:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:359:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:364:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:371:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:378:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:382:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:387:1: W293 blank line contains whitespace
+tests/integration/test_result_parsing.py:390:71: W292 no newline at end of file
+tests/integration/test_simulation_workflow.py:26:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:29:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:33:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:36:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:42:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:62:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:65:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:68:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:85:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:88:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:92:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:95:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:98:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:118:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:121:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:124:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:127:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:157:1: W293 blank line contains whitespace
+tests/integration/test_simulation_workflow.py:164:38: W292 no newline at end of file
+tests/integration/test_simulator_execution.py:34:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:37:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:41:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:44:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:48:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:51:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:56:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:78:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:84:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:87:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:91:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:114:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:120:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:123:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:127:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:147:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:153:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:157:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:186:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:189:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:194:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:197:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:200:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:204:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:221:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:227:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:230:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:258:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:261:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:266:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:270:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:273:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:294:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:297:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:302:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:305:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:308:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:329:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:334:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:340:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:343:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:360:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:364:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:368:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:374:1: W293 blank line contains whitespace
+tests/integration/test_simulator_execution.py:379:43: W292 no newline at end of file
+tests/performance/test_performance.py:23:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:27:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:31:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:35:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:39:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:44:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:46:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:49:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:53:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:58:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:59:101: E501 line too long (119 > 100 characters)
+tests/performance/test_performance.py:60:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:72:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:78:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:82:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:87:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:89:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:93:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:99:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:102:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:108:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:113:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:115:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:125:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:129:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:134:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:136:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:150:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:153:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:157:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:161:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:164:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:166:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:171:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:177:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:183:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:188:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:194:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:195:101: E501 line too long (136 > 100 characters)
+tests/performance/test_performance.py:196:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:201:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:203:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:207:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:212:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:214:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:217:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:224:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:230:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:234:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:257:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:259:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:263:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:266:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:270:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:272:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:276:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:279:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:283:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:285:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:289:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:291:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:305:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:309:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:312:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:316:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:319:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:329:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:340:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:343:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:351:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:358:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:362:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:365:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:369:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:372:1: W293 blank line contains whitespace
+tests/performance/test_performance.py:373:101: E501 line too long (121 > 100 characters)
+tests/performance/test_performance.py:373:122: W292 no newline at end of file
+tests/platform/test_platform_specific.py:21:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:24:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:29:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:39:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:43:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:46:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:50:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:54:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:59:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:70:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:85:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:89:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:98:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:103:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:108:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:112:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:117:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:126:17: E722 do not use bare 'except'
+tests/platform/test_platform_specific.py:141:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:144:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:149:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:157:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:165:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:168:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:172:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:177:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:183:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:188:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:193:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:198:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:215:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:220:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:223:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:227:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:230:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:244:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:249:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:253:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:256:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:262:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:270:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:278:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:280:9: F841 local variable 'windows_path' is assigned to but never used
+tests/platform/test_platform_specific.py:281:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:298:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:302:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:305:1: W293 blank line contains whitespace
+tests/platform/test_platform_specific.py:312:63: W292 no newline at end of file
+tests/test_core_api_consistency.py:23:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:29:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:33:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:39:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:45:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:49:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:51:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:58:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:63:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:68:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:73:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:79:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:86:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:93:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:97:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:103:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:107:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:116:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:122:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:127:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:132:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:138:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:142:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:147:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:156:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:160:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:163:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:169:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:176:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:184:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:192:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:197:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:202:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:207:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:214:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:218:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:221:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:224:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:227:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:232:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:237:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:241:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:245:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:250:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:253:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:257:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:260:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:263:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:267:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:271:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:276:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:284:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:291:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:295:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:303:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:309:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:313:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:318:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:324:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:328:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:332:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:338:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:342:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:350:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:357:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:360:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:364:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:369:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:373:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:377:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:380:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:386:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:391:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:394:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:399:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:402:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:407:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:414:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:422:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:426:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:430:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:437:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:441:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:443:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:450:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:461:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:465:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:469:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:473:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:477:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:483:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:488:1: W293 blank line contains whitespace
+tests/test_core_api_consistency.py:494:28: W292 no newline at end of file
+tests/test_core_performance.py:26:1: W293 blank line contains whitespace
+tests/test_core_performance.py:30:1: W293 blank line contains whitespace
+tests/test_core_performance.py:37:1: W293 blank line contains whitespace
+tests/test_core_performance.py:41:1: W293 blank line contains whitespace
+tests/test_core_performance.py:50:1: W293 blank line contains whitespace
+tests/test_core_performance.py:59:1: W293 blank line contains whitespace
+tests/test_core_performance.py:64:1: W293 blank line contains whitespace
+tests/test_core_performance.py:70:1: W293 blank line contains whitespace
+tests/test_core_performance.py:73:1: W293 blank line contains whitespace
+tests/test_core_performance.py:80:1: W293 blank line contains whitespace
+tests/test_core_performance.py:84:1: W293 blank line contains whitespace
+tests/test_core_performance.py:89:1: W293 blank line contains whitespace
+tests/test_core_performance.py:93:1: W293 blank line contains whitespace
+tests/test_core_performance.py:95:1: W293 blank line contains whitespace
+tests/test_core_performance.py:101:1: W293 blank line contains whitespace
+tests/test_core_performance.py:106:1: W293 blank line contains whitespace
+tests/test_core_performance.py:108:1: W293 blank line contains whitespace
+tests/test_core_performance.py:110:1: W293 blank line contains whitespace
+tests/test_core_performance.py:116:1: W293 blank line contains whitespace
+tests/test_core_performance.py:121:1: W293 blank line contains whitespace
+tests/test_core_performance.py:127:1: W293 blank line contains whitespace
+tests/test_core_performance.py:134:1: W293 blank line contains whitespace
+tests/test_core_performance.py:139:1: W293 blank line contains whitespace
+tests/test_core_performance.py:143:1: W293 blank line contains whitespace
+tests/test_core_performance.py:151:1: W293 blank line contains whitespace
+tests/test_core_performance.py:156:1: W293 blank line contains whitespace
+tests/test_core_performance.py:162:1: W293 blank line contains whitespace
+tests/test_core_performance.py:167:1: W293 blank line contains whitespace
+tests/test_core_performance.py:171:1: W293 blank line contains whitespace
+tests/test_core_performance.py:178:1: W293 blank line contains whitespace
+tests/test_core_performance.py:182:1: W293 blank line contains whitespace
+tests/test_core_performance.py:190:1: W293 blank line contains whitespace
+tests/test_core_performance.py:194:1: W293 blank line contains whitespace
+tests/test_core_performance.py:197:1: W293 blank line contains whitespace
+tests/test_core_performance.py:202:1: W293 blank line contains whitespace
+tests/test_core_performance.py:205:1: W293 blank line contains whitespace
+tests/test_core_performance.py:211:1: W293 blank line contains whitespace
+tests/test_core_performance.py:216:1: W293 blank line contains whitespace
+tests/test_core_performance.py:222:1: W293 blank line contains whitespace
+tests/test_core_performance.py:225:1: W293 blank line contains whitespace
+tests/test_core_performance.py:229:1: W293 blank line contains whitespace
+tests/test_core_performance.py:233:1: W293 blank line contains whitespace
+tests/test_core_performance.py:238:1: W293 blank line contains whitespace
+tests/test_core_performance.py:243:1: W293 blank line contains whitespace
+tests/test_core_performance.py:246:1: W293 blank line contains whitespace
+tests/test_core_performance.py:250:1: W293 blank line contains whitespace
+tests/test_core_performance.py:257:1: W293 blank line contains whitespace
+tests/test_core_performance.py:262:1: W293 blank line contains whitespace
+tests/test_core_performance.py:265:1: W293 blank line contains whitespace
+tests/test_core_performance.py:270:1: W293 blank line contains whitespace
+tests/test_core_performance.py:275:1: W293 blank line contains whitespace
+tests/test_core_performance.py:280:1: W293 blank line contains whitespace
+tests/test_core_performance.py:289:1: W293 blank line contains whitespace
+tests/test_core_performance.py:293:1: W293 blank line contains whitespace
+tests/test_core_performance.py:298:1: W293 blank line contains whitespace
+tests/test_core_performance.py:302:1: W293 blank line contains whitespace
+tests/test_core_performance.py:307:1: W293 blank line contains whitespace
+tests/test_core_performance.py:312:1: W293 blank line contains whitespace
+tests/test_core_performance.py:315:1: W293 blank line contains whitespace
+tests/test_core_performance.py:319:1: W293 blank line contains whitespace
+tests/test_core_performance.py:323:1: W293 blank line contains whitespace
+tests/test_core_performance.py:329:1: W293 blank line contains whitespace
+tests/test_core_performance.py:333:1: W293 blank line contains whitespace
+tests/test_core_performance.py:335:9: F841 local variable 'pattern1' is assigned to but never used
+tests/test_core_performance.py:336:9: F841 local variable 'pattern2' is assigned to but never used
+tests/test_core_performance.py:338:1: W293 blank line contains whitespace
+tests/test_core_performance.py:340:9: F841 local variable 'pattern3' is assigned to but never used
+tests/test_core_performance.py:342:1: W293 blank line contains whitespace
+tests/test_core_performance.py:344:9: F841 local variable 'pattern1_new' is assigned to but never used
+tests/test_core_performance.py:346:1: W293 blank line contains whitespace
+tests/test_core_performance.py:350:1: W293 blank line contains whitespace
+tests/test_core_performance.py:357:1: W293 blank line contains whitespace
+tests/test_core_performance.py:363:1: W293 blank line contains whitespace
+tests/test_core_performance.py:367:1: W293 blank line contains whitespace
+tests/test_core_performance.py:371:1: W293 blank line contains whitespace
+tests/test_core_performance.py:380:1: W293 blank line contains whitespace
+tests/test_core_performance.py:386:1: W293 blank line contains whitespace
+tests/test_core_performance.py:389:1: W293 blank line contains whitespace
+tests/test_core_performance.py:392:1: W293 blank line contains whitespace
+tests/test_core_performance.py:396:1: W293 blank line contains whitespace
+tests/test_core_performance.py:400:1: W293 blank line contains whitespace
+tests/test_core_performance.py:407:1: W293 blank line contains whitespace
+tests/test_core_performance.py:414:1: W293 blank line contains whitespace
+tests/test_core_performance.py:419:1: W293 blank line contains whitespace
+tests/test_core_performance.py:424:1: W293 blank line contains whitespace
+tests/test_core_performance.py:433:1: W293 blank line contains whitespace
+tests/test_core_performance.py:435:1: W293 blank line contains whitespace
+tests/test_core_performance.py:440:1: W293 blank line contains whitespace
+tests/test_core_performance.py:446:1: W293 blank line contains whitespace
+tests/test_core_performance.py:458:1: W293 blank line contains whitespace
+tests/test_core_performance.py:463:1: W293 blank line contains whitespace
+tests/test_core_performance.py:471:1: W293 blank line contains whitespace
+tests/test_core_performance.py:476:1: W293 blank line contains whitespace
+tests/test_core_performance.py:478:1: W293 blank line contains whitespace
+tests/test_core_performance.py:485:1: W293 blank line contains whitespace
+tests/test_core_performance.py:490:1: W293 blank line contains whitespace
+tests/test_core_performance.py:492:1: W293 blank line contains whitespace
+tests/test_core_performance.py:499:1: W293 blank line contains whitespace
+tests/test_core_performance.py:503:1: W293 blank line contains whitespace
+tests/test_core_performance.py:505:1: W293 blank line contains whitespace
+tests/test_core_performance.py:509:1: W293 blank line contains whitespace
+tests/test_core_performance.py:512:1: W293 blank line contains whitespace
+tests/test_core_performance.py:515:1: W293 blank line contains whitespace
+tests/test_core_performance.py:520:1: W293 blank line contains whitespace
+tests/test_core_performance.py:524:1: W293 blank line contains whitespace
+tests/test_core_performance.py:534:1: W293 blank line contains whitespace
+tests/test_core_performance.py:539:1: W293 blank line contains whitespace
+tests/test_core_performance.py:543:1: W293 blank line contains whitespace
+tests/test_core_performance.py:546:1: W293 blank line contains whitespace
+tests/test_core_performance.py:551:1: W293 blank line contains whitespace
+tests/test_core_performance.py:556:1: W293 blank line contains whitespace
+tests/test_core_performance.py:561:1: W293 blank line contains whitespace
+tests/test_core_performance.py:564:1: W293 blank line contains whitespace
+tests/test_core_performance.py:571:28: W292 no newline at end of file
+tests/test_core_platform.py:26:1: W293 blank line contains whitespace
+tests/test_core_platform.py:39:1: W293 blank line contains whitespace
+tests/test_core_platform.py:47:1: W293 blank line contains whitespace
+tests/test_core_platform.py:60:1: W293 blank line contains whitespace
+tests/test_core_platform.py:65:1: W293 blank line contains whitespace
+tests/test_core_platform.py:78:1: W293 blank line contains whitespace
+tests/test_core_platform.py:87:1: W293 blank line contains whitespace
+tests/test_core_platform.py:93:1: W293 blank line contains whitespace
+tests/test_core_platform.py:98:1: W293 blank line contains whitespace
+tests/test_core_platform.py:105:1: W293 blank line contains whitespace
+tests/test_core_platform.py:113:1: W293 blank line contains whitespace
+tests/test_core_platform.py:116:1: W293 blank line contains whitespace
+tests/test_core_platform.py:120:1: W293 blank line contains whitespace
+tests/test_core_platform.py:124:1: W293 blank line contains whitespace
+tests/test_core_platform.py:128:1: W293 blank line contains whitespace
+tests/test_core_platform.py:133:1: W293 blank line contains whitespace
+tests/test_core_platform.py:137:1: W293 blank line contains whitespace
+tests/test_core_platform.py:142:1: W293 blank line contains whitespace
+tests/test_core_platform.py:146:1: W293 blank line contains whitespace
+tests/test_core_platform.py:149:1: W293 blank line contains whitespace
+tests/test_core_platform.py:154:1: W293 blank line contains whitespace
+tests/test_core_platform.py:158:1: W293 blank line contains whitespace
+tests/test_core_platform.py:163:1: W293 blank line contains whitespace
+tests/test_core_platform.py:167:1: W293 blank line contains whitespace
+tests/test_core_platform.py:171:1: W293 blank line contains whitespace
+tests/test_core_platform.py:176:1: W293 blank line contains whitespace
+tests/test_core_platform.py:181:1: W293 blank line contains whitespace
+tests/test_core_platform.py:185:1: W293 blank line contains whitespace
+tests/test_core_platform.py:190:1: W293 blank line contains whitespace
+tests/test_core_platform.py:196:1: W293 blank line contains whitespace
+tests/test_core_platform.py:201:1: W293 blank line contains whitespace
+tests/test_core_platform.py:204:1: W293 blank line contains whitespace
+tests/test_core_platform.py:209:1: W293 blank line contains whitespace
+tests/test_core_platform.py:214:1: W293 blank line contains whitespace
+tests/test_core_platform.py:219:1: W293 blank line contains whitespace
+tests/test_core_platform.py:225:1: W293 blank line contains whitespace
+tests/test_core_platform.py:230:1: W293 blank line contains whitespace
+tests/test_core_platform.py:235:1: W293 blank line contains whitespace
+tests/test_core_platform.py:239:1: W293 blank line contains whitespace
+tests/test_core_platform.py:246:1: W293 blank line contains whitespace
+tests/test_core_platform.py:252:1: W293 blank line contains whitespace
+tests/test_core_platform.py:258:1: W293 blank line contains whitespace
+tests/test_core_platform.py:263:1: W293 blank line contains whitespace
+tests/test_core_platform.py:271:1: W293 blank line contains whitespace
+tests/test_core_platform.py:276:1: W293 blank line contains whitespace
+tests/test_core_platform.py:284:1: W293 blank line contains whitespace
+tests/test_core_platform.py:294:1: W293 blank line contains whitespace
+tests/test_core_platform.py:298:1: W293 blank line contains whitespace
+tests/test_core_platform.py:307:1: W293 blank line contains whitespace
+tests/test_core_platform.py:311:1: W293 blank line contains whitespace
+tests/test_core_platform.py:316:1: W293 blank line contains whitespace
+tests/test_core_platform.py:320:1: W293 blank line contains whitespace
+tests/test_core_platform.py:325:1: W293 blank line contains whitespace
+tests/test_core_platform.py:329:1: W293 blank line contains whitespace
+tests/test_core_platform.py:338:1: W293 blank line contains whitespace
+tests/test_core_platform.py:343:1: W293 blank line contains whitespace
+tests/test_core_platform.py:347:1: W293 blank line contains whitespace
+tests/test_core_platform.py:351:1: W293 blank line contains whitespace
+tests/test_core_platform.py:355:1: W293 blank line contains whitespace
+tests/test_core_platform.py:359:1: W293 blank line contains whitespace
+tests/test_core_platform.py:363:1: W293 blank line contains whitespace
+tests/test_core_platform.py:367:1: W293 blank line contains whitespace
+tests/test_core_platform.py:373:28: W292 no newline at end of file
+tests/unit/editor/__init__.py:1:40: W292 no newline at end of file
+tests/unit/editor/test_spice_editor.py:168:48: W292 no newline at end of file
+tests/unit/raw/__init__.py:1:37: W292 no newline at end of file
+tests/unit/raw/test_raw_read.py:29:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:33:29: W291 trailing whitespace
+tests/unit/raw/test_raw_read.py:45:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:48:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:57:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:65:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:70:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:72:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:82:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:86:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:89:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:92:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:94:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:103:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:107:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:110:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:117:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:131:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:141:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:146:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:148:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:156:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:170:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:173:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:176:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:184:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:193:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:201:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:206:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:208:1: W293 blank line contains whitespace
+tests/unit/raw/test_raw_read.py:211:54: W292 no newline at end of file
+tests/unit/sim/__init__.py:1:37: W292 no newline at end of file
+tests/unit/sim/test_sim_runner.py:22:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:37:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:46:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:49:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:55:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:58:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:66:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:70:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:79:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:87:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:96:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:103:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:112:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:119:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:129:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:132:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:135:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:143:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:153:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:162:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:165:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:172:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:175:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:183:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:190:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:198:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:207:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:218:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:228:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:239:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:247:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:255:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:262:1: W293 blank line contains whitespace
+tests/unit/sim/test_sim_runner.py:267:41: W292 no newline at end of file
+tests/unit/simulators/__init__.py:1:44: W292 no newline at end of file
+tests/unit/simulators/test_ltspice_simulator.py:20:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:25:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:34:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:51:101: E501 line too long (102 > 100 characters)
+tests/unit/simulators/test_ltspice_simulator.py:53:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:58:23: W291 trailing whitespace
+tests/unit/simulators/test_ltspice_simulator.py:68:101: E501 line too long (102 > 100 characters)
+tests/unit/simulators/test_ltspice_simulator.py:70:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:72:101: E501 line too long (106 > 100 characters)
+tests/unit/simulators/test_ltspice_simulator.py:78:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:88:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:100:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:102:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:105:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:107:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:120:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:124:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:126:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:128:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:143:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:147:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:155:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:159:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:170:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:175:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:186:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:191:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:201:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:204:101: E501 line too long (110 > 100 characters)
+tests/unit/simulators/test_ltspice_simulator.py:206:101: E501 line too long (129 > 100 characters)
+tests/unit/simulators/test_ltspice_simulator.py:208:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:216:101: E501 line too long (115 > 100 characters)
+tests/unit/simulators/test_ltspice_simulator.py:224:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:228:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:236:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:247:1: W293 blank line contains whitespace
+tests/unit/simulators/test_ltspice_simulator.py:251:46: W292 no newline at end of file
+tests/unit/utils/__init__.py:1:39: W292 no newline at end of file
+tests/unit/utils/test_sweep_iterators.py:20:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:27:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:35:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:43:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:50:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:58:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:66:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:74:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:83:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:91:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:95:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:108:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:119:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:131:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:146:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:154:1: W293 blank line contains whitespace
+tests/unit/utils/test_sweep_iterators.py:171:37: W292 no newline at end of file

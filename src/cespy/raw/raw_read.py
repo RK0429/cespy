@@ -229,7 +229,6 @@ import ast
 import logging
 import operator as _op
 import os
-import re
 from collections import OrderedDict
 from pathlib import Path
 from struct import unpack
@@ -253,7 +252,6 @@ from numpy.typing import NDArray
 # Core imports
 from ..core import constants as core_constants
 from ..core import patterns as core_patterns
-from ..core import paths as core_paths
 from ..exceptions import (
     FileFormatError,
     InvalidRawFileError,
@@ -1072,7 +1070,8 @@ class RawRead:
             # look in the .log file for information about the steps
             if filename.suffix != core_constants.FileExtensions.RAW:
                 raise SpiceReadException(
-                    f"Invalid Filename. The file should end with '{core_constants.FileExtensions.RAW}'"
+                    f"Invalid Filename. The file should end with "
+                    f"'{core_constants.FileExtensions.RAW}'"
                 )
             # it should have a .log file with the same name
             logfile = filename.with_suffix(core_constants.FileExtensions.LOG)
@@ -1109,7 +1108,8 @@ class RawRead:
             # look in the .log file for information about the steps
             if filename.suffix != core_constants.FileExtensions.QRAW:
                 raise SpiceReadException(
-                    f"Invalid Filename. The file should end with '{core_constants.FileExtensions.QRAW}'"
+                    f"Invalid Filename. The file should end with "
+                    f"'{core_constants.FileExtensions.QRAW}'"
                 )
             # it should have a .log file with the same name
             logfile = filename.with_suffix(core_constants.FileExtensions.LOG)

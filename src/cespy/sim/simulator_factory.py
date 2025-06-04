@@ -8,7 +8,7 @@ instances, with support for automatic detection, custom paths, and validation.
 
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
 # Core imports
 from ..core import constants as core_constants
@@ -20,7 +20,7 @@ from ..simulators.ngspice_simulator import NGspiceSimulator
 from ..simulators.qspice_simulator import Qspice
 from ..simulators.xyce_simulator import XyceSimulator
 
-from .simulator_interface import ISimulator, SimulatorInfo, SimulatorStatus
+from .simulator_interface import SimulatorInfo, SimulatorStatus
 from .simulator_locator import SimulatorLocator
 from .simulator import Simulator
 
@@ -38,7 +38,7 @@ class SimulatorFactory:
         core_constants.Simulators.XYCE: XyceSimulator,
     }
 
-    # Cache for created simulators
+    # Cache for created simulator instances
     _simulator_cache: Dict[str, Simulator] = {}
 
     @classmethod
@@ -102,13 +102,15 @@ class SimulatorFactory:
         else:
             spice_exe = [str(exe_path)]
 
-        # Configure the simulator class
-        simulator_class.spice_exe = spice_exe
-        simulator_class.process_name = exe_path.name
+        # Create instance
+        simulator_instance = simulator_class()
+        # Configure the simulator instance
+        simulator_instance.spice_exe = spice_exe
+        simulator_instance.process_name = exe_path.name
 
         # Get library paths
         lib_paths = locator.get_library_paths(exe_path)
-        simulator_class._default_lib_paths = [str(p) for p in lib_paths]
+        simulator_instance._default_lib_paths = [str(p) for p in lib_paths]
 
         # Validate if requested
         if validate:
@@ -120,12 +122,11 @@ class SimulatorFactory:
                     f"{simulator_type} found but validation failed: {version_or_error}"
                 )
             _logger.info("%s version: %s", simulator_type, version_or_error)
-
-        # Cache the configured class
+        # Cache the instance
         if use_cache:
-            cls._simulator_cache[cache_key] = simulator_class
+            cls._simulator_cache[cache_key] = simulator_instance
 
-        return simulator_class
+        return simulator_instance
 
     @classmethod
     def detect_all(cls) -> Dict[str, SimulatorInfo]:

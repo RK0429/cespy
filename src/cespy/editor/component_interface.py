@@ -7,7 +7,7 @@ must implement, ensuring consistent behavior across different editor types.
 """
 
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Protocol, Union
+from typing import Any, Dict, List, Protocol, Union
 
 
 class ComponentInterface(Protocol):

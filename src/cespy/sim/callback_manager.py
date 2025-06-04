@@ -224,7 +224,7 @@ class CallbackManager:
 
         return results
 
-    def create_chain(self, *callback_ids: str) -> Callable:
+    def create_chain(self, *callback_ids: str) -> Callable[[Path, Path], List[Tuple[bool, Any]]]:
         """Create a chained callback that executes multiple callbacks in sequence.
 
         Args:
@@ -246,7 +246,9 @@ class CallbackManager:
 
         return chained_callback
 
-    def create_parallel(self, *callback_ids: str) -> Callable:
+    def create_parallel(
+        self, *callback_ids: str
+    ) -> Callable[[Path, Path], Dict[str, Tuple[bool, Any]]]:
         """Create a parallel callback that executes multiple callbacks concurrently.
 
         Args:

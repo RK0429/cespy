@@ -13,14 +13,14 @@ class TestCLIEntryPoints:
         """Test that CLI commands show help when called with --help."""
         commands = [
             "cespy-asc-to-qsch",
-            "cespy-run-server", 
+            "cespy-run-server",
             "cespy-raw-convert",
             "cespy-sim-client",
             "cespy-ltsteps",
             "cespy-rawplot",
             "cespy-histogram"
         ]
-        
+
         for command in commands:
             # Test that command exists and shows help
             try:
@@ -43,14 +43,14 @@ class TestCLIEntryPoints:
         # Test that entry point modules can be imported
         import_tests = [
             "from cespy.editor.asc_to_qsch import main",
-            "from cespy.client_server.run_server import main", 
+            "from cespy.client_server.run_server import main",
             "from cespy.raw.raw_convert import main",
             "from cespy.client_server.sim_client import main",
             "from cespy.log.ltsteps import main",
             "from cespy.raw.rawplot import main",
             "from cespy.utils.histogram import main"
         ]
-        
+
         for import_test in import_tests:
             try:
                 result = subprocess.run(
@@ -86,7 +86,7 @@ SYMATTR Value 1u
 TEXT 32 200 Left 2 !.tran 1m
 """
         asc_file.write_text(asc_content)
-        
+
         # Test that the entry point can be called (may fail due to missing implementation)
         try:
             result = subprocess.run(
@@ -121,7 +121,7 @@ TEXT 32 200 Left 2 !.tran 1m
         # Create a dummy raw file for testing
         raw_file = temp_dir / "test.raw"
         raw_file.write_bytes(b"Binary data placeholder")
-        
+
         try:
             result = subprocess.run(
                 [sys.executable, "-c", "from cespy.raw.raw_convert import main; print('Raw convert module imported')"],
@@ -153,7 +153,7 @@ TEXT 32 200 Left 2 !.tran 1m
             ("cespy-asc-to-qsch", ["nonexistent_file.asc"]),
             ("cespy-raw-convert", ["nonexistent_file.raw"]),
         ]
-        
+
         for command, args in test_cases:
             try:
                 result = subprocess.run(
@@ -177,7 +177,7 @@ TEXT 32 200 Left 2 !.tran 1m
             text=True,
             timeout=5
         )
-        
+
         if result.returncode == 0:
             assert "cespy version:" in result.stdout
         else:
@@ -187,23 +187,23 @@ TEXT 32 200 Left 2 !.tran 1m
         """Test that poetry scripts are properly configured."""
         # Read the pyproject.toml to verify script entry points
         import tomllib
-        
+
         pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
         if pyproject_path.exists():
             with open(pyproject_path, "rb") as f:
                 config = tomllib.load(f)
-            
+
             scripts = config.get("tool", {}).get("poetry", {}).get("scripts", {})
             expected_scripts = [
                 "cespy-asc-to-qsch",
                 "cespy-run-server",
-                "cespy-raw-convert", 
+                "cespy-raw-convert",
                 "cespy-sim-client",
                 "cespy-ltsteps",
                 "cespy-rawplot",
                 "cespy-histogram"
             ]
-            
+
             for script in expected_scripts:
                 assert script in scripts, f"Script {script} not found in pyproject.toml"
                 # Verify the entry point format

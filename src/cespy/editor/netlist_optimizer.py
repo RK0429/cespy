@@ -16,11 +16,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
-from ..exceptions import OptimizationError
+from typing import Any, Dict, List, Optional, Tuple
 
 _logger = logging.getLogger("cespy.NetlistOptimizer")
 
@@ -286,7 +282,7 @@ class NetlistOptimizer:
         """Remove components with unconnected nodes."""
         # First, collect all nodes
         set(["0", "GND"])  # Ground nodes
-        node_connections = defaultdict(int)
+        node_connections: defaultdict[str, int] = defaultdict(int)
 
         # Count node connections
         for line in lines:
@@ -378,7 +374,7 @@ class NetlistOptimizer:
         for nodes, caps in capacitors_by_nodes.items():
             if len(caps) > 1:
                 # Sum capacitance values
-                total_cap = 0
+                total_cap = 0.0
                 refs_to_merge = []
 
                 try:
@@ -548,7 +544,7 @@ class NetlistOptimizer:
         Returns:
             Dictionary with impact analysis
         """
-        analysis = {
+        analysis: Dict[str, Any] = {
             "size_reduction": len(original) - len(optimized),
             "size_reduction_pct": (1 - len(optimized) / len(original)) * 100
             if len(original) > 0
@@ -559,8 +555,8 @@ class NetlistOptimizer:
         }
 
         # Count components by type
-        orig_components = defaultdict(int)
-        opt_components = defaultdict(int)
+        orig_components: defaultdict[str, int] = defaultdict(int)
+        opt_components: defaultdict[str, int] = defaultdict(int)
 
         for line in original.split("\n"):
             if line.strip() and line[0].isalpha() and not line.startswith("."):
@@ -571,18 +567,26 @@ class NetlistOptimizer:
                 opt_components[line[0].upper()] += 1
 
         # Find affected component types
+        affected_types = analysis["component_types_affected"]
+        assert isinstance(affected_types, set)
         for comp_type in orig_components:
             if orig_components[comp_type] != opt_components.get(comp_type, 0):
-                analysis["component_types_affected"].add(comp_type)
+                affected_types.add(comp_type)
 
         # Add warnings for significant changes
-        if analysis["size_reduction_pct"] > 50:
-            analysis["warnings"].append(
+        size_reduction_pct = analysis["size_reduction_pct"]
+        assert isinstance(size_reduction_pct, (int, float))
+        if size_reduction_pct > 50:
+            warnings = analysis["warnings"]
+            assert isinstance(warnings, list)
+            warnings.append(
                 "Large size reduction - verify simulation accuracy"
             )
 
-        if "X" in analysis["component_types_affected"]:
-            analysis["warnings"].append(
+        if "X" in affected_types:
+            warnings = analysis["warnings"]
+            assert isinstance(warnings, list)
+            warnings.append(
                 "Subcircuits were modified - check hierarchical behavior"
             )
 
