@@ -27,6 +27,7 @@ from typing import Any, Dict, Optional, Union
 # Core imports
 from ..core import constants as core_constants
 from ..core import patterns as core_patterns
+from ..core import paths as core_paths
 from ..exceptions import SimulatorNotFoundError
 
 from ..sim.simulator import run_function
@@ -146,9 +147,9 @@ class QspiceLogReader(LogfileData):
             _logger.error("==============================================")
             raise SimulatorNotFoundError(
                 "qspice",
-                search_paths=Qspice._spice_exe_win_paths
-                if hasattr(Qspice, "_spice_exe_win_paths")
-                else None,
+                search_paths=core_paths.get_default_simulator_paths(
+                    core_constants.Simulators.QSPICE
+                ),
             )
 
         # Get the QPOST location, which is the same as the QSPICE location

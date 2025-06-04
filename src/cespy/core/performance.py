@@ -15,6 +15,10 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Pattern, TypeVar, Union
 
+import psutil
+
+from .platform import get_platform_info
+
 _logger = logging.getLogger("cespy.Performance")
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -232,8 +236,6 @@ def profile_performance(
 
             if include_memory:
                 try:
-                    import psutil
-
                     process = psutil.Process()
                     memory_before = process.memory_info().rss / (1024 * 1024)  # MB
                 except ImportError:
@@ -254,8 +256,6 @@ def profile_performance(
                 memory_usage = 0.0
                 if include_memory:
                     try:
-                        import psutil
-
                         process = psutil.Process()
                         memory_after = process.memory_info().rss / (1024 * 1024)  # MB
                         memory_usage = memory_after - memory_before
@@ -474,8 +474,6 @@ class PerformanceOptimizer:
 
         # Get platform info for memory-aware recommendations
         try:
-            from .platform import get_platform_info
-
             platform_info = get_platform_info()
             available_memory = platform_info.total_memory_gb * 1024  # Convert to MB
         except ImportError:

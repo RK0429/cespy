@@ -14,7 +14,10 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Union
 
-from .performance import PerformanceMonitor
+from .constants import Simulators
+from .patterns import SPICE_PATTERNS
+from .performance import PerformanceMonitor, cached_regex
+from .platform import get_simulator_path
 
 _logger = logging.getLogger("cespy.Benchmarks")
 
@@ -62,13 +65,11 @@ class BenchmarkSuite:
             with open(self.baseline_file, "w", encoding="utf-8") as f:
                 json.dump(self.results, f, indent=2)
             _logger.info("Saved baseline data with %d benchmarks", len(self.results))
-        except Exception as e:
+        except (OSError, IOError, PermissionError, TypeError, ValueError) as e:
             _logger.error("Failed to save baseline data: %s", e)
 
     def benchmark_regex_performance(self) -> Dict[str, float]:
         """Benchmark regex pattern compilation and matching performance."""
-        from .patterns import SPICE_PATTERNS
-
         results = {}
         test_text = """
         R1 net1 net2 1k
@@ -96,7 +97,6 @@ class BenchmarkSuite:
         results["pattern_matching_time"] = (end_time - start_time) / 1000
 
         # Test with cached regex
-        from .performance import cached_regex
 
         start_time = time.perf_counter()
         for _ in range(1000):
@@ -148,9 +148,6 @@ class BenchmarkSuite:
 
     def benchmark_simulator_detection(self) -> Dict[str, float]:
         """Benchmark simulator detection and path resolution."""
-        from .platform import get_simulator_path
-        from .constants import Simulators
-
         results = {}
         simulators = [
             Simulators.LTSPICE,
@@ -182,8 +179,6 @@ class BenchmarkSuite:
             "Q1 net1 net2 net3 NPN",
             "D1 net1 net2 1N4148",
         ] * 1000
-
-        from .patterns import SPICE_PATTERNS
 
         component_pattern = SPICE_PATTERNS.get("component", r"(\S+)\s+(\S+.*)")
 
@@ -238,7 +233,8 @@ class BenchmarkSuite:
             # Clean up
             Path(circuit_file).unlink()
 
-        except Exception as e:
+        except (OSError, IOError, PermissionError, ImportError,
+                ModuleNotFoundError, AttributeError, ValueError) as e:
             _logger.warning("Failed to benchmark analysis setup: %s", e)
             results["montecarlo_setup_time"] = float("inf")
 
@@ -274,7 +270,8 @@ class BenchmarkSuite:
                     "Completed benchmark %s in %.3fs", name, end_time - start_time
                 )
 
-            except Exception as e:
+            except (AttributeError, TypeError, ValueError, OSError, IOError,
+                    ImportError, RuntimeError) as e:
                 _logger.error("Benchmark %s failed: %s", name, e)
                 self.results[name] = {"error": str(e)}
 

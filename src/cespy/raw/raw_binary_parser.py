@@ -96,7 +96,7 @@ class OptimizedBinaryParser:
         self,
         offset: int,
         count: int,
-        format: DataFormat,
+        data_format: DataFormat,
         byte_order: str = "<",  # Little-endian by default
     ) -> NDArray[np.float64]:
         """Read a block of values efficiently.
@@ -104,13 +104,13 @@ class OptimizedBinaryParser:
         Args:
             offset: Byte offset in file
             count: Number of values to read
-            format: Data format
+            data_format: Data format
             byte_order: Byte order ('<' for little-endian, '>' for big-endian)
 
         Returns:
             Numpy array with the data
         """
-        fmt_info = BINARY_FORMATS[format]
+        fmt_info = BINARY_FORMATS[data_format]
         num_bytes = count * fmt_info.bytes_per_value
 
         # Check bounds

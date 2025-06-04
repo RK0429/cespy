@@ -279,7 +279,9 @@ class CallbackManager:
                     try:
                         success, result = future.result()
                         results[callback_id] = (success, result)
-                    except Exception as e:
+                    except (concurrent.futures.CancelledError,
+                            concurrent.futures.TimeoutError,
+                            RuntimeError, ValueError, TypeError) as e:
                         _logger.error(
                             "Error in parallel execution of '%s': %s", callback_id, e
                         )
@@ -391,7 +393,7 @@ class CallbackManager:
                     test_args = (Path("dummy"), Path("dummy")) + (args or ())
                     sig.bind(*test_args, **(kwargs or {}))
             except TypeError as e:
-                raise TypeError(f"Callback signature mismatch: {e}")
+                raise TypeError(f"Callback signature mismatch: {e}") from e
 
     def _execute_callback(
         self,

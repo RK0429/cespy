@@ -431,22 +431,22 @@ if is_windows():
 
             try:
                 # GetShortPathNameW returns required buffer size
-                GetShortPathNameW = (
+                get_short_path_name_w = (
                     ctypes.windll.kernel32.GetShortPathNameW  # type: ignore[attr-defined]
                 )
-                GetShortPathNameW.argtypes = [
+                get_short_path_name_w.argtypes = [
                     wintypes.LPCWSTR,
                     wintypes.LPWSTR,
                     wintypes.DWORD,
                 ]
-                GetShortPathNameW.restype = wintypes.DWORD
+                get_short_path_name_w.restype = wintypes.DWORD
 
-                buffer_size = GetShortPathNameW(long_name, None, 0)
+                buffer_size = get_short_path_name_w(long_name, None, 0)
                 if buffer_size == 0:
                     return long_name
 
                 output = ctypes.create_unicode_buffer(buffer_size)
-                result = GetShortPathNameW(long_name, output, buffer_size)
+                result = get_short_path_name_w(long_name, output, buffer_size)
 
                 return output.value if result else long_name
             except (AttributeError, OSError):
