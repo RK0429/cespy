@@ -368,7 +368,7 @@ class TestErrorHandling:
 
         # Should return empty list for unknown simulator
         paths = manager.get_simulator_search_paths("invalid_simulator")
-        assert paths == []
+        assert not paths
 
     def test_nonexistent_executable_search(self) -> None:
         """Test searching for nonexistent executable."""

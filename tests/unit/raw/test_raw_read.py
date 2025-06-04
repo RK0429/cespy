@@ -5,7 +5,7 @@ import numpy as np
 from pathlib import Path
 from collections import OrderedDict
 from cespy.raw.raw_read import RawRead
-from cespy.raw.raw_classes import TraceRead, Axis
+from cespy.raw.raw_classes import TraceRead, Axis, DummyTrace
 
 
 def create_mock_raw_reader() -> RawRead:
@@ -97,8 +97,11 @@ Binary:
         # Test retrieving by name
         retrieved = raw_reader.get_trace("V(out)")
         assert retrieved.name == "V(out)"
-        if hasattr(retrieved, 'data') and retrieved.data is not None:
-            assert np.array_equal(retrieved.data, voltage_data)
+        # Type guard: DummyTrace doesn't have data attribute
+        assert not isinstance(retrieved, DummyTrace), "Expected actual trace, not DummyTrace"
+        assert hasattr(retrieved, 'data'), "Trace should have data attribute"
+        assert retrieved.data is not None
+        assert np.array_equal(retrieved.data, voltage_data)
 
     def test_get_axis_functionality(self) -> None:
         """Test get_axis method."""
@@ -146,9 +149,12 @@ Binary:
         raw_reader._traces = [trace]
 
         retrieved_trace = raw_reader.get_trace("time")
-        if hasattr(retrieved_trace, 'data') and retrieved_trace.data is not None:
-            assert isinstance(retrieved_trace.data, np.ndarray)
-            assert len(retrieved_trace.data) == 100
+        # Type guard: DummyTrace doesn't have data attribute
+        assert not isinstance(retrieved_trace, DummyTrace), "Expected actual trace, not DummyTrace"
+        assert hasattr(retrieved_trace, 'data'), "Trace should have data attribute"
+        assert retrieved_trace.data is not None
+        assert isinstance(retrieved_trace.data, np.ndarray)
+        assert len(retrieved_trace.data) == 100
 
     def test_header_information(self, temp_dir: Path) -> None:
         """Test that header information is properly parsed."""
@@ -207,6 +213,9 @@ Binary:
         raw_reader._traces = [trace]
 
         retrieved = raw_reader.get_trace("large_signal")
-        if hasattr(retrieved, 'data') and retrieved.data is not None:
-            assert len(retrieved.data) == 10000
-            assert isinstance(retrieved.data, np.ndarray)
+        # Type guard: DummyTrace doesn't have data attribute
+        assert not isinstance(retrieved, DummyTrace), "Expected actual trace, not DummyTrace"
+        assert hasattr(retrieved, 'data'), "Trace should have data attribute"
+        assert retrieved.data is not None
+        assert len(retrieved.data) == 10000
+        assert isinstance(retrieved.data, np.ndarray)

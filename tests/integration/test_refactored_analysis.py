@@ -76,17 +76,16 @@ class TestStatisticalAnalysisIntegration:
 
     def test_statistical_analysis_creation(self, sample_circuit_file: Path) -> None:
         """Test StatisticalAnalysis instantiation."""
-        analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=10, seed=42)
-
-        assert analysis.num_runs == 10
-        assert analysis.seed == 42
-        assert len(analysis.results) == 0
+        # StatisticalAnalysis is abstract, can't instantiate directly
+        with pytest.raises(TypeError):
+            analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=10, seed=42)
 
     def test_statistics_calculation_with_mock_results(
         self, sample_circuit_file: Path
     ) -> None:
         """Test statistics calculation with mock results."""
-        analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=5)
+        # Use MonteCarloAnalysis as a concrete implementation of StatisticalAnalysis
+        analysis = MonteCarloAnalysis(str(sample_circuit_file), num_runs=5)
 
         # Add mock results
         for i in range(5):
@@ -109,7 +108,8 @@ class TestStatisticalAnalysisIntegration:
 
     def test_histogram_data_generation(self, sample_circuit_file: Path) -> None:
         """Test histogram data generation."""
-        analysis = StatisticalAnalysis(sample_circuit_file, num_runs=10)
+        # Use MonteCarloAnalysis as a concrete implementation of StatisticalAnalysis
+        analysis = MonteCarloAnalysis(sample_circuit_file, num_runs=10)
 
         # Add mock results with varied data
         import numpy as np
@@ -131,7 +131,8 @@ class TestStatisticalAnalysisIntegration:
 
     def test_correlation_matrix_calculation(self, sample_circuit_file: Path) -> None:
         """Test correlation matrix calculation."""
-        analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=5)
+        # Use MonteCarloAnalysis as a concrete implementation of StatisticalAnalysis
+        analysis = MonteCarloAnalysis(str(sample_circuit_file), num_runs=5)
 
         # Add mock results with correlated measurements
         for i in range(5):
@@ -239,7 +240,7 @@ class TestMonteCarloAnalysisIntegration:
 
                 assert len(all_params) == 10
                 # Check that parameters contain component variations
-                param_names = set()
+                param_names: set[str] = set()
                 for params in all_params:
                     param_names.update(params.keys())
 
@@ -383,7 +384,8 @@ class TestErrorHandlingIntegration:
 
     def test_analysis_with_failed_runs(self, sample_circuit_file: Path) -> None:
         """Test analysis behavior with some failed simulation runs."""
-        analysis = StatisticalAnalysis(str(sample_circuit_file), num_runs=5)
+        # Use MonteCarloAnalysis as a concrete implementation of StatisticalAnalysis
+        analysis = MonteCarloAnalysis(str(sample_circuit_file), num_runs=5)
 
         # Add mix of successful and failed results
         results = [
@@ -420,7 +422,8 @@ class TestErrorHandlingIntegration:
 
     def test_missing_measurement_handling(self, sample_circuit_file: Path) -> None:
         """Test handling of missing measurements in results."""
-        analysis = StatisticalAnalysis(sample_circuit_file, num_runs=3)
+        # Use MonteCarloAnalysis as a concrete implementation of StatisticalAnalysis
+        analysis = MonteCarloAnalysis(sample_circuit_file, num_runs=3)
 
         # Add results with inconsistent measurements
         results = [

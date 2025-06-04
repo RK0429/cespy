@@ -30,11 +30,10 @@ class TestRawFileParsing:
 
         raw_file = temp_dir / "test_tran.raw"
         try:
-            writer = RawWrite(str(raw_file), binary=False, title="transient")
+            writer = RawWrite(plot_name="transient")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, "write"):
-                writer.write()
+            writer.save(raw_file)
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment")
@@ -90,11 +89,10 @@ class TestRawFileParsing:
 
         raw_file = temp_dir / "test_ac.raw"
         try:
-            writer = RawWrite(str(raw_file), binary=False, title="AC Analysis")
+            writer = RawWrite(plot_name="AC Analysis")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, "write"):
-                writer.write()
+            writer.save(raw_file)
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment")
@@ -154,15 +152,14 @@ class TestRawFileParsing:
 
         raw_file = temp_dir / "test_stepped.raw"
         try:
-            writer = RawWrite(str(raw_file), binary=False, title="Transient Analysis")
+            writer = RawWrite(plot_name="Transient Analysis")
             if hasattr(writer, "set_no_points"):
                 writer.set_no_points(num_points)
             if hasattr(writer, "set_no_steps"):
                 writer.set_no_steps(num_steps)
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, "write"):
-                writer.write()
+            writer.save(raw_file)
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment")
@@ -203,11 +200,10 @@ class TestRawFileParsing:
 
         raw_file = temp_dir / "test_op.raw"
         try:
-            writer = RawWrite(str(raw_file), binary=False, title="Operating Point")
+            writer = RawWrite(plot_name="Operating Point")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, "write"):
-                writer.write()
+            writer.save(raw_file)
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment")
@@ -426,13 +422,10 @@ class TestRawFileCompatibility:
         # Write as "NGSpice" style
         ngspice_raw = temp_dir / "ngspice.raw"
         try:
-            writer = RawWrite(
-                str(ngspice_raw), binary=False, title="Transient Analysis"
-            )
+            writer = RawWrite(plot_name="Transient Analysis")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, "write"):
-                writer.write()
+            writer.save(ngspice_raw)
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment")
@@ -465,11 +458,10 @@ class TestRawFileCompatibility:
         # Write binary raw file
         binary_raw = temp_dir / "binary.raw"
         try:
-            writer_bin = RawWrite(str(binary_raw), binary=True, title="Transient")
+            writer_bin = RawWrite(plot_name="Transient")
             for trace in traces:
                 writer_bin.add_trace(trace)
-            if hasattr(writer_bin, "write"):
-                writer_bin.write()
+            writer_bin.save(binary_raw)
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment")
@@ -477,11 +469,10 @@ class TestRawFileCompatibility:
         # Write ASCII raw file
         ascii_raw = temp_dir / "ascii.raw"
         try:
-            writer_asc = RawWrite(str(ascii_raw), binary=False, title="Transient")
+            writer_asc = RawWrite(plot_name="Transient")
             for trace in traces:
                 writer_asc.add_trace(trace)
-            if hasattr(writer_asc, "write"):
-                writer_asc.write()
+            writer_asc.save(ascii_raw)
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment")

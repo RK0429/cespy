@@ -58,7 +58,7 @@ class TestSimRunner:
 
         # Simulate successful simulation
         if hasattr(self.runner, "stats"):
-            self.runner.stats.successful_count += 1
+            self.runner.stats.successful_simulations += 1
             new_ok = self.runner.ok_sim
             assert new_ok == initial_ok + 1
         else:

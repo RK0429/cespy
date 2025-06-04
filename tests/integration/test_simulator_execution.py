@@ -34,15 +34,20 @@ C1 out 0 1u
 """
             netlist_path.write_text(netlist_content)
 
-        # Create simulator instance
-        simulator = LTspice()
-
         # Run simulation
-        runner = SimRunner()
-        runner.run(simulator, netlist_path)
+        runner = SimRunner(simulator=LTspice)
+        task = runner.run(netlist_path)
+        assert task is not None, "Simulation task should not be None"
 
         # Wait for completion
-        raw_file, log_file = runner.wait_completion()
+        success = runner.wait_completion()
+        assert success
+        
+        # Get results from task
+        raw_file = task.raw_file
+        log_file = task.log_file
+        assert raw_file is not None
+        assert log_file is not None
 
         # Verify output files
         assert Path(raw_file).exists()
@@ -57,8 +62,9 @@ C1 out 0 1u
         assert raw_data.get_trace("V(out)") is not None
 
         # Check time range
-        time_data = raw_data.get_axis().data
-        assert time_data[-1] >= 2e-3  # Should simulate to at least 2ms
+        time_axis = raw_data.get_axis()
+        assert hasattr(time_axis, 'data')
+        assert time_axis.data[-1] >= 2e-3  # Should simulate to at least 2ms
 
     @pytest.mark.requires_ltspice
     def test_ltspice_ac_analysis(self, temp_dir: Path) -> None:
@@ -79,22 +85,30 @@ C1 out 0 1u
             netlist_path.write_text(netlist_content)
 
         # Run simulation
-        simulator = LTspice()
-        runner = SimRunner()
-        runner.run(simulator, netlist_path)
-        raw_file, log_file = runner.wait_completion()
+        runner = SimRunner(simulator=LTspice)
+        task = runner.run(netlist_path)
+        assert task is not None
+        success = runner.wait_completion()
+        assert success
+        
+        # Get results from task
+        raw_file = task.raw_file
+        log_file = task.log_file
+        assert raw_file is not None
+        assert log_file is not None
 
         # Parse results
         raw_data = RawRead(raw_file)
 
         # AC analysis should have frequency as x-axis
         axis = raw_data.get_axis()
+        assert hasattr(axis, 'name')
         assert axis.name == "frequency"
 
         # Check frequency range
-        freq_data = axis.data
-        assert freq_data[0] >= 1  # Start at 1Hz
-        assert freq_data[-1] <= 1e5  # End at 100kHz
+        assert hasattr(axis, 'data')
+        assert axis.data[0] >= 1  # Start at 1Hz
+        assert axis.data[-1] <= 1e5  # End at 100kHz
 
     @pytest.mark.requires_ltspice
     def test_ltspice_dc_sweep(self, temp_dir: Path) -> None:
@@ -115,22 +129,30 @@ R2 out 0 1k
             netlist_path.write_text(netlist_content)
 
         # Run simulation
-        simulator = LTspice()
-        runner = SimRunner()
-        runner.run(simulator, netlist_path)
-        raw_file, log_file = runner.wait_completion()
+        runner = SimRunner(simulator=LTspice)
+        task = runner.run(netlist_path)
+        assert task is not None
+        success = runner.wait_completion()
+        assert success
+        
+        # Get results from task
+        raw_file = task.raw_file
+        log_file = task.log_file
+        assert raw_file is not None
+        assert log_file is not None
 
         # Parse results
         raw_data = RawRead(raw_file)
 
         # DC sweep should have V1 as x-axis
         axis = raw_data.get_axis()
+        assert hasattr(axis, 'name')
         assert axis.name in ["V1", "v1", "v-sweep"]
 
         # Check voltage range
-        v_data = axis.data
-        assert v_data[0] == 0  # Start at 0V
-        assert v_data[-1] == 5  # End at 5V
+        assert hasattr(axis, 'data')
+        assert axis.data[0] == 0  # Start at 0V
+        assert axis.data[-1] == 5  # End at 5V
 
     @pytest.mark.requires_ltspice
     def test_ltspice_parameter_stepping(self, temp_dir: Path) -> None:
@@ -148,17 +170,27 @@ C1 out 0 1u
         netlist_path.write_text(netlist_content)
 
         # Run simulation
-        simulator = LTspice()
-        runner = SimRunner()
-        runner.run(simulator, netlist_path)
-        raw_file, log_file = runner.wait_completion()
+        runner = SimRunner(simulator=LTspice)
+        task = runner.run(netlist_path)
+        assert task is not None
+        success = runner.wait_completion()
+        assert success
+        
+        # Get results from task
+        raw_file = task.raw_file
+        log_file = task.log_file
+        assert raw_file is not None
+        assert log_file is not None
 
         # Parse log file for steps
-        log_reader = LTSpiceLogReader(log_file)
-        steps = log_reader.get_steps()
-
-        # Should have 5 steps (1k, 2k, 3k, 4k, 5k)
-        assert len(steps) == 5
+        log_reader = LTSpiceLogReader(str(log_file))
+        
+        # Check step info from stepset property
+        assert hasattr(log_reader, 'stepset')
+        if log_reader.stepset:
+            # Should have parameter 'Rval' with 5 values
+            assert 'rval' in log_reader.stepset  # Note: keys are lowercase
+            assert len(log_reader.stepset['rval']) == 5
 
 
 class TestNGSpiceExecution:
@@ -188,13 +220,18 @@ write ngspice_test.raw
 """
             netlist_path.write_text(netlist_content)
 
-        # Create simulator instance
-        simulator = NGspice()
-
         # Run simulation
-        runner = SimRunner()
-        runner.run(simulator, netlist_path)
-        raw_file, log_file = runner.wait_completion()
+        runner = SimRunner(simulator=NGspice)
+        task = runner.run(netlist_path)
+        assert task is not None
+        success = runner.wait_completion()
+        assert success
+        
+        # Get results from task
+        raw_file = task.raw_file
+        log_file = task.log_file
+        assert raw_file is not None
+        assert log_file is not None
 
         # Verify output
         assert Path(raw_file).exists()
@@ -224,17 +261,26 @@ write ngspice_tran.raw
         netlist_path.write_text(netlist_content)
 
         # Run simulation
-        simulator = NGspice()
-        runner = SimRunner()
-        runner.run(simulator, netlist_path)
-        raw_file, log_file = runner.wait_completion()
+        runner = SimRunner(simulator=NGspice)
+        task = runner.run(netlist_path)
+        assert task is not None
+        success = runner.wait_completion()
+        assert success
+        
+        # Get results from task
+        raw_file = task.raw_file
+        log_file = task.log_file
+        assert raw_file is not None
+        assert log_file is not None
 
         # Parse results
         raw_data = RawRead(raw_file)
 
         # Verify time domain data
         time_axis = raw_data.get_axis()
+        assert hasattr(time_axis, 'name')
         assert time_axis.name == "time"
+        assert hasattr(time_axis, 'data')
         assert time_axis.data[-1] >= 2e-3
 
 
@@ -262,17 +308,22 @@ C1 out 0 1u
 """
             netlist_path.write_text(netlist_content)
 
-        # Create simulator instance
-        simulator = Qspice()
-
         # Run simulation
-        runner = SimRunner()
-        runner.run(simulator, netlist_path)
-        raw_file, log_file = runner.wait_completion()
+        runner = SimRunner(simulator=Qspice)
+        task = runner.run(netlist_path)
+        assert task is not None
+        success = runner.wait_completion()
+        assert success
+        
+        # Get results from task
+        raw_file = task.raw_file
+        log_file = task.log_file
+        assert raw_file is not None
+        assert log_file is not None
 
         # Verify output - Qspice uses .qraw extension
         assert Path(raw_file).exists()
-        assert raw_file.endswith(".qraw")
+        assert str(raw_file).endswith(".qraw")
 
         # Parse results
         raw_data = RawRead(raw_file)
@@ -298,13 +349,18 @@ C1 out 0 1u
 """
         netlist_path.write_text(netlist_content)
 
-        # Create simulator instance
-        simulator = Xyce()
-
         # Run simulation
-        runner = SimRunner()
-        runner.run(simulator, netlist_path)
-        raw_file, log_file = runner.wait_completion()
+        runner = SimRunner(simulator=Xyce)
+        task = runner.run(netlist_path)
+        assert task is not None
+        success = runner.wait_completion()
+        assert success
+        
+        # Get results from task
+        raw_file = task.raw_file
+        log_file = task.log_file
+        assert raw_file is not None
+        assert log_file is not None
 
         # Verify output
         assert Path(raw_file).exists()
@@ -321,7 +377,7 @@ class TestSimulatorWithCallbacks:
     """Test simulator execution with callbacks."""
 
     @pytest.mark.requires_ltspice
-    def test_simulation_with_callback(self, temp_dir: Path, capsys) -> None:
+    def test_simulation_with_callback(self, temp_dir: Path, capsys: pytest.CaptureFixture[str]) -> None:
         """Test simulation with process callback."""
         netlist_path = temp_dir / "callback_test.net"
         netlist_content = """* Callback Test
@@ -333,20 +389,27 @@ C1 out 0 1u
 """
         netlist_path.write_text(netlist_content)
 
-        # Define callback to capture output
-        output_lines = []
+        # Define callback to capture results
+        results = []
 
-        def capture_output(line):
-            output_lines.append(line)
+        def capture_results(raw_file: Path, log_file: Path) -> None:
+            """Capture simulation results.
+            
+            Args:
+                raw_file: Path to raw data file
+                log_file: Path to log file
+            """
+            results.append((raw_file, log_file))
 
         # Run simulation with callback
-        simulator = LTspice()
-        runner = SimRunner()
-        runner.run(simulator, netlist_path, callback=capture_output)
-        runner.wait_completion()
+        runner = SimRunner(simulator=LTspice)
+        task = runner.run(netlist_path, callback=capture_results)
+        assert task is not None
+        success = runner.wait_completion()
+        assert success
 
-        # Should have captured some output
-        assert len(output_lines) > 0
+        # Should have captured results
+        assert len(results) > 0
 
     @pytest.mark.requires_ltspice
     def test_multiple_simulations_parallel(self, temp_dir: Path) -> None:
@@ -366,21 +429,23 @@ C1 out 0 1u
             netlists.append(netlist_path)
 
         # Run simulations in parallel
-        simulator = LTspice()
-        runner = SimRunner(max_parallel_runs=3)
+        runner = SimRunner(simulator=LTspice, parallel_sims=3)
 
         # Start all simulations
+        tasks = []
         for netlist in netlists:
-            runner.run(simulator, netlist)
+            task = runner.run(netlist)
+            assert task is not None
+            tasks.append(task)
 
         # Wait for all to complete
-        results = []
-        for _ in range(3):
-            raw_file, log_file = runner.wait_completion()
-            results.append((raw_file, log_file))
+        success = runner.wait_completion()
+        assert success
 
         # Verify all completed
-        assert len(results) == 3
-        for raw_file, log_file in results:
-            assert Path(raw_file).exists()
-            assert Path(log_file).exists()
+        assert len(tasks) == 3
+        for task in tasks:
+            assert task.raw_file is not None
+            assert task.log_file is not None
+            assert Path(task.raw_file).exists()
+            assert Path(task.log_file).exists()

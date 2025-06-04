@@ -10,6 +10,7 @@ import pytest
 
 from cespy.editor import SpiceEditor
 from cespy.raw import RawRead, RawWrite, Trace
+from cespy.raw.raw_classes import DummyTrace
 from cespy.sim import SimRunner
 from cespy.simulators import LTspice
 
@@ -42,11 +43,10 @@ class TestRawFilePerformance:
         start_time = time.time()
 
         try:
-            writer = RawWrite(str(raw_file), binary=False, title="Performance Test")
+            writer = RawWrite(plot_name="Performance Test")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, "write"):
-                writer.write()
+            writer.save(raw_file)
 
             write_time = time.time() - start_time
 
@@ -84,11 +84,10 @@ class TestRawFilePerformance:
 
         raw_file = temp_dir / "read_test.raw"
         try:
-            writer = RawWrite(str(raw_file), binary=False, title="Read Test")
+            writer = RawWrite(plot_name="Read Test")
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, "write"):
-                writer.write()
+            writer.save(raw_file)
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment for read test")
@@ -100,10 +99,14 @@ class TestRawFilePerformance:
 
             # Read all traces
             for trace_name in reader.get_trace_names():
-                trace = reader.get_trace(trace_name)
-                if hasattr(trace, "data") and trace.data is not None:
-                    data = trace.data
-                    assert len(data) == num_points
+                trace_obj = reader.get_trace(trace_name)
+                # Skip DummyTrace objects which don't have data
+                if not isinstance(trace_obj, DummyTrace):
+                    assert hasattr(trace_obj, "data"), f"Trace {trace_name} should have data"
+                    assert trace_obj.data is not None, f"Trace {trace_name} has no data"
+                    if hasattr(trace_obj, 'data'):
+                        data = trace_obj.data
+                        assert len(data) == num_points
 
             read_time = time.time() - start_time
 
@@ -139,15 +142,11 @@ class TestRawFilePerformance:
         # Time write with stepped data
         try:
             start_time = time.time()
-            writer = RawWrite(str(raw_file), binary=False, title="Stepped Test")
-            if hasattr(writer, "set_no_steps"):
-                writer.set_no_steps(num_steps)
-            if hasattr(writer, "set_no_points"):
-                writer.set_no_points(points_per_step)
+            writer = RawWrite(plot_name="Stepped Test")
+            # Note: set_no_steps and set_no_points might not be available in current API
             for trace in traces:
                 writer.add_trace(trace)
-            if hasattr(writer, "write"):
-                writer.write()
+            writer.save(raw_file)
             write_time = time.time() - start_time
 
             # Time read with step access
@@ -155,9 +154,13 @@ class TestRawFilePerformance:
             reader = RawRead(raw_file)
 
             # Access data from different steps (simplified)
-            trace = reader.get_trace("V(out)")
-            if hasattr(trace, "data") and trace.data is not None:
-                data = trace.data
+            trace_obj = reader.get_trace("V(out)")
+            # Ensure we have a real trace with data
+            assert not isinstance(trace_obj, DummyTrace), "Expected actual trace, not DummyTrace"
+            assert hasattr(trace_obj, "data"), "Trace should have data attribute"
+            assert trace_obj.data is not None
+            if hasattr(trace_obj, 'data'):
+                data = trace_obj.data
                 assert len(data) >= points_per_step
 
             read_time = time.time() - start_time
@@ -214,7 +217,8 @@ class TestEditorPerformance:
 
         # Time save operation
         start_time = time.time()
-        editor.save_netlist()
+        output_file = temp_dir / "large_netlist_output.net"
+        editor.save_netlist(output_file)
         save_time = time.time() - start_time
 
         # Performance assertions
@@ -291,14 +295,12 @@ C1 out 0 1u
             netlist_path.write_text(content)
             netlists.append(netlist_path)
 
-        simulator = LTspice()
-
         # Test sequential execution
-        runner_seq = SimRunner(max_parallel_runs=1)
+        runner_seq = SimRunner(simulator=LTspice, parallel_sims=1)
         start_time = time.time()
 
         for netlist in netlists:
-            runner_seq.run(simulator, netlist)
+            runner_seq.run(netlist)
 
         # Wait for all to complete
         for _ in range(10):
@@ -307,11 +309,11 @@ C1 out 0 1u
         seq_time = time.time() - start_time
 
         # Test parallel execution
-        runner_par = SimRunner(max_parallel_runs=4)
+        runner_par = SimRunner(simulator=LTspice, parallel_sims=4)
         start_time = time.time()
 
         for netlist in netlists:
-            runner_par.run(simulator, netlist)
+            runner_par.run(netlist)
 
         # Wait for all to complete
         for _ in range(10):
@@ -341,12 +343,10 @@ C1 out 0 1u
 """
         netlist_path.write_text(content)
 
-        simulator = LTspice()
-        runner = SimRunner()
-        runner.set_simulation_timeout(2)  # 2 second timeout
+        runner = SimRunner(simulator=LTspice, timeout=2)  # 2 second timeout
 
         start_time = time.time()
-        runner.run(simulator, netlist_path)
+        runner.run(netlist_path)
 
         # Should timeout
         with pytest.raises(Exception):  # Timeout exception
@@ -385,18 +385,23 @@ C1 out 0 1u
             editor = SpiceEditor(netlist_path)
             editor.set_component_value("R1", f"{i+1}k")
             editor.set_parameter("test_param", str(i))
-            editor.save_netlist()
+            editor.save_netlist(netlist_path)
 
             # Create and write raw file
             raw_file = temp_dir / f"test_{i}.raw"
-            writer = RawWrite(raw_file, "Test", 1e-6)
-            writer.add_trace(Trace("time", "time", data=np.linspace(0, 1, 1000)))
-            writer.add_trace(Trace("V1", "voltage", data=np.random.rand(1000)))
-            writer.write()
+            writer = RawWrite(plot_name="Test")
+            writer.add_trace(Trace(name="time", data=np.linspace(0, 1, 1000)))
+            writer.add_trace(Trace(name="V1", data=np.random.rand(1000)))
+            writer.save(raw_file)
 
             # Read raw file
             reader = RawRead(raw_file)
-            _ = reader.get_trace("V1").data
+            trace_obj = reader.get_trace("V1")
+            # Ensure trace has data attribute for type checking
+            assert not isinstance(trace_obj, DummyTrace), "Expected actual trace, not DummyTrace"
+            assert hasattr(trace_obj, "data"), "Trace should have data attribute"
+            if hasattr(trace_obj, 'data'):
+                _ = trace_obj.data
 
             # Clean up file
             raw_file.unlink()

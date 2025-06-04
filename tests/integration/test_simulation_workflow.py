@@ -27,7 +27,7 @@ C1 out 0 1u
         netlist_path.write_text(netlist_content)
 
         # Run simulation
-        raw_file, log_file = simulate(netlist_path, simulator="ltspice")
+        raw_file, log_file = simulate(netlist_path, engine="ltspice")
 
         # Verify output files exist
         assert raw_file.exists()
@@ -63,7 +63,7 @@ C1 out 0 1u
         netlist_path.write_text(netlist_content)
 
         # Run simulation
-        raw_file, log_file = simulate(netlist_path, simulator="ltspice")
+        raw_file, log_file = simulate(netlist_path, engine="ltspice")
 
         # Parse results
         raw_data = RawRead(raw_file)
@@ -96,10 +96,11 @@ C1 out 0 1u
         editor.set_parameter("gain", "10")
 
         # Save changes
-        editor.save_netlist()
+        modified_netlist = temp_dir / "modified_netlist.net"
+        editor.save_netlist(modified_netlist)
 
         # Verify changes were saved
-        new_editor = SpiceEditor(netlist_path)
+        new_editor = SpiceEditor(modified_netlist)
         assert new_editor.get_component_value("R1") == "2.2k"
         assert new_editor.get_component_value("C1") == "100n"
         assert new_editor.get_parameter("gain") == "10"
@@ -119,7 +120,7 @@ C1 out 0 1u
         netlist_path.write_text(netlist_content)
 
         # Run simulation with NGSpice
-        raw_file, log_file = simulate(netlist_path, simulator="ngspice")
+        raw_file, log_file = simulate(netlist_path, engine="ngspice")
 
         # Verify output
         assert raw_file.exists()

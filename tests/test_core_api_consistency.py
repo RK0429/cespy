@@ -160,7 +160,11 @@ class TestStandardizeParametersDecorator:
         @standardize_parameters(
             {"old_param1": "new_param1", "old_param2": "new_param2"}
         )
-        def test_function(new_param1: str = "default1", new_param2: str = "default2", **kwargs: str) -> str:
+        def test_function(
+            new_param1: str = "default1",
+            new_param2: str = "default2",
+            **kwargs: str
+        ) -> str:
             return f"{new_param1}_{new_param2}"
 
         with warnings.catch_warnings(record=True) as w:
