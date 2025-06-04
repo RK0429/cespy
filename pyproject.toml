@@ -42,6 +42,8 @@ pytest-mock = "^3.11.0"
 sphinx = "^7.2.0"
 sphinx-rtd-theme = "^3.0.2"
 myst-parser = "^4.0.1"
+pylint = "^3.3.7"
+pyright = "^1.1.401"
 
 [tool.black]
 line-length = 88
