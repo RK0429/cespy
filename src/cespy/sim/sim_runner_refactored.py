@@ -20,7 +20,7 @@ from .process_callback import ProcessCallback
 from .process_manager import ProcessManager, ProcessResult
 from .result_collector import ResultCollector
 from .run_task import RunTask
-from .task_queue import TaskQueue, TaskPriority
+from .task_queue import TaskPriority, TaskQueue
 
 __all__ = [
     "SimRunnerRefactored",
@@ -473,7 +473,6 @@ class SimRunnerRefactored:
                 callback_id=callback_id,
                 raw_file=raw_file,
                 log_file=log_file,
-                context={"task": task, "result": sim_result},
             )
 
     def _abort_all(self) -> None:

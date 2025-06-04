@@ -55,6 +55,13 @@ A unified Python toolkit for automating SPICE circuit simulators, merging the ca
 - `cespy-histogram` - Create histograms from measurement data
 - `cespy-raw-convert` - Convert between raw file formats
 
+### 🚀 **Enhanced Core Features**
+
+- **Performance Monitoring** - Built-in profiling and optimization tools
+- **API Consistency** - Compatibility wrappers and parameter validation
+- **Platform Management** - Cross-platform simulator detection and configuration
+- **Advanced Visualization** - Integrated plotting and analysis visualization
+
 ## Installation
 
 Install via pip:
@@ -125,12 +132,12 @@ plt.show()
 ### Monte Carlo Analysis
 
 ```python
-from cespy.sim.toolkit import Montecarlo
+from cespy.sim.toolkit import MonteCarloAnalysis
 from cespy import AscEditor
 
 # Set up circuit with tolerances
 circuit = AscEditor("filter.asc")
-mc = Montecarlo(circuit, num_runs=1000)
+mc = MonteCarloAnalysis(circuit, num_runs=1000)
 
 # Define component tolerances
 mc.set_tolerance("R1", 0.05)  # 5% tolerance
@@ -166,6 +173,7 @@ Full documentation is available at the [project repository](https://github.com/R
 
 ### Key Modules
 
+- **`cespy.core`** - Core utilities for patterns, performance, and platform management
 - **`cespy.editor`** - Schematic and netlist editing tools
 - **`cespy.simulators`** - Simulator-specific implementations
 - **`cespy.sim`** - Simulation execution and management
@@ -176,13 +184,16 @@ Full documentation is available at the [project repository](https://github.com/R
 
 ## Examples
 
-Check the `examples/` directory for more detailed examples:
+Check the `examples/` directory for comprehensive examples:
 
-- Basic circuit simulation
-- Parameter sweeps
-- Monte Carlo analysis
-- Remote simulation setup
-- Custom analysis scripts
+- `01_basic_simulation.py` - Getting started with all supported simulators
+- `02_circuit_editing.py` - Programmatic schematic and netlist manipulation
+- `03_analysis_toolkit.py` - Monte Carlo, worst-case, and sensitivity analysis
+- `04_data_processing.py` - Efficient data handling and visualization
+- `05_batch_distributed.py` - Parallel and distributed simulation workflows
+- `06_platform_integration.py` - Cross-platform compatibility and auto-detection
+
+Run all examples with: `python examples/run_all_examples.py`
 
 ## Migration from kupicelib/kuPyLTSpice
 
@@ -192,6 +203,27 @@ If you're migrating from kupicelib or kuPyLTSpice:
 - kuPyLTSpice users: Replace `kuPyLTSpice.LTSpiceSimulation` with `cespy.simulate()` or `cespy.LTspice`
 
 See the [migration guide](docs/migration_guide.md) for detailed instructions.
+
+## Development
+
+For development installation and testing:
+
+```bash
+# Install with development dependencies
+poetry install
+
+# Run tests
+poetry run pytest
+
+# Code quality checks
+poetry run black src/ tests/      # Format code
+poetry run flake8 src/ tests/     # Lint check
+poetry run mypy src/              # Type checking
+poetry run pylint src/            # Additional linting
+
+# Build documentation
+cd docs && make html
+```
 
 ## Contributing
 
