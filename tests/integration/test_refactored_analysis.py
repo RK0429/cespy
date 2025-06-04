@@ -3,9 +3,11 @@
 """Integration tests for refactored analysis components."""
 
 import tempfile
-import pytest
 from pathlib import Path
+from typing import Generator, List, Tuple, Any
 from unittest.mock import patch
+
+import pytest
 
 from cespy.sim.toolkit import (
     MonteCarloAnalysis,
@@ -20,7 +22,7 @@ from cespy.sim.toolkit import (
 
 
 @pytest.fixture
-def sample_circuit_file():
+def sample_circuit_file() -> Generator[Path, None, None]:
     """Create a sample circuit file for testing."""
     circuit_content = """
 * Simple test circuit
@@ -44,17 +46,17 @@ C1 net2 0 1u
 class TestBaseAnalysisIntegration:
     """Test integration of BaseAnalysis with mock simulations."""
 
-    def test_base_analysis_abstract_methods(self, sample_circuit_file):
+    def test_base_analysis_abstract_methods(self, sample_circuit_file: Path) -> None:
         """Test that BaseAnalysis enforces abstract methods."""
         # Can't instantiate BaseAnalysis directly
         with pytest.raises(TypeError):
             BaseAnalysis(sample_circuit_file)
 
-    def test_progress_reporter_integration(self):
+    def test_progress_reporter_integration(self) -> None:
         """Test ProgressReporter integration."""
-        progress_calls = []
+        progress_calls: List[Tuple[int, int, str]] = []
 
-        def progress_callback(current, total, message):
+        def progress_callback(current: int, total: int, message: str) -> None:
             progress_calls.append((current, total, message))
 
         reporter = ProgressReporter(progress_callback)
@@ -72,7 +74,7 @@ class TestBaseAnalysisIntegration:
 class TestStatisticalAnalysisIntegration:
     """Test StatisticalAnalysis base class integration."""
 
-    def test_statistical_analysis_creation(self, sample_circuit_file):
+    def test_statistical_analysis_creation(self, sample_circuit_file: Path) -> None:
         """Test StatisticalAnalysis instantiation."""
         analysis = StatisticalAnalysis(sample_circuit_file, num_runs=10, seed=42)
 
@@ -80,7 +82,7 @@ class TestStatisticalAnalysisIntegration:
         assert analysis.seed == 42
         assert len(analysis.results) == 0
 
-    def test_statistics_calculation_with_mock_results(self, sample_circuit_file):
+    def test_statistics_calculation_with_mock_results(self, sample_circuit_file: Path) -> None:
         """Test statistics calculation with mock results."""
         analysis = StatisticalAnalysis(sample_circuit_file, num_runs=5)
 
@@ -103,7 +105,7 @@ class TestStatisticalAnalysisIntegration:
         assert stats["max"] == pytest.approx(2.4, rel=1e-10)
         assert stats["std"] > 0
 
-    def test_histogram_data_generation(self, sample_circuit_file):
+    def test_histogram_data_generation(self, sample_circuit_file: Path) -> None:
         """Test histogram data generation."""
         analysis = StatisticalAnalysis(sample_circuit_file, num_runs=10)
 
@@ -125,7 +127,7 @@ class TestStatisticalAnalysisIntegration:
         assert len(bin_edges) == 6  # N+1 edges for N bins
         assert sum(counts) == 10  # Total count should match number of results
 
-    def test_correlation_matrix_calculation(self, sample_circuit_file):
+    def test_correlation_matrix_calculation(self, sample_circuit_file: Path) -> None:
         """Test correlation matrix calculation."""
         analysis = StatisticalAnalysis(sample_circuit_file, num_runs=5)
 
@@ -158,7 +160,7 @@ class TestMonteCarloAnalysisIntegration:
     """Test enhanced MonteCarloAnalysis integration."""
 
     @patch("cespy.sim.toolkit.montecarlo.SimRunner")
-    def test_monte_carlo_dual_mode_creation(self, mock_runner, sample_circuit_file):
+    def test_monte_carlo_dual_mode_creation(self, mock_runner: Any, sample_circuit_file: Path) -> None:
         """Test MonteCarloAnalysis creation with both modes."""
         # Testbench mode (default)
         mc_testbench = MonteCarloAnalysis(
@@ -181,8 +183,8 @@ class TestMonteCarloAnalysisIntegration:
 
     @patch("cespy.sim.toolkit.montecarlo.SimRunner")
     def test_tolerance_setting_and_parameter_generation(
-        self, mock_runner, sample_circuit_file
-    ):
+        self, mock_runner: Any, sample_circuit_file: Path
+    ) -> None:
         """Test tolerance setting and parameter generation."""
         mc = MonteCarloAnalysis(
             sample_circuit_file, num_runs=10, use_testbench_mode=False, seed=42
@@ -201,19 +203,19 @@ class TestMonteCarloAnalysisIntegration:
                     DeviationType,
                 )
 
-                def mock_deviation(ref):
+                def mock_deviation(ref: str) -> Tuple[float, ComponentDeviation]:
                     if ref == "R1":
                         return (
                             1000.0,
                             ComponentDeviation(
-                                DeviationType.TOLERANCE, 0.05, 0, "uniform"
+                                max_val=0.05, min_val=0, typ=DeviationType.TOLERANCE, distribution="uniform"
                             ),
                         )
                     elif ref == "C1":
                         return 1e-6, ComponentDeviation(
-                            DeviationType.TOLERANCE, 0.10, 0, "normal"
+                            max_val=0.10, min_val=0, typ=DeviationType.TOLERANCE, distribution="normal"
                         )
-                    return 0, ComponentDeviation(DeviationType.NONE, 0, 0, "uniform")
+                    return 0, ComponentDeviation(max_val=0, min_val=0, typ=DeviationType.NONE, distribution="uniform")
 
                 mock_get_dev.side_effect = mock_deviation
 
@@ -229,7 +231,7 @@ class TestMonteCarloAnalysisIntegration:
                 # Should have run_id and possibly component parameters
                 assert "run_id" in param_names
 
-    def test_backward_compatibility_methods(self, sample_circuit_file):
+    def test_backward_compatibility_methods(self, sample_circuit_file: Path) -> None:
         """Test that backward compatibility methods work."""
         with patch("cespy.sim.toolkit.montecarlo.SimRunner"):
             mc = MonteCarloAnalysis(
@@ -261,7 +263,7 @@ class TestMonteCarloAnalysisIntegration:
 class TestAnalysisVisualizationIntegration:
     """Test integration of analysis visualization components."""
 
-    def test_plotting_availability_check(self):
+    def test_plotting_availability_check(self) -> None:
         """Test plotting library availability check."""
         availability = check_plotting_availability()
 
@@ -275,7 +277,7 @@ class TestAnalysisVisualizationIntegration:
         not check_plotting_availability()["matplotlib"],
         reason="Matplotlib not available",
     )
-    def test_visualizer_creation(self, sample_circuit_file):
+    def test_visualizer_creation(self, sample_circuit_file: Path) -> None:
         """Test AnalysisVisualizer creation and basic functionality."""
         visualizer = AnalysisVisualizer()
 
@@ -288,7 +290,7 @@ class TestAnalysisVisualizationIntegration:
         not check_plotting_availability()["matplotlib"],
         reason="Matplotlib not available",
     )
-    def test_histogram_plotting_integration(self, sample_circuit_file):
+    def test_histogram_plotting_integration(self, sample_circuit_file: Path) -> None:
         """Test histogram plotting with real analysis data."""
         # Create analysis with mock results
         analysis = StatisticalAnalysis(sample_circuit_file, num_runs=20)
@@ -324,7 +326,7 @@ class TestAnalysisVisualizationIntegration:
 class TestPerformanceIntegration:
     """Test performance monitoring integration with analysis."""
 
-    def test_analysis_with_performance_monitoring(self, sample_circuit_file):
+    def test_analysis_with_performance_monitoring(self, sample_circuit_file: Path) -> None:
         """Test analysis with performance monitoring enabled."""
         from cespy.core import enable_performance_monitoring, get_performance_report
 
@@ -362,7 +364,7 @@ class TestPerformanceIntegration:
 class TestErrorHandlingIntegration:
     """Test error handling in integrated analysis workflows."""
 
-    def test_analysis_with_failed_runs(self, sample_circuit_file):
+    def test_analysis_with_failed_runs(self, sample_circuit_file: Path) -> None:
         """Test analysis behavior with some failed simulation runs."""
         analysis = StatisticalAnalysis(sample_circuit_file, num_runs=5)
 
@@ -399,7 +401,7 @@ class TestErrorHandlingIntegration:
         assert overall_stats["failed"] == 1
         assert overall_stats["success_rate"] == 60.0
 
-    def test_missing_measurement_handling(self, sample_circuit_file):
+    def test_missing_measurement_handling(self, sample_circuit_file: Path) -> None:
         """Test handling of missing measurements in results."""
         analysis = StatisticalAnalysis(sample_circuit_file, num_runs=3)
 
@@ -435,7 +437,7 @@ class TestErrorHandlingIntegration:
 class TestCrossModuleIntegration:
     """Test integration between different refactored modules."""
 
-    def test_platform_aware_analysis(self, sample_circuit_file):
+    def test_platform_aware_analysis(self, sample_circuit_file: Path) -> None:
         """Test that analysis uses platform information for optimization."""
         from cespy.core import get_platform_info, get_optimal_workers
 
@@ -454,7 +456,7 @@ class TestCrossModuleIntegration:
             assert mc.max_workers == optimal_workers
             assert mc.max_workers <= platform_info.cpu_count
 
-    def test_regex_caching_in_analysis(self, sample_circuit_file):
+    def test_regex_caching_in_analysis(self, sample_circuit_file: Path) -> None:
         """Test that analysis components use cached regex patterns."""
         from cespy.core import cached_regex
         from cespy.core.performance import regex_cache

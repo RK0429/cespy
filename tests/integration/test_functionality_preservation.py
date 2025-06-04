@@ -16,7 +16,7 @@ import numpy as np
 class TestEditorFunctionality:
     """Test all editor functionality is preserved."""
 
-    def test_spice_editor_component_operations(self, temp_dir: Path):
+    def test_spice_editor_component_operations(self, temp_dir: Path) -> None:
         """Test SpiceEditor component manipulation."""
         netlist_path = temp_dir / "test_spice.net"
         netlist_content = """* Test Circuit
@@ -69,7 +69,7 @@ C1 out 0 1u
         assert ".tran" not in str(editor2)
 
     @pytest.mark.requires_ltspice
-    def test_asc_editor_operations(self, temp_dir: Path):
+    def test_asc_editor_operations(self, temp_dir: Path) -> None:
         """Test AscEditor schematic manipulation."""
         # Find a test .asc file
         test_asc = (
@@ -111,7 +111,7 @@ C1 out 0 1u
         assert asc_file.exists()
 
     @pytest.mark.requires_qspice
-    def test_qsch_editor_operations(self, temp_dir: Path):
+    def test_qsch_editor_operations(self, temp_dir: Path) -> None:
         """Test QschEditor schematic manipulation."""
         # Find a test .qsch file
         test_qsch = (
@@ -142,7 +142,7 @@ C1 out 0 1u
 class TestSimulationFunctionality:
     """Test all simulation functionality is preserved."""
 
-    def test_sim_runner_basic(self, temp_dir: Path):
+    def test_sim_runner_basic(self, temp_dir: Path) -> None:
         """Test basic SimRunner functionality."""
         netlist_path = temp_dir / "test_runner.net"
         netlist_content = """* SimRunner Test
@@ -166,7 +166,7 @@ C1 out 0 1u
         assert runner.timeout == 60
 
     @pytest.mark.requires_ltspice
-    def test_sim_batch_functionality(self, temp_dir: Path):
+    def test_sim_batch_functionality(self, temp_dir: Path) -> None:
         """Test SimBatch functionality from kuPyLTSpice."""
         base_netlist = temp_dir / "batch_base.net"
         base_content = """* Batch Test
@@ -196,7 +196,7 @@ C1 out 0 1u
             assert Path(raw_file).exists()
             assert Path(log_file).exists()
 
-    def test_simulator_detection(self):
+    def test_simulator_detection(self) -> None:
         """Test that all simulators can be detected."""
         # Test LTspice detection
         ltspice = LTspice()
@@ -217,7 +217,7 @@ C1 out 0 1u
 class TestRawFileFunctionality:
     """Test all raw file functionality is preserved."""
 
-    def test_raw_read_write_roundtrip(self, temp_dir: Path):
+    def test_raw_read_write_roundtrip(self, temp_dir: Path) -> None:
         """Test reading and writing raw files."""
         # Create test data
         time = np.linspace(0, 1e-3, 100)
@@ -254,7 +254,7 @@ class TestRawFileFunctionality:
         current_read = reader.get_trace("I(R1)").data
         np.testing.assert_array_almost_equal(current, current_read, decimal=6)
 
-    def test_raw_file_properties(self, temp_dir: Path):
+    def test_raw_file_properties(self, temp_dir: Path) -> None:
         """Test raw file property access."""
         # Create a raw file with specific properties
         raw_file = temp_dir / "test_props.raw"
@@ -275,7 +275,7 @@ class TestRawFileFunctionality:
 class TestLogFileFunctionality:
     """Test all log file functionality is preserved."""
 
-    def test_ltspice_log_reader(self, temp_dir: Path):
+    def test_ltspice_log_reader(self, temp_dir: Path) -> None:
         """Test LTSpice log file reading."""
         log_content = """Circuit: * Test Circuit
 
@@ -348,7 +348,7 @@ solver = Normal
 class TestUtilityFunctionality:
     """Test all utility functionality is preserved."""
 
-    def test_sweep_functions(self):
+    def test_sweep_functions(self) -> None:
         """Test parameter sweep utility functions."""
         # Test linear sweep
         lin_values = list(sweep_lin(1, 10, 10))
@@ -364,7 +364,7 @@ class TestUtilityFunctionality:
         assert log_values[2] == pytest.approx(100)
         assert log_values[3] == pytest.approx(1000)
 
-    def test_histogram_functionality(self):
+    def test_histogram_functionality(self) -> None:
         """Test Histogram utility class."""
         # Create test data
         data = np.random.normal(0, 1, 1000)
@@ -390,7 +390,7 @@ class TestClientServerFunctionality:
     """Test client-server functionality is preserved."""
 
     @pytest.mark.slow
-    def test_sim_server_client_basic(self, temp_dir: Path):
+    def test_sim_server_client_basic(self, temp_dir: Path) -> None:
         """Test basic server-client communication."""
         # This test would require starting a server in background
         # For now, just test that classes can be instantiated
@@ -409,7 +409,7 @@ class TestClientServerFunctionality:
 class TestBackwardCompatibility:
     """Test backward compatibility with old API."""
 
-    def test_kupicelib_imports(self):
+    def test_kupicelib_imports(self) -> None:
         """Test that common kupicelib imports still work."""
         # These imports should work if backward compatibility is maintained
         try:
@@ -423,7 +423,7 @@ class TestBackwardCompatibility:
         except ImportError as e:
             pytest.fail(f"Import failed: {e}")
 
-    def test_kuPyLTSpice_style_usage(self, temp_dir: Path):
+    def test_kuPyLTSpice_style_usage(self, temp_dir: Path) -> None:
         """Test that kuPyLTSpice-style usage patterns still work."""
         # Create a simple netlist
         netlist = temp_dir / "compat_test.net"

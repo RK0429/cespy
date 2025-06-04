@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+from typing import List
 
 import pytest
 
@@ -49,7 +50,7 @@ def sample_asc_file(test_files_dir: Path) -> Path:
 
 
 # Platform-specific markers
-def pytest_configure(config):
+def pytest_configure(config: pytest.Config) -> None:
     """Configure pytest with custom markers."""
     config.addinivalue_line("markers", "windows: mark test to run only on Windows")
     config.addinivalue_line("markers", "linux: mark test to run only on Linux")
@@ -63,7 +64,7 @@ def pytest_configure(config):
     )
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(config: pytest.Config, items: List[pytest.Item]) -> None:
     """Skip platform-specific tests on wrong platforms."""
     skip_windows = pytest.mark.skip(reason="Test only runs on Windows")
     skip_linux = pytest.mark.skip(reason="Test only runs on Linux")

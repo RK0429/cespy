@@ -11,7 +11,7 @@ class TestSimulationWorkflow:
     """Test complete simulation workflows from netlist to results."""
 
     @pytest.mark.requires_ltspice
-    def test_basic_ltspice_workflow(self, temp_dir: Path):
+    def test_basic_ltspice_workflow(self, temp_dir: Path) -> None:
         """Test basic LTSpice simulation workflow."""
         # Create a simple RC circuit netlist
         netlist_path = temp_dir / "rc_circuit.net"
@@ -45,7 +45,7 @@ C1 out 0 1u
         assert time_axis.data[-1] >= 2e-3  # Should run for at least 2ms
 
     @pytest.mark.requires_ltspice
-    def test_parameter_sweep_workflow(self, temp_dir: Path):
+    def test_parameter_sweep_workflow(self, temp_dir: Path) -> None:
         """Test parameter sweep simulation workflow."""
         # Create netlist with parameter sweep
         netlist_path = temp_dir / "sweep_circuit.net"
@@ -70,7 +70,7 @@ C1 out 0 1u
         # Note: Implementation would need to handle stepped data
         assert raw_data.get_trace("V(out)") is not None
 
-    def test_edit_and_simulate_workflow(self, temp_dir: Path):
+    def test_edit_and_simulate_workflow(self, temp_dir: Path) -> None:
         """Test editing a circuit and simulating."""
         # Create initial netlist
         netlist_path = temp_dir / "edit_test.net"
@@ -103,7 +103,7 @@ C1 out 0 1u
         assert new_editor.get_parameter("gain") == "10"
 
     @pytest.mark.requires_ngspice
-    def test_ngspice_workflow(self, temp_dir: Path):
+    def test_ngspice_workflow(self, temp_dir: Path) -> None:
         """Test NGSpice simulation workflow."""
         # Create NGSpice compatible netlist
         netlist_path = temp_dir / "ngspice_test.net"
@@ -130,7 +130,7 @@ C1 out 0 1u
         assert "frequency" in trace_names
         assert "V(out)" in trace_names
 
-    def test_multi_analysis_workflow(self, temp_dir: Path):
+    def test_multi_analysis_workflow(self, temp_dir: Path) -> None:
         """Test circuit with multiple analyses."""
         # Create netlist with multiple analyses
         netlist_path = temp_dir / "multi_analysis.net"

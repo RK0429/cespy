@@ -4,8 +4,9 @@
 
 import re
 import time
+from unittest.mock import patch, MagicMock
+
 import pytest
-from unittest.mock import patch
 
 from cespy.core.performance import (
     PerformanceMetrics,
@@ -24,7 +25,7 @@ from cespy.core.performance import (
 class TestPerformanceMetrics:
     """Test PerformanceMetrics dataclass."""
 
-    def test_metrics_creation(self):
+    def test_metrics_creation(self) -> None:
         """Test PerformanceMetrics creation and initialization."""
         metrics = PerformanceMetrics("test_function")
 
@@ -35,7 +36,7 @@ class TestPerformanceMetrics:
         assert metrics.max_time == 0.0
         assert metrics.avg_time == 0.0
 
-    def test_metrics_update(self):
+    def test_metrics_update(self) -> None:
         """Test metrics update functionality."""
         metrics = PerformanceMetrics("test_function")
 
@@ -57,7 +58,7 @@ class TestPerformanceMetrics:
         assert metrics.avg_time == 0.75
         assert metrics.memory_usage_mb == 15.0
 
-    def test_metrics_to_dict(self):
+    def test_metrics_to_dict(self) -> None:
         """Test conversion to dictionary."""
         metrics = PerformanceMetrics("test_function")
         metrics.update(0.5, 10.0)
@@ -84,7 +85,7 @@ class TestPerformanceMetrics:
 class TestPerformanceMonitor:
     """Test PerformanceMonitor class."""
 
-    def test_monitor_creation(self):
+    def test_monitor_creation(self) -> None:
         """Test PerformanceMonitor creation."""
         monitor = PerformanceMonitor()
 
@@ -93,7 +94,7 @@ class TestPerformanceMonitor:
         assert monitor.threshold_critical_time == 5.0
         assert len(monitor.metrics) == 0
 
-    def test_record_execution(self):
+    def test_record_execution(self) -> None:
         """Test execution recording."""
         monitor = PerformanceMonitor()
 
@@ -105,7 +106,7 @@ class TestPerformanceMonitor:
         assert metrics.total_time == 0.5
         assert metrics.memory_usage_mb == 10.0
 
-    def test_disabled_monitor(self):
+    def test_disabled_monitor(self) -> None:
         """Test disabled monitor doesn't record."""
         monitor = PerformanceMonitor()
         monitor.enabled = False
@@ -114,7 +115,7 @@ class TestPerformanceMonitor:
 
         assert len(monitor.metrics) == 0
 
-    def test_get_metrics(self):
+    def test_get_metrics(self) -> None:
         """Test metrics retrieval."""
         monitor = PerformanceMonitor()
         monitor.record_execution("func1", 0.5)
@@ -122,16 +123,18 @@ class TestPerformanceMonitor:
 
         # Get specific function metrics
         func1_metrics = monitor.get_metrics("func1")
+        assert isinstance(func1_metrics, PerformanceMetrics)
         assert func1_metrics.function_name == "func1"
         assert func1_metrics.total_time == 0.5
 
         # Get all metrics
         all_metrics = monitor.get_metrics()
+        assert isinstance(all_metrics, dict)
         assert len(all_metrics) == 2
         assert "func1" in all_metrics
         assert "func2" in all_metrics
 
-    def test_slowest_functions(self):
+    def test_slowest_functions(self) -> None:
         """Test slowest functions retrieval."""
         monitor = PerformanceMonitor()
         monitor.record_execution("fast_func", 0.1)
@@ -143,7 +146,7 @@ class TestPerformanceMonitor:
         assert slowest[0].function_name == "slow_func"
         assert slowest[1].function_name == "medium_func"
 
-    def test_most_called_functions(self):
+    def test_most_called_functions(self) -> None:
         """Test most called functions retrieval."""
         monitor = PerformanceMonitor()
 
@@ -160,7 +163,7 @@ class TestPerformanceMonitor:
         assert most_called[0].function_name == "popular_func"
         assert most_called[1].function_name == "medium_func"
 
-    def test_reset_metrics(self):
+    def test_reset_metrics(self) -> None:
         """Test metrics reset functionality."""
         monitor = PerformanceMonitor()
         monitor.record_execution("func1", 0.5)
@@ -176,7 +179,7 @@ class TestPerformanceMonitor:
         assert len(monitor.metrics) == 0
 
     @patch("cespy.core.performance._logger")
-    def test_warning_thresholds(self, mock_logger):
+    def test_warning_thresholds(self, mock_logger: MagicMock) -> None:
         """Test warning and critical threshold logging."""
         monitor = PerformanceMonitor()
         monitor.threshold_warning_time = 0.5
@@ -194,7 +197,7 @@ class TestPerformanceMonitor:
 class TestProfilePerformanceDecorator:
     """Test @profile_performance decorator."""
 
-    def test_basic_profiling(self):
+    def test_basic_profiling(self) -> None:
         """Test basic function profiling."""
         from cespy.core.performance import performance_monitor
 
@@ -202,7 +205,7 @@ class TestProfilePerformanceDecorator:
         performance_monitor.reset_metrics()
 
         @profile_performance()
-        def test_function(x):
+        def test_function(x: int) -> int:
             time.sleep(0.01)  # Small delay
             return x * 2
 
@@ -211,18 +214,18 @@ class TestProfilePerformanceDecorator:
 
         # Check metrics were recorded
         metrics = performance_monitor.get_metrics("test_function")
-        assert metrics is not None
+        assert isinstance(metrics, PerformanceMetrics)
         assert metrics.call_count == 1
         assert metrics.total_time > 0.005  # Should be at least 5ms
 
-    def test_profiling_with_memory(self):
+    def test_profiling_with_memory(self) -> None:
         """Test profiling with memory monitoring."""
         from cespy.core.performance import performance_monitor
 
         performance_monitor.reset_metrics()
 
         @profile_performance(include_memory=True)
-        def memory_function():
+        def memory_function() -> int:
             # Create some data to use memory
             data = [i for i in range(1000)]
             return len(data)
@@ -231,10 +234,10 @@ class TestProfilePerformanceDecorator:
         assert result == 1000
 
         metrics = performance_monitor.get_metrics("memory_function")
-        assert metrics is not None
+        assert isinstance(metrics, PerformanceMetrics)
         assert metrics.call_count == 1
 
-    def test_profiling_disabled(self):
+    def test_profiling_disabled(self) -> None:
         """Test profiling when monitoring is disabled."""
         from cespy.core.performance import performance_monitor
 
@@ -246,7 +249,7 @@ class TestProfilePerformanceDecorator:
         try:
 
             @profile_performance()
-            def disabled_function():
+            def disabled_function() -> str:
                 return "test"
 
             result = disabled_function()
@@ -254,7 +257,8 @@ class TestProfilePerformanceDecorator:
 
             # Should not have recorded metrics
             metrics = performance_monitor.get_metrics("disabled_function")
-            assert metrics is None
+            assert isinstance(metrics, PerformanceMetrics)
+            assert metrics.call_count == 0
 
         finally:
             performance_monitor.enabled = original_enabled
@@ -263,7 +267,7 @@ class TestProfilePerformanceDecorator:
 class TestPerformanceTimer:
     """Test performance_timer context manager."""
 
-    def test_basic_timing(self):
+    def test_basic_timing(self) -> None:
         """Test basic timing functionality."""
         from cespy.core.performance import performance_monitor
 
@@ -273,11 +277,11 @@ class TestPerformanceTimer:
             time.sleep(0.01)
 
         metrics = performance_monitor.get_metrics("test_operation")
-        assert metrics is not None
+        assert isinstance(metrics, PerformanceMetrics)
         assert metrics.call_count == 1
         assert metrics.total_time > 0.005
 
-    def test_timer_with_exception(self):
+    def test_timer_with_exception(self) -> None:
         """Test timer behavior when exception occurs."""
         from cespy.core.performance import performance_monitor
 
@@ -290,14 +294,14 @@ class TestPerformanceTimer:
 
         # Should still record metrics despite exception
         metrics = performance_monitor.get_metrics("error_operation")
-        assert metrics is not None
+        assert isinstance(metrics, PerformanceMetrics)
         assert metrics.call_count == 1
 
 
 class TestRegexCache:
     """Test RegexCache functionality."""
 
-    def test_cache_creation(self):
+    def test_cache_creation(self) -> None:
         """Test cache creation and initialization."""
         cache = RegexCache(max_size=100)
 
@@ -306,7 +310,7 @@ class TestRegexCache:
         assert cache.hit_count == 0
         assert cache.miss_count == 0
 
-    def test_pattern_caching(self):
+    def test_pattern_caching(self) -> None:
         """Test pattern compilation and caching."""
         cache = RegexCache()
 
@@ -323,7 +327,7 @@ class TestRegexCache:
         # Should be the same compiled pattern object
         assert pattern1 is pattern2
 
-    def test_pattern_with_flags(self):
+    def test_pattern_with_flags(self) -> None:
         """Test pattern caching with different flags."""
         cache = RegexCache()
 
@@ -337,7 +341,7 @@ class TestRegexCache:
         assert cache.miss_count == 2  # Two different patterns
         assert cache.hit_count == 1  # One hit for pattern3
 
-    def test_cache_eviction(self):
+    def test_cache_eviction(self) -> None:
         """Test cache eviction when max size is reached."""
         cache = RegexCache(max_size=2)
 
@@ -354,7 +358,7 @@ class TestRegexCache:
         cache.get_pattern(r"pattern1")
         assert cache.miss_count == 4  # Original 3 + 1 for re-compilation
 
-    def test_cache_stats(self):
+    def test_cache_stats(self) -> None:
         """Test cache statistics."""
         cache = RegexCache()
 
@@ -371,7 +375,7 @@ class TestRegexCache:
         assert stats["hit_rate"] == 40.0  # 2/5 * 100
         assert stats["cache_size"] == 3
 
-    def test_cache_clear(self):
+    def test_cache_clear(self) -> None:
         """Test cache clearing functionality."""
         cache = RegexCache()
 
@@ -388,7 +392,7 @@ class TestRegexCache:
 class TestCachedRegex:
     """Test cached_regex function."""
 
-    def test_cached_regex_function(self):
+    def test_cached_regex_function(self) -> None:
         """Test module-level cached_regex function."""
         # Clear global cache first
         from cespy.core.performance import regex_cache
@@ -401,7 +405,7 @@ class TestCachedRegex:
         assert pattern1 is pattern2
         assert regex_cache.hit_count >= 1  # Should have at least one hit
 
-    def test_pattern_functionality(self):
+    def test_pattern_functionality(self) -> None:
         """Test that cached patterns work correctly."""
         pattern = cached_regex(r"R(\d+)")
 
@@ -416,7 +420,7 @@ class TestCachedRegex:
 class TestPerformanceOptimizer:
     """Test PerformanceOptimizer utility class."""
 
-    def test_file_operation_optimization(self):
+    def test_file_operation_optimization(self) -> None:
         """Test file operation optimization recommendations."""
         # Small file
         small_rec = PerformanceOptimizer.optimize_file_operations(0.5)
@@ -433,7 +437,7 @@ class TestPerformanceOptimizer:
         assert large_rec["read_mode"] == "streaming"
         assert large_rec["use_compression"] is True
 
-    def test_regex_optimization(self):
+    def test_regex_optimization(self) -> None:
         """Test regex pattern optimization analysis."""
         patterns = [
             r"simple_pattern",
@@ -449,7 +453,7 @@ class TestPerformanceOptimizer:
         assert len(recommendations["problematic_patterns"]) > 0
         assert len(recommendations["optimizations"]) > 0
 
-    def test_memory_optimization(self):
+    def test_memory_optimization(self) -> None:
         """Test memory usage optimization recommendations."""
         # Test with mocked platform info
         with patch("cespy.core.performance.get_platform_info") as mock_get_info:
@@ -487,10 +491,10 @@ class TestPerformanceOptimizer:
 class TestBenchmarkFunction:
     """Test benchmark_function utility."""
 
-    def test_basic_benchmarking(self):
+    def test_basic_benchmarking(self) -> None:
         """Test basic function benchmarking."""
 
-        def test_func(x):
+        def test_func(x: int) -> int:
             return x * 2
 
         results = benchmark_function(test_func, 5, iterations=10)
@@ -502,10 +506,10 @@ class TestBenchmarkFunction:
         assert results["max_time"] >= results["min_time"]
         assert "std_dev" in results
 
-    def test_benchmark_with_kwargs(self):
+    def test_benchmark_with_kwargs(self) -> None:
         """Test benchmarking with keyword arguments."""
 
-        def test_func(x, multiplier=2):
+        def test_func(x: int, multiplier: int = 2) -> int:
             return x * multiplier
 
         results = benchmark_function(test_func, 5, multiplier=3, iterations=5)
@@ -517,7 +521,7 @@ class TestBenchmarkFunction:
 class TestModuleFunctions:
     """Test module-level utility functions."""
 
-    def test_enable_performance_monitoring(self):
+    def test_enable_performance_monitoring(self) -> None:
         """Test enable/disable performance monitoring."""
         from cespy.core.performance import performance_monitor
 
@@ -533,7 +537,7 @@ class TestModuleFunctions:
         finally:
             performance_monitor.enabled = original_state
 
-    def test_get_performance_report(self):
+    def test_get_performance_report(self) -> None:
         """Test performance report generation."""
         from cespy.core.performance import performance_monitor
 
@@ -553,14 +557,14 @@ class TestModuleFunctions:
 class TestErrorHandling:
     """Test error handling in performance monitoring."""
 
-    def test_profiling_with_exception(self):
+    def test_profiling_with_exception(self) -> None:
         """Test that profiling handles function exceptions correctly."""
         from cespy.core.performance import performance_monitor
 
         performance_monitor.reset_metrics()
 
         @profile_performance()
-        def failing_function():
+        def failing_function() -> None:
             raise ValueError("Test error")
 
         with pytest.raises(ValueError):
@@ -568,10 +572,10 @@ class TestErrorHandling:
 
         # Should still record timing even with exception
         metrics = performance_monitor.get_metrics("failing_function")
-        assert metrics is not None
+        assert isinstance(metrics, PerformanceMetrics)
         assert metrics.call_count == 1
 
-    def test_memory_profiling_without_psutil(self):
+    def test_memory_profiling_without_psutil(self) -> None:
         """Test memory profiling when psutil is not available."""
         from cespy.core.performance import performance_monitor
 
@@ -580,7 +584,7 @@ class TestErrorHandling:
         with patch("builtins.__import__", side_effect=ImportError("No psutil")):
 
             @profile_performance(include_memory=True)
-            def test_function():
+            def test_function() -> str:
                 return "test"
 
             result = test_function()
@@ -588,7 +592,7 @@ class TestErrorHandling:
 
             # Should work without memory monitoring
             metrics = performance_monitor.get_metrics("test_function")
-            assert metrics is not None
+            assert isinstance(metrics, PerformanceMetrics)
 
 
 if __name__ == "__main__":

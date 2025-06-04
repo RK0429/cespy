@@ -13,7 +13,7 @@ class TestLTSpiceExecution:
     """Test LTSpice simulator execution."""
 
     @pytest.mark.requires_ltspice
-    def test_ltspice_transient_analysis(self, temp_dir: Path):
+    def test_ltspice_transient_analysis(self, temp_dir: Path) -> None:
         """Test LTSpice transient analysis execution."""
         # Copy test netlist
         test_netlist = Path(__file__).parent.parent / "testfiles" / "TRAN.net"
@@ -59,7 +59,7 @@ C1 out 0 1u
         assert time_data[-1] >= 2e-3  # Should simulate to at least 2ms
 
     @pytest.mark.requires_ltspice
-    def test_ltspice_ac_analysis(self, temp_dir: Path):
+    def test_ltspice_ac_analysis(self, temp_dir: Path) -> None:
         """Test LTSpice AC analysis execution."""
         test_netlist = Path(__file__).parent.parent / "testfiles" / "AC.net"
         if test_netlist.exists():
@@ -95,7 +95,7 @@ C1 out 0 1u
         assert freq_data[-1] <= 1e5  # End at 100kHz
 
     @pytest.mark.requires_ltspice
-    def test_ltspice_dc_sweep(self, temp_dir: Path):
+    def test_ltspice_dc_sweep(self, temp_dir: Path) -> None:
         """Test LTSpice DC sweep analysis."""
         test_netlist = Path(__file__).parent.parent / "testfiles" / "DC sweep.net"
         if test_netlist.exists():
@@ -131,7 +131,7 @@ R2 out 0 1k
         assert v_data[-1] == 5  # End at 5V
 
     @pytest.mark.requires_ltspice
-    def test_ltspice_parameter_stepping(self, temp_dir: Path):
+    def test_ltspice_parameter_stepping(self, temp_dir: Path) -> None:
         """Test LTSpice with parameter stepping."""
         netlist_path = temp_dir / "step_test.net"
         netlist_content = """* Parameter Stepping Test
@@ -163,7 +163,7 @@ class TestNGSpiceExecution:
     """Test NGSpice simulator execution."""
 
     @pytest.mark.requires_ngspice
-    def test_ngspice_basic_simulation(self, temp_dir: Path):
+    def test_ngspice_basic_simulation(self, temp_dir: Path) -> None:
         """Test basic NGSpice simulation."""
         test_netlist = (
             Path(__file__).parent.parent / "testfiles" / "testfile_ngspice.net"
@@ -205,7 +205,7 @@ write ngspice_test.raw
         assert "frequency" in trace_names
 
     @pytest.mark.requires_ngspice
-    def test_ngspice_transient_analysis(self, temp_dir: Path):
+    def test_ngspice_transient_analysis(self, temp_dir: Path) -> None:
         """Test NGSpice transient analysis."""
         netlist_path = temp_dir / "ngspice_tran.net"
         netlist_content = """NGSpice Transient Test
@@ -240,7 +240,7 @@ class TestQspiceExecution:
     """Test Qspice simulator execution."""
 
     @pytest.mark.requires_qspice
-    def test_qspice_basic_simulation(self, temp_dir: Path):
+    def test_qspice_basic_simulation(self, temp_dir: Path) -> None:
         """Test basic Qspice simulation."""
         # Find a Qspice test netlist
         test_netlist = (
@@ -283,7 +283,7 @@ class TestXyceExecution:
     """Test Xyce simulator execution."""
 
     @pytest.mark.requires_xyce
-    def test_xyce_basic_simulation(self, temp_dir: Path):
+    def test_xyce_basic_simulation(self, temp_dir: Path) -> None:
         """Test basic Xyce simulation."""
         netlist_path = temp_dir / "xyce_test.net"
         netlist_content = """* Xyce Test Circuit
@@ -319,7 +319,7 @@ class TestSimulatorWithCallbacks:
     """Test simulator execution with callbacks."""
 
     @pytest.mark.requires_ltspice
-    def test_simulation_with_callback(self, temp_dir: Path, capsys):
+    def test_simulation_with_callback(self, temp_dir: Path, capsys) -> None:
         """Test simulation with process callback."""
         netlist_path = temp_dir / "callback_test.net"
         netlist_content = """* Callback Test
@@ -347,7 +347,7 @@ C1 out 0 1u
         assert len(output_lines) > 0
 
     @pytest.mark.requires_ltspice
-    def test_multiple_simulations_parallel(self, temp_dir: Path):
+    def test_multiple_simulations_parallel(self, temp_dir: Path) -> None:
         """Test running multiple simulations in parallel."""
         # Create multiple netlists
         netlists = []

@@ -11,7 +11,7 @@ from cespy.simulators.ltspice_simulator import LTspice
 class TestAPICompatibility:
     """Test that the unified API maintains compatibility with original packages."""
 
-    def test_high_level_simulate_function(self, temp_dir: Path):
+    def test_high_level_simulate_function(self, temp_dir: Path) -> None:
         """Test the high-level simulate function works as expected."""
         # Create a simple netlist
         netlist_path = temp_dir / "test_circuit.net"
@@ -42,7 +42,7 @@ C1 out 0 1u
             # Expected if simulator not available
             pass
 
-    def test_spice_editor_basic_workflow(self, temp_dir: Path):
+    def test_spice_editor_basic_workflow(self, temp_dir: Path) -> None:
         """Test basic SpiceEditor workflow."""
         netlist_path = temp_dir / "editor_test.net"
         initial_content = """* Test Circuit for Editor
@@ -77,7 +77,7 @@ C1 out 0 1u
         assert new_editor.get_component_value("R1") == "2.2k"
         assert new_editor.get_parameter("freq") == "1k"
 
-    def test_raw_read_basic_functionality(self, temp_dir: Path):
+    def test_raw_read_basic_functionality(self, temp_dir: Path) -> None:
         """Test basic RawRead functionality without actual raw files."""
         # Test that RawRead can be instantiated and has expected methods
         raw_reader = RawRead()
@@ -93,7 +93,7 @@ C1 out 0 1u
         assert hasattr(raw_reader, "nPlots")
         assert hasattr(raw_reader, "spice_params")
 
-    def test_simulator_classes_availability(self):
+    def test_simulator_classes_availability(self) -> None:
         """Test that all simulator classes are available and have expected interface."""
         # Test LTspice simulator
         assert hasattr(LTspice, "run")
@@ -109,7 +109,7 @@ C1 out 0 1u
             # Log but don't fail - simulator may not be available
             print(f"Simulator detection info: {e}")
 
-    def test_import_structure_compatibility(self):
+    def test_import_structure_compatibility(self) -> None:
         """Test that imports work as expected for API compatibility."""
         # Test main package imports
         import cespy
@@ -130,7 +130,7 @@ C1 out 0 1u
         assert callable(LTspice)
         assert callable(SimRunner)
 
-    def test_editor_file_format_support(self, temp_dir: Path):
+    def test_editor_file_format_support(self, temp_dir: Path) -> None:
         """Test that editor supports various file formats."""
         # Test .net file support
         net_file = temp_dir / "test.net"
@@ -144,7 +144,7 @@ C1 out 0 1u
         SpiceEditor(blank_file, create_blank=True)
         assert blank_file.exists()
 
-    def test_error_handling_compatibility(self, temp_dir: Path):
+    def test_error_handling_compatibility(self, temp_dir: Path) -> None:
         """Test that error handling works as expected."""
         # Test file not found error
         non_existent = temp_dir / "non_existent.net"
@@ -164,7 +164,7 @@ C1 out 0 1u
         ):  # Specific exception type depends on implementation
             editor.get_component_value("non_existent_component")
 
-    def test_cross_module_integration(self, temp_dir: Path):
+    def test_cross_module_integration(self, temp_dir: Path) -> None:
         """Test integration between different modules."""
         # Create a circuit with editor
         netlist_path = temp_dir / "integration_test.net"
@@ -187,7 +187,7 @@ C1 out 0 1u
         assert "V1 in 0 DC 1" in content
         assert "R1 in out 1k" in content
 
-    def test_parameter_sweep_integration(self, temp_dir: Path):
+    def test_parameter_sweep_integration(self, temp_dir: Path) -> None:
         """Test parameter sweep functionality integration."""
         netlist_path = temp_dir / "sweep_test.net"
         content = """.param res_val=1k
@@ -214,7 +214,7 @@ C1 out 0 1u
         assert ".step param res_val" in netlist_content
 
     @pytest.mark.integration
-    def test_end_to_end_workflow_mock(self, temp_dir: Path):
+    def test_end_to_end_workflow_mock(self, temp_dir: Path) -> None:
         """Test end-to-end workflow with mocked simulation."""
         # Create initial circuit
         circuit_file = temp_dir / "workflow_test.net"

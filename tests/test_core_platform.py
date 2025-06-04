@@ -3,9 +3,10 @@
 """Tests for core platform management functionality."""
 
 import platform
-import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
+
+import pytest
 
 from cespy.core.platform import (
     Architecture,
@@ -23,7 +24,7 @@ from cespy.core.constants import Simulators
 class TestPlatformInfo:
     """Test PlatformInfo dataclass."""
 
-    def test_platform_info_creation(self):
+    def test_platform_info_creation(self) -> None:
         """Test PlatformInfo creation and properties."""
         info = PlatformInfo(
             os_type=OSType.LINUX,
@@ -44,7 +45,7 @@ class TestPlatformInfo:
         assert info.recommended_workers == 6  # 75% of 8 cores
         assert info.memory_per_worker_gb == pytest.approx(2.33, rel=0.1)  # (16-2)/6
 
-    def test_windows_platform_info(self):
+    def test_windows_platform_info(self) -> None:
         """Test Windows-specific platform info."""
         info = PlatformInfo(
             os_type=OSType.WINDOWS,
@@ -62,7 +63,7 @@ class TestPlatformInfo:
         assert not info.supports_wine
         assert info.recommended_workers == 3
 
-    def test_macos_platform_info(self):
+    def test_macos_platform_info(self) -> None:
         """Test macOS-specific platform info."""
         info = PlatformInfo(
             os_type=OSType.MACOS,
@@ -84,13 +85,13 @@ class TestPlatformInfo:
 class TestPlatformManager:
     """Test PlatformManager singleton."""
 
-    def test_singleton_behavior(self):
+    def test_singleton_behavior(self) -> None:
         """Test that PlatformManager is a singleton."""
         manager1 = PlatformManager()
         manager2 = PlatformManager()
         assert manager1 is manager2
 
-    def test_platform_detection(self):
+    def test_platform_detection(self) -> None:
         """Test platform detection functionality."""
         manager = PlatformManager()
         info = manager.info
@@ -104,7 +105,7 @@ class TestPlatformManager:
 
     @patch("platform.system")
     @patch("platform.machine")
-    def test_os_type_detection(self, mock_machine, mock_system):
+    def test_os_type_detection(self, mock_machine: Mock, mock_system: Mock) -> None:
         """Test OS type detection logic."""
         # Reset singleton for testing
         PlatformManager._instance = None
@@ -121,7 +122,7 @@ class TestPlatformManager:
         PlatformManager._instance = None
         PlatformManager._platform_info = None
 
-    def test_simulator_search_paths(self):
+    def test_simulator_search_paths(self) -> None:
         """Test simulator search path generation."""
         manager = PlatformManager()
 
@@ -134,7 +135,7 @@ class TestPlatformManager:
         ngspice_paths = manager.get_simulator_search_paths(Simulators.NGSPICE)
         assert len(ngspice_paths) > 0
 
-    def test_temp_directory_creation(self):
+    def test_temp_directory_creation(self) -> None:
         """Test temporary directory creation."""
         manager = PlatformManager()
         temp_dir = manager.get_temp_directory()
@@ -146,7 +147,7 @@ class TestPlatformManager:
         # Cleanup
         temp_dir.rmdir()
 
-    def test_config_directory_creation(self):
+    def test_config_directory_creation(self) -> None:
         """Test configuration directory creation."""
         manager = PlatformManager()
         config_dir = manager.get_config_directory()
@@ -155,7 +156,7 @@ class TestPlatformManager:
         assert config_dir.is_dir()
         assert "cespy" in str(config_dir)
 
-    def test_cache_directory_creation(self):
+    def test_cache_directory_creation(self) -> None:
         """Test cache directory creation."""
         manager = PlatformManager()
         cache_dir = manager.get_cache_directory()
@@ -164,7 +165,7 @@ class TestPlatformManager:
         assert cache_dir.is_dir()
         assert "cespy" in str(cache_dir)
 
-    def test_optimal_process_count(self):
+    def test_optimal_process_count(self) -> None:
         """Test optimal process count calculation."""
         manager = PlatformManager()
 
@@ -178,7 +179,7 @@ class TestPlatformManager:
         assert memory_count > 0
         assert memory_count <= normal_count  # Should be same or fewer
 
-    def test_process_environment_setup(self):
+    def test_process_environment_setup(self) -> None:
         """Test process environment setup."""
         manager = PlatformManager()
 
@@ -193,7 +194,7 @@ class TestPlatformManager:
         if manager.info.supports_wine:
             assert "WINEDEBUG" in wine_env
 
-    def test_executable_extensions(self):
+    def test_executable_extensions(self) -> None:
         """Test executable extension detection."""
         manager = PlatformManager()
         extensions = manager.get_executable_extensions()
@@ -207,7 +208,7 @@ class TestPlatformManager:
             assert "" in extensions  # Unix systems use no extension
 
     @patch("shutil.which")
-    def test_find_executable(self, mock_which):
+    def test_find_executable(self, mock_which: Mock) -> None:
         """Test executable finding functionality."""
         manager = PlatformManager()
 
@@ -222,7 +223,7 @@ class TestPlatformManager:
         result = manager.find_executable("nonexistent", search_paths)
         assert result is None
 
-    def test_performance_hints(self):
+    def test_performance_hints(self) -> None:
         """Test performance optimization hints."""
         manager = PlatformManager()
         hints = manager.get_performance_hints()
@@ -243,7 +244,7 @@ class TestPlatformManager:
 class TestPlatformFunctions:
     """Test module-level platform functions."""
 
-    def test_get_platform_info(self):
+    def test_get_platform_info(self) -> None:
         """Test get_platform_info function."""
         info = get_platform_info()
         assert isinstance(info, PlatformInfo)
@@ -254,7 +255,7 @@ class TestPlatformFunctions:
             OSType.UNKNOWN,
         ]
 
-    def test_get_optimal_workers(self):
+    def test_get_optimal_workers(self) -> None:
         """Test get_optimal_workers function."""
         workers = get_optimal_workers()
         assert isinstance(workers, int)
@@ -266,7 +267,7 @@ class TestPlatformFunctions:
         assert memory_workers <= workers
 
     @patch("cespy.core.platform.PlatformManager")
-    def test_is_simulator_available(self, mock_manager_class):
+    def test_is_simulator_available(self, mock_manager_class: Mock) -> None:
         """Test is_simulator_available function."""
         mock_manager = Mock()
         mock_manager.get_simulator_search_paths.return_value = [Path("/fake/path")]
@@ -279,7 +280,7 @@ class TestPlatformFunctions:
             assert isinstance(result, bool)
 
     @patch("cespy.core.platform.PlatformManager")
-    def test_get_simulator_path(self, mock_manager_class):
+    def test_get_simulator_path(self, mock_manager_class: Mock) -> None:
         """Test get_simulator_path function."""
         mock_manager = Mock()
         mock_manager.get_simulator_search_paths.return_value = [Path("/fake/path")]
@@ -296,7 +297,7 @@ class TestPlatformFunctions:
 class TestPlatformIntegration:
     """Integration tests for platform functionality."""
 
-    def test_real_platform_detection(self):
+    def test_real_platform_detection(self) -> None:
         """Test detection on real platform."""
         info = get_platform_info()
 
@@ -309,7 +310,7 @@ class TestPlatformIntegration:
         elif system == "darwin":
             assert info.is_macos
 
-    def test_directory_operations(self):
+    def test_directory_operations(self) -> None:
         """Test directory operations on real filesystem."""
         manager = PlatformManager()
 
@@ -327,7 +328,7 @@ class TestPlatformIntegration:
         assert config_dir != cache_dir
         assert temp_dir != cache_dir
 
-    def test_resource_detection(self):
+    def test_resource_detection(self) -> None:
         """Test system resource detection."""
         info = get_platform_info()
 
@@ -341,7 +342,7 @@ class TestErrorHandling:
     """Test error handling in platform management."""
 
     @patch("subprocess.run")
-    def test_memory_detection_failure(self, mock_run):
+    def test_memory_detection_failure(self, mock_run: Mock) -> None:
         """Test graceful handling of memory detection failure."""
         mock_run.side_effect = Exception("Command failed")
 
@@ -357,7 +358,7 @@ class TestErrorHandling:
         PlatformManager._instance = None
         PlatformManager._platform_info = None
 
-    def test_invalid_simulator_name(self):
+    def test_invalid_simulator_name(self) -> None:
         """Test handling of invalid simulator names."""
         manager = PlatformManager()
 
@@ -365,7 +366,7 @@ class TestErrorHandling:
         paths = manager.get_simulator_search_paths("invalid_simulator")
         assert paths == []
 
-    def test_nonexistent_executable_search(self):
+    def test_nonexistent_executable_search(self) -> None:
         """Test searching for nonexistent executable."""
         manager = PlatformManager()
 

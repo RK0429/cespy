@@ -9,7 +9,7 @@ from pathlib import Path
 class TestCLIEntryPoints:
     """Test CLI entry points work correctly."""
 
-    def test_cli_help_commands(self):
+    def test_cli_help_commands(self) -> None:
         """Test that CLI commands show help when called with --help."""
         commands = [
             "cespy-asc-to-qsch",
@@ -42,7 +42,7 @@ class TestCLIEntryPoints:
                 # Command not found - may not be installed yet
                 pytest.skip(f"Command {command} not found in PATH")
 
-    def test_module_imports_from_cli(self):
+    def test_module_imports_from_cli(self) -> None:
         """Test that modules can be imported when called from CLI context."""
         # Test that entry point modules can be imported
         import_tests = [
@@ -73,7 +73,7 @@ class TestCLIEntryPoints:
             except subprocess.TimeoutExpired:
                 pytest.fail(f"Import test timed out: {import_test}")
 
-    def test_asc_to_qsch_entry_point(self, temp_dir: Path):
+    def test_asc_to_qsch_entry_point(self, temp_dir: Path) -> None:
         """Test asc-to-qsch entry point with mock data."""
         # Create a simple .asc file for testing
         asc_file = temp_dir / "test.asc"
@@ -106,7 +106,7 @@ TEXT 32 200 Left 2 !.tran 1m
         except FileNotFoundError:
             pytest.skip("asc-to-qsch module not found")
 
-    def test_server_entry_point_help(self):
+    def test_server_entry_point_help(self) -> None:
         """Test that server entry point can show help."""
         try:
             result = subprocess.run(
@@ -125,7 +125,7 @@ TEXT 32 200 Left 2 !.tran 1m
         except subprocess.TimeoutExpired:
             pytest.fail("Server import test timed out")
 
-    def test_raw_convert_entry_point(self, temp_dir: Path):
+    def test_raw_convert_entry_point(self, temp_dir: Path) -> None:
         """Test raw convert entry point."""
         # Create a dummy raw file for testing
         raw_file = temp_dir / "test.raw"
@@ -146,7 +146,7 @@ TEXT 32 200 Left 2 !.tran 1m
         except subprocess.TimeoutExpired:
             pytest.fail("Raw convert import test timed out")
 
-    def test_histogram_entry_point(self):
+    def test_histogram_entry_point(self) -> None:
         """Test histogram entry point."""
         try:
             subprocess.run(
@@ -163,7 +163,7 @@ TEXT 32 200 Left 2 !.tran 1m
         except subprocess.TimeoutExpired:
             pytest.fail("Histogram import test timed out")
 
-    def test_cli_with_invalid_arguments(self):
+    def test_cli_with_invalid_arguments(self) -> None:
         """Test CLI behavior with invalid arguments."""
         # Test commands that should handle invalid arguments gracefully
         test_cases = [
@@ -189,7 +189,7 @@ TEXT 32 200 Left 2 !.tran 1m
             except FileNotFoundError:
                 pytest.skip(f"Command {command} not found")
 
-    def test_package_installation_check(self):
+    def test_package_installation_check(self) -> None:
         """Test that the package is properly installed and entry points work."""
         # Test basic package import
         result = subprocess.run(
@@ -209,7 +209,7 @@ TEXT 32 200 Left 2 !.tran 1m
         else:
             pytest.fail(f"Failed to import cespy: {result.stderr}")
 
-    def test_poetry_scripts_configuration(self):
+    def test_poetry_scripts_configuration(self) -> None:
         """Test that poetry scripts are properly configured."""
         # Read the pyproject.toml to verify script entry points
         import tomllib
