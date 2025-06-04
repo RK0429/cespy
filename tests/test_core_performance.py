@@ -4,22 +4,21 @@
 
 import re
 import time
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-# pylint: disable=import-error
 from cespy.core.performance import (
     PerformanceMetrics,
     PerformanceMonitor,
-    profile_performance,
-    performance_timer,
-    RegexCache,
-    cached_regex,
     PerformanceOptimizer,
+    RegexCache,
     benchmark_function,
-    get_performance_report,
+    cached_regex,
     enable_performance_monitoring,
+    get_performance_report,
+    performance_timer,
+    profile_performance,
 )
 
 
@@ -465,7 +464,7 @@ class TestPerformanceOptimizer:
         # Test with mocked platform info
         with patch("cespy.core.performance.get_platform_info") as mock_get_info:
             # pylint: disable=import-outside-toplevel,import-error
-            from cespy.core.platform import PlatformInfo, OSType, Architecture
+            from cespy.core.platform import Architecture, OSType, PlatformInfo
 
             mock_info = PlatformInfo(
                 os_type=OSType.LINUX,
