@@ -165,7 +165,9 @@ class TestNGSpiceExecution:
     @pytest.mark.requires_ngspice
     def test_ngspice_basic_simulation(self, temp_dir: Path):
         """Test basic NGSpice simulation."""
-        test_netlist = Path(__file__).parent.parent / "testfiles" / "testfile_ngspice.net"
+        test_netlist = (
+            Path(__file__).parent.parent / "testfiles" / "testfile_ngspice.net"
+        )
         if test_netlist.exists():
             netlist_path = temp_dir / "ngspice_test.net"
             shutil.copy(test_netlist, netlist_path)
@@ -241,7 +243,9 @@ class TestQspiceExecution:
     def test_qspice_basic_simulation(self, temp_dir: Path):
         """Test basic Qspice simulation."""
         # Find a Qspice test netlist
-        test_netlist = Path(__file__).parent.parent / "testfiles" / "QSPICE_TRAN - STEP.net"
+        test_netlist = (
+            Path(__file__).parent.parent / "testfiles" / "QSPICE_TRAN - STEP.net"
+        )
         if test_netlist.exists():
             netlist_path = temp_dir / "qspice_test.net"
             shutil.copy(test_netlist, netlist_path)
@@ -266,7 +270,7 @@ C1 out 0 1u
 
         # Verify output - Qspice uses .qraw extension
         assert Path(raw_file).exists()
-        assert raw_file.endswith('.qraw')
+        assert raw_file.endswith(".qraw")
 
         # Parse results
         raw_data = RawRead(raw_file)

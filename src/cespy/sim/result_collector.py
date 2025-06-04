@@ -6,9 +6,11 @@ This module provides functionality to collect, organize, and process simulation
 results, including raw data files, log files, and measurements.
 """
 
+import csv
 import json
 import logging
 import shutil
+import statistics
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -273,8 +275,6 @@ class ResultCollector:
         if not values:
             return {"count": 0}
 
-        import statistics
-
         return {
             "count": len(values),
             "min": min(values),
@@ -295,8 +295,6 @@ class ResultCollector:
             output_path: Path for CSV output
             batch_id: Optional batch to export (None for all)
         """
-        import csv
-
         # Determine which results to export
         if batch_id:
             batch = self._batches.get(batch_id)

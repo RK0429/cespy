@@ -47,9 +47,9 @@ Binary:
         raw_reader = RawRead(raw_file, headeronly=True)
 
         # Verify basic attributes exist
-        assert hasattr(raw_reader, 'get_trace_names')
-        assert hasattr(raw_reader, 'get_trace')
-        assert hasattr(raw_reader, 'get_axis')
+        assert hasattr(raw_reader, "get_trace_names")
+        assert hasattr(raw_reader, "get_trace")
+        assert hasattr(raw_reader, "get_axis")
 
     def test_get_trace_names_empty(self):
         """Test get_trace_names with no traces."""
@@ -116,18 +116,14 @@ Binary:
         raw_reader = create_mock_raw_reader()
 
         # Test properties exist and are accessible
-        assert hasattr(raw_reader, 'nPoints')
-        assert hasattr(raw_reader, 'nPlots')
-        assert hasattr(raw_reader, 'spice_params')
+        assert hasattr(raw_reader, "nPoints")
+        assert hasattr(raw_reader, "nPlots")
+        assert hasattr(raw_reader, "spice_params")
 
     def test_spice_params_handling(self):
         """Test SPICE parameter handling."""
         raw_reader = create_mock_raw_reader()
-        raw_reader.spice_params = {
-            "FREQ": "1k",
-            "GAIN": "10",
-            "TEMP": "27"
-        }
+        raw_reader.spice_params = {"FREQ": "1k", "GAIN": "10", "TEMP": "27"}
 
         # Test parameter access
         assert "FREQ" in raw_reader.spice_params
@@ -172,7 +168,7 @@ Binary:
             raw_reader = RawRead(raw_file, headeronly=True)
 
             # Test that we can access basic information
-            assert hasattr(raw_reader, 'raw_params')
+            assert hasattr(raw_reader, "raw_params")
 
         except Exception:
             # If the file format is not exactly right, just test the class structure

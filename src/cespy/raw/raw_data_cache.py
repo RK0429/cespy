@@ -167,9 +167,9 @@ class RawDataCache:
             self._cache.move_to_end(key)
 
             return self._cache[key].data
-        else:
-            self._misses += 1
-            return None
+
+        self._misses += 1
+        return None
 
     def put(self, key: str, data: NDArray[np.float64]) -> None:
         """Put data into cache.
@@ -194,7 +194,11 @@ class RawDataCache:
         _logger.debug("Cached %s (%d bytes)", key, entry.size_bytes)
 
     def get_or_compute(
-        self, key: str, compute_func: Callable[..., NDArray[np.float64]], *args: Any, **kwargs: Any
+        self,
+        key: str,
+        compute_func: Callable[..., NDArray[np.float64]],
+        *args: Any,
+        **kwargs: Any,
     ) -> NDArray[np.float64]:
         """Get from cache or compute if not present.
 

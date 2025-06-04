@@ -33,7 +33,7 @@ class TestPlatformInfo:
             is_wine_available=True,
             wine_prefix=Path("/home/user/.wine"),
             cpu_count=8,
-            total_memory_gb=16.0
+            total_memory_gb=16.0,
         )
 
         assert info.is_linux
@@ -54,7 +54,7 @@ class TestPlatformInfo:
             is_wine_available=False,
             wine_prefix=None,
             cpu_count=4,
-            total_memory_gb=8.0
+            total_memory_gb=8.0,
         )
 
         assert info.is_windows
@@ -72,7 +72,7 @@ class TestPlatformInfo:
             is_wine_available=False,
             wine_prefix=None,
             cpu_count=10,
-            total_memory_gb=32.0
+            total_memory_gb=32.0,
         )
 
         assert info.is_macos
@@ -102,8 +102,8 @@ class TestPlatformManager:
         assert info.total_memory_gb > 0
         assert isinstance(info.python_version, str)
 
-    @patch('platform.system')
-    @patch('platform.machine')
+    @patch("platform.system")
+    @patch("platform.machine")
     def test_os_type_detection(self, mock_machine, mock_system):
         """Test OS type detection logic."""
         # Reset singleton for testing
@@ -185,13 +185,13 @@ class TestPlatformManager:
         # Normal environment
         env = manager.setup_process_environment(wine_mode=False)
         assert isinstance(env, dict)
-        assert 'PATH' in env  # Should inherit system PATH
+        assert "PATH" in env  # Should inherit system PATH
 
         # Wine environment (if supported)
         wine_env = manager.setup_process_environment(wine_mode=True)
         assert isinstance(wine_env, dict)
         if manager.info.supports_wine:
-            assert 'WINEDEBUG' in wine_env
+            assert "WINEDEBUG" in wine_env
 
     def test_executable_extensions(self):
         """Test executable extension detection."""
@@ -202,11 +202,11 @@ class TestPlatformManager:
         assert len(extensions) > 0
 
         if manager.info.is_windows:
-            assert '.exe' in extensions
+            assert ".exe" in extensions
         else:
-            assert '' in extensions  # Unix systems use no extension
+            assert "" in extensions  # Unix systems use no extension
 
-    @patch('shutil.which')
+    @patch("shutil.which")
     def test_find_executable(self, mock_which):
         """Test executable finding functionality."""
         manager = PlatformManager()
@@ -228,16 +228,16 @@ class TestPlatformManager:
         hints = manager.get_performance_hints()
 
         assert isinstance(hints, dict)
-        assert 'recommended_workers' in hints
-        assert 'memory_per_worker_gb' in hints
-        assert 'use_memory_mapping' in hints
+        assert "recommended_workers" in hints
+        assert "memory_per_worker_gb" in hints
+        assert "use_memory_mapping" in hints
 
         # Platform-specific hints
         if manager.info.is_windows:
-            assert 'use_job_objects' in hints
+            assert "use_job_objects" in hints
 
         if manager.info.supports_wine:
-            assert 'wine_available' in hints
+            assert "wine_available" in hints
 
 
 class TestPlatformFunctions:
@@ -247,7 +247,12 @@ class TestPlatformFunctions:
         """Test get_platform_info function."""
         info = get_platform_info()
         assert isinstance(info, PlatformInfo)
-        assert info.os_type in [OSType.WINDOWS, OSType.LINUX, OSType.MACOS, OSType.UNKNOWN]
+        assert info.os_type in [
+            OSType.WINDOWS,
+            OSType.LINUX,
+            OSType.MACOS,
+            OSType.UNKNOWN,
+        ]
 
     def test_get_optimal_workers(self):
         """Test get_optimal_workers function."""
@@ -260,7 +265,7 @@ class TestPlatformFunctions:
         assert memory_workers > 0
         assert memory_workers <= workers
 
-    @patch('cespy.core.platform.PlatformManager')
+    @patch("cespy.core.platform.PlatformManager")
     def test_is_simulator_available(self, mock_manager_class):
         """Test is_simulator_available function."""
         mock_manager = Mock()
@@ -269,11 +274,11 @@ class TestPlatformFunctions:
         mock_manager_class.return_value = mock_manager
 
         # Mock the module-level manager
-        with patch('cespy.core.platform.platform_manager', mock_manager):
+        with patch("cespy.core.platform.platform_manager", mock_manager):
             result = is_simulator_available(Simulators.LTSPICE)
             assert isinstance(result, bool)
 
-    @patch('cespy.core.platform.PlatformManager')
+    @patch("cespy.core.platform.PlatformManager")
     def test_get_simulator_path(self, mock_manager_class):
         """Test get_simulator_path function."""
         mock_manager = Mock()
@@ -282,7 +287,7 @@ class TestPlatformFunctions:
         mock_manager_class.return_value = mock_manager
 
         # Mock the module-level manager
-        with patch('cespy.core.platform.platform_manager', mock_manager):
+        with patch("cespy.core.platform.platform_manager", mock_manager):
             result = get_simulator_path(Simulators.LTSPICE)
             assert result == Path("/fake/simulator") or result is None
 
@@ -335,7 +340,7 @@ class TestPlatformIntegration:
 class TestErrorHandling:
     """Test error handling in platform management."""
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_memory_detection_failure(self, mock_run):
         """Test graceful handling of memory detection failure."""
         mock_run.side_effect = Exception("Command failed")

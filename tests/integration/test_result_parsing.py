@@ -18,9 +18,16 @@ class TestRawFileParsing:
         # Create a simple raw file for testing
         traces = [
             Trace("time", "time", data=np.linspace(0, 1e-3, 100)),
-            Trace("V(out)", "voltage", data=np.sin(2 * np.pi * 1000 * np.linspace(0, 1e-3, 100))),
-            Trace("I(R1)", "current",
-                  data=np.sin(2 * np.pi * 1000 * np.linspace(0, 1e-3, 100)) / 1000)
+            Trace(
+                "V(out)",
+                "voltage",
+                data=np.sin(2 * np.pi * 1000 * np.linspace(0, 1e-3, 100)),
+            ),
+            Trace(
+                "I(R1)",
+                "current",
+                data=np.sin(2 * np.pi * 1000 * np.linspace(0, 1e-3, 100)) / 1000,
+            ),
         ]
 
         raw_file = temp_dir / "test_tran.raw"
@@ -66,7 +73,7 @@ class TestRawFileParsing:
 
         traces = [
             Trace("frequency", "frequency", data=frequencies),
-            Trace("V(out)", "voltage", data=z_complex)
+            Trace("V(out)", "voltage", data=z_complex),
         ]
 
         raw_file = temp_dir / "test_ac.raw"
@@ -112,7 +119,7 @@ class TestRawFileParsing:
 
         traces = [
             Trace("time", "time", data=np.array(all_time_data)),
-            Trace("V(out)", "voltage", data=np.array(all_voltage_data))
+            Trace("V(out)", "voltage", data=np.array(all_voltage_data)),
         ]
 
         raw_file = temp_dir / "test_stepped.raw"
@@ -144,7 +151,7 @@ class TestRawFileParsing:
         traces = [
             Trace("V(in)", "voltage", data=np.array([5.0])),
             Trace("V(out)", "voltage", data=np.array([2.5])),
-            Trace("I(Vsource)", "current", data=np.array([0.0025]))
+            Trace("I(Vsource)", "current", data=np.array([0.0025])),
         ]
 
         raw_file = temp_dir / "test_op.raw"
@@ -332,7 +339,7 @@ class TestRawFileCompatibility:
 
         traces = [
             Trace("time", "time", data=time),
-            Trace("v(out)", "voltage", data=voltage)  # NGSpice uses lowercase
+            Trace("v(out)", "voltage", data=voltage),  # NGSpice uses lowercase
         ]
 
         # Write as "NGSpice" style
@@ -360,7 +367,7 @@ class TestRawFileCompatibility:
 
         traces = [
             Trace("time", "time", data=time),
-            Trace("V(out)", "voltage", data=voltage)
+            Trace("V(out)", "voltage", data=voltage),
         ]
 
         # Write binary raw file

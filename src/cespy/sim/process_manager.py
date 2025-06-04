@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union, IO
 
 try:
     import psutil
+
     HAS_PSUTIL = True
 except ImportError:
     psutil = None  # type: ignore[assignment]
@@ -158,7 +159,7 @@ class ProcessManager:
                 stdout=stdout_handle,
                 stderr=stderr_handle,
                 # Prevent console window on Windows
-                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)
                 if sys.platform == "win32"
                 else 0,
             )
@@ -237,9 +238,17 @@ class ProcessManager:
 
         finally:
             # Close file handles if we opened them
-            if stdout_handle is not None and stdout_file and not isinstance(stdout_handle, int):
+            if (
+                stdout_handle is not None
+                and stdout_file
+                and not isinstance(stdout_handle, int)
+            ):
                 stdout_handle.close()
-            if stderr_handle is not None and stderr_file and not isinstance(stderr_handle, int):
+            if (
+                stderr_handle is not None
+                and stderr_file
+                and not isinstance(stderr_handle, int)
+            ):
                 stderr_handle.close()
 
     def terminate_process(self, process_id: int) -> bool:
@@ -287,7 +296,11 @@ class ProcessManager:
                         result[pid]["memory_mb"] = (
                             info.psutil_process.memory_info().rss / 1024 / 1024
                         )
-                    except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
+                    except (
+                        (psutil.NoSuchProcess, psutil.AccessDenied)
+                        if psutil
+                        else Exception
+                    ):
                         pass
 
             return result
@@ -311,7 +324,11 @@ class ProcessManager:
                             info.psutil_process.memory_info().rss / 1024 / 1024
                         )
                         process_count += 1
-                    except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
+                    except (
+                        (psutil.NoSuchProcess, psutil.AccessDenied)
+                        if psutil
+                        else Exception
+                    ):
                         pass
 
         return {
@@ -411,7 +428,11 @@ class ProcessManager:
                 else:
                     # Unix nice values (-20 to 19)
                     proc.nice(priority)
-            except (psutil.NoSuchProcess, psutil.AccessDenied, OSError) if psutil else Exception:
+            except (
+                (psutil.NoSuchProcess, psutil.AccessDenied, OSError)
+                if psutil
+                else Exception
+            ):
                 pass
 
     def _terminate_process(self, process_info: ProcessInfo) -> None:

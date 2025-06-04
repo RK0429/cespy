@@ -29,10 +29,7 @@ class TestSimRunner:
     def test_init_custom_values(self):
         """Test SimRunner initialization with custom values."""
         runner = SimRunner(
-            parallel_sims=8,
-            timeout=1200,
-            verbose=True,
-            output_folder="custom_output"
+            parallel_sims=8, timeout=1200, verbose=True, output_folder="custom_output"
         )
 
         assert runner.parallel_sims == 8
@@ -58,63 +55,57 @@ class TestSimRunner:
 
         assert self.runner.okSim == initial_ok + 1
 
-    @patch('cespy.simulators.ltspice_simulator.LTspice.is_available', return_value=True)
-    @patch('shutil.copy')
+    @patch("cespy.simulators.ltspice_simulator.LTspice.is_available", return_value=True)
+    @patch("shutil.copy")
     def test_run_single_simulation(self, mock_copy, mock_available):
         """Test running a single simulation."""
         mock_copy.return_value = self.test_netlist
 
         # Create a test netlist file
-        with patch('pathlib.Path.exists', return_value=True):
+        with patch("pathlib.Path.exists", return_value=True):
             task = self.runner.run(self.test_netlist, wait_resource=False)
 
             assert isinstance(task, RunTask)
             assert task.netlist_file == self.test_netlist
 
-    @patch('cespy.simulators.ltspice_simulator.LTspice.is_available', return_value=True)
-    @patch('shutil.copy')
+    @patch("cespy.simulators.ltspice_simulator.LTspice.is_available", return_value=True)
+    @patch("shutil.copy")
     def test_run_with_switches(self, mock_copy, mock_available):
         """Test running simulation with command line switches."""
         mock_copy.return_value = self.test_netlist
 
-        with patch('pathlib.Path.exists', return_value=True):
+        with patch("pathlib.Path.exists", return_value=True):
             switches = ["-ascii", "-alt"]
             task = self.runner.run(
-                self.test_netlist,
-                switches=switches,
-                wait_resource=False
+                self.test_netlist, switches=switches, wait_resource=False
             )
 
             assert task.switches == switches
 
-    @patch('cespy.simulators.ltspice_simulator.LTspice.is_available', return_value=True)
-    @patch('shutil.copy')
+    @patch("cespy.simulators.ltspice_simulator.LTspice.is_available", return_value=True)
+    @patch("shutil.copy")
     def test_run_with_callback(self, mock_copy, mock_available):
         """Test running simulation with callback."""
         callback_mock = Mock(spec=ProcessCallback)
         mock_copy.return_value = self.test_netlist
 
-        with patch('pathlib.Path.exists', return_value=True):
+        with patch("pathlib.Path.exists", return_value=True):
             task = self.runner.run(
-                self.test_netlist,
-                callback=callback_mock,
-                wait_resource=False
+                self.test_netlist, callback=callback_mock, wait_resource=False
             )
 
             assert task.callback == callback_mock
 
-    @patch('cespy.simulators.ltspice_simulator.LTspice.is_available', return_value=True)
-    @patch('shutil.copy')
+    @patch("cespy.simulators.ltspice_simulator.LTspice.is_available", return_value=True)
+    @patch("shutil.copy")
     def test_run_with_custom_filename(self, mock_copy, mock_available):
         """Test running simulation with custom filename."""
         custom_name = "custom_simulation"
         mock_copy.return_value = self.test_netlist
 
-        with patch('pathlib.Path.exists', return_value=True):
+        with patch("pathlib.Path.exists", return_value=True):
             task = self.runner.run(
-                self.test_netlist,
-                run_filename=custom_name,
-                wait_resource=False
+                self.test_netlist, run_filename=custom_name, wait_resource=False
             )
 
             # The run_filename is passed through to the task
@@ -130,7 +121,7 @@ class TestSimRunner:
         # Add a future to the internal set to simulate active task
         self.runner._active_futures = {mock_future}
 
-        with patch('time.sleep'):  # Speed up the test
+        with patch("time.sleep"):  # Speed up the test
             result = self.runner.wait_completion(timeout=0.1)
 
             # Should timeout and return False
@@ -147,7 +138,7 @@ class TestSimRunner:
     def test_abort_all_simulations(self):
         """Test aborting all running simulations."""
         # Test that executor shutdown is called properly
-        with patch.object(self.runner._executor, 'shutdown') as mock_shutdown:
+        with patch.object(self.runner._executor, "shutdown") as mock_shutdown:
             # Simulate destruction/cleanup
             self.runner.__del__()
 
@@ -197,7 +188,7 @@ class TestSimRunner:
         assert isinstance(runner, SimRunner)
 
         # Test manual cleanup
-        with patch.object(runner._executor, 'shutdown') as mock_shutdown:
+        with patch.object(runner._executor, "shutdown") as mock_shutdown:
             runner.__del__()
             mock_shutdown.assert_called()
 
@@ -223,7 +214,7 @@ class TestRunTask:
             callback=Mock(),
             switches=["-ascii"],
             timeout=300,
-            exe_log=True
+            exe_log=True,
         )
 
         assert task.netlist_file == Path("test.net")
@@ -235,18 +226,16 @@ class TestRunTask:
     def test_runtask_abort(self):
         """Test aborting a RunTask."""
         from cespy.simulators.ltspice_simulator import LTspice
+
         mock_process = Mock()
 
         task = RunTask(
-            simulator=LTspice,
-            runno=1,
-            netlist_file=Path("test.net"),
-            callback=Mock()
+            simulator=LTspice, runno=1, netlist_file=Path("test.net"), callback=Mock()
         )
         task.process = mock_process
 
         # Test that we can access the process attribute
-        assert hasattr(task, 'process')
+        assert hasattr(task, "process")
         assert task.process == mock_process
 
     def test_runtask_basic_properties(self):
@@ -254,10 +243,7 @@ class TestRunTask:
         from cespy.simulators.ltspice_simulator import LTspice
 
         task = RunTask(
-            simulator=LTspice,
-            runno=1,
-            netlist_file=Path("test.net"),
-            callback=Mock()
+            simulator=LTspice, runno=1, netlist_file=Path("test.net"), callback=Mock()
         )
 
         # Test basic attributes

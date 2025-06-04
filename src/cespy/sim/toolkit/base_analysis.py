@@ -122,10 +122,9 @@ class ProgressReporter:
         """Format time duration."""
         if seconds < 60:
             return f"{seconds:.0f}s"
-        elif seconds < 3600:
+        if seconds < 3600:
             return f"{seconds/60:.1f}m"
-        else:
-            return f"{seconds/3600:.1f}h"
+        return f"{seconds/3600:.1f}h"
 
 
 class BaseAnalysis(SimAnalysis):
@@ -590,8 +589,7 @@ class ParametricAnalysis(BaseAnalysis):
 
         if meas_mid == 0:
             return float(slope * param_mid)
-        else:
-            return float(slope * param_mid / meas_mid)
+        return float(slope * param_mid / meas_mid)
 
     def get_response_surface(
         self, param1_name: str, param2_name: str, measurement_name: str

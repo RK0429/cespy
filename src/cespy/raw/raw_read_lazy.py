@@ -245,7 +245,9 @@ class RawReadLazy(RawRead):
             info = TraceInfo(
                 name=trace_name,
                 index=trace_index,
-                var_type=parent_trace.whattype if hasattr(parent_trace, "whattype") else "unknown",
+                var_type=parent_trace.whattype
+                if hasattr(parent_trace, "whattype")
+                else "unknown",
             )
 
             # Calculate offsets for each step
@@ -308,7 +310,9 @@ class RawReadLazy(RawRead):
         # Fall back to parent implementation
         return super().get_trace(trace_ref)
 
-    def get_wave(self, trace_ref: Union[str, int], step: int = 0) -> NDArray[np.float64]:
+    def get_wave(
+        self, trace_ref: Union[str, int], step: int = 0
+    ) -> NDArray[np.float64]:
         """Get waveform data for a trace.
 
         Args:
@@ -347,7 +351,7 @@ class RawReadLazy(RawRead):
             trace_names = [trace_names]
 
         if steps is None:
-            if hasattr(self, 'steps') and self.steps:
+            if hasattr(self, "steps") and self.steps:
                 steps = list(range(len(self.steps)))
             else:
                 steps = [0]  # Default to single step

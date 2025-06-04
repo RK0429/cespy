@@ -9,6 +9,7 @@ regex compilation caching, and performance benchmarking across the codebase.
 import functools
 import logging
 import re
+import statistics
 import time
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -524,8 +525,6 @@ def benchmark_function(
         func(*args, **kwargs)
         end_time = time.perf_counter()
         times.append(end_time - start_time)
-
-    import statistics
 
     return {
         "iterations": iterations,

@@ -117,11 +117,11 @@ class ValidationResult:
         """Get validation summary."""
         if self.is_valid:
             return f"Validation passed with {self.warning_count} warnings"
-        else:
-            return (
-                f"Validation failed: {self.error_count} errors, "
-                f"{self.warning_count} warnings"
-            )
+
+        return (
+            f"Validation failed: {self.error_count} errors, "
+            f"{self.warning_count} warnings"
+        )
 
 
 class CircuitValidator:
@@ -340,15 +340,15 @@ class CircuitValidator:
         if comp_type in "RCL":
             # Simple passive components
             return parts[3] if len(parts) > 3 else None
-        elif comp_type in "VI":
+        if comp_type in "VI":
             # Sources - may have complex values
             return " ".join(parts[3:]) if len(parts) > 3 else None
-        elif comp_type in "DQJM":
+        if comp_type in "DQJM":
             # Semiconductor devices - model name
             node_count = {"D": 2, "Q": 3, "J": 3, "M": 4}[comp_type]
             return parts[node_count + 1] if len(parts) > node_count + 1 else None
-        else:
-            return None
+
+        return None
 
     def _check_connectivity(
         self,
@@ -434,7 +434,9 @@ class CircuitValidator:
                                 suggestion="Typical range: 1pH to 1kH",
                             )
 
-    def _check_models(self, components: List[Dict[str, Any]], result: ValidationResult) -> None:
+    def _check_models(
+        self, components: List[Dict[str, Any]], result: ValidationResult
+    ) -> None:
         """Check model references."""
         for comp in components:
             if comp["type"] in "DQJM":
@@ -539,7 +541,13 @@ class CircuitValidator:
 
         # Check for current sources in series
         current_sources = [c for c in components if c["type"] == "I"]
-        # This is more complex - would need full circuit analysis
+        if current_sources:
+            # This is more complex - would need full circuit analysis
+            result.add_warning(
+                "circuit",
+                f"Found {len(current_sources)} current sources - check for series connections",
+                suggestion="Current sources in series can cause convergence issues",
+            )
         # TODO: Implement current source series detection
 
         # Check for missing DC path to ground

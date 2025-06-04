@@ -668,13 +668,13 @@ class BaseEditorEnhanced(BaseEditor, ABC):
         if isinstance(value2, str):
             # String comparison
             return value1.lower() == value2.lower()
-        else:
-            # Numeric comparison
-            try:
-                num_value1 = scan_eng(value1)
-                return abs(num_value1 - value2) < 1e-9
-            except ValueError:
-                return False
+
+        # Numeric comparison
+        try:
+            num_value1 = scan_eng(value1)
+            return abs(num_value1 - value2) < 1e-9
+        except ValueError:
+            return False
 
     def _snapshot_state(self) -> None:
         """Take a snapshot of current state for change tracking."""

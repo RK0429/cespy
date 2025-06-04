@@ -136,7 +136,9 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
             if isinstance(sim_config, dict):
                 self._update_simulator_attributes(sim_name, sim_config)
 
-    def _update_simulator_attributes(self, sim_name: str, sim_config: Dict[str, Any]) -> None:
+    def _update_simulator_attributes(
+        self, sim_name: str, sim_config: Dict[str, Any]
+    ) -> None:
         """Update individual simulator attributes."""
         for attr, val in sim_config.items():
             if hasattr(self.simulators[sim_name], attr):
@@ -179,7 +181,9 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
             with open(filepath, "r", encoding="utf-8") as f:
                 config_dict = json.load(f)
         except json.JSONDecodeError as e:
-            raise InvalidConfigurationError(f"Invalid JSON in configuration file: {e}") from e
+            raise InvalidConfigurationError(
+                f"Invalid JSON in configuration file: {e}"
+            ) from e
         except Exception as e:
             raise ConfigurationError(f"Failed to read configuration file: {e}") from e
 
@@ -243,7 +247,9 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
                     else:
                         setattr(config, attr_path, converted_value)
                 except (ValueError, AttributeError) as e:
-                    logging.warning("Failed to set %s from %s: %s", attr_path, env_var, e)
+                    logging.warning(
+                        "Failed to set %s from %s: %s", attr_path, env_var, e
+                    )
 
         # Handle simulator-specific paths
         for sim in Simulators.ALL:

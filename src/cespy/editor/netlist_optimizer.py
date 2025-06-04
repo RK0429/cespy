@@ -579,15 +579,11 @@ class NetlistOptimizer:
         if size_reduction_pct > 50:
             warnings = analysis["warnings"]
             assert isinstance(warnings, list)
-            warnings.append(
-                "Large size reduction - verify simulation accuracy"
-            )
+            warnings.append("Large size reduction - verify simulation accuracy")
 
         if "X" in affected_types:
             warnings = analysis["warnings"]
             assert isinstance(warnings, list)
-            warnings.append(
-                "Subcircuits were modified - check hierarchical behavior"
-            )
+            warnings.append("Subcircuits were modified - check hierarchical behavior")
 
         return analysis

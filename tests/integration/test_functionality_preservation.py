@@ -72,8 +72,10 @@ C1 out 0 1u
     def test_asc_editor_operations(self, temp_dir: Path):
         """Test AscEditor schematic manipulation."""
         # Find a test .asc file
-        test_asc = (Path(__file__).parent.parent.parent.parent /
-                    "kupicelib/examples/testfiles/TRAN.asc")
+        test_asc = (
+            Path(__file__).parent.parent.parent.parent
+            / "kupicelib/examples/testfiles/TRAN.asc"
+        )
         if not test_asc.exists():
             pytest.skip("Test .asc file not found")
 
@@ -90,7 +92,7 @@ C1 out 0 1u
         # Get and set component values
         for comp_ref in components:
             comp = editor.get_component(comp_ref)
-            if comp and hasattr(comp, 'value'):
+            if comp and hasattr(comp, "value"):
                 old_value = comp.value
                 # Set a new value
                 editor.set_component_value(comp_ref, "100")
@@ -112,8 +114,10 @@ C1 out 0 1u
     def test_qsch_editor_operations(self, temp_dir: Path):
         """Test QschEditor schematic manipulation."""
         # Find a test .qsch file
-        test_qsch = (Path(__file__).parent.parent.parent.parent /
-                     "kupicelib/examples/testfiles/DC sweep.qsch")
+        test_qsch = (
+            Path(__file__).parent.parent.parent.parent
+            / "kupicelib/examples/testfiles/DC sweep.qsch"
+        )
         if not test_qsch.exists():
             pytest.skip("Test .qsch file not found")
 
@@ -197,17 +201,17 @@ C1 out 0 1u
         # Test LTspice detection
         ltspice = LTspice()
         # Should have detected executable or set to empty list
-        assert hasattr(ltspice, 'spice_exe')
+        assert hasattr(ltspice, "spice_exe")
 
         # Test other simulators
         ngspice = NGspice()
-        assert hasattr(ngspice, 'spice_exe')
+        assert hasattr(ngspice, "spice_exe")
 
         qspice = Qspice()
-        assert hasattr(qspice, 'spice_exe')
+        assert hasattr(qspice, "spice_exe")
 
         xyce = Xyce()
-        assert hasattr(xyce, 'spice_exe')
+        assert hasattr(xyce, "spice_exe")
 
 
 class TestRawFileFunctionality:
@@ -224,7 +228,7 @@ class TestRawFileFunctionality:
         traces = [
             Trace("time", "time", data=time),
             Trace("V(out)", "voltage", data=voltage),
-            Trace("I(R1)", "current", data=current)
+            Trace("I(R1)", "current", data=current),
         ]
 
         # Write raw file
@@ -258,7 +262,7 @@ class TestRawFileFunctionality:
         writer.set_no_points(50)
         writer.set_no_variables(2)
         writer.add_trace(Trace("x", "independent", data=np.linspace(0, 1, 50)))
-        writer.add_trace(Trace("y", "dependent", data=np.linspace(0, 1, 50)**2))
+        writer.add_trace(Trace("y", "dependent", data=np.linspace(0, 1, 50) ** 2))
         writer.write()
 
         # Read and check properties
@@ -375,7 +379,7 @@ class TestUtilityFunctionality:
 
         # Check statistics
         assert abs(hist.mean - 0) < 0.1  # Should be close to 0
-        assert abs(hist.std - 1) < 0.1   # Should be close to 1
+        assert abs(hist.std - 1) < 0.1  # Should be close to 1
 
         # Test percentile
         p50 = hist.percentile(50)
@@ -393,13 +397,13 @@ class TestClientServerFunctionality:
 
         # Test server creation
         server = SimServer(port=0)  # Use port 0 for automatic assignment
-        assert hasattr(server, 'port')
+        assert hasattr(server, "port")
 
         # Test client creation
         client = SimClient()
-        assert hasattr(client, 'connect')
-        assert hasattr(client, 'submit_simulation')
-        assert hasattr(client, 'get_results')
+        assert hasattr(client, "connect")
+        assert hasattr(client, "submit_simulation")
+        assert hasattr(client, "get_results")
 
 
 class TestBackwardCompatibility:
@@ -413,6 +417,7 @@ class TestBackwardCompatibility:
             from cespy.simulators import LTspice  # noqa: F401
             from cespy.sim import SimRunner  # noqa: F401
             from cespy.raw import RawRead, RawWrite  # noqa: F401
+
             # All imports successful
             assert True
         except ImportError as e:
@@ -422,12 +427,14 @@ class TestBackwardCompatibility:
         """Test that kuPyLTSpice-style usage patterns still work."""
         # Create a simple netlist
         netlist = temp_dir / "compat_test.net"
-        netlist.write_text("""* Compatibility Test
+        netlist.write_text(
+            """* Compatibility Test
 V1 in 0 1
 R1 in out 1k
 .tran 1m
 .end
-""")
+"""
+        )
 
         # kuPyLTSpice style workflow
         try:

@@ -9,6 +9,7 @@ handle Wine environments, and validate installations.
 import logging
 import os
 import platform
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -293,8 +294,6 @@ class SimulatorLocator:
         Returns:
             Version string or None
         """
-        import re
-
         # Patterns for different simulators
         patterns = {
             core_constants.Simulators.LTSPICE: (

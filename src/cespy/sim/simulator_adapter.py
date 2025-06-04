@@ -176,8 +176,8 @@ class SimulatorAdapter(ISimulator):
                 timeout=options.get("timeout") if options else None,
             )
         raise NotImplementedError(
-                f"{self.simulator_name} does not support netlist creation from schematics"
-            )
+            f"{self.simulator_name} does not support netlist creation from schematics"
+        )
 
     def get_default_options(self) -> Dict[str, Any]:
         """Get default simulation options for this simulator."""

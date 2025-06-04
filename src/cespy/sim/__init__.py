@@ -19,5 +19,6 @@ def __getattr__(name: str) -> Any:
     """Lazy imports to avoid circular dependency."""
     if name == "SimCommander":
         from .sim_batch import SimCommander
+
         return SimCommander
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")

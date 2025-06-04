@@ -27,7 +27,18 @@ statistical analysis of circuit behavior under component variations.
 import logging
 import random
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from ...editor.base_editor import BaseEditor
 from ...log.logfile_data import LogfileData
@@ -110,14 +121,14 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             # In testbench mode, prepare a single run with formulas
             self.prepare_testbench(num_runs=self.num_runs)
             return [{"run_id": 0, "type": "testbench"}]
-        else:
-            # In separate run mode, prepare individual parameter sets
-            all_params = []
-            for run_id in range(self.num_runs):
-                params = self._generate_run_parameters(run_id)
-                all_params.append(params)
-            self._current_run_params = all_params
-            return all_params
+
+        # In separate run mode, prepare individual parameter sets
+        all_params = []
+        for run_id in range(self.num_runs):
+            params = self._generate_run_parameters(run_id)
+            all_params.append(params)
+        self._current_run_params = all_params
+        return all_params
 
     def _generate_run_parameters(self, run_id: int) -> Dict[str, Any]:
         """Generate parameters for a single run.
@@ -507,7 +518,9 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 # Create result
                 result = AnalysisResult(
                     run_id=params.get("run_id", 0),
-                    status=AnalysisStatus.COMPLETED if raw_file else AnalysisStatus.FAILED,
+                    status=AnalysisStatus.COMPLETED
+                    if raw_file
+                    else AnalysisStatus.FAILED,
                     raw_file=raw_file,
                     log_file=log_file,
                     parameters=params,
@@ -517,7 +530,9 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 if callback is not None and raw_file and log_file:
                     cb_result = None
                     try:
-                        if isinstance(callback, type) and issubclass(callback, ProcessCallback):
+                        if isinstance(callback, type) and issubclass(
+                            callback, ProcessCallback
+                        ):
                             # ProcessCallback subclass needs raw_file and log_file in constructor
                             cb_instance = callback(raw_file, log_file)
                             cb_result = cb_instance.callback(raw_file, log_file)
@@ -571,7 +586,11 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         """Process callback results from individual runs."""
         callback_returns = []
         for result in results:
-            if result.success and result.measurements and "_callback_result" in result.measurements:
+            if (
+                result.success
+                and result.measurements
+                and "_callback_result" in result.measurements
+            ):
                 callback_returns.append(result.measurements["_callback_result"])
 
         if not hasattr(self, "simulation_results"):
@@ -586,15 +605,18 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
     ) -> RunTask:
         """Create a run task for simulation execution."""
         # Save current netlist to a file
-        netlist_file = Path(self.editor.circuit_file).with_suffix('.net')
+        netlist_file = Path(self.editor.circuit_file).with_suffix(".net")
         self.editor.save_netlist(netlist_file)
 
         # Get the simulator class
-        if hasattr(self.runner, "simulator") and isinstance(cast(Any, self.runner).simulator, type):
+        if hasattr(self.runner, "simulator") and isinstance(
+            cast(Any, self.runner).simulator, type
+        ):
             simulator_class = cast(Any, self.runner).simulator
         else:
             # Try to get the simulator from the runner's class
             from ..simulator import Simulator as SimulatorBase
+
             simulator_class = SimulatorBase  # Default fallback
 
         return RunTask(
@@ -630,15 +652,15 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 _logger.warning("Measurement %s not found in log files", meas_name)
                 return None
             return meas_data
-        else:
-            # In separate run mode, collect from results
-            values = []
-            for result in self.results:
-                if result.success and meas_name in result.measurements:
-                    value = result.measurements[meas_name]
-                    if isinstance(value, (int, float)):
-                        values.append(float(value))
-            return values if values else None
+
+        # In separate run mode, collect from results
+        values = []
+        for result in self.results:
+            if result.success and meas_name in result.measurements:
+                value = result.measurements[meas_name]
+                if isinstance(value, (int, float)):
+                    values.append(float(value))
+        return values if values else None
 
     def get_measurement_statistics(self, meas_name: str) -> Dict[str, float]:
         """Get statistics for a measurement.
@@ -700,7 +722,10 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         # If called without arguments, use new interface
         if (
             callback is None
-            and all(arg is None for arg in [callback_args, switches, timeout, measure, num_runs])
+            and all(
+                arg is None
+                for arg in [callback_args, switches, timeout, measure, num_runs]
+            )
             and exe_log
         ):
             if self.use_testbench_mode:
@@ -708,9 +733,9 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 self.run_testbench()
                 # Convert stored results to AnalysisResult format
                 return self.results
-            else:
-                # Run separate analysis mode
-                return self.run_separate_analysis()
+
+            # Run separate analysis mode
+            return self.run_separate_analysis()
         else:
             # Legacy mode - delegate to run_analysis_legacy
             return self.run_analysis_legacy(
@@ -773,12 +798,12 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 exe_log=exe_log,
             )
             return None
-        else:
-            # Use separate run mode
-            return self.run_separate_analysis(  # type: ignore[return-value]
-                callback=callback,
-                callback_args=callback_args,
-                switches=switches,
-                timeout=timeout,
-                exe_log=exe_log,
-            )
+
+        # Use separate run mode
+        return self.run_separate_analysis(  # type: ignore[return-value]
+            callback=callback,
+            callback_args=callback_args,
+            switches=switches,
+            timeout=timeout,
+            exe_log=exe_log,
+        )

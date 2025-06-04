@@ -51,18 +51,10 @@ def sample_asc_file(test_files_dir: Path) -> Path:
 # Platform-specific markers
 def pytest_configure(config):
     """Configure pytest with custom markers."""
-    config.addinivalue_line(
-        "markers", "windows: mark test to run only on Windows"
-    )
-    config.addinivalue_line(
-        "markers", "linux: mark test to run only on Linux"
-    )
-    config.addinivalue_line(
-        "markers", "macos: mark test to run only on macOS"
-    )
-    config.addinivalue_line(
-        "markers", "slow: mark test as slow running"
-    )
+    config.addinivalue_line("markers", "windows: mark test to run only on Windows")
+    config.addinivalue_line("markers", "linux: mark test to run only on Linux")
+    config.addinivalue_line("markers", "macos: mark test to run only on macOS")
+    config.addinivalue_line("markers", "slow: mark test as slow running")
     config.addinivalue_line(
         "markers", "requires_ltspice: mark test as requiring LTSpice"
     )

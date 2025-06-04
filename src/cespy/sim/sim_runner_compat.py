@@ -7,6 +7,7 @@ the refactored implementation while maintaining full backward compatibility.
 """
 
 import warnings
+from pathlib import Path
 from typing import Any, Optional
 
 from .sim_runner import SimRunner as OriginalSimRunner
@@ -135,8 +136,6 @@ class SimRunner(SimRunnerRefactored):
         Args:
             filepath: Path to output CSV file
         """
-        from pathlib import Path
-
         self._result_collector.export_to_csv(Path(filepath))
 
     # Override methods that need special handling

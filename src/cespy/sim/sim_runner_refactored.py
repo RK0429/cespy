@@ -424,7 +424,7 @@ class SimRunnerRefactored:
                 netlist_file=task.netlist_file,
                 cmd_line_switches=task.switches or [],
                 timeout=task.timeout,
-                exe_log=task.exe_log
+                exe_log=task.exe_log,
             )
             # Create a mock result for compatibility with existing code
             result = ProcessResult(
@@ -433,7 +433,7 @@ class SimRunnerRefactored:
                 stderr_path=None,
                 duration=0.0,
                 terminated=False,
-                error_message=None
+                error_message=None,
             )
 
             # Mark complete

@@ -23,6 +23,7 @@ class TestDeprecationDecorator:
 
     def test_basic_deprecation_warning(self):
         """Test basic deprecation warning functionality."""
+
         @deprecated(version="2.0", reason="Test deprecation")
         def old_function():
             return "result"
@@ -39,7 +40,10 @@ class TestDeprecationDecorator:
 
     def test_deprecation_with_replacement(self):
         """Test deprecation warning with replacement suggestion."""
-        @deprecated(version="2.0", reason="Use new function", replacement="new_function")
+
+        @deprecated(
+            version="2.0", reason="Use new function", replacement="new_function"
+        )
         def old_function():
             return "result"
 
@@ -51,6 +55,7 @@ class TestDeprecationDecorator:
 
     def test_deprecation_levels(self):
         """Test different deprecation levels."""
+
         # INFO level
         @deprecated(version="2.0", reason="Info", level=DeprecationLevel.INFO)
         def info_function():
@@ -97,18 +102,19 @@ class TestDeprecationDecorator:
 
     def test_deprecation_metadata(self):
         """Test that deprecation metadata is attached to function."""
+
         @deprecated(version="2.0", reason="Test", replacement="new_func")
         def test_function():
             pass
 
-        assert hasattr(test_function, '__deprecated__')
+        assert hasattr(test_function, "__deprecated__")
         assert test_function.__deprecated__ is True
-        assert hasattr(test_function, '__deprecation_info__')
+        assert hasattr(test_function, "__deprecation_info__")
 
         info = test_function.__deprecation_info__
-        assert info['version'] == "2.0"
-        assert info['reason'] == "Test"
-        assert info['replacement'] == "new_func"
+        assert info["version"] == "2.0"
+        assert info["reason"] == "Test"
+        assert info["replacement"] == "new_func"
 
 
 class TestStandardizeParametersDecorator:
@@ -116,7 +122,8 @@ class TestStandardizeParametersDecorator:
 
     def test_parameter_name_conversion(self):
         """Test automatic parameter name conversion."""
-        @standardize_parameters({'old_param': 'new_param'})
+
+        @standardize_parameters({"old_param": "new_param"})
         def test_function(new_param="default"):
             return new_param
 
@@ -132,7 +139,8 @@ class TestStandardizeParametersDecorator:
 
     def test_both_old_and_new_parameters(self):
         """Test behavior when both old and new parameter names are provided."""
-        @standardize_parameters({'old_param': 'new_param'})
+
+        @standardize_parameters({"old_param": "new_param"})
         def test_function(new_param="default"):
             return new_param
 
@@ -147,10 +155,10 @@ class TestStandardizeParametersDecorator:
 
     def test_multiple_parameter_conversions(self):
         """Test multiple parameter name conversions."""
-        @standardize_parameters({
-            'old_param1': 'new_param1',
-            'old_param2': 'new_param2'
-        })
+
+        @standardize_parameters(
+            {"old_param1": "new_param1", "old_param2": "new_param2"}
+        )
         def test_function(new_param1="default1", new_param2="default2"):
             return f"{new_param1}_{new_param2}"
 
@@ -163,7 +171,8 @@ class TestStandardizeParametersDecorator:
 
     def test_no_conversion_needed(self):
         """Test that functions work normally when no conversion is needed."""
-        @standardize_parameters({'old_param': 'new_param'})
+
+        @standardize_parameters({"old_param": "new_param"})
         def test_function(new_param="default", other_param="other"):
             return f"{new_param}_{other_param}"
 
@@ -178,9 +187,15 @@ class TestAPIStandardizer:
         """Test standard method name mapping."""
         assert APIStandardizer.get_standard_method_name("load") == "load_file"
         assert APIStandardizer.get_standard_method_name("save") == "save_file"
-        assert APIStandardizer.get_standard_method_name("get_component") == "get_component_value"
+        assert (
+            APIStandardizer.get_standard_method_name("get_component")
+            == "get_component_value"
+        )
         assert APIStandardizer.get_standard_method_name("analyze") == "run_analysis"
-        assert APIStandardizer.get_standard_method_name("unknown_method") == "unknown_method"
+        assert (
+            APIStandardizer.get_standard_method_name("unknown_method")
+            == "unknown_method"
+        )
 
     def test_standard_parameter_names(self):
         """Test standard parameter name mapping."""
@@ -188,12 +203,17 @@ class TestAPIStandardizer:
         assert APIStandardizer.get_standard_parameter_name("filename") == "file_path"
         assert APIStandardizer.get_standard_parameter_name("comp") == "component"
         assert APIStandardizer.get_standard_parameter_name("val") == "value"
-        assert APIStandardizer.get_standard_parameter_name("unknown_param") == "unknown_param"
+        assert (
+            APIStandardizer.get_standard_parameter_name("unknown_param")
+            == "unknown_param"
+        )
 
     def test_parameter_order_validation(self):
         """Test parameter order validation and suggestion."""
         file_params = ["encoding", "file_path", "mode"]
-        ordered = APIStandardizer.validate_parameter_order("file_operations", file_params)
+        ordered = APIStandardizer.validate_parameter_order(
+            "file_operations", file_params
+        )
 
         # Should put file_path first according to standard order
         assert ordered[0] == "file_path"
@@ -227,6 +247,7 @@ class TestParameterValidator:
 
         # Test Path-like object
         from pathlib import Path
+
         path_obj = Path("test.txt")
         assert validator.validate_file_path_parameter(path_obj) == "test.txt"
 
@@ -303,6 +324,7 @@ class TestEnsureAPIConsistency:
 
     def test_file_path_validation(self):
         """Test automatic file path validation."""
+
         @ensure_api_consistency
         def test_function(file_path=None):
             return file_path
@@ -313,11 +335,13 @@ class TestEnsureAPIConsistency:
 
         # Test Path object
         from pathlib import Path
+
         result = test_function(file_path=Path("test.txt"))
         assert result == "test.txt"
 
     def test_timeout_validation(self):
         """Test automatic timeout validation."""
+
         @ensure_api_consistency
         def test_function(timeout=None):
             return timeout
@@ -332,6 +356,7 @@ class TestEnsureAPIConsistency:
 
     def test_boolean_validation(self):
         """Test automatic boolean validation."""
+
         @ensure_api_consistency
         def test_function(flag: bool = False):
             return flag
@@ -351,21 +376,19 @@ class TestCreateCompatibilityWrapper:
     def test_wrapper_creation(self):
         """Test creation of compatibility wrapper."""
         # Create a mock module dict
-        module_dict = {
-            'NewFunction': lambda x: x * 2
-        }
+        module_dict = {"NewFunction": lambda x: x * 2}
 
         # Create compatibility wrapper
-        create_compatibility_wrapper('OldFunction', 'NewFunction', '2.0', module_dict)
+        create_compatibility_wrapper("OldFunction", "NewFunction", "2.0", module_dict)
 
         # Test that wrapper was created
-        assert 'OldFunction' in module_dict
-        assert callable(module_dict['OldFunction'])
+        assert "OldFunction" in module_dict
+        assert callable(module_dict["OldFunction"])
 
         # Test that wrapper works and issues deprecation warning
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            result = module_dict['OldFunction'](5)
+            result = module_dict["OldFunction"](5)
 
             assert result == 10  # Should call the new function
             assert len(w) == 1
@@ -376,9 +399,11 @@ class TestCreateCompatibilityWrapper:
         module_dict = {}
 
         # Should not create wrapper if new name doesn't exist
-        create_compatibility_wrapper('OldFunction', 'NonexistentFunction', '2.0', module_dict)
+        create_compatibility_wrapper(
+            "OldFunction", "NonexistentFunction", "2.0", module_dict
+        )
 
-        assert 'OldFunction' not in module_dict
+        assert "OldFunction" not in module_dict
 
 
 class TestCompatibilityMappings:
@@ -386,27 +411,27 @@ class TestCompatibilityMappings:
 
     def test_simulator_mappings(self):
         """Test simulator class name mappings."""
-        assert 'LTspiceSimulator' in COMPATIBILITY_MAPPINGS
-        assert COMPATIBILITY_MAPPINGS['LTspiceSimulator'] == 'LTSpiceSimulator'
+        assert "LTspiceSimulator" in COMPATIBILITY_MAPPINGS
+        assert COMPATIBILITY_MAPPINGS["LTspiceSimulator"] == "LTSpiceSimulator"
 
-        assert 'NgspiceSimulator' in COMPATIBILITY_MAPPINGS
-        assert COMPATIBILITY_MAPPINGS['NgspiceSimulator'] == 'NGSpiceSimulator'
+        assert "NgspiceSimulator" in COMPATIBILITY_MAPPINGS
+        assert COMPATIBILITY_MAPPINGS["NgspiceSimulator"] == "NGSpiceSimulator"
 
     def test_editor_mappings(self):
         """Test editor class name mappings."""
-        assert 'ASCEditor' in COMPATIBILITY_MAPPINGS
-        assert COMPATIBILITY_MAPPINGS['ASCEditor'] == 'AscEditor'
+        assert "ASCEditor" in COMPATIBILITY_MAPPINGS
+        assert COMPATIBILITY_MAPPINGS["ASCEditor"] == "AscEditor"
 
-        assert 'QSCHEditor' in COMPATIBILITY_MAPPINGS
-        assert COMPATIBILITY_MAPPINGS['QSCHEditor'] == 'QschEditor'
+        assert "QSCHEditor" in COMPATIBILITY_MAPPINGS
+        assert COMPATIBILITY_MAPPINGS["QSCHEditor"] == "QschEditor"
 
     def test_analysis_mappings(self):
         """Test analysis class name mappings."""
-        assert 'MontecarloAnalysis' in COMPATIBILITY_MAPPINGS
-        assert COMPATIBILITY_MAPPINGS['MontecarloAnalysis'] == 'MonteCarloAnalysis'
+        assert "MontecarloAnalysis" in COMPATIBILITY_MAPPINGS
+        assert COMPATIBILITY_MAPPINGS["MontecarloAnalysis"] == "MonteCarloAnalysis"
 
-        assert 'WorstcaseAnalysis' in COMPATIBILITY_MAPPINGS
-        assert COMPATIBILITY_MAPPINGS['WorstcaseAnalysis'] == 'WorstCaseAnalysis'
+        assert "WorstcaseAnalysis" in COMPATIBILITY_MAPPINGS
+        assert COMPATIBILITY_MAPPINGS["WorstcaseAnalysis"] == "WorstCaseAnalysis"
 
 
 class TestIntegration:
@@ -414,8 +439,9 @@ class TestIntegration:
 
     def test_combined_decorators(self):
         """Test combining multiple API consistency decorators."""
+
         @deprecated(version="2.0", reason="Use new function")
-        @standardize_parameters({'old_param': 'new_param'})
+        @standardize_parameters({"old_param": "new_param"})
         @ensure_api_consistency
         def test_function(new_param="default"):
             return new_param
@@ -430,12 +456,13 @@ class TestIntegration:
 
     def test_class_method_decoration(self):
         """Test decorating class methods."""
+
         class TestClass:
             @deprecated(version="2.0", reason="Use new method")
             def old_method(self, value):
                 return value * 2
 
-            @standardize_parameters({'old_arg': 'new_arg'})
+            @standardize_parameters({"old_arg": "new_arg"})
             def standardized_method(self, new_arg="default"):
                 return new_arg
 
@@ -477,6 +504,7 @@ class TestErrorHandling:
 
     def test_decorator_with_exceptions(self):
         """Test decorator behavior when decorated function raises exception."""
+
         @deprecated(version="2.0", reason="Test")
         def failing_function():
             raise ValueError("Test error")

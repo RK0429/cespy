@@ -2,12 +2,7 @@
 
 import pytest
 import numpy as np
-from cespy.utils.sweep_iterators import (
-    sweep,
-    sweep_n,
-    sweep_log,
-    sweep_log_n
-)
+from cespy.utils.sweep_iterators import sweep, sweep_n, sweep_log, sweep_log_n
 
 
 class TestSweepIterators:
@@ -90,8 +85,8 @@ class TestSweepIterators:
         sweep_iter = sweep(0, 10, 2)
 
         # Should be iterable
-        assert hasattr(sweep_iter, '__iter__')
-        assert hasattr(sweep_iter, '__next__')
+        assert hasattr(sweep_iter, "__iter__")
+        assert hasattr(sweep_iter, "__next__")
 
         # Should be able to iterate
         list1 = list(sweep_iter)

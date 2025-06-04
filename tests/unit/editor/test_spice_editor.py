@@ -16,7 +16,7 @@ class TestSpiceCircuit:
             "R1 in out 1k",
             "C1 out 0 1u",
             ".tran 1m",
-            ".end"
+            ".end",
         ]
         circuit = SpiceCircuit()
         circuit.netlist = netlist_lines
@@ -67,11 +67,13 @@ class TestSpiceEditor:
     def test_create_editor(self, temp_dir: Path):
         """Test creating a SpiceEditor instance."""
         netlist_path = temp_dir / "test.net"
-        netlist_path.write_text("""* Test Circuit
+        netlist_path.write_text(
+            """* Test Circuit
 V1 in 0 1
 R1 in out 1k
 .end
-""")
+"""
+        )
 
         editor = SpiceEditor(netlist_path)
         assert editor.circuit_file == netlist_path
@@ -102,8 +104,9 @@ R1 in out 1k
         """Test automatic encoding detection."""
         netlist_path = temp_dir / "test_utf8.net"
         # Write with UTF-8 encoding including special characters
-        netlist_path.write_text("* Test Circuit with µ\nR1 in out 1kΩ\n.end\n",
-                                encoding="utf-8")
+        netlist_path.write_text(
+            "* Test Circuit with µ\nR1 in out 1kΩ\n.end\n", encoding="utf-8"
+        )
 
         editor = SpiceEditor(netlist_path, encoding="autodetect")
         netlist_str = str(editor)
@@ -136,13 +139,15 @@ R1 in out 1k
     def test_subcircuit_handling(self, temp_dir: Path):
         """Test subcircuit manipulation."""
         netlist_path = temp_dir / "test.net"
-        netlist_path.write_text(""".subckt amp in out vcc vss
+        netlist_path.write_text(
+            """.subckt amp in out vcc vss
 R1 in mid 10k
 R2 mid out 10k
 .ends
 X1 input output vdd gnd amp
 .end
-""")
+"""
+        )
 
         editor = SpiceEditor(netlist_path)
 
@@ -154,11 +159,13 @@ X1 input output vdd gnd amp
     def test_parameter_stepping(self, temp_dir: Path):
         """Test parameter stepping functionality."""
         netlist_path = temp_dir / "test.net"
-        netlist_path.write_text(""".param res=1k
+        netlist_path.write_text(
+            """.param res=1k
 R1 in out {res}
 .step param res 1k 10k 1k
 .end
-""")
+"""
+        )
 
         editor = SpiceEditor(netlist_path)
 

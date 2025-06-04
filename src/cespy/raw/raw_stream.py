@@ -431,9 +431,13 @@ class DataSamplerProcessor(StreamProcessor):
                 values.append(float(np.real(trace_data[i])))
             self._point_counter[key] += 1
 
-    def finalize(self) -> Dict[str, Dict[int, Tuple[NDArray[np.float64], NDArray[np.float64]]]]:
+    def finalize(
+        self,
+    ) -> Dict[str, Dict[int, Tuple[NDArray[np.float64], NDArray[np.float64]]]]:
         """Convert lists to arrays and return."""
-        results: Dict[str, Dict[int, Tuple[NDArray[np.float64], NDArray[np.float64]]]] = {}
+        results: Dict[
+            str, Dict[int, Tuple[NDArray[np.float64], NDArray[np.float64]]]
+        ] = {}
 
         for trace_name in self.samples:
             results[trace_name] = {}

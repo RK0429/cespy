@@ -17,7 +17,7 @@ class TestPlatformDetection:
     def test_platform_info(self):
         """Test that platform detection works correctly."""
         current_platform = sys.platform
-        assert current_platform in ['win32', 'linux', 'darwin', 'aix', 'wasi']
+        assert current_platform in ["win32", "linux", "darwin", "aix", "wasi"]
 
         # Check Python version
         assert sys.version_info >= (3, 10)
@@ -34,7 +34,7 @@ class TestPlatformDetection:
             temp_dir / "test_file.net",
             temp_dir / "sub_dir" / "test.net",
             temp_dir / "spaces in name" / "test file.net",
-            temp_dir / "unicode_文件" / "test.net"
+            temp_dir / "unicode_文件" / "test.net",
         ]
 
         for test_path in test_paths:
@@ -52,10 +52,10 @@ class TestPlatformDetection:
             posix_path = test_path.as_posix()
             assert isinstance(posix_path, str)
 
-            if sys.platform == 'win32':
+            if sys.platform == "win32":
                 # Windows-specific path testing
                 uri = test_path.as_uri()
-                assert uri.startswith('file:///')
+                assert uri.startswith("file:///")
 
             # Clean up
             test_path.unlink()
@@ -68,12 +68,12 @@ class TestSimulatorPlatformCompatibility:
         """Test LTspice detection on current platform."""
         ltspice = LTspice()
 
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             # Windows should detect native LTspice
             assert not ltspice.using_macos_native_sim()
-        elif sys.platform == 'darwin':
+        elif sys.platform == "darwin":
             # macOS might have native or wine version
-            if ltspice.spice_exe and 'wine' not in str(ltspice.spice_exe[0]).lower():
+            if ltspice.spice_exe and "wine" not in str(ltspice.spice_exe[0]).lower():
                 assert ltspice.using_macos_native_sim()
             else:
                 assert not ltspice.using_macos_native_sim()
@@ -81,7 +81,7 @@ class TestSimulatorPlatformCompatibility:
             # Linux uses wine
             assert not ltspice.using_macos_native_sim()
             if ltspice.spice_exe:
-                assert 'wine' in str(ltspice.spice_exe[0]).lower()
+                assert "wine" in str(ltspice.spice_exe[0]).lower()
 
     def test_ngspice_platform_compatibility(self):
         """Test NGspice compatibility."""
@@ -90,13 +90,13 @@ class TestSimulatorPlatformCompatibility:
         # NGspice should work on all platforms
         if ngspice.is_available():
             # Check executable format
-            if sys.platform == 'win32':
-                assert any(exe.endswith('.exe') for exe in ngspice.spice_exe)
+            if sys.platform == "win32":
+                assert any(exe.endswith(".exe") for exe in ngspice.spice_exe)
             else:
                 # Unix-like systems
-                assert not any(exe.endswith('.exe') for exe in ngspice.spice_exe)
+                assert not any(exe.endswith(".exe") for exe in ngspice.spice_exe)
 
-    @pytest.mark.skipif(sys.platform != 'win32', reason="Qspice is Windows-only")
+    @pytest.mark.skipif(sys.platform != "win32", reason="Qspice is Windows-only")
     def test_qspice_windows_only(self):
         """Test that Qspice is available on Windows."""
         qspice = Qspice()
@@ -104,7 +104,7 @@ class TestSimulatorPlatformCompatibility:
         # On Windows, check if Qspice can be found
         if qspice.is_available():
             assert qspice.spice_exe
-            assert any('qspice' in exe.lower() for exe in qspice.spice_exe)
+            assert any("qspice" in exe.lower() for exe in qspice.spice_exe)
 
     def test_xyce_platform_compatibility(self):
         """Test Xyce compatibility."""
@@ -116,11 +116,13 @@ class TestSimulatorPlatformCompatibility:
             assert xyce.spice_exe
 
             # Check for MPI support on Unix-like systems
-            if sys.platform != 'win32':
+            if sys.platform != "win32":
                 # Xyce often uses MPI on Unix
                 # Check if mpirun is available
                 try:
-                    result = subprocess.run(['which', 'mpirun'], capture_output=True, text=True)
+                    result = subprocess.run(
+                        ["which", "mpirun"], capture_output=True, text=True
+                    )
                     has_mpi = result.returncode == 0
                     print(f"MPI available: {has_mpi}")
                 except Exception:
@@ -136,7 +138,11 @@ class TestFileSystemOperations:
         test_cases = [
             ("utf8_test.net", "UTF-8", "* UTF-8 Test\nΩ Ω Ω\n.end\n"),
             ("ascii_test.net", "ASCII", "* ASCII Test\n.end\n"),
-            ("latin1_test.net", "ISO-8859-1", "* Latin-1 Test\n.end\n".encode('latin-1'))
+            (
+                "latin1_test.net",
+                "ISO-8859-1",
+                "* Latin-1 Test\n.end\n".encode("latin-1"),
+            ),
         ]
 
         for filename, expected_encoding, content in test_cases:
@@ -153,9 +159,11 @@ class TestFileSystemOperations:
                 # Should be able to read the file
                 assert len(str(editor)) > 0
             except UnicodeDecodeError:
-                pytest.fail(f"Failed to read {filename} with encoding {expected_encoding}")
+                pytest.fail(
+                    f"Failed to read {filename} with encoding {expected_encoding}"
+                )
 
-    @pytest.mark.skipif(sys.platform != 'win32', reason="Windows-specific test")
+    @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_windows_short_names(self, temp_dir: Path):
         """Test Windows short path name functionality."""
         # Create a path with spaces
@@ -210,7 +218,7 @@ class TestLineEndingHandling:
             ("unix_endings.net", "* Unix Line Endings\nV1 in 0 1\n.end\n"),
             ("windows_endings.net", "* Windows Line Endings\r\nV1 in 0 1\r\n.end\r\n"),
             ("mac_endings.net", "* Mac Line Endings\rV1 in 0 1\r.end\r"),
-            ("mixed_endings.net", "* Mixed\nV1 in 0 1\r\n.end\r")
+            ("mixed_endings.net", "* Mixed\nV1 in 0 1\r\n.end\r"),
         ]
 
         for filename, content in test_cases:
@@ -260,15 +268,17 @@ class TestPlatformSpecificPaths:
             # Path might not exist, but expansion should work
             assert "~" not in str(expanded)
 
-            if sys.platform == 'win32':
+            if sys.platform == "win32":
                 # Windows paths
-                assert any(p in str(expanded) for p in ['AppData', 'Documents', 'My Documents'])
-            elif sys.platform == 'darwin':
+                assert any(
+                    p in str(expanded) for p in ["AppData", "Documents", "My Documents"]
+                )
+            elif sys.platform == "darwin":
                 # macOS paths
                 if expanded.exists():
-                    assert any(p in str(expanded) for p in ['Library', 'Documents'])
+                    assert any(p in str(expanded) for p in ["Library", "Documents"])
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Unix-specific test")
+    @pytest.mark.skipif(sys.platform == "win32", reason="Unix-specific test")
     def test_wine_path_handling(self, temp_dir: Path):
         """Test Wine path handling for LTspice on Unix."""
         # Create a mock Wine environment structure
@@ -281,15 +291,15 @@ class TestPlatformSpecificPaths:
 
         # LTspice should handle this conversion internally
         ltspice = LTspice()
-        if ltspice.spice_exe and 'wine' in ltspice.spice_exe[0]:
+        if ltspice.spice_exe and "wine" in ltspice.spice_exe[0]:
             # Should convert C:/ to Z:/ for Wine
-            assert not any('C:/' in arg for arg in ltspice.spice_exe)
+            assert not any("C:/" in arg for arg in ltspice.spice_exe)
 
 
 class TestExecutablePermissions:
     """Test executable permissions on Unix-like systems."""
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="Unix-specific test")
+    @pytest.mark.skipif(sys.platform == "win32", reason="Unix-specific test")
     def test_executable_permissions(self, temp_dir: Path):
         """Test that executables have correct permissions."""
         # Create a mock executable
@@ -298,6 +308,7 @@ class TestExecutablePermissions:
 
         # Set executable permissions
         import stat
+
         mock_exe.chmod(mock_exe.stat().st_mode | stat.S_IEXEC)
 
         # Verify executable

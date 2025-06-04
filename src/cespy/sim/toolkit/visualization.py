@@ -44,7 +44,9 @@ except ImportError:
 class AnalysisVisualizer:
     """Visualization helper for analysis results."""
 
-    def __init__(self, style: str = "seaborn-v0_8", figsize: Tuple[int, int] = (10, 6)) -> None:
+    def __init__(
+        self, style: str = "seaborn-v0_8", figsize: Tuple[int, int] = (10, 6)
+    ) -> None:
         """Initialize visualizer.
 
         Args:

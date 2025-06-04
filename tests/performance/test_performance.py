@@ -30,7 +30,9 @@ class TestRawFilePerformance:
         traces = [Trace("time", "time", data=time_data)]
 
         for i in range(num_traces - 1):
-            data = np.sin(2 * np.pi * (i + 1) * time_data) + np.random.normal(0, 0.1, num_points)
+            data = np.sin(2 * np.pi * (i + 1) * time_data) + np.random.normal(
+                0, 0.1, num_points
+            )
             traces.append(Trace(f"V{i+1}", "voltage", data=data))
 
         # Time the write operation
@@ -56,8 +58,10 @@ class TestRawFilePerformance:
         mem_increase = mem_after - mem_before
         assert mem_increase < 1000  # Should not use more than 1GB additional memory
 
-        print(f"Write time: {write_time:.2f}s, File size: {file_size_mb:.1f}MB, "
-              f"Memory increase: {mem_increase:.1f}MB")
+        print(
+            f"Write time: {write_time:.2f}s, File size: {file_size_mb:.1f}MB, "
+            f"Memory increase: {mem_increase:.1f}MB"
+        )
 
     def test_large_raw_file_read(self, temp_dir: Path):
         """Test reading large raw files."""
@@ -68,7 +72,7 @@ class TestRawFilePerformance:
             Trace("time", "time", data=time_data),
             Trace("V1", "voltage", data=np.sin(2 * np.pi * time_data)),
             Trace("V2", "voltage", data=np.cos(2 * np.pi * time_data)),
-            Trace("I1", "current", data=np.sin(4 * np.pi * time_data) * 0.001)
+            Trace("I1", "current", data=np.sin(4 * np.pi * time_data) * 0.001),
         ]
 
         raw_file = temp_dir / "read_test.raw"
@@ -109,7 +113,7 @@ class TestRawFilePerformance:
 
         traces = [
             Trace("time", "time", data=np.array(all_time)),
-            Trace("V(out)", "voltage", data=np.array(all_voltage))
+            Trace("V(out)", "voltage", data=np.array(all_voltage)),
         ]
 
         raw_file = temp_dir / "stepped_test.raw"
@@ -193,8 +197,10 @@ class TestEditorPerformance:
         assert change_time < 0.5  # 100 changes should be quick
         assert save_time < 1.0  # Save should be fast
 
-        print(f"Large netlist - Load: {load_time:.3f}s, Access: {access_time:.3f}s, "
-              f"Change: {change_time:.3f}s, Save: {save_time:.3f}s")
+        print(
+            f"Large netlist - Load: {load_time:.3f}s, Access: {access_time:.3f}s, "
+            f"Change: {change_time:.3f}s, Save: {save_time:.3f}s"
+        )
 
     def test_parameter_search_performance(self, temp_dir: Path):
         """Test performance of parameter searches in large netlists."""
@@ -234,7 +240,9 @@ class TestEditorPerformance:
         assert access_time < 0.5  # 100 accesses should be fast
         assert update_time < 0.5  # 100 updates should be fast
 
-        print(f"Parameter operations - Access: {access_time:.3f}s, Update: {update_time:.3f}s")
+        print(
+            f"Parameter operations - Access: {access_time:.3f}s, Update: {update_time:.3f}s"
+        )
 
 
 class TestSimulationPerformance:
@@ -289,7 +297,9 @@ C1 out 0 1u
         speedup = seq_time / par_time
         assert speedup > 1.5  # At least 1.5x speedup with 4 parallel runs
 
-        print(f"Sequential: {seq_time:.2f}s, Parallel: {par_time:.2f}s, Speedup: {speedup:.2f}x")
+        print(
+            f"Sequential: {seq_time:.2f}s, Parallel: {par_time:.2f}s, Speedup: {speedup:.2f}x"
+        )
 
     @pytest.mark.requires_ltspice
     def test_simulation_timeout_performance(self, temp_dir: Path):
@@ -372,5 +382,7 @@ C1 out 0 1u
         # Should not have significant memory increase
         assert mem_increase < 100  # Less than 100MB increase
 
-        print(f"Memory usage - Baseline: {mem_baseline:.1f}MB, After: {mem_after:.1f}MB, "
-              f"Increase: {mem_increase:.1f}MB")
+        print(
+            f"Memory usage - Baseline: {mem_baseline:.1f}MB, After: {mem_after:.1f}MB, "
+            f"Increase: {mem_increase:.1f}MB"
+        )

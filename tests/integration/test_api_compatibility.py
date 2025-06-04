@@ -32,7 +32,7 @@ C1 out 0 1u
                 engine="ltspice",
                 parallel_sims=1,
                 timeout=60.0,
-                verbose=False
+                verbose=False,
             )
             # If it succeeds, should return a tuple of (raw_file, log_file)
             if result is not None:
@@ -83,23 +83,23 @@ C1 out 0 1u
         raw_reader = RawRead()
 
         # Test essential methods exist
-        assert hasattr(raw_reader, 'get_trace_names')
-        assert hasattr(raw_reader, 'get_trace')
-        assert hasattr(raw_reader, 'get_axis')
-        assert hasattr(raw_reader, 'add_trace_alias')
+        assert hasattr(raw_reader, "get_trace_names")
+        assert hasattr(raw_reader, "get_trace")
+        assert hasattr(raw_reader, "get_axis")
+        assert hasattr(raw_reader, "add_trace_alias")
 
         # Test properties exist
-        assert hasattr(raw_reader, 'nPoints')
-        assert hasattr(raw_reader, 'nPlots')
-        assert hasattr(raw_reader, 'spice_params')
+        assert hasattr(raw_reader, "nPoints")
+        assert hasattr(raw_reader, "nPlots")
+        assert hasattr(raw_reader, "spice_params")
 
     def test_simulator_classes_availability(self):
         """Test that all simulator classes are available and have expected interface."""
         # Test LTspice simulator
-        assert hasattr(LTspice, 'run')
-        assert hasattr(LTspice, 'create_netlist')
-        assert hasattr(LTspice, 'is_available')
-        assert hasattr(LTspice, 'valid_switch')
+        assert hasattr(LTspice, "run")
+        assert hasattr(LTspice, "create_netlist")
+        assert hasattr(LTspice, "is_available")
+        assert hasattr(LTspice, "valid_switch")
 
         # Test that simulator detection works
         try:
@@ -113,8 +113,9 @@ C1 out 0 1u
         """Test that imports work as expected for API compatibility."""
         # Test main package imports
         import cespy
-        assert hasattr(cespy, 'simulate')
-        assert hasattr(cespy, '__version__')
+
+        assert hasattr(cespy, "simulate")
+        assert hasattr(cespy, "__version__")
 
         # Test submodule imports
         from cespy.editor import SpiceEditor, AscEditor
@@ -158,7 +159,9 @@ C1 out 0 1u
         editor = SpiceEditor(netlist_path)
 
         # Should raise exception for non-existent component
-        with pytest.raises(Exception):  # Specific exception type depends on implementation
+        with pytest.raises(
+            Exception
+        ):  # Specific exception type depends on implementation
             editor.get_component_value("non_existent_component")
 
     def test_cross_module_integration(self, temp_dir: Path):

@@ -31,7 +31,7 @@ class TestPerformanceMetrics:
         assert metrics.function_name == "test_function"
         assert metrics.call_count == 0
         assert metrics.total_time == 0.0
-        assert metrics.min_time == float('inf')
+        assert metrics.min_time == float("inf")
         assert metrics.max_time == 0.0
         assert metrics.avg_time == 0.0
 
@@ -64,15 +64,21 @@ class TestPerformanceMetrics:
 
         result = metrics.to_dict()
         expected_keys = [
-            'function_name', 'call_count', 'total_time', 'min_time',
-            'max_time', 'avg_time', 'last_call_time', 'memory_usage_mb'
+            "function_name",
+            "call_count",
+            "total_time",
+            "min_time",
+            "max_time",
+            "avg_time",
+            "last_call_time",
+            "memory_usage_mb",
         ]
 
         for key in expected_keys:
             assert key in result
 
-        assert result['function_name'] == "test_function"
-        assert result['call_count'] == 1
+        assert result["function_name"] == "test_function"
+        assert result["call_count"] == 1
 
 
 class TestPerformanceMonitor:
@@ -169,7 +175,7 @@ class TestPerformanceMonitor:
         monitor.reset_metrics()
         assert len(monitor.metrics) == 0
 
-    @patch('cespy.core.performance._logger')
+    @patch("cespy.core.performance._logger")
     def test_warning_thresholds(self, mock_logger):
         """Test warning and critical threshold logging."""
         monitor = PerformanceMonitor()
@@ -212,6 +218,7 @@ class TestProfilePerformanceDecorator:
     def test_profiling_with_memory(self):
         """Test profiling with memory monitoring."""
         from cespy.core.performance import performance_monitor
+
         performance_monitor.reset_metrics()
 
         @profile_performance(include_memory=True)
@@ -237,6 +244,7 @@ class TestProfilePerformanceDecorator:
         performance_monitor.reset_metrics()
 
         try:
+
             @profile_performance()
             def disabled_function():
                 return "test"
@@ -258,6 +266,7 @@ class TestPerformanceTimer:
     def test_basic_timing(self):
         """Test basic timing functionality."""
         from cespy.core.performance import performance_monitor
+
         performance_monitor.reset_metrics()
 
         with performance_timer("test_operation"):
@@ -271,6 +280,7 @@ class TestPerformanceTimer:
     def test_timer_with_exception(self):
         """Test timer behavior when exception occurs."""
         from cespy.core.performance import performance_monitor
+
         performance_monitor.reset_metrics()
 
         with pytest.raises(ValueError):
@@ -301,12 +311,12 @@ class TestRegexCache:
         cache = RegexCache()
 
         # First access should be a cache miss
-        pattern1 = cache.get_pattern(r'\d+')
+        pattern1 = cache.get_pattern(r"\d+")
         assert cache.miss_count == 1
         assert cache.hit_count == 0
 
         # Second access should be a cache hit
-        pattern2 = cache.get_pattern(r'\d+')
+        pattern2 = cache.get_pattern(r"\d+")
         assert cache.miss_count == 1
         assert cache.hit_count == 1
 
@@ -317,31 +327,31 @@ class TestRegexCache:
         """Test pattern caching with different flags."""
         cache = RegexCache()
 
-        pattern1 = cache.get_pattern(r'test', re.IGNORECASE)
-        pattern2 = cache.get_pattern(r'test', 0)  # No flags
-        pattern3 = cache.get_pattern(r'test', re.IGNORECASE)  # Same as pattern1
+        pattern1 = cache.get_pattern(r"test", re.IGNORECASE)
+        pattern2 = cache.get_pattern(r"test", 0)  # No flags
+        pattern3 = cache.get_pattern(r"test", re.IGNORECASE)  # Same as pattern1
 
         # Different flags should create different cache entries
         assert pattern1 is not pattern2
         assert pattern1 is pattern3
         assert cache.miss_count == 2  # Two different patterns
-        assert cache.hit_count == 1   # One hit for pattern3
+        assert cache.hit_count == 1  # One hit for pattern3
 
     def test_cache_eviction(self):
         """Test cache eviction when max size is reached."""
         cache = RegexCache(max_size=2)
 
         # Fill cache to capacity
-        cache.get_pattern(r'pattern1')
-        cache.get_pattern(r'pattern2')
+        cache.get_pattern(r"pattern1")
+        cache.get_pattern(r"pattern2")
         assert len(cache.cache) == 2
 
         # Adding third pattern should evict first (FIFO)
-        cache.get_pattern(r'pattern3')
+        cache.get_pattern(r"pattern3")
         assert len(cache.cache) == 2
 
         # First pattern should have been evicted
-        cache.get_pattern(r'pattern1')
+        cache.get_pattern(r"pattern1")
         assert cache.miss_count == 4  # Original 3 + 1 for re-compilation
 
     def test_cache_stats(self):
@@ -349,24 +359,24 @@ class TestRegexCache:
         cache = RegexCache()
 
         # Generate some cache activity
-        cache.get_pattern(r'test1')
-        cache.get_pattern(r'test2')
-        cache.get_pattern(r'test1')  # Hit
-        cache.get_pattern(r'test3')
-        cache.get_pattern(r'test2')  # Hit
+        cache.get_pattern(r"test1")
+        cache.get_pattern(r"test2")
+        cache.get_pattern(r"test1")  # Hit
+        cache.get_pattern(r"test3")
+        cache.get_pattern(r"test2")  # Hit
 
         stats = cache.get_stats()
-        assert stats['hit_count'] == 2
-        assert stats['miss_count'] == 3
-        assert stats['hit_rate'] == 40.0  # 2/5 * 100
-        assert stats['cache_size'] == 3
+        assert stats["hit_count"] == 2
+        assert stats["miss_count"] == 3
+        assert stats["hit_rate"] == 40.0  # 2/5 * 100
+        assert stats["cache_size"] == 3
 
     def test_cache_clear(self):
         """Test cache clearing functionality."""
         cache = RegexCache()
 
-        cache.get_pattern(r'test1')
-        cache.get_pattern(r'test2')
+        cache.get_pattern(r"test1")
+        cache.get_pattern(r"test2")
         assert len(cache.cache) == 2
 
         cache.clear()
@@ -382,17 +392,18 @@ class TestCachedRegex:
         """Test module-level cached_regex function."""
         # Clear global cache first
         from cespy.core.performance import regex_cache
+
         regex_cache.clear()
 
-        pattern1 = cached_regex(r'\w+')
-        pattern2 = cached_regex(r'\w+')
+        pattern1 = cached_regex(r"\w+")
+        pattern2 = cached_regex(r"\w+")
 
         assert pattern1 is pattern2
         assert regex_cache.hit_count >= 1  # Should have at least one hit
 
     def test_pattern_functionality(self):
         """Test that cached patterns work correctly."""
-        pattern = cached_regex(r'R(\d+)')
+        pattern = cached_regex(r"R(\d+)")
 
         match = pattern.match("R123 net1 net2 1k")
         assert match is not None
@@ -409,39 +420,39 @@ class TestPerformanceOptimizer:
         """Test file operation optimization recommendations."""
         # Small file
         small_rec = PerformanceOptimizer.optimize_file_operations(0.5)
-        assert small_rec['read_mode'] == 'full'
-        assert small_rec['use_mmap'] is False
+        assert small_rec["read_mode"] == "full"
+        assert small_rec["use_mmap"] is False
 
         # Medium file
         medium_rec = PerformanceOptimizer.optimize_file_operations(50)
-        assert medium_rec['read_mode'] == 'chunked'
-        assert medium_rec['use_mmap'] is True
+        assert medium_rec["read_mode"] == "chunked"
+        assert medium_rec["use_mmap"] is True
 
         # Large file
         large_rec = PerformanceOptimizer.optimize_file_operations(500)
-        assert large_rec['read_mode'] == 'streaming'
-        assert large_rec['use_compression'] is True
+        assert large_rec["read_mode"] == "streaming"
+        assert large_rec["use_compression"] is True
 
     def test_regex_optimization(self):
         """Test regex pattern optimization analysis."""
         patterns = [
-            r'simple_pattern',
-            r'.*dangerous.*pattern.*',  # Multiple .* should be flagged
-            r'.*start_pattern',         # Starting with .* should be noted
-            r'complex|choice|with|many|alternatives|here|too',  # Many alternatives
+            r"simple_pattern",
+            r".*dangerous.*pattern.*",  # Multiple .* should be flagged
+            r".*start_pattern",  # Starting with .* should be noted
+            r"complex|choice|with|many|alternatives|here|too",  # Many alternatives
         ]
 
         recommendations = PerformanceOptimizer.optimize_regex_patterns(patterns)
 
-        assert recommendations['compile_patterns'] is True
-        assert recommendations['use_cache'] is True
-        assert len(recommendations['problematic_patterns']) > 0
-        assert len(recommendations['optimizations']) > 0
+        assert recommendations["compile_patterns"] is True
+        assert recommendations["use_cache"] is True
+        assert len(recommendations["problematic_patterns"]) > 0
+        assert len(recommendations["optimizations"]) > 0
 
     def test_memory_optimization(self):
         """Test memory usage optimization recommendations."""
         # Test with mocked platform info
-        with patch('cespy.core.performance.get_platform_info') as mock_get_info:
+        with patch("cespy.core.performance.get_platform_info") as mock_get_info:
             from cespy.core.platform import PlatformInfo, OSType, Architecture
 
             mock_info = PlatformInfo(
@@ -452,18 +463,25 @@ class TestPerformanceOptimizer:
                 is_wine_available=False,
                 wine_prefix=None,
                 cpu_count=8,
-                total_memory_gb=16.0
+                total_memory_gb=16.0,
             )
             mock_get_info.return_value = mock_info
 
             # Large data requiring streaming
-            large_rec = PerformanceOptimizer.optimize_memory_usage(10000, 'analysis')  # 10GB
-            assert large_rec['use_streaming'] is True
-            assert large_rec['use_memory_mapping'] is True
+            large_rec = PerformanceOptimizer.optimize_memory_usage(
+                10000, "analysis"
+            )  # 10GB
+            assert large_rec["use_streaming"] is True
+            assert large_rec["use_memory_mapping"] is True
 
             # Small data that can be loaded fully
-            small_rec = PerformanceOptimizer.optimize_memory_usage(100, 'parsing')  # 100MB
-            assert small_rec.get('load_fully') is True or small_rec.get('chunk_size_mb') is not None
+            small_rec = PerformanceOptimizer.optimize_memory_usage(
+                100, "parsing"
+            )  # 100MB
+            assert (
+                small_rec.get("load_fully") is True
+                or small_rec.get("chunk_size_mb") is not None
+            )
 
 
 class TestBenchmarkFunction:
@@ -471,27 +489,29 @@ class TestBenchmarkFunction:
 
     def test_basic_benchmarking(self):
         """Test basic function benchmarking."""
+
         def test_func(x):
             return x * 2
 
         results = benchmark_function(test_func, 5, iterations=10)
 
-        assert results['iterations'] == 10
-        assert results['total_time'] > 0
-        assert results['avg_time'] > 0
-        assert results['min_time'] > 0
-        assert results['max_time'] >= results['min_time']
-        assert 'std_dev' in results
+        assert results["iterations"] == 10
+        assert results["total_time"] > 0
+        assert results["avg_time"] > 0
+        assert results["min_time"] > 0
+        assert results["max_time"] >= results["min_time"]
+        assert "std_dev" in results
 
     def test_benchmark_with_kwargs(self):
         """Test benchmarking with keyword arguments."""
+
         def test_func(x, multiplier=2):
             return x * multiplier
 
         results = benchmark_function(test_func, 5, multiplier=3, iterations=5)
 
-        assert results['iterations'] == 5
-        assert results['total_time'] > 0
+        assert results["iterations"] == 5
+        assert results["total_time"] > 0
 
 
 class TestModuleFunctions:
@@ -516,6 +536,7 @@ class TestModuleFunctions:
     def test_get_performance_report(self):
         """Test performance report generation."""
         from cespy.core.performance import performance_monitor
+
         performance_monitor.reset_metrics()
 
         # Generate some performance data
@@ -535,6 +556,7 @@ class TestErrorHandling:
     def test_profiling_with_exception(self):
         """Test that profiling handles function exceptions correctly."""
         from cespy.core.performance import performance_monitor
+
         performance_monitor.reset_metrics()
 
         @profile_performance()
@@ -552,9 +574,11 @@ class TestErrorHandling:
     def test_memory_profiling_without_psutil(self):
         """Test memory profiling when psutil is not available."""
         from cespy.core.performance import performance_monitor
+
         performance_monitor.reset_metrics()
 
-        with patch('builtins.__import__', side_effect=ImportError("No psutil")):
+        with patch("builtins.__import__", side_effect=ImportError("No psutil")):
+
             @profile_performance(include_memory=True)
             def test_function():
                 return "test"

@@ -528,7 +528,9 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
             # last_token of the line before Params:
             subcircuit_name = m.group("value")
         else:
-            raise UnrecognizedSyntaxError(sub_circuit_instance, REPLACE_REGEXS["X"].pattern)
+            raise UnrecognizedSyntaxError(
+                sub_circuit_instance, REPLACE_REGEXS["X"].pattern
+            )
 
         # Search for the sub-circuit in the netlist
         sub_circuit = self.get_subcircuit_named(subcircuit_name)

@@ -28,7 +28,7 @@ C1 out 0 1u
         # Define component tolerances
         tolerances = {
             "R1": ("uniform", 0.1),  # ±10% uniform distribution
-            "C1": ("gauss", 0.05)    # ±5% Gaussian distribution
+            "C1": ("gauss", 0.05),  # ±5% Gaussian distribution
         }
 
         # Run Monte Carlo analysis
@@ -36,7 +36,7 @@ C1 out 0 1u
             netlist_path,
             tolerances,
             num_runs=10,  # Small number for testing
-            simulator=LTspice()
+            simulator=LTspice(),
         )
 
         _results = mc.run()
@@ -70,10 +70,7 @@ C1 out 0 1u
         netlist_path.write_text(netlist_content)
 
         # Define tolerances
-        tolerances = {
-            "R1": ("gauss", 0.1),
-            "C1": ("gauss", 0.1)
-        }
+        tolerances = {"R1": ("gauss", 0.1), "C1": ("gauss", 0.1)}
 
         # Run analysis with measurement extraction
         mc = MonteCarloAnalysis(
@@ -81,7 +78,7 @@ C1 out 0 1u
             tolerances,
             num_runs=20,
             simulator=LTspice(),
-            measurements=["rise_time"]
+            measurements=["rise_time"],
         )
 
         mc.run()
@@ -119,17 +116,14 @@ R4 4 0 4k
 
         # Test different distribution types
         tolerances = {
-            "R1": ("uniform", 0.1),    # Uniform ±10%
-            "R2": ("gauss", 0.05),     # Gaussian ±5%
-            "R3": ("gauss3", 0.1),     # 3-sigma Gaussian ±10%
-            "R4": ("flat", 0.2)        # Flat distribution ±20%
+            "R1": ("uniform", 0.1),  # Uniform ±10%
+            "R2": ("gauss", 0.05),  # Gaussian ±5%
+            "R3": ("gauss3", 0.1),  # 3-sigma Gaussian ±10%
+            "R4": ("flat", 0.2),  # Flat distribution ±20%
         }
 
         mc = MonteCarloAnalysis(
-            netlist_path,
-            tolerances,
-            num_runs=100,
-            seed=42  # For reproducibility
+            netlist_path, tolerances, num_runs=100, seed=42  # For reproducibility
         )
 
         # Generate component values
@@ -168,17 +162,11 @@ R2 out 0 10k
         netlist_path.write_text(netlist_content)
 
         # Define tolerances
-        tolerances = {
-            "R1": 0.05,  # ±5%
-            "R2": 0.05   # ±5%
-        }
+        tolerances = {"R1": 0.05, "R2": 0.05}  # ±5%  # ±5%
 
         # Run worst-case analysis
         wc = WorstCaseAnalysis(
-            netlist_path,
-            tolerances,
-            output_node="out",
-            simulator=LTspice()
+            netlist_path, tolerances, output_node="out", simulator=LTspice()
         )
 
         results = wc.run()
@@ -208,18 +196,11 @@ R3 n2 0 3k
 """
         netlist_path.write_text(netlist_content)
 
-        tolerances = {
-            "R1": 0.1,
-            "R2": 0.1,
-            "R3": 0.1
-        }
+        tolerances = {"R1": 0.1, "R2": 0.1, "R3": 0.1}
 
         # Analyze multiple nodes
         wc = WorstCaseAnalysis(
-            netlist_path,
-            tolerances,
-            output_node=["n1", "n2"],
-            simulator=LTspice()
+            netlist_path, tolerances, output_node=["n1", "n2"], simulator=LTspice()
         )
 
         results = wc.run()
@@ -243,11 +224,7 @@ R2 out 0 10k
 """
         netlist_path.write_text(netlist_content)
 
-        tolerances = {
-            "R1": 0.05,
-            "R2": 0.05,
-            "C1": 0.10
-        }
+        tolerances = {"R1": 0.05, "R2": 0.05, "C1": 0.10}
 
         # Run worst-case with sensitivity analysis
         wc = WorstCaseAnalysis(
@@ -255,7 +232,7 @@ R2 out 0 10k
             tolerances,
             output_node="out",
             frequency=1000,  # Analyze at 1kHz
-            calculate_sensitivity=True
+            calculate_sensitivity=True,
         )
 
         wc.run()
@@ -297,7 +274,7 @@ R4 out 0 4k
             components,
             output_node="out",
             analysis_type="dc",
-            simulator=LTspice()
+            simulator=LTspice(),
         )
 
         results = sa.run()
@@ -336,7 +313,7 @@ C2 out 0 100n
             output_node="out",
             analysis_type="ac",
             frequency=159.15,  # ~1/(2*pi*R1*C1)
-            simulator=LTspice()
+            simulator=LTspice(),
         )
 
         results = sa.run()
@@ -366,10 +343,7 @@ R4 out 0 100k
         components = ["R1", "R2", "R3", "R4"]
 
         sa = SensitivityAnalysis(
-            netlist_path,
-            components,
-            output_node="out",
-            analysis_type="dc"
+            netlist_path, components, output_node="out", analysis_type="dc"
         )
 
         sa.run()
@@ -407,7 +381,7 @@ R2 out 0 10k
         tolerances = {
             "R1": ("gauss", 0.05),
             "C1": ("gauss", 0.10),
-            "R2": ("gauss", 0.05)
+            "R2": ("gauss", 0.05),
         }
 
         # First run Monte Carlo
@@ -416,7 +390,7 @@ R2 out 0 10k
             tolerances,
             num_runs=50,
             measurements=["delay"],
-            simulator=LTspice()
+            simulator=LTspice(),
         )
 
         mc.run()
@@ -434,7 +408,7 @@ R2 out 0 10k
             netlist_path,
             {k: v[1] for k, v in tolerances.items()},  # Extract tolerance values
             measurement="delay",
-            simulator=LTspice()
+            simulator=LTspice(),
         )
 
         wc_results = wc.run()

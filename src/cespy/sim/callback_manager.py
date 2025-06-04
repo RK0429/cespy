@@ -6,6 +6,7 @@ This module provides a manager for registering and executing callbacks when
 simulations complete, with support for different callback types and error handling.
 """
 
+import concurrent.futures
 import inspect
 import logging
 import threading
@@ -224,7 +225,9 @@ class CallbackManager:
 
         return results
 
-    def create_chain(self, *callback_ids: str) -> Callable[[Path, Path], List[Tuple[bool, Any]]]:
+    def create_chain(
+        self, *callback_ids: str
+    ) -> Callable[[Path, Path], List[Tuple[bool, Any]]]:
         """Create a chained callback that executes multiple callbacks in sequence.
 
         Args:
@@ -257,7 +260,6 @@ class CallbackManager:
         Returns:
             Callable that executes all callbacks concurrently
         """
-        import concurrent.futures
 
         def parallel_callback(
             raw_file: Path, log_file: Path

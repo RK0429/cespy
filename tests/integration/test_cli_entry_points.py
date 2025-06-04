@@ -18,18 +18,21 @@ class TestCLIEntryPoints:
             "cespy-sim-client",
             "cespy-ltsteps",
             "cespy-rawplot",
-            "cespy-histogram"
+            "cespy-histogram",
         ]
 
         for command in commands:
             # Test that command exists and shows help
             try:
                 subprocess.run(
-                    [sys.executable, "-c",
-                     f"import subprocess; subprocess.run(['{command}', '--help'])"],
+                    [
+                        sys.executable,
+                        "-c",
+                        f"import subprocess; subprocess.run(['{command}', '--help'])",
+                    ],
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=10,
                 )
                 # Should not crash when called with --help
                 # The exact return code may vary, but it shouldn't hang or crash
@@ -49,7 +52,7 @@ class TestCLIEntryPoints:
             "from cespy.client_server.sim_client import main",
             "from cespy.log.ltsteps import main",
             "from cespy.raw.rawplot import main",
-            "from cespy.utils.histogram import main"
+            "from cespy.utils.histogram import main",
         ]
 
         for import_test in import_tests:
@@ -58,7 +61,7 @@ class TestCLIEntryPoints:
                     [sys.executable, "-c", import_test],
                     capture_output=True,
                     text=True,
-                    timeout=5
+                    timeout=5,
                 )
                 if result.returncode != 0:
                     # Check if it's a missing main function or import error
@@ -95,7 +98,7 @@ TEXT 32 200 Left 2 !.tran 1m
                 capture_output=True,
                 text=True,
                 timeout=10,
-                cwd=temp_dir
+                cwd=temp_dir,
             )
             # May fail if not implemented, but shouldn't crash Python
         except subprocess.TimeoutExpired:
@@ -107,12 +110,15 @@ TEXT 32 200 Left 2 !.tran 1m
         """Test that server entry point can show help."""
         try:
             result = subprocess.run(
-                [sys.executable, "-c",
-                 "from cespy.client_server.run_server import main; "
-                 "print('Server module imported successfully')"],
+                [
+                    sys.executable,
+                    "-c",
+                    "from cespy.client_server.run_server import main; "
+                    "print('Server module imported successfully')",
+                ],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 assert "successfully" in result.stdout
@@ -127,11 +133,14 @@ TEXT 32 200 Left 2 !.tran 1m
 
         try:
             subprocess.run(
-                [sys.executable, "-c",
-                 "from cespy.raw.raw_convert import main; print('Raw convert module imported')"],
+                [
+                    sys.executable,
+                    "-c",
+                    "from cespy.raw.raw_convert import main; print('Raw convert module imported')",
+                ],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             # Just test that the module can be imported
         except subprocess.TimeoutExpired:
@@ -141,11 +150,14 @@ TEXT 32 200 Left 2 !.tran 1m
         """Test histogram entry point."""
         try:
             subprocess.run(
-                [sys.executable, "-c",
-                 "from cespy.utils.histogram import main; print('Histogram module imported')"],
+                [
+                    sys.executable,
+                    "-c",
+                    "from cespy.utils.histogram import main; print('Histogram module imported')",
+                ],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             # Just test that the module can be imported
         except subprocess.TimeoutExpired:
@@ -162,11 +174,14 @@ TEXT 32 200 Left 2 !.tran 1m
         for command, args in test_cases:
             try:
                 subprocess.run(
-                    [sys.executable, "-c",
-                     f"import subprocess; subprocess.run(['{command}'] + {args})"],
+                    [
+                        sys.executable,
+                        "-c",
+                        f"import subprocess; subprocess.run(['{command}'] + {args})",
+                    ],
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=10,
                 )
                 # Should handle invalid arguments without crashing
             except subprocess.TimeoutExpired:
@@ -178,12 +193,15 @@ TEXT 32 200 Left 2 !.tran 1m
         """Test that the package is properly installed and entry points work."""
         # Test basic package import
         result = subprocess.run(
-            [sys.executable, "-c",
-             "import cespy; "
-             "print(f'cespy version: {getattr(cespy, \"__version__\", \"unknown\")}')"],
+            [
+                sys.executable,
+                "-c",
+                "import cespy; "
+                'print(f\'cespy version: {getattr(cespy, "__version__", "unknown")}\')',
+            ],
             capture_output=True,
             text=True,
-            timeout=5
+            timeout=5,
         )
 
         if result.returncode == 0:
@@ -209,14 +227,17 @@ TEXT 32 200 Left 2 !.tran 1m
                 "cespy-sim-client",
                 "cespy-ltsteps",
                 "cespy-rawplot",
-                "cespy-histogram"
+                "cespy-histogram",
             ]
 
             for script in expected_scripts:
                 assert script in scripts, f"Script {script} not found in pyproject.toml"
                 # Verify the entry point format
                 entry_point = scripts[script]
-                assert ":" in entry_point, f"Invalid entry point format for {script}: {entry_point}"
+                assert (
+                    ":" in entry_point
+                ), f"Invalid entry point format for {script}: {entry_point}"
                 module, function = entry_point.split(":")
-                assert module.startswith("cespy."), (
-                    f"Entry point should start with cespy.: {entry_point}")
+                assert module.startswith(
+                    "cespy."
+                ), f"Entry point should start with cespy.: {entry_point}"

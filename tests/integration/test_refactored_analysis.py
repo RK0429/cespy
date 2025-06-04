@@ -32,7 +32,7 @@ C1 net2 0 1u
 .end
 """
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.net', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".net", delete=False) as f:
         f.write(circuit_content)
         f.flush()
         yield Path(f.name)
@@ -89,17 +89,19 @@ class TestStatisticalAnalysisIntegration:
             result = AnalysisResult(
                 run_id=i,
                 status=AnalysisStatus.COMPLETED,
-                measurements={"Vout_avg": 2.0 + i * 0.1}  # Values: 2.0, 2.1, 2.2, 2.3, 2.4
+                measurements={
+                    "Vout_avg": 2.0 + i * 0.1
+                },  # Values: 2.0, 2.1, 2.2, 2.3, 2.4
             )
             analysis.results.append(result)
 
         stats = analysis.calculate_statistics("Vout_avg")
 
-        assert stats['count'] == 5
-        assert stats['mean'] == pytest.approx(2.2, rel=1e-10)
-        assert stats['min'] == pytest.approx(2.0, rel=1e-10)
-        assert stats['max'] == pytest.approx(2.4, rel=1e-10)
-        assert stats['std'] > 0
+        assert stats["count"] == 5
+        assert stats["mean"] == pytest.approx(2.2, rel=1e-10)
+        assert stats["min"] == pytest.approx(2.0, rel=1e-10)
+        assert stats["max"] == pytest.approx(2.4, rel=1e-10)
+        assert stats["std"] > 0
 
     def test_histogram_data_generation(self, sample_circuit_file):
         """Test histogram data generation."""
@@ -107,12 +109,13 @@ class TestStatisticalAnalysisIntegration:
 
         # Add mock results with varied data
         import numpy as np
+
         np.random.seed(42)
         for i in range(10):
             result = AnalysisResult(
                 run_id=i,
                 status=AnalysisStatus.COMPLETED,
-                measurements={"Vout": np.random.normal(2.5, 0.1)}
+                measurements={"Vout": np.random.normal(2.5, 0.1)},
             )
             analysis.results.append(result)
 
@@ -134,8 +137,8 @@ class TestStatisticalAnalysisIntegration:
                 measurements={
                     "Vout1": 2.0 + i * 0.1,
                     "Vout2": 3.0 + i * 0.1,  # Perfectly correlated with Vout1
-                    "Vout3": 1.0 - i * 0.05  # Anti-correlated
-                }
+                    "Vout3": 1.0 - i * 0.05,  # Anti-correlated
+                },
             )
             analysis.results.append(result)
 
@@ -154,14 +157,12 @@ class TestStatisticalAnalysisIntegration:
 class TestMonteCarloAnalysisIntegration:
     """Test enhanced MonteCarloAnalysis integration."""
 
-    @patch('cespy.sim.toolkit.montecarlo.SimRunner')
+    @patch("cespy.sim.toolkit.montecarlo.SimRunner")
     def test_monte_carlo_dual_mode_creation(self, mock_runner, sample_circuit_file):
         """Test MonteCarloAnalysis creation with both modes."""
         # Testbench mode (default)
         mc_testbench = MonteCarloAnalysis(
-            sample_circuit_file,
-            num_runs=100,
-            use_testbench_mode=True
+            sample_circuit_file, num_runs=100, use_testbench_mode=True
         )
         assert mc_testbench.use_testbench_mode is True
         assert mc_testbench.num_runs == 100
@@ -172,38 +173,46 @@ class TestMonteCarloAnalysisIntegration:
             num_runs=50,
             use_testbench_mode=False,
             parallel=True,
-            max_workers=2
+            max_workers=2,
         )
         assert mc_separate.use_testbench_mode is False
         assert mc_separate.parallel is True
         assert mc_separate.max_workers == 2
 
-    @patch('cespy.sim.toolkit.montecarlo.SimRunner')
-    def test_tolerance_setting_and_parameter_generation(self, mock_runner, sample_circuit_file):
+    @patch("cespy.sim.toolkit.montecarlo.SimRunner")
+    def test_tolerance_setting_and_parameter_generation(
+        self, mock_runner, sample_circuit_file
+    ):
         """Test tolerance setting and parameter generation."""
         mc = MonteCarloAnalysis(
-            sample_circuit_file,
-            num_runs=10,
-            use_testbench_mode=False,
-            seed=42
+            sample_circuit_file, num_runs=10, use_testbench_mode=False, seed=42
         )
 
         # Set component tolerances
-        mc.set_tolerance('R1', 0.05)  # 5% tolerance
-        mc.set_tolerance('C1', 0.10)  # 10% tolerance
+        mc.set_tolerance("R1", 0.05)  # 5% tolerance
+        mc.set_tolerance("C1", 0.10)  # 10% tolerance
 
         # Mock the component retrieval
-        with patch.object(mc, 'get_components', return_value=['R1', 'C1']):
-            with patch.object(mc, 'get_component_value_deviation_type') as mock_get_dev:
+        with patch.object(mc, "get_components", return_value=["R1", "C1"]):
+            with patch.object(mc, "get_component_value_deviation_type") as mock_get_dev:
                 # Mock return values for component deviations
-                from cespy.sim.toolkit.tolerance_deviations import ComponentDeviation, DeviationType
+                from cespy.sim.toolkit.tolerance_deviations import (
+                    ComponentDeviation,
+                    DeviationType,
+                )
 
                 def mock_deviation(ref):
-                    if ref == 'R1':
-                        return (1000.0,
-                                ComponentDeviation(DeviationType.TOLERANCE, 0.05, 0, "uniform"))
-                    elif ref == 'C1':
-                        return 1e-6, ComponentDeviation(DeviationType.TOLERANCE, 0.10, 0, "normal")
+                    if ref == "R1":
+                        return (
+                            1000.0,
+                            ComponentDeviation(
+                                DeviationType.TOLERANCE, 0.05, 0, "uniform"
+                            ),
+                        )
+                    elif ref == "C1":
+                        return 1e-6, ComponentDeviation(
+                            DeviationType.TOLERANCE, 0.10, 0, "normal"
+                        )
                     return 0, ComponentDeviation(DeviationType.NONE, 0, 0, "uniform")
 
                 mock_get_dev.side_effect = mock_deviation
@@ -218,28 +227,26 @@ class TestMonteCarloAnalysisIntegration:
                     param_names.update(params.keys())
 
                 # Should have run_id and possibly component parameters
-                assert 'run_id' in param_names
+                assert "run_id" in param_names
 
     def test_backward_compatibility_methods(self, sample_circuit_file):
         """Test that backward compatibility methods work."""
-        with patch('cespy.sim.toolkit.montecarlo.SimRunner'):
+        with patch("cespy.sim.toolkit.montecarlo.SimRunner"):
             mc = MonteCarloAnalysis(
-                sample_circuit_file,
-                num_runs=5,
-                use_testbench_mode=True
+                sample_circuit_file, num_runs=5, use_testbench_mode=True
             )
 
             # Test that old methods still exist and work
-            assert hasattr(mc, 'run_analysis')
-            assert hasattr(mc, 'analyse_measurement')
-            assert hasattr(mc, 'get_measurement_statistics')
+            assert hasattr(mc, "run_analysis")
+            assert hasattr(mc, "analyse_measurement")
+            assert hasattr(mc, "get_measurement_statistics")
 
             # Mock some results for testing
             mc.results = [
                 AnalysisResult(
                     run_id=i,
                     status=AnalysisStatus.COMPLETED,
-                    measurements={"Vout": 2.0 + i * 0.1}
+                    measurements={"Vout": 2.0 + i * 0.1},
                 )
                 for i in range(5)
             ]
@@ -247,8 +254,8 @@ class TestMonteCarloAnalysisIntegration:
             # Test statistics method
             stats = mc.get_measurement_statistics("Vout")
             assert isinstance(stats, dict)
-            assert 'mean' in stats
-            assert 'std' in stats
+            assert "mean" in stats
+            assert "std" in stats
 
 
 class TestAnalysisVisualizationIntegration:
@@ -259,36 +266,41 @@ class TestAnalysisVisualizationIntegration:
         availability = check_plotting_availability()
 
         assert isinstance(availability, dict)
-        assert 'matplotlib' in availability
-        assert 'seaborn' in availability
-        assert isinstance(availability['matplotlib'], bool)
-        assert isinstance(availability['seaborn'], bool)
+        assert "matplotlib" in availability
+        assert "seaborn" in availability
+        assert isinstance(availability["matplotlib"], bool)
+        assert isinstance(availability["seaborn"], bool)
 
-    @pytest.mark.skipif(not check_plotting_availability()['matplotlib'],
-                        reason="Matplotlib not available")
+    @pytest.mark.skipif(
+        not check_plotting_availability()["matplotlib"],
+        reason="Matplotlib not available",
+    )
     def test_visualizer_creation(self, sample_circuit_file):
         """Test AnalysisVisualizer creation and basic functionality."""
         visualizer = AnalysisVisualizer()
 
         assert visualizer.figsize == (10, 6)
-        assert hasattr(visualizer, 'plot_histogram')
-        assert hasattr(visualizer, 'plot_scatter_matrix')
-        assert hasattr(visualizer, 'create_analysis_report')
+        assert hasattr(visualizer, "plot_histogram")
+        assert hasattr(visualizer, "plot_scatter_matrix")
+        assert hasattr(visualizer, "create_analysis_report")
 
-    @pytest.mark.skipif(not check_plotting_availability()['matplotlib'],
-                        reason="Matplotlib not available")
+    @pytest.mark.skipif(
+        not check_plotting_availability()["matplotlib"],
+        reason="Matplotlib not available",
+    )
     def test_histogram_plotting_integration(self, sample_circuit_file):
         """Test histogram plotting with real analysis data."""
         # Create analysis with mock results
         analysis = StatisticalAnalysis(sample_circuit_file, num_runs=20)
 
         import numpy as np
+
         np.random.seed(42)
         for i in range(20):
             result = AnalysisResult(
                 run_id=i,
                 status=AnalysisStatus.COMPLETED,
-                measurements={"Vout": np.random.normal(2.5, 0.2)}
+                measurements={"Vout": np.random.normal(2.5, 0.2)},
             )
             analysis.results.append(result)
 
@@ -297,10 +309,11 @@ class TestAnalysisVisualizationIntegration:
         try:
             fig = visualizer.plot_histogram(analysis, "Vout", show_stats=True)
             assert fig is not None
-            assert hasattr(fig, 'savefig')  # Should be a matplotlib Figure
+            assert hasattr(fig, "savefig")  # Should be a matplotlib Figure
 
             # Clean up
             import matplotlib.pyplot as plt
+
             plt.close(fig)
 
         except Exception as e:
@@ -320,19 +333,17 @@ class TestPerformanceIntegration:
 
         try:
             # Create analysis (this should be monitored)
-            with patch('cespy.sim.toolkit.montecarlo.SimRunner'):
+            with patch("cespy.sim.toolkit.montecarlo.SimRunner"):
                 mc = MonteCarloAnalysis(
-                    sample_circuit_file,
-                    num_runs=5,
-                    use_testbench_mode=False
+                    sample_circuit_file, num_runs=5, use_testbench_mode=False
                 )
 
                 # Mock the analysis execution
-                with patch.object(mc, '_run_single') as mock_run_single:
+                with patch.object(mc, "_run_single") as mock_run_single:
                     mock_run_single.return_value = AnalysisResult(
                         run_id=0,
                         status=AnalysisStatus.COMPLETED,
-                        measurements={"Vout": 2.5}
+                        measurements={"Vout": 2.5},
                     )
 
                     # This should be monitored if the decorator is applied
@@ -357,27 +368,36 @@ class TestErrorHandlingIntegration:
 
         # Add mix of successful and failed results
         results = [
-            AnalysisResult(run_id=0, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.0}),
-            AnalysisResult(run_id=1, status=AnalysisStatus.FAILED,
-                           error_message="Simulation failed"),
-            AnalysisResult(run_id=2, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.1}),
+            AnalysisResult(
+                run_id=0, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.0}
+            ),
+            AnalysisResult(
+                run_id=1,
+                status=AnalysisStatus.FAILED,
+                error_message="Simulation failed",
+            ),
+            AnalysisResult(
+                run_id=2, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.1}
+            ),
             AnalysisResult(run_id=3, status=AnalysisStatus.CANCELLED),
-            AnalysisResult(run_id=4, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.2}),
+            AnalysisResult(
+                run_id=4, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.2}
+            ),
         ]
 
         analysis.results = results
 
         # Statistics should only include successful runs
         stats = analysis.calculate_statistics("Vout")
-        assert stats['count'] == 3  # Only successful runs
-        assert stats['mean'] == pytest.approx(2.1, rel=1e-10)
+        assert stats["count"] == 3  # Only successful runs
+        assert stats["mean"] == pytest.approx(2.1, rel=1e-10)
 
         # Get overall statistics
         overall_stats = analysis.get_statistics()
-        assert overall_stats['total_runs'] == 5
-        assert overall_stats['successful'] == 3
-        assert overall_stats['failed'] == 1
-        assert overall_stats['success_rate'] == 60.0
+        assert overall_stats["total_runs"] == 5
+        assert overall_stats["successful"] == 3
+        assert overall_stats["failed"] == 1
+        assert overall_stats["success_rate"] == 60.0
 
     def test_missing_measurement_handling(self, sample_circuit_file):
         """Test handling of missing measurements in results."""
@@ -385,22 +405,27 @@ class TestErrorHandlingIntegration:
 
         # Add results with inconsistent measurements
         results = [
-            AnalysisResult(run_id=0, status=AnalysisStatus.COMPLETED,
-                           measurements={"Vout": 2.0, "Iout": 0.001}),
-            AnalysisResult(run_id=1, status=AnalysisStatus.COMPLETED,
-                           measurements={"Vout": 2.1}),  # Missing Iout
-            AnalysisResult(run_id=2, status=AnalysisStatus.COMPLETED,
-                           measurements={"Iout": 0.002}),  # Missing Vout
+            AnalysisResult(
+                run_id=0,
+                status=AnalysisStatus.COMPLETED,
+                measurements={"Vout": 2.0, "Iout": 0.001},
+            ),
+            AnalysisResult(
+                run_id=1, status=AnalysisStatus.COMPLETED, measurements={"Vout": 2.1}
+            ),  # Missing Iout
+            AnalysisResult(
+                run_id=2, status=AnalysisStatus.COMPLETED, measurements={"Iout": 0.002}
+            ),  # Missing Vout
         ]
 
         analysis.results = results
 
         # Should handle missing measurements gracefully
         vout_stats = analysis.calculate_statistics("Vout")
-        assert vout_stats['count'] == 2  # Only 2 results have Vout
+        assert vout_stats["count"] == 2  # Only 2 results have Vout
 
         iout_stats = analysis.calculate_statistics("Iout")
-        assert iout_stats['count'] == 2  # Only 2 results have Iout
+        assert iout_stats["count"] == 2  # Only 2 results have Iout
 
         # Non-existent measurement should return empty stats
         missing_stats = analysis.calculate_statistics("NonExistent")
@@ -417,12 +442,12 @@ class TestCrossModuleIntegration:
         platform_info = get_platform_info()
         optimal_workers = get_optimal_workers()
 
-        with patch('cespy.sim.toolkit.montecarlo.SimRunner'):
+        with patch("cespy.sim.toolkit.montecarlo.SimRunner"):
             mc = MonteCarloAnalysis(
                 sample_circuit_file,
                 num_runs=10,
                 parallel=True,
-                max_workers=optimal_workers
+                max_workers=optimal_workers,
             )
 
             # Should respect platform-specific worker count
@@ -438,11 +463,11 @@ class TestCrossModuleIntegration:
         regex_cache.clear()
 
         # Use a pattern that might be used in analysis
-        pattern = cached_regex(r'R\w+')
+        pattern = cached_regex(r"R\w+")
         assert regex_cache.miss_count == 1
 
         # Use same pattern again
-        pattern2 = cached_regex(r'R\w+')
+        pattern2 = cached_regex(r"R\w+")
         assert pattern is pattern2  # Should be cached
         assert regex_cache.hit_count == 1
 
