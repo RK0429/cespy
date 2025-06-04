@@ -6,10 +6,10 @@ This example demonstrates advanced data processing capabilities including
 lazy loading, streaming, caching, and visualization of simulation results.
 """
 
-import os
 import sys
 import time
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,7 +17,7 @@ import numpy as np
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, SimRunner
+# removed unused imports
 from cespy.raw import (
     OptimizedBinaryParser,
     RawDataCache,
@@ -29,7 +29,7 @@ from cespy.raw import (
 from cespy.utils import Histogram
 
 
-def create_sample_raw_data():
+def create_sample_raw_data() -> Dict[str, Any]:
     """Create sample raw data for demonstration."""
     print("Creating sample raw data...")
 
@@ -55,7 +55,7 @@ def create_sample_raw_data():
     }
 
 
-def example_basic_raw_operations():
+def example_basic_raw_operations() -> None:
     """Demonstrate basic raw file operations."""
     print("=== Basic Raw File Operations ===")
 
@@ -110,7 +110,7 @@ def example_basic_raw_operations():
             raw_file_path.unlink()
 
 
-def example_lazy_loading():
+def example_lazy_loading() -> None:
     """Demonstrate lazy loading for large files."""
     print("\n=== Lazy Loading Example ===")
 
@@ -176,7 +176,7 @@ def example_lazy_loading():
             large_raw_path.unlink()
 
 
-def example_data_streaming():
+def example_data_streaming() -> None:
     """Demonstrate data streaming for very large files."""
     print("\n=== Data Streaming Example ===")
 
@@ -265,7 +265,7 @@ def example_data_streaming():
                     file_path.unlink()
 
 
-def example_data_caching():
+def example_data_caching() -> None:
     """Demonstrate intelligent data caching."""
     print("\n=== Data Caching Example ===")
 
@@ -352,7 +352,7 @@ def example_data_caching():
                     file_path.unlink()
 
 
-def example_histogram_analysis():
+def example_histogram_analysis() -> None:
     """Demonstrate histogram analysis utilities."""
     print("\n=== Histogram Analysis Example ===")
 
@@ -448,7 +448,7 @@ def example_histogram_analysis():
         print(f"Error in histogram analysis: {e}")
 
 
-def example_visualization():
+def example_visualization() -> None:
     """Demonstrate data visualization capabilities."""
     print("\n=== Data Visualization Example ===")
 
@@ -583,7 +583,7 @@ def example_visualization():
         print(f"Error in visualization: {e}")
 
 
-def main():
+def main() -> None:
     """Run all data processing examples."""
     print("CESPy Data Processing and Visualization Examples")
     print("=" * 70)

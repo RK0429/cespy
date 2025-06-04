@@ -1,9 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "mcp__slack__slack_post_message",
-      "mcp__slack__slack_list_channels"
-    ],
+    "allow": [],
     "deny": []
   }
 }
