@@ -276,7 +276,9 @@ class BenchmarkSuite:
 
         return self.results
 
-    def compare_with_baseline(self, tolerance: float = 0.1) -> Dict[str, Any]:  # pylint: disable=too-many-branches
+    def compare_with_baseline(
+        self, tolerance: float = 0.1
+    ) -> Dict[str, Any]:  # pylint: disable=too-many-branches
         """Compare current results with baseline performance.
 
         Args:

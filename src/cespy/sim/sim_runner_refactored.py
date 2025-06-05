@@ -453,7 +453,7 @@ class SimRunnerRefactored:
         log_file = task.netlist_file.with_suffix(".log")
 
         # Add to result collector
-        sim_result = self._result_collector.add_result(
+        self._result_collector.add_result(
             task_id=f"run_{task.runno}",
             netlist_path=task.netlist_file,
             raw_file=raw_file if raw_file.exists() else None,

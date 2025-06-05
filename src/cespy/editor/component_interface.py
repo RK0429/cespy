@@ -25,7 +25,7 @@ class ComponentInterface(Protocol):
         Returns:
             Component name (e.g., 'R1', 'C2', 'U1')
         """
-        ...
+        pass
 
     @abstractmethod
     def get_type(self) -> str:
@@ -34,7 +34,7 @@ class ComponentInterface(Protocol):
         Returns:
             Component type (e.g., 'resistor', 'capacitor', 'voltage_source')
         """
-        ...
+        pass
 
     @abstractmethod
     def set_value(self, value: Union[str, float]) -> None:
@@ -46,7 +46,7 @@ class ComponentInterface(Protocol):
         Raises:
             ValueError: If value is invalid for this component type
         """
-        ...
+        pass
 
     @abstractmethod
     def get_value(self) -> Union[str, float, None]:
@@ -55,7 +55,7 @@ class ComponentInterface(Protocol):
         Returns:
             Component value or None if not set
         """
-        ...
+        pass
 
     @abstractmethod
     def get_attributes(self) -> Dict[str, Any]:
@@ -64,7 +64,7 @@ class ComponentInterface(Protocol):
         Returns:
             Dictionary of attribute names to values
         """
-        ...
+        pass
 
     @abstractmethod
     def set_attribute(self, name: str, value: Any) -> None:
@@ -77,7 +77,7 @@ class ComponentInterface(Protocol):
         Raises:
             KeyError: If attribute name is not valid for this component
         """
-        ...
+        pass
 
     @abstractmethod
     def get_attribute(self, name: str) -> Any:
@@ -92,7 +92,7 @@ class ComponentInterface(Protocol):
         Raises:
             KeyError: If attribute does not exist
         """
-        ...
+        pass
 
     @abstractmethod
     def validate(self) -> List[str]:
@@ -101,7 +101,7 @@ class ComponentInterface(Protocol):
         Returns:
             List of validation error messages (empty if valid)
         """
-        ...
+        pass
 
     @abstractmethod
     def get_pins(self) -> List[str]:
@@ -110,7 +110,7 @@ class ComponentInterface(Protocol):
         Returns:
             List of pin names or numbers
         """
-        ...
+        pass
 
     @abstractmethod
     def get_connected_nets(self) -> Dict[str, str]:
@@ -119,7 +119,7 @@ class ComponentInterface(Protocol):
         Returns:
             Dictionary mapping pin names to net names
         """
-        ...
+        pass
 
     @abstractmethod
     def connect_pin(self, pin: str, net: str) -> None:
@@ -132,7 +132,7 @@ class ComponentInterface(Protocol):
         Raises:
             ValueError: If pin name is invalid
         """
-        ...
+        pass
 
     @abstractmethod
     def get_position(self) -> tuple[float, float]:
@@ -141,7 +141,7 @@ class ComponentInterface(Protocol):
         Returns:
             Tuple of (x, y) coordinates
         """
-        ...
+        pass
 
     @abstractmethod
     def set_position(self, x: float, y: float) -> None:
@@ -151,7 +151,7 @@ class ComponentInterface(Protocol):
             x: X coordinate
             y: Y coordinate
         """
-        ...
+        pass
 
     @abstractmethod
     def get_rotation(self) -> float:
@@ -160,7 +160,7 @@ class ComponentInterface(Protocol):
         Returns:
             Rotation angle in degrees
         """
-        ...
+        pass
 
     @abstractmethod
     def set_rotation(self, angle: float) -> None:
@@ -169,7 +169,7 @@ class ComponentInterface(Protocol):
         Args:
             angle: Rotation angle in degrees
         """
-        ...
+        pass
 
     @abstractmethod
     def is_flipped(self) -> bool:
@@ -178,7 +178,7 @@ class ComponentInterface(Protocol):
         Returns:
             True if flipped, False otherwise
         """
-        ...
+        pass
 
     @abstractmethod
     def set_flipped(self, flipped: bool) -> None:
@@ -187,7 +187,7 @@ class ComponentInterface(Protocol):
         Args:
             flipped: True to flip, False for normal
         """
-        ...
+        pass
 
     @abstractmethod
     def clone(self) -> "ComponentInterface":
@@ -196,7 +196,7 @@ class ComponentInterface(Protocol):
         Returns:
             New component instance with same attributes
         """
-        ...
+        pass
 
     @abstractmethod
     def to_spice(self) -> str:
@@ -205,4 +205,4 @@ class ComponentInterface(Protocol):
         Returns:
             SPICE netlist line(s) for this component
         """
-        ...
+        pass

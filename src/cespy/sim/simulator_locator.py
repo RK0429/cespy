@@ -270,7 +270,7 @@ class SimulatorLocator:
                 cmd.append("-v")
 
             # Run command with timeout
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5.0)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5.0, check=False)
 
             # Parse version from output
             output = result.stdout + result.stderr
