@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,duplicate-code
 """
 Analysis Toolkit Examples
 
@@ -14,8 +14,10 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy.sim.process_callback import ProcessCallback
-from cespy.sim.toolkit import (
+from cespy.sim.process_callback import (
+    ProcessCallback,  # pylint: disable=wrong-import-position
+)
+from cespy.sim.toolkit import (  # pylint: disable=wrong-import-position
     FailureMode,
     FastWorstCaseAnalysis,
     MonteCarloAnalysis,
@@ -180,8 +182,10 @@ Rout out 0 100
         print("Running worst-case analysis...")
         try:
             if hasattr(wc_analysis, "run_analysis"):
-                results = wc_analysis.run_analysis()
-                if results:
+                results = (
+                    wc_analysis.run_analysis()
+                )  # pylint: disable=assignment-from-none
+                if results is not None:
                     print("✓ Worst-case analysis completed")
                 else:
                     print("✗ Worst-case analysis failed")
@@ -312,9 +316,9 @@ Q1 coll base emit BJT_MODEL
             )
 
         print("Running sensitivity analysis...")
-        results = sens_analysis.run_analysis()
+        results = sens_analysis.run_analysis()  # pylint: disable=assignment-from-none
 
-        if results:
+        if results is not None:
             print("✓ Sensitivity analysis completed")
 
             # Extract sensitivity information

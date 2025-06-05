@@ -18,7 +18,7 @@ import numpy as np
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy.raw import (
+from cespy.raw import (  # pylint: disable=wrong-import-position
     RawDataCache,
     RawFileStreamer,
     RawRead,
@@ -26,8 +26,8 @@ from cespy.raw import (
     RawWrite,
     Trace,
 )
-from cespy.raw.raw_classes import DummyTrace
-from cespy.utils.histogram import create_histogram
+from cespy.raw.raw_classes import DummyTrace  # pylint: disable=wrong-import-position
+from cespy.utils.histogram import create_histogram  # pylint: disable=wrong-import-position
 
 
 def create_sample_raw_data() -> Dict[str, Any]:
@@ -128,7 +128,7 @@ def example_basic_raw_operations() -> None:
 
 def example_lazy_loading() -> None:
     """Demonstrate lazy loading for large files."""
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-statements
     print("\n=== Lazy Loading Example ===")
 
     # Define file path early to avoid unbound variable issues
@@ -517,6 +517,7 @@ def example_histogram_analysis() -> None:
 
 def example_visualization() -> None:
     """Demonstrate data visualization capabilities."""
+    # pylint: disable=too-many-statements
     print("\n=== Data Visualization Example ===")
 
     try:

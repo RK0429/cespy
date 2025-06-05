@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Tuple
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator
-from cespy.utils.detect_encoding import detect_encoding
+from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator  # pylint: disable=wrong-import-position
+from cespy.utils.detect_encoding import detect_encoding  # pylint: disable=wrong-import-position
 
 
 def example_platform_detection() -> None:
@@ -584,6 +584,7 @@ def example_api_compatibility() -> None:
 
 def example_environment_configuration() -> None:
     """Demonstrate environment configuration and setup."""
+    # pylint: disable=too-many-statements
     print("\n=== Environment Configuration Example ===")
 
     try:

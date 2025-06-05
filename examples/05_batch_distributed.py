@@ -17,16 +17,17 @@ from typing import Any, Dict
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice
-from cespy.client_server import SimClient, SimServer
-from cespy.editor import SpiceEditor
-from cespy.sim import SimRunner
+from cespy import LTspice  # pylint: disable=wrong-import-position
+from cespy.client_server import SimClient, SimServer  # pylint: disable=wrong-import-position
+from cespy.editor import SpiceEditor  # pylint: disable=wrong-import-position
+from cespy.sim import SimRunner  # pylint: disable=wrong-import-position
 
 # Note: SimBatch is not available in cespy.sim
 
 
 def example_basic_batch_simulation() -> None:
     """Demonstrate basic batch simulation capabilities."""
+    # pylint: disable=too-many-locals,too-many-statements
     print("=== Basic Batch Simulation Example ===")
 
     # Create a base circuit for batch simulation
@@ -189,6 +190,7 @@ C1 vout 0 {C_val}
 
 def example_parallel_simulation() -> None:
     """Demonstrate parallel simulation using threading and multiprocessing."""
+    # pylint: disable=too-many-locals,too-many-statements
     print("\n=== Parallel Simulation Example ===")
 
     # Create multiple circuit variants
@@ -448,7 +450,7 @@ C1 vout 0 {C1_val}
 
 def example_performance_optimization() -> None:
     """Demonstrate performance optimization techniques."""
-    # pylint: disable=too-many-locals,too-many-statements
+    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
     print("\n=== Performance Optimization Example ===")
 
     # Define file path early to avoid unbound variable issues

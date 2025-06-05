@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,duplicate-code
 """
 Circuit Editing and Manipulation Examples
 
@@ -13,8 +13,8 @@ from pathlib import Path
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy.editor import AscEditor, SpiceEditor
-from cespy.editor.base_editor import Component
+from cespy.editor import AscEditor, SpiceEditor  # pylint: disable=wrong-import-position
+from cespy.editor.base_editor import Component  # pylint: disable=wrong-import-position
 
 
 def example_asc_editor() -> None:

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name,duplicate-code
 """
 Basic Simulation Examples - Getting Started with CESPy
 
@@ -12,8 +13,8 @@ from pathlib import Path
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, RawRead, SimRunner, XyceSimulator
-from cespy.editor import SpiceEditor
+from cespy import LTspice, NGspiceSimulator, Qspice, RawRead, SimRunner, XyceSimulator  # pylint: disable=wrong-import-position
+from cespy.editor import SpiceEditor  # pylint: disable=wrong-import-position
 
 
 def example_ltspice_simulation() -> None:
