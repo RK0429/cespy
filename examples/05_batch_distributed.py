@@ -20,7 +20,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from cespy import LTspice
 from cespy.client_server import SimClient, SimServer
 from cespy.editor import SpiceEditor
-from cespy.sim import SimBatch, SimRunner
+from cespy.sim import SimRunner
+
+# Note: SimBatch is not available in cespy.sim
 
 
 def example_basic_batch_simulation() -> None:
@@ -42,14 +44,65 @@ C1 vout 0 {C_val}
 """
 
     base_path = Path("batch_base_circuit.net")
-    with open(base_path, "w") as f:
+    with open(base_path, "w", encoding="utf-8") as f:
         f.write(base_netlist)
 
     try:
         print("Setting up batch simulation...")
 
-        # Initialize batch simulator
-        batch_sim = SimBatch()
+        # Mock batch simulator implementation since SimBatch is not available
+        class MockBatchSim:
+            """Mock batch simulator implementation."""
+
+            def __init__(self) -> None:
+                """Initialize mock batch simulator."""
+                self.jobs: list[Dict[str, Any]] = []
+                self.simulator: Any = None
+                self.base_circuit: str | None = None
+                self.progress_callback: Any = None
+
+            def set_base_circuit(self, circuit: str) -> None:
+                """Set base circuit."""
+                self.base_circuit = circuit
+
+            def set_simulator(self, simulator: Any) -> None:
+                """Set simulator."""
+                self.simulator = simulator
+
+            def add_job(
+                self, job_id: int, parameters: Dict[str, Any], output_file: str
+            ) -> None:
+                """Add job to batch."""
+                self.jobs.append(
+                    {
+                        "job_id": job_id,
+                        "parameters": parameters,
+                        "output_file": output_file,
+                    }
+                )
+
+            def set_progress_callback(self, callback: Any) -> None:
+                """Set progress callback."""
+                self.progress_callback = callback
+
+            def run_batch(self) -> list[Dict[str, Any]]:
+                """Run batch simulation."""
+                results = []
+                total = len(self.jobs)
+                for i, job in enumerate(self.jobs):
+                    if self.progress_callback:
+                        self.progress_callback(i, total, job["job_id"])
+                    # Simulate running the job
+                    results.append(
+                        {
+                            "job_id": job["job_id"],
+                            "status": "success",
+                            "parameters": job["parameters"],
+                        }
+                    )
+                return results
+
+        batch_sim = MockBatchSim()
 
         # Configure batch parameters
         batch_sim.set_base_circuit(str(base_path))
@@ -77,11 +130,13 @@ C1 vout 0 {C_val}
 
         # Add jobs to batch
         for job in simulation_jobs[:10]:  # Limit to first 10 for demo
-            batch_sim.add_job(
-                job_id=job["job_id"],
-                parameters=job,
-                output_file=f"batch_result_{job['job_id']}.raw",
-            )
+            job_id_val = job["job_id"]
+            if isinstance(job_id_val, int):
+                batch_sim.add_job(
+                    job_id=job_id_val,
+                    parameters=job,
+                    output_file=f"batch_result_{job_id_val}.raw",
+                )
 
         print("Running batch simulation...")
         start_time = time.time()
@@ -152,7 +207,7 @@ C1 vout 0 1n
 .end
 """
         circuit_path = Path(f"parallel_circuit_{i}.net")
-        with open(circuit_path, "w") as f:
+        with open(circuit_path, "w", encoding="utf-8") as f:
             f.write(circuit_content)
         circuits.append(circuit_path)
 
@@ -190,7 +245,7 @@ C1 vout 0 1n
         start_time = time.time()
 
         with ThreadPoolExecutor(max_workers=3) as executor:
-            circuit_info = [(i, path) for i, path in enumerate(circuits)]
+            circuit_info = list(enumerate(circuits))
             threaded_results = list(executor.map(run_single_simulation, circuit_info))
 
         threaded_time = time.time() - start_time
@@ -206,11 +261,10 @@ C1 vout 0 1n
         start_time = time.time()
 
         # Note: Process-based parallelism may have overhead for small simulations
-        with ProcessPoolExecutor(max_workers=2) as executor:
-            circuit_info = [
-                (i, path) for i, path in enumerate(circuits[:4])
-            ]  # Limit for demo
-            process_results = list(executor.map(run_single_simulation, circuit_info))
+        # Use multiprocessing for CPU-bound simulations
+        with ProcessPoolExecutor(max_workers=2) as mp_executor:
+            circuit_info = list(enumerate(circuits[:4]))  # Limit for demo
+            process_results = list(mp_executor.map(run_single_simulation, circuit_info))
 
         process_time = time.time() - start_time
         print(f"Process-based time: {process_time:.2f} seconds")
@@ -259,7 +313,7 @@ C1 vout 0 {C1_val}
 .ac dec 10 1 100k
 .end
 """
-        with open(circuit_path, "w") as f:
+        with open(circuit_path, "w", encoding="utf-8") as f:
             f.write(server_circuit)
 
         # Configure server
@@ -319,10 +373,10 @@ C1 vout 0 {C1_val}
         # Simulate job execution (normally done by server)
         print("Executing distributed jobs...")
 
-        job_results = []
+        job_results: list[Dict[str, Any]] = []
         for job in client_jobs:
             # Simulate job processing
-            job_id = job.get("job_id", "unknown")
+            job_id = job.get("job_id", 0)
             print(f"  Processing job {job_id}...")
 
             # In real implementation, this would be handled by the server
@@ -332,12 +386,11 @@ C1 vout 0 {C1_val}
 
             # Apply parameters to the circuit
             request = job.get("request", {})
-            circuit_file = (
-                request.get("circuit_file", "") if isinstance(request, dict) else ""
-            )
-            parameters = (
-                request.get("parameters", {}) if isinstance(request, dict) else {}
-            )
+            circuit_file = ""
+            parameters = {}
+            if isinstance(request, dict):
+                circuit_file = request.get("circuit_file", "")
+                parameters = request.get("parameters", {})
 
             editor = SpiceEditor(circuit_file)
             if isinstance(parameters, dict):
@@ -364,8 +417,8 @@ C1 vout 0 {C1_val}
         # Results analysis
         print("Distributed simulation results:")
         total_jobs = len(job_results)
-        successful_jobs = sum(1 for r in job_results if r["success"])
-        total_time = sum(r["execution_time"] for r in job_results)
+        successful_jobs = sum(1 for r in job_results if bool(r.get("success", False)))
+        total_time = sum(float(r.get("execution_time", 0.0)) for r in job_results)
 
         print(f"  Total jobs: {total_jobs}")
         print(f"  Successful: {successful_jobs}")
@@ -375,9 +428,11 @@ C1 vout 0 {C1_val}
 
         # Show job details
         print("Job details:")
-        for result in job_results:
-            status = "✓" if result["success"] else "✗"
-            print(f"  {status} Job {result['job_id']}: {result['execution_time']:.3f}s")
+        for job_result in job_results:
+            status = "✓" if job_result.get("success", False) else "✗"
+            job_id = job_result.get("job_id", "unknown")
+            exec_time = float(job_result.get("execution_time", 0.0))
+            print(f"  {status} Job {job_id}: {exec_time:.3f}s")
 
     except (IOError, ValueError, OSError) as e:
         print(f"Error in client-server simulation: {e}")
@@ -421,7 +476,7 @@ C3 vout 0 {C3}
 .ac dec 20 1 10meg
 .end
 """
-        with open(circuit_path, "w") as f:
+        with open(circuit_path, "w", encoding="utf-8") as f:
             f.write(complex_circuit)
 
         # Test 1: Basic simulation timing

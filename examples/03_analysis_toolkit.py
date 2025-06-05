@@ -64,10 +64,12 @@ R2 vout 0 {R2_nom*(1+R2_tol*AGAUSS(0,1,1))}
         }
 
         for comp, params in component_variations.items():
-            mc_analysis.set_tolerance(
-                ref=comp,
-                new_tolerance=float(params["tolerance"]),
-            )
+            tolerance = params["tolerance"]
+            if isinstance(tolerance, (int, float)):
+                mc_analysis.set_tolerance(
+                    ref=comp,
+                    new_tolerance=float(tolerance),
+                )
 
         print("Running Monte Carlo simulation...")
         results = mc_analysis.run_analysis()
@@ -431,11 +433,15 @@ R3 vout 0 {R3_nom}
         ]
 
         for comp in components:
-            tol_analysis.set_tolerance(
-                ref=str(comp["name"]),
-                new_tolerance=float(comp["tolerance"]),
-                distribution=str(comp.get("distribution", "uniform")),
-            )
+            name = comp["name"]
+            tolerance = comp["tolerance"]
+            distribution = comp.get("distribution", "uniform")
+            if isinstance(name, str) and isinstance(tolerance, (int, float)):
+                tol_analysis.set_tolerance(
+                    ref=name,
+                    new_tolerance=float(tolerance),
+                    distribution=str(distribution),
+                )
 
         print("Running tolerance analysis...")
         results = tol_analysis.run_analysis()

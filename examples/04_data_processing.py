@@ -264,7 +264,7 @@ def example_data_streaming() -> None:
             stream_data = {}
             for trace_name in reader.get_trace_names():
                 trace = reader.get_trace(trace_name)
-                if hasattr(trace, "data"):
+                if not isinstance(trace, DummyTrace) and hasattr(trace, "data"):
                     stream_data[trace_name] = trace.data
 
             # Calculate FFT for frequency analysis
@@ -352,7 +352,7 @@ def example_data_caching() -> None:
             # Use RawRead to get data and cache manually
             reader = RawRead(str(file_path))
             trace = reader.get_trace("V(decay)")
-            if hasattr(trace, "data"):
+            if not isinstance(trace, DummyTrace) and hasattr(trace, "data"):
                 data = trace.data
                 processed = np.mean(data)  # Simple processing
                 processed_values.append(processed)
@@ -366,7 +366,7 @@ def example_data_caching() -> None:
         for file_path in cache_files:
             reader = RawRead(str(file_path))
             trace = reader.get_trace("V(decay)")
-            if hasattr(trace, "data"):
+            if not isinstance(trace, DummyTrace) and hasattr(trace, "data"):
                 data = trace.data
                 processed = np.mean(data)  # Same processing
                 processed_values_2.append(processed)
@@ -408,7 +408,7 @@ def example_data_caching() -> None:
         # This should trigger cache eviction
         reader = RawRead(str(large_file))
         trace = reader.get_trace("V(large)")
-        if hasattr(trace, "data"):
+        if not isinstance(trace, DummyTrace) and hasattr(trace, "data"):
             _ = trace.data  # Access data to potentially trigger cache
 
         if hasattr(cache_system, "get_statistics"):
