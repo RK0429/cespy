@@ -136,9 +136,8 @@ def example_qspice_simulation() -> None:
     """Basic QSpice simulation example."""
     print("\n=== QSpice Simulation Example ===")
 
-    try:
-        # Create a simple RC circuit
-        netlist_content = """
+    # Create a simple RC circuit
+    netlist_content = """
 * RC Low-pass filter
 V1 in 0 AC 1 0
 R1 in out 1k
@@ -147,7 +146,8 @@ C1 out 0 1n
 .end
 """
 
-        netlist_path = Path("temp_rc_filter.net")
+    netlist_path = Path("temp_rc_filter.net")
+    try:
         with open(netlist_path, "w", encoding="utf-8") as f:
             f.write(netlist_content)
 
@@ -165,7 +165,7 @@ C1 out 0 1n
     except Exception as e:
         print(f"Error running QSpice simulation: {e}")
     finally:
-        if "netlist_path" in locals() and netlist_path.exists():
+        if netlist_path.exists():
             netlist_path.unlink()
 
 
@@ -173,9 +173,8 @@ def example_xyce_simulation() -> None:
     """Basic Xyce simulation example."""
     print("\n=== Xyce Simulation Example ===")
 
-    try:
-        # Create a simple diode circuit
-        netlist_content = """
+    # Create a simple diode circuit
+    netlist_content = """
 * Simple diode circuit
 V1 in 0 DC 2.5
 R1 in cathode 1k
@@ -186,7 +185,8 @@ D1 cathode 0 DMOD
 .end
 """
 
-        netlist_path = Path("temp_diode.net")
+    netlist_path = Path("temp_diode.net")
+    try:
         with open(netlist_path, "w", encoding="utf-8") as f:
             f.write(netlist_content)
 
@@ -204,7 +204,7 @@ D1 cathode 0 DMOD
     except Exception as e:
         print(f"Error running Xyce simulation: {e}")
     finally:
-        if "netlist_path" in locals() and netlist_path.exists():
+        if netlist_path.exists():
             netlist_path.unlink()
 
 
@@ -212,9 +212,8 @@ def example_parameter_sweep() -> None:
     """Example of parameter sweep simulation."""
     print("\n=== Parameter Sweep Example ===")
 
-    try:
-        # Create circuit with parameter to sweep
-        netlist_content = """
+    # Create circuit with parameter to sweep
+    netlist_content = """
 Version 4
 SHEET 1 880 680
 WIRE 176 80 80 80
@@ -241,7 +240,8 @@ TEXT 56 264 Left 2 !.step param R 100 10k 100
 TEXT 56 288 Left 2 !.op
 """
 
-        netlist_path = Path("temp_sweep.asc")
+    netlist_path = Path("temp_sweep.asc")
+    try:
         with open(netlist_path, "w", encoding="utf-8") as f:
             f.write(netlist_content)
 
@@ -275,7 +275,7 @@ TEXT 56 288 Left 2 !.op
     except Exception as e:
         print(f"Error in parameter sweep: {e}")
     finally:
-        if "netlist_path" in locals() and netlist_path.exists():
+        if netlist_path.exists():
             netlist_path.unlink()
 
 

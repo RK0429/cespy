@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from cespy.editor import AscEditor, SpiceEditor  # noqa: E402
+from cespy.editor.base_editor import Component  # noqa: E402
 
 
 def example_asc_editor() -> None:
@@ -183,8 +184,8 @@ E1 out_int 0 in+ in- 100000
         print("\nCircuit analysis:")
         components = editor.get_components()
         print(f"  Total components: {len(components)}")
-        instructions = editor.get_instructions()
-        print(f"  Instructions: {len(instructions)}")
+        # Note: There's no get_instructions method, we'd need to track added instructions manually
+        print("  Instructions: Added dynamically")
         print("✓ Circuit structure analyzed")
 
     except (IOError, OSError, ValueError) as e:
@@ -354,35 +355,14 @@ L1 n1 n2 1m
         # Note: Circuit validation is not a built-in method
         # Check for common issues manually
         components = editor.get_components()
-        instructions = editor.get_instructions()
-        print(
-            f"Circuit has {len(components)} components and {len(instructions)} instructions"
-        )
+        # Note: There's no get_instructions method
+        print(f"Circuit has {len(components)} components")
 
-        # Check for floating nodes (if supported)
-        print("\nChecking for floating nodes...")
-        try:
-            if hasattr(editor, "find_floating_nodes"):
-                floating_nodes = editor.find_floating_nodes()
-                if floating_nodes:
-                    print(f"⚠ Floating nodes found: {floating_nodes}")
-                else:
-                    print("✓ No floating nodes detected")
-            else:
-                print("⚠ Floating node detection not available")
-        except AttributeError:
-            print("⚠ Floating node detection not supported")
-
-        # Check connectivity (if supported)
-        print("Checking circuit connectivity...")
-        try:
-            if hasattr(editor, "get_connected_nodes"):
-                connected_nodes = editor.get_connected_nodes()
-                print(f"Connected node groups: {len(connected_nodes)}")
-            else:
-                print("⚠ Connectivity analysis not available")
-        except AttributeError:
-            print("⚠ Connectivity analysis not supported")
+        # Note: Neither find_floating_nodes nor get_connected_nodes methods exist
+        # These validation features would need to be implemented separately
+        print("\nNote: Advanced circuit validation features are not built-in")
+        print("  - Floating node detection would need custom implementation")
+        print("  - Connectivity analysis would need custom implementation")
 
         # Fix the circuit
         print("\nFixing circuit issues...")
@@ -390,7 +370,6 @@ L1 n1 n2 1m
         # Connect the floating node
         editor.set_component_value("R2", "2k")  # Ensure proper connection
         # Add component using the correct API
-        from cespy.editor.base_editor import Component
 
         component_line = "R3 floating_node 0 10k"
         editor.add_component(Component(editor, component_line))
@@ -413,11 +392,10 @@ L1 n1 n2 1m
         # Check the fixed circuit
         fixed_editor = SpiceEditor(str(fixed_path))
         fixed_components = fixed_editor.get_components()
-        fixed_instructions = fixed_editor.get_instructions()
+        # Note: There's no get_instructions method
         if len(fixed_components) > len(components):
             print("✓ Fixed circuit has additional components added")
             print(f"  Components: {len(components)} → {len(fixed_components)}")
-            print(f"  Instructions: {len(instructions)} → {len(fixed_instructions)}")
         else:
             print("⚠ No new components added")
 

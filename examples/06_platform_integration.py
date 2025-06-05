@@ -317,9 +317,10 @@ R1 vin vout 1k
         print(f"Error in encoding handling: {e}")
     finally:
         # Cleanup
-        for file_path in test_files:
-            if file_path.exists():
-                file_path.unlink()
+        if "test_files" in locals():
+            for file_path in test_files:
+                if file_path.exists():
+                    file_path.unlink()
 
 
 def example_path_handling() -> None:
@@ -410,8 +411,6 @@ def example_path_handling() -> None:
     finally:
         # Cleanup
         if "test_dir" in locals() and test_dir.exists():
-            import shutil
-
             shutil.rmtree(test_dir)
             print("Cleaned up test directory")
 

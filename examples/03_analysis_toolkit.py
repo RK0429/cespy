@@ -8,12 +8,12 @@ worst-case analysis, sensitivity analysis, and other statistical techniques.
 
 import sys
 from pathlib import Path
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from typing import Any
-
+from cespy.sim.process_callback import ProcessCallback  # noqa: E402
 from cespy.sim.toolkit import (  # noqa: E402
     FailureMode,
     FastWorstCaseAnalysis,
@@ -64,8 +64,8 @@ R2 vout 0 {R2_nom*(1+R2_tol*AGAUSS(0,1,1))}
 
         for comp, params in component_variations.items():
             mc_analysis.set_tolerance(
-                component=comp,
-                tolerance=params["tolerance"],
+                ref=comp,
+                new_tolerance=params["tolerance"],
             )
 
         print("Running Monte Carlo simulation...")
@@ -135,12 +135,8 @@ Rout out 0 100
         # Initialize worst-case analysis
         print("Configuring worst-case analysis...")
 
-        try:
-            wc_analysis = WorstCaseAnalysis(circuit_file=str(netlist_path))
-            print("Worst-case analysis initialized")
-        except TypeError:
-            wc_analysis = WorstCaseAnalysis()
-            print("Initialized with default constructor")
+        wc_analysis = WorstCaseAnalysis(circuit_file=str(netlist_path))
+        print("Worst-case analysis initialized")
 
         # Try to configure if methods are available
         config_methods = [
@@ -169,23 +165,13 @@ Rout out 0 100
 
         for comp, tol in tolerances.items():
             try:
-                if hasattr(wc_analysis, "add_component_tolerance"):
-                    wc_analysis.add_component_tolerance(comp, tol)
-                    print(f"  Added tolerance for {comp}: {tol*100}%")
-                else:
-                    print(f"  Cannot add tolerance for {comp} - method not available")
+                wc_analysis.set_tolerance(ref=comp, new_tolerance=tol)
+                print(f"  Added tolerance for {comp}: {tol*100}%")
             except Exception as e:
                 print(f"  Error adding tolerance for {comp}: {e}")
 
-        # Add temperature variation
-        try:
-            if hasattr(wc_analysis, "add_temperature_variation"):
-                wc_analysis.add_temperature_variation(min_temp=-40, max_temp=85)
-                print("  Added temperature variation: -40°C to 85°C")
-            else:
-                print("  Temperature variation method not available")
-        except Exception as e:
-            print(f"  Error adding temperature variation: {e}")
+        # Note: Temperature variation would need to be implemented
+        print("  Temperature variation: would need custom implementation")
 
         print("Running worst-case analysis...")
         try:
@@ -196,31 +182,8 @@ Rout out 0 100
                 else:
                     print("✗ Worst-case analysis failed")
 
-                # Try to get results if available
-                if hasattr(wc_analysis, "get_worst_case_results"):
-                    try:
-                        wc_results = wc_analysis.get_worst_case_results()
-                        print("Worst-case results at 1kHz:")
-                        print(f"  Maximum gain: {wc_results.get('max_gain', 'N/A')}")
-                        print(f"  Minimum gain: {wc_results.get('min_gain', 'N/A')}")
-                        print(
-                            f"  Gain variation: {wc_results.get('gain_variation', 'N/A')}"
-                        )
-                    except Exception as e:
-                        print(f"  Could not get worst-case results: {e}")
-
-                # Try to get worst combinations if available
-                if hasattr(wc_analysis, "get_worst_combinations"):
-                    try:
-                        worst_combinations = wc_analysis.get_worst_combinations()
-                        print(
-                            f"  Worst-case high combination: {worst_combinations.get('high', 'N/A')}"
-                        )
-                        print(
-                            f"  Worst-case low combination: {worst_combinations.get('low', 'N/A')}"
-                        )
-                    except Exception as e:
-                        print(f"  Could not get worst combinations: {e}")
+                # Note: Results would need specific implementation
+                print("  Results processing would need custom implementation")
             else:
                 print("✗ Worst-case run_analysis method not available")
         except Exception as e:
@@ -391,29 +354,37 @@ R3 vout 0 {R3_nom}
         f.write(netlist_content)
 
     try:
-        # Initialize tolerance analysis (note: may be abstract)
-        try:
-            tol_analysis = ToleranceDeviations(circuit_file=str(netlist_path))
-            print("Tolerance analysis initialized")
-        except TypeError:
-            print(
-                "Note: ToleranceDeviations may be abstract or require different constructor"
-            )
+        # ToleranceDeviations is abstract, create a concrete implementation
+        class MockToleranceAnalysis(ToleranceDeviations):
+            """Mock tolerance analysis for demonstration."""
 
-            # Create a concrete implementation that inherits from ToleranceDeviations
-            class MockToleranceAnalysis(ToleranceDeviations):
-                """Mock tolerance analysis for demonstration."""
+            def prepare_testbench(self, **kwargs: Any) -> None:
+                """Prepare testbench for analysis."""
+                pass
 
-                def prepare_testbench(self, **kwargs: Any) -> None:
-                    """Prepare testbench for analysis."""
-                    pass
+            def run_analysis(
+                self,
+                callback: Union[type[ProcessCallback], Callable[..., Any], None] = None,
+                callback_args: Union[Tuple[Any, ...], Dict[str, Any], None] = None,
+                switches: Optional[list[str]] = None,
+                timeout: Optional[float] = None,
+                exe_log: bool = False,
+                measure: Optional[str] = None,
+            ) -> Union[
+                Tuple[
+                    float,
+                    float,
+                    Dict[str, Union[str, float]],
+                    float,
+                    Dict[str, Union[str, float]],
+                ],
+                None,
+            ]:
+                """Run the analysis."""
+                return None
 
-                def run_analysis(self, **kwargs: Any) -> Any:
-                    """Run the analysis."""
-                    return {"mock": "results"}
-
-            tol_analysis = MockToleranceAnalysis(str(netlist_path))
-            print("Using mock tolerance analysis for demonstration")
+        tol_analysis = MockToleranceAnalysis(str(netlist_path))
+        print("Using mock tolerance analysis for demonstration")
 
         print("Configuring tolerance analysis...")
 

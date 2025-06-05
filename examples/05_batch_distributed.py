@@ -16,12 +16,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from cespy import LTspice  # noqa: E402
-from cespy.client_server import ServerSimRunner, SimClient, SimServer  # noqa: E402
+from cespy.client_server import SimClient, SimServer  # noqa: E402
 from cespy.editor import SpiceEditor  # noqa: E402
 from cespy.sim import SimBatch, SimRunner  # noqa: E402
 
 
-def example_basic_batch_simulation():
+def example_basic_batch_simulation() -> None:
     """Demonstrate basic batch simulation capabilities."""
     print("=== Basic Batch Simulation Example ===")
 
@@ -85,7 +85,7 @@ C1 vout 0 {C_val}
         start_time = time.time()
 
         # Run batch with progress callback
-        def progress_callback(completed, total, current_job):
+        def progress_callback(completed: int, total: int, current_job: int) -> None:
             progress = (completed / total) * 100
             print(f"  Progress: {progress:.1f}% (Job {current_job})")
 
@@ -108,10 +108,10 @@ C1 vout 0 {C_val}
         if successful_jobs:
             print("Sample results:")
             for job in successful_jobs[:3]:  # Show first 3
-                job_params: dict[str, object] = job["parameters"]
+                params = job["parameters"]
                 print(
-                    f"  Job {job['job_id']}: R={job_params['R_val']}, "
-                    f"C={job_params['C_val']}"
+                    f"  Job {job['job_id']}: R={params['R_val']}, "
+                    f"C={params['C_val']}"
                 )
 
     except Exception as e:
@@ -173,7 +173,7 @@ C1 vout 0 1n
         # Parallel simulation using ThreadPoolExecutor
         print("Running parallel simulations (threading)...")
 
-        def run_single_simulation(circuit_info):
+        def run_single_simulation(circuit_info: tuple[int, Path]) -> dict[str, object]:
             circuit_id, circuit_path = circuit_info
             runner = SimRunner(simulator=LTspice)
 
@@ -266,7 +266,12 @@ C1 vout 0 {C1_val}
 
         # Simulate server setup (in real usage, server runs in separate process)
         print("Configuring simulation server...")
-        server = SimServer(**server_config)
+        server = SimServer(
+            simulator=LTspice,
+            parallel_sims=server_config["max_workers"],
+            port=server_config["port"],
+            host=server_config["host"],
+        )
 
         # Note: In actual usage, you would start the server:
         # server.start()
@@ -289,7 +294,7 @@ C1 vout 0 {C1_val}
 
         for i, params in enumerate(parameter_sets):
             # Create client
-            client = SimClient(host="localhost", port=9090)
+            client = SimClient(host_address="localhost", port=9090)
 
             # Prepare job
             job_request = {
@@ -313,12 +318,19 @@ C1 vout 0 {C1_val}
             print(f"  Processing job {job['job_id']}...")
 
             # In real implementation, this would be handled by the server
-            runner = ServerSimRunner()
-            runner.set_circuit(job["request"]["circuit_file"])
-            runner.set_parameters(job["request"]["parameters"])
+            # Since ServerSimRunner doesn't have set_circuit/set_parameters methods,
+            # we'll simulate the behavior with a regular SimRunner
+            runner = SimRunner(simulator=LTspice)
+
+            # Apply parameters to the circuit
+            editor = SpiceEditor(job["request"]["circuit_file"])
+            for param, value in job["request"]["parameters"].items():
+                editor.set_parameter(param, value)
+            temp_file = Path(f"temp_job_{job['job_id']}.net")
+            editor.save_netlist(str(temp_file))
 
             start_time = time.time()
-            result = runner.run()
+            result = runner.run(str(temp_file))
             execution_time = time.time() - start_time
 
             job_results.append(
@@ -353,8 +365,13 @@ C1 vout 0 {C1_val}
     except Exception as e:
         print(f"Error in client-server simulation: {e}")
     finally:
-        if "circuit_path" in locals() and circuit_path.exists():
+        if circuit_path.exists():
             circuit_path.unlink()
+        # Clean up temp files
+        for i in range(4):
+            temp_file = Path(f"temp_job_{i}.net")
+            if temp_file.exists():
+                temp_file.unlink()
 
 
 def example_performance_optimization() -> None:
@@ -400,7 +417,7 @@ C3 vout 0 {C3}
         times = []
         for i in range(5):
             start_time = time.time()
-            result = runner.run()
+            result = runner.run(str(circuit_path))
             elapsed = time.time() - start_time
             times.append(elapsed)
             print(f"  Run {i+1}: {elapsed:.3f}s")
@@ -525,7 +542,7 @@ C3 vout 0 {C3}
     except Exception as e:
         print(f"Error in performance optimization: {e}")
     finally:
-        if "circuit_path" in locals() and circuit_path.exists():
+        if circuit_path.exists():
             circuit_path.unlink()
 
 
