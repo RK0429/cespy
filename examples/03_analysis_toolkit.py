@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name
 """
 Analysis Toolkit Examples
 
@@ -13,8 +14,8 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy.sim.process_callback import ProcessCallback  # noqa: E402
-from cespy.sim.toolkit import (  # noqa: E402
+from cespy.sim.process_callback import ProcessCallback
+from cespy.sim.toolkit import (
     FailureMode,
     FastWorstCaseAnalysis,
     MonteCarloAnalysis,
@@ -65,7 +66,7 @@ R2 vout 0 {R2_nom*(1+R2_tol*AGAUSS(0,1,1))}
         for comp, params in component_variations.items():
             mc_analysis.set_tolerance(
                 ref=comp,
-                new_tolerance=params["tolerance"],
+                new_tolerance=float(params["tolerance"]),
             )
 
         print("Running Monte Carlo simulation...")
@@ -97,6 +98,7 @@ R2 vout 0 {R2_nom*(1+R2_tol*AGAUSS(0,1,1))}
 
 def example_worst_case_analysis() -> None:
     """Demonstrate worst-case analysis."""
+    # pylint: disable=too-many-branches
     print("\n=== Worst-Case Analysis Example ===")
 
     # Create an amplifier circuit for worst-case analysis
@@ -153,7 +155,7 @@ Rout out 0 100
                     print(f"  Configured {method_name}")
                 else:
                     print(f"  {method_name} method not available")
-            except Exception as e:
+            except (AttributeError, ValueError) as e:
                 print(f"  Error configuring {method_name}: {e}")
 
         # Define component tolerances
@@ -167,7 +169,7 @@ Rout out 0 100
             try:
                 wc_analysis.set_tolerance(ref=comp, new_tolerance=tol)
                 print(f"  Added tolerance for {comp}: {tol*100}%")
-            except Exception as e:
+            except (AttributeError, ValueError) as e:
                 print(f"  Error adding tolerance for {comp}: {e}")
 
         # Note: Temperature variation would need to be implemented
@@ -186,7 +188,7 @@ Rout out 0 100
                 print("  Results processing would need custom implementation")
             else:
                 print("✗ Worst-case run_analysis method not available")
-        except Exception as e:
+        except (AttributeError, ValueError) as e:
             print(f"✗ Worst-case analysis error: {e}")
 
     except (IOError, OSError, ValueError) as e:
@@ -360,7 +362,8 @@ R3 vout 0 {R3_nom}
 
             def prepare_testbench(self, **kwargs: Any) -> None:
                 """Prepare testbench for analysis."""
-                pass
+                # Implementation would prepare circuit for analysis
+                _ = kwargs  # Acknowledge unused parameter
 
             def run_analysis(
                 self,
@@ -381,7 +384,16 @@ R3 vout 0 {R3_nom}
                 None,
             ]:
                 """Run the analysis."""
-                return None
+                # Acknowledge unused parameters
+                _ = (callback, callback_args, switches, timeout, exe_log, measure)
+                # Return a mock result tuple
+                return (
+                    0.0,  # nominal_value
+                    0.0,  # min_value
+                    {},  # min_combination
+                    0.0,  # max_value
+                    {},  # max_combination
+                )
 
         tol_analysis = MockToleranceAnalysis(str(netlist_path))
         print("Using mock tolerance analysis for demonstration")
@@ -420,9 +432,9 @@ R3 vout 0 {R3_nom}
 
         for comp in components:
             tol_analysis.set_tolerance(
-                ref=comp["name"],
-                new_tolerance=comp["tolerance"],
-                distribution=comp.get("distribution", "uniform"),
+                ref=str(comp["name"]),
+                new_tolerance=float(comp["tolerance"]),
+                distribution=str(comp.get("distribution", "uniform")),
             )
 
         print("Running tolerance analysis...")

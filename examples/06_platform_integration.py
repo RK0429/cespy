@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name
 """
 Platform Integration and Compatibility Examples
 
@@ -18,8 +19,8 @@ from typing import Any, Dict, List, Tuple
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator  # noqa: E402
-from cespy.utils.detect_encoding import detect_encoding  # noqa: E402
+from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator
+from cespy.utils.detect_encoding import detect_encoding
 
 
 def example_platform_detection() -> None:
@@ -67,6 +68,7 @@ def example_platform_detection() -> None:
 
 def example_simulator_detection() -> Dict[str, Any]:
     """Demonstrate automatic simulator detection across platforms."""
+    # pylint: disable=too-many-branches,too-many-statements
     print("\n=== Simulator Detection Example ===")
 
     # Common simulator installation paths by platform
@@ -146,8 +148,7 @@ def example_simulator_detection() -> Dict[str, Any]:
                         found_path = expanded_path
                         print(f"    ✓ Found at: {found_path}")
                         break
-                    else:
-                        print(f"    ✗ Not found: {expanded_path}")
+                    print(f"    ✗ Not found: {expanded_path}")
 
                 # Also check PATH
                 executable_name = simulator
@@ -230,9 +231,11 @@ def example_file_encoding_handling() -> None:
     """Demonstrate cross-platform file encoding handling."""
     print("\n=== File Encoding Handling Example ===")
 
+    # Define test_files early to avoid unbound variable issues
+    test_files = []
+
     try:
         # Create test files with different encodings
-        test_files = []
 
         # UTF-8 file (common on Linux/macOS)
         utf8_content = """* UTF-8 encoded circuit file
@@ -327,6 +330,9 @@ def example_path_handling() -> None:
     """Demonstrate cross-platform path handling."""
     print("\n=== Cross-Platform Path Handling Example ===")
 
+    # Define test_dir early to avoid unbound variable issues
+    test_dir = Path("test_platform_structure")
+
     try:
         print("Path handling examples:")
 
@@ -402,6 +408,7 @@ def example_path_handling() -> None:
         # Test relative path operations
         print("\nRelative path operations:")
         base_path = test_dir / "circuits"
+        print(f"  Base path: {base_path}")
         for file_path in test_files[:2]:  # First two files
             relative = file_path.relative_to(test_dir)
             print(f"  {file_path.name} relative to test_dir: {relative}")
@@ -417,6 +424,7 @@ def example_path_handling() -> None:
 
 def example_api_compatibility() -> None:
     """Demonstrate API compatibility and migration helpers."""
+    # pylint: disable=too-many-statements
     print("\n=== API Compatibility Example ===")
 
     try:
@@ -429,17 +437,19 @@ def example_api_compatibility() -> None:
         print("  Testing legacy simulator initialization...")
         try:
             # This simulates how users might have used older versions
-            _ltspice_old_style = LTspice()
-            print("    ✓ LTSpice (old style) - compatible")
+            ltspice_old_style = LTspice()
+            print(f"    ✓ LTSpice (old style) - compatible: {ltspice_old_style}")
         except (IOError, OSError, ValueError) as e:
             print(f"    ✗ LTSpice (old style) - error: {e}")
 
         # New pattern: Modern API
         print("  Testing modern API...")
         try:
-            from cespy import simulate  # Modern unified interface  # noqa: F401
+            from cespy import (  # Modern unified interface  # noqa: F401  # pylint: disable=import-outside-toplevel
+                simulate,
+            )
 
-            print("    ✓ Modern unified simulate() function available")
+            print(f"    ✓ Modern unified simulate() function available: {simulate}")
         except ImportError:
             print("    ✗ Modern API not available")
 
@@ -500,7 +510,7 @@ def example_api_compatibility() -> None:
         # Simulate version checking
         def check_version_compatibility() -> List[str]:
             """Check if current version is compatible with user's code."""
-            import cespy
+            import cespy  # pylint: disable=import-outside-toplevel
 
             # Simulate version detection
             current_version = getattr(cespy, "__version__", "1.0.0")
@@ -533,12 +543,13 @@ def example_api_compatibility() -> None:
 
             return available_features
 
-        _available_features = check_version_compatibility()
+        available_features = check_version_compatibility()
+        print(f"  Total available features: {len(available_features)}")
 
         # Test deprecated function warnings
         print("\nTesting deprecation warnings...")
 
-        import warnings as warning_module
+        import warnings as warning_module  # pylint: disable=import-outside-toplevel
 
         def deprecated_function() -> str:
             """Example of a deprecated function."""
@@ -557,12 +568,13 @@ def example_api_compatibility() -> None:
         # Capture warnings
         with warning_module.catch_warnings(record=True) as w:
             warning_module.simplefilter("always")
-            _result = deprecated_function()
+            result = deprecated_function()
+            print(f"    Function result: {result}")
 
             if w:
                 print(f"    ✓ Deprecation warning captured: {w[0].message}")
             else:
-                print(f"    ✗ No deprecation warning")
+                print("    ✗ No deprecation warning")
 
         print(f"    New function result: {new_function()}")
 
@@ -611,8 +623,14 @@ def example_environment_configuration() -> None:
         # Create configuration file template
         print("\nCreating configuration template...")
 
-        config_template = """# CESPy Configuration File
-# Platform: {platform}
+        current_platform = platform.system()
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        cpu_count = multiprocessing.cpu_count()
+        path_style = "posix" if current_platform != "Windows" else "windows"
+        line_endings = "lf" if current_platform != "Windows" else "crlf"
+
+        config_template = f"""# CESPy Configuration File
+# Platform: {current_platform}
 # Generated: {timestamp}
 
 [simulators]
@@ -639,13 +657,7 @@ use_temp_files = true
 encoding = utf-8
 path_style = {path_style}
 line_endings = {line_endings}
-""".format(
-            platform=platform.system(),
-            timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
-            cpu_count=multiprocessing.cpu_count(),
-            path_style="posix" if platform.system() != "Windows" else "windows",
-            line_endings="lf" if platform.system() != "Windows" else "crlf",
-        )
+"""
 
         config_path = Path("cespy_config_template.ini")
         with open(config_path, "w", encoding="utf-8") as f:
@@ -656,7 +668,7 @@ line_endings = {line_endings}
         print("\nTesting configuration loading...")
 
         try:
-            import configparser
+            import configparser  # pylint: disable=import-outside-toplevel
 
             config = configparser.ConfigParser()
             config.read(config_path)

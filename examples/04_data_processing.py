@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name
 """
 Data Processing and Visualization Examples
 
@@ -17,7 +18,7 @@ import numpy as np
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy.raw import (  # noqa: E402
+from cespy.raw import (
     RawDataCache,
     RawFileStreamer,
     RawRead,
@@ -25,7 +26,8 @@ from cespy.raw import (  # noqa: E402
     RawWrite,
     Trace,
 )
-from cespy.utils.histogram import create_histogram  # noqa: E402
+from cespy.raw.raw_classes import DummyTrace
+from cespy.utils.histogram import create_histogram
 
 
 def create_sample_raw_data() -> Dict[str, Any]:
@@ -61,6 +63,9 @@ def example_basic_raw_operations() -> None:
     # Create sample data
     sample_data = create_sample_raw_data()
 
+    # Define file path early to avoid unbound variable issues
+    raw_file_path = Path("sample_transient.raw")
+
     try:
         # Write raw data
         print("Writing raw data file...")
@@ -70,8 +75,6 @@ def example_basic_raw_operations() -> None:
         raw_writer.add_trace(Trace("time", sample_data["transient"]["time"]))
         raw_writer.add_trace(Trace("V(vin)", sample_data["transient"]["vin"]))
         raw_writer.add_trace(Trace("V(vout)", sample_data["transient"]["vout"]))
-
-        raw_file_path = Path("sample_transient.raw")
         raw_writer.save(raw_file_path)
         print(f"✓ Raw data written to {raw_file_path}")
 
@@ -82,7 +85,7 @@ def example_basic_raw_operations() -> None:
         # Get basic information
         print(f"Number of traces: {len(raw_reader.get_trace_names())}")
         time_trace = raw_reader.get_trace("time")
-        if hasattr(time_trace, "data"):
+        if not isinstance(time_trace, DummyTrace):
             print(f"Number of points: {len(time_trace.data)}")
         print(f"Traces available: {raw_reader.get_trace_names()}")
 
@@ -91,10 +94,10 @@ def example_basic_raw_operations() -> None:
         vin_trace = raw_reader.get_trace("V(vin)")
         vout_trace = raw_reader.get_trace("V(vout)")
 
-        if not (
-            hasattr(time_trace, "data")
-            and hasattr(vin_trace, "data")
-            and hasattr(vout_trace, "data")
+        if (
+            isinstance(time_trace, DummyTrace)
+            or isinstance(vin_trace, DummyTrace)
+            or isinstance(vout_trace, DummyTrace)
         ):
             print("Error: Unable to access trace data")
             return
@@ -115,7 +118,7 @@ def example_basic_raw_operations() -> None:
         print(f"RMS Values: Vin = {vin_rms:.3f} V, Vout = {vout_rms:.3f} V")
         print(f"Gain: {gain:.2f} dB")
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in basic raw operations: {e}")
     finally:
         # Cleanup
@@ -125,7 +128,11 @@ def example_basic_raw_operations() -> None:
 
 def example_lazy_loading() -> None:
     """Demonstrate lazy loading for large files."""
+    # pylint: disable=too-many-locals
     print("\n=== Lazy Loading Example ===")
+
+    # Define file path early to avoid unbound variable issues
+    large_raw_path = Path("large_dataset.raw")
 
     try:
         # Create a large dataset
@@ -139,8 +146,6 @@ def example_lazy_loading() -> None:
         raw_writer = RawWrite()
         raw_writer.add_trace(Trace("time", large_time))
         raw_writer.add_trace(Trace("V(signal)", large_signal))
-
-        large_raw_path = Path("large_dataset.raw")
         raw_writer.save(large_raw_path)
         file_size = large_raw_path.stat().st_size / (1024 * 1024)  # MB
         print(f"✓ Large file created: {file_size:.1f} MB")
@@ -152,13 +157,13 @@ def example_lazy_loading() -> None:
         start_time = time.time()
         normal_reader = RawRead(str(large_raw_path))
         normal_trace = normal_reader.get_trace("V(signal)")
-        if hasattr(normal_trace, "data"):
-            normal_data = normal_trace.data
-        else:
+        if isinstance(normal_trace, DummyTrace):
             print("Error: Unable to access normal trace data")
             return
+        normal_data = normal_trace.data
         normal_time = time.time() - start_time
         print(f"Normal loading: {normal_time:.3f} seconds")
+        print(f"  Loaded {len(normal_data)} data points")
 
         # Lazy loading
         start_time = time.time()
@@ -167,12 +172,19 @@ def example_lazy_loading() -> None:
         lazy_init_time = time.time() - start_time
         print(f"Lazy initialization: {lazy_init_time:.3f} seconds")
 
-        # Access subset of data if trace supports indexing
-        if hasattr(lazy_trace, "__getitem__"):
+        # Access subset of data
+        if not isinstance(lazy_trace, DummyTrace):
             start_time = time.time()
-            subset_data = lazy_trace[:10000]  # First 10k points
+            # LazyTrace needs to use get_wave() method
+            if hasattr(lazy_trace, "get_wave"):
+                full_data = lazy_trace.get_wave()
+                subset_data = full_data[:10000]  # First 10k points
+            else:
+                # For regular traces that support slicing
+                subset_data = lazy_trace.data[:10000]  # type: ignore
             subset_time = time.time() - start_time
             print(f"Subset access (10k points): {subset_time:.3f} seconds")
+            print(f"  Retrieved {len(subset_data)} data points")
 
             # Demonstrate streaming access
             print("Streaming data access...")
@@ -182,15 +194,22 @@ def example_lazy_loading() -> None:
             for i in range(min(5, total_chunks)):  # Process first 5 chunks
                 start_idx = i * chunk_size
                 end_idx = min((i + 1) * chunk_size, len(large_time))
-                chunk_data = lazy_trace[start_idx:end_idx]
+
+                # Get the chunk data
+                if hasattr(lazy_trace, "get_wave"):
+                    full_data = lazy_trace.get_wave()
+                    chunk_data = full_data[start_idx:end_idx]
+                else:
+                    chunk_data = lazy_trace.data[start_idx:end_idx]  # type: ignore
+
                 chunk_mean = np.mean(chunk_data)
                 print(
                     f"  Chunk {i+1}: points {start_idx}-{end_idx}, mean = {chunk_mean:.3f}"
                 )
         else:
-            print("Note: Lazy trace does not support indexing")
+            print("Note: Lazy trace is a DummyTrace")
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in lazy loading: {e}")
     finally:
         if "large_raw_path" in locals() and large_raw_path.exists():
@@ -199,13 +218,15 @@ def example_lazy_loading() -> None:
 
 def example_data_streaming() -> None:
     """Demonstrate data streaming for very large files."""
+    # pylint: disable=too-many-locals
     print("\n=== Data Streaming Example ===")
+
+    # Define file_paths early to avoid unbound variable issues
+    file_paths = []
 
     try:
         # Create multiple raw files to simulate large dataset
         print("Creating multiple raw files for streaming...")
-
-        file_paths = []
         for i in range(3):
             # Each file represents a different simulation run
             time_data = np.linspace(0, 1e-3, 50000)
@@ -236,6 +257,7 @@ def example_data_streaming() -> None:
 
             # Use RawFileStreamer for each file
             streamer = RawFileStreamer(raw_file=str(file_path))
+            print(f"    Using RawFileStreamer: {streamer}")
 
             # Read data using RawRead as fallback since streaming API may differ
             reader = RawRead(str(file_path))
@@ -280,7 +302,7 @@ def example_data_streaming() -> None:
                 f"RMS = {result['signal_rms']:.3f}"
             )
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in data streaming: {e}")
     finally:
         # Cleanup
@@ -292,13 +314,15 @@ def example_data_streaming() -> None:
 
 def example_data_caching() -> None:
     """Demonstrate intelligent data caching."""
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     print("\n=== Data Caching Example ===")
+
+    # Define cache_files early to avoid unbound variable issues
+    cache_files = []
 
     try:
         # Create sample data files
         print("Creating data files for caching demo...")
-
-        cache_files = []
         for i in range(3):
             time_data = np.linspace(0, 1e-3, 100000)
             signal_data = np.sin(2 * np.pi * 1000 * time_data) * np.exp(
@@ -323,6 +347,7 @@ def example_data_caching() -> None:
 
         # First access (cache miss)
         start_time = time.time()
+        processed_values = []
         for file_path in cache_files:
             # Use RawRead to get data and cache manually
             reader = RawRead(str(file_path))
@@ -330,19 +355,24 @@ def example_data_caching() -> None:
             if hasattr(trace, "data"):
                 data = trace.data
                 processed = np.mean(data)  # Simple processing
+                processed_values.append(processed)
         first_access_time = time.time() - start_time
         print(f"First access (cache miss): {first_access_time:.3f} seconds")
+        print(f"  Processed {len(processed_values)} files")
 
         # Second access (simulate cache hit by reading again)
         start_time = time.time()
+        processed_values_2 = []
         for file_path in cache_files:
             reader = RawRead(str(file_path))
             trace = reader.get_trace("V(decay)")
             if hasattr(trace, "data"):
                 data = trace.data
                 processed = np.mean(data)  # Same processing
+                processed_values_2.append(processed)
         second_access_time = time.time() - start_time
         print(f"Second access (simulated cache hit): {second_access_time:.3f} seconds")
+        print(f"  Processed {len(processed_values_2)} files again")
 
         if second_access_time > 0:
             speedup = first_access_time / second_access_time
@@ -393,7 +423,7 @@ def example_data_caching() -> None:
         if large_file.exists():
             large_file.unlink()
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in data caching: {e}")
     finally:
         # Cleanup
@@ -405,6 +435,7 @@ def example_data_caching() -> None:
 
 def example_histogram_analysis() -> None:
     """Demonstrate histogram analysis utilities."""
+    # pylint: disable=too-many-statements
     print("\n=== Histogram Analysis Example ===")
 
     try:
@@ -480,7 +511,7 @@ def example_histogram_analysis() -> None:
             data=list(lognormal_data), title="Failure Time Distribution", bins=50
         )
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in histogram analysis: {e}")
 
 
@@ -615,7 +646,7 @@ def example_visualization() -> None:
         if advanced_plot_path.exists():
             advanced_plot_path.unlink()
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in visualization: {e}")
 
 

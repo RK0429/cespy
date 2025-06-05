@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name
 """
 Batch and Distributed Simulation Examples
 
@@ -11,14 +12,15 @@ import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from pathlib import Path
+from typing import Any, Dict
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice  # noqa: E402
-from cespy.client_server import SimClient, SimServer  # noqa: E402
-from cespy.editor import SpiceEditor  # noqa: E402
-from cespy.sim import SimBatch, SimRunner  # noqa: E402
+from cespy import LTspice
+from cespy.client_server import SimClient, SimServer
+from cespy.editor import SpiceEditor
+from cespy.sim import SimBatch, SimRunner
 
 
 def example_basic_batch_simulation() -> None:
@@ -108,13 +110,15 @@ C1 vout 0 {C_val}
         if successful_jobs:
             print("Sample results:")
             for job in successful_jobs[:3]:  # Show first 3
-                params = job["parameters"]
-                print(
-                    f"  Job {job['job_id']}: R={params['R_val']}, "
-                    f"C={params['C_val']}"
-                )
+                params = job.get("parameters", {})
+                if isinstance(params, dict):
+                    print(
+                        f"  Job {job.get('job_id', 'unknown')}: "
+                        f"R={params.get('R_val', 'N/A')}, "
+                        f"C={params.get('C_val', 'N/A')}"
+                    )
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in batch simulation: {e}")
     finally:
         # Cleanup
@@ -221,7 +225,7 @@ C1 vout 0 1n
         print(f"  Threaded: {successful_threaded}/{len(threaded_results)}")
         print(f"  Process-based: {successful_process}/{len(process_results)}")
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in parallel simulation: {e}")
     finally:
         # Cleanup
@@ -232,7 +236,11 @@ C1 vout 0 1n
 
 def example_client_server_simulation() -> None:
     """Demonstrate client-server distributed simulation."""
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     print("\n=== Client-Server Simulation Example ===")
+
+    # Define file path early to avoid unbound variable issues
+    circuit_path = Path("server_circuit.net")
 
     try:
         print("Setting up client-server simulation...")
@@ -251,13 +259,11 @@ C1 vout 0 {C1_val}
 .ac dec 10 1 100k
 .end
 """
-
-        circuit_path = Path("server_circuit.net")
         with open(circuit_path, "w") as f:
             f.write(server_circuit)
 
         # Configure server
-        server_config = {
+        server_config: Dict[str, Any] = {
             "host": "localhost",
             "port": 9090,
             "max_workers": 3,
@@ -268,10 +274,11 @@ C1 vout 0 {C1_val}
         print("Configuring simulation server...")
         server = SimServer(
             simulator=LTspice,
-            parallel_sims=server_config["max_workers"],
-            port=server_config["port"],
-            host=server_config["host"],
+            parallel_sims=int(server_config["max_workers"]),
+            port=int(server_config["port"]),
+            host=str(server_config["host"]),
         )
+        print(f"Server configured: {server}")
 
         # Note: In actual usage, you would start the server:
         # server.start()
@@ -315,7 +322,8 @@ C1 vout 0 {C1_val}
         job_results = []
         for job in client_jobs:
             # Simulate job processing
-            print(f"  Processing job {job['job_id']}...")
+            job_id = job.get("job_id", "unknown")
+            print(f"  Processing job {job_id}...")
 
             # In real implementation, this would be handled by the server
             # Since ServerSimRunner doesn't have set_circuit/set_parameters methods,
@@ -323,10 +331,19 @@ C1 vout 0 {C1_val}
             runner = SimRunner(simulator=LTspice)
 
             # Apply parameters to the circuit
-            editor = SpiceEditor(job["request"]["circuit_file"])
-            for param, value in job["request"]["parameters"].items():
-                editor.set_parameter(param, value)
-            temp_file = Path(f"temp_job_{job['job_id']}.net")
+            request = job.get("request", {})
+            circuit_file = (
+                request.get("circuit_file", "") if isinstance(request, dict) else ""
+            )
+            parameters = (
+                request.get("parameters", {}) if isinstance(request, dict) else {}
+            )
+
+            editor = SpiceEditor(circuit_file)
+            if isinstance(parameters, dict):
+                for param, value in parameters.items():
+                    editor.set_parameter(param, value)
+            temp_file = Path(f"temp_job_{job_id}.net")
             editor.save_netlist(str(temp_file))
 
             start_time = time.time()
@@ -335,14 +352,14 @@ C1 vout 0 {C1_val}
 
             job_results.append(
                 {
-                    "job_id": job["job_id"],
+                    "job_id": job_id,
                     "success": result,
                     "execution_time": execution_time,
-                    "parameters": job["request"]["parameters"],
+                    "parameters": parameters,
                 }
             )
 
-            print(f"    Job {job['job_id']} completed in {execution_time:.3f}s")
+            print(f"    Job {job_id} completed in {execution_time:.3f}s")
 
         # Results analysis
         print("Distributed simulation results:")
@@ -362,7 +379,7 @@ C1 vout 0 {C1_val}
             status = "✓" if result["success"] else "✗"
             print(f"  {status} Job {result['job_id']}: {result['execution_time']:.3f}s")
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in client-server simulation: {e}")
     finally:
         if circuit_path.exists():
@@ -376,7 +393,11 @@ C1 vout 0 {C1_val}
 
 def example_performance_optimization() -> None:
     """Demonstrate performance optimization techniques."""
+    # pylint: disable=too-many-locals,too-many-statements
     print("\n=== Performance Optimization Example ===")
+
+    # Define file path early to avoid unbound variable issues
+    circuit_path = Path("performance_test.net")
 
     try:
         print("Demonstrating performance optimization techniques...")
@@ -400,8 +421,6 @@ C3 vout 0 {C3}
 .ac dec 20 1 10meg
 .end
 """
-
-        circuit_path = Path("performance_test.net")
         with open(circuit_path, "w") as f:
             f.write(complex_circuit)
 
@@ -420,7 +439,8 @@ C3 vout 0 {C3}
             result = runner.run(str(circuit_path))
             elapsed = time.time() - start_time
             times.append(elapsed)
-            print(f"  Run {i+1}: {elapsed:.3f}s")
+            status = "✓" if result else "✗"
+            print(f"  Run {i+1}: {elapsed:.3f}s {status}")
 
         avg_time = sum(times) / len(times)
         print(f"  Average time: {avg_time:.3f}s")
@@ -460,7 +480,8 @@ C3 vout 0 {C3}
             result = optimized_runner.run(str(optimized_path))
             elapsed = time.time() - start_time
             optimized_times.append(elapsed)
-            print(f"  Optimized run {i+1}: {elapsed:.3f}s")
+            status = "✓" if result else "✗"
+            print(f"  Optimized run {i+1}: {elapsed:.3f}s {status}")
 
         avg_optimized_time = sum(optimized_times) / len(optimized_times)
         speedup = avg_time / avg_optimized_time
@@ -471,7 +492,7 @@ C3 vout 0 {C3}
         # Test 3: Memory usage optimization
         print("\nTest 3: Memory usage monitoring...")
 
-        import psutil
+        import psutil  # pylint: disable=import-outside-toplevel
 
         process = psutil.Process(os.getpid())
 
@@ -491,7 +512,7 @@ C3 vout 0 {C3}
         print("\nTest 4: Disk I/O optimization...")
 
         # Test with temporary files vs. persistent files
-        import tempfile
+        import tempfile  # pylint: disable=import-outside-toplevel
 
         # Persistent file test
         start_time = time.time()
@@ -539,7 +560,7 @@ C3 vout 0 {C3}
         if optimized_path.exists():
             optimized_path.unlink()
 
-    except Exception as e:
+    except (IOError, ValueError, OSError) as e:
         print(f"Error in performance optimization: {e}")
     finally:
         if circuit_path.exists():

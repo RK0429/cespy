@@ -6,9 +6,9 @@ This script runs all example files in sequence, providing a comprehensive
 demonstration of CESPy capabilities.
 """
 
+import subprocess
 import sys
 import time
-import subprocess
 from pathlib import Path
 from typing import Tuple
 
@@ -29,6 +29,7 @@ def run_example(example_file: Path) -> Tuple[bool, float]:
             text=True,
             cwd=example_file.parent,
             timeout=300,  # 5 minute timeout per example
+            check=False,  # We handle errors ourselves
         )
 
         elapsed_time = time.time() - start_time
@@ -38,11 +39,9 @@ def run_example(example_file: Path) -> Tuple[bool, float]:
                 f"\n✓ {example_file.name} completed successfully in {elapsed_time:.2f}s"
             )
             return True, elapsed_time
-        else:
-            print(
-                f"\n✗ {example_file.name} failed with return code {result.returncode}"
-            )
-            return False, elapsed_time
+
+        print(f"\n✗ {example_file.name} failed with return code {result.returncode}")
+        return False, elapsed_time
 
     except subprocess.TimeoutExpired:
         print(f"\n⏰ {example_file.name} timed out after 5 minutes")
