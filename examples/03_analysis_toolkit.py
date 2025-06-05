@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from typing import Any
+
 from cespy.sim.toolkit import (  # noqa: E402
     FailureMode,
     FastWorstCaseAnalysis,
@@ -135,7 +136,7 @@ Rout out 0 100
         print("Configuring worst-case analysis...")
 
         try:
-            wc_analysis = WorstCaseAnalysis(str(netlist_path))
+            wc_analysis = WorstCaseAnalysis(circuit_file=str(netlist_path))
             print("Worst-case analysis initialized")
         except TypeError:
             wc_analysis = WorstCaseAnalysis()
@@ -339,8 +340,8 @@ Q1 coll base emit BJT_MODEL
 
         for param, config in parameters.items():
             sens_analysis.set_tolerance(
-                component=param,
-                tolerance=config["variation"],
+                ref=param,
+                new_tolerance=config["variation"],
             )
 
         print("Running sensitivity analysis...")
@@ -392,7 +393,7 @@ R3 vout 0 {R3_nom}
     try:
         # Initialize tolerance analysis (note: may be abstract)
         try:
-            tol_analysis = ToleranceDeviations(str(netlist_path))
+            tol_analysis = ToleranceDeviations(circuit_file=str(netlist_path))
             print("Tolerance analysis initialized")
         except TypeError:
             print(
@@ -402,6 +403,7 @@ R3 vout 0 {R3_nom}
             # Create a concrete implementation that inherits from ToleranceDeviations
             class MockToleranceAnalysis(ToleranceDeviations):
                 """Mock tolerance analysis for demonstration."""
+
                 def prepare_testbench(self, **kwargs: Any) -> None:
                     """Prepare testbench for analysis."""
                     pass
@@ -447,8 +449,9 @@ R3 vout 0 {R3_nom}
 
         for comp in components:
             tol_analysis.set_tolerance(
-                component=comp["name"],
-                tolerance=comp["tolerance"],
+                ref=comp["name"],
+                new_tolerance=comp["tolerance"],
+                distribution=comp.get("distribution", "uniform"),
             )
 
         print("Running tolerance analysis...")
@@ -511,7 +514,7 @@ R_load out gnd 100
 
     try:
         # Initialize failure mode analysis
-        failure_analysis = FailureMode(str(netlist_path))
+        failure_analysis = FailureMode(circuit_file=str(netlist_path))
 
         print("Configuring failure mode analysis...")
 
@@ -557,7 +560,13 @@ R_load out gnd 100
             print(f"Adding failure mode: {failure}")
 
         print("Running failure mode analysis...")
-        results = failure_analysis.run_analysis()
+        # Note: FailureMode uses run() method, not run_analysis()
+        try:
+            results = failure_analysis.run()
+        except AttributeError:
+            # Fallback if run() doesn't exist
+            print("Note: Failure mode analysis requires proper run implementation")
+            results = None
 
         if results:
             print("✓ Failure mode analysis completed")

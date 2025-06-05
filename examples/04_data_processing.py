@@ -339,9 +339,11 @@ def example_data_caching() -> None:
         raw_writer.save(large_file)
 
         # This should trigger cache eviction
-        large_data_cached = cache_system.get_trace_data(str(large_file), "V(large)")
+        reader = RawRead(str(large_file))
+        trace = reader.get_trace("V(large)")
+        large_data_cached = trace.data if hasattr(trace, "data") else []
 
-        final_stats = cache_system.get_cache_statistics()
+        final_stats = cache_system.get_statistics()
         print("After large data:")
         print(f"  Memory usage: {final_stats['memory_usage_mb']:.1f} MB")
         print(f"  Cached items: {final_stats['cached_items']}")

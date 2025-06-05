@@ -12,7 +12,14 @@ from pathlib import Path
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, RawRead, SimRunner, XyceSimulator  # noqa: E402
+from cespy import (  # noqa: E402
+    LTspice,
+    NGspiceSimulator,
+    Qspice,
+    RawRead,
+    SimRunner,
+    XyceSimulator,
+)
 from cespy.editor import SpiceEditor  # noqa: E402
 
 
@@ -56,19 +63,12 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
         f.write(netlist_content)
 
     try:
-        # Initialize LTSpice simulator
-        simulator = LTspice()
-
-        # Run simulation using SimRunner
-        runner = SimRunner()
-        runner.simulator = simulator
-
-        # Configure simulation
-        runner.set_circuit(str(netlist_path))
+        # Initialize SimRunner with LTspice simulator class
+        runner = SimRunner(simulator=LTspice)
 
         # Run the simulation
         print("Running LTSpice simulation...")
-        result = runner.run()
+        result = runner.run(str(netlist_path))
 
         if result:
             print("✓ Simulation completed successfully")
@@ -249,9 +249,7 @@ TEXT 56 288 Left 2 !.op
         editor = SpiceEditor(str(netlist_path))
 
         # Run simulation with different parameters
-        simulator = LTspice()
-        runner = SimRunner()
-        runner.simulator = simulator
+        runner = SimRunner(simulator=LTspice)
 
         print("Running parameter sweep simulation...")
 
@@ -263,10 +261,9 @@ TEXT 56 288 Left 2 !.op
 
             # Modify the parameter
             editor.set_parameter("R", str(r_val))
-            editor.save_netlist()
+            editor.save_netlist(run_netlist_file=str(netlist_path))
 
-            runner.set_circuit(str(netlist_path))
-            result = runner.run()
+            result = runner.run(str(netlist_path))
 
             if result:
                 print(f"    ✓ R={r_val} simulation completed")

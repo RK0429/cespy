@@ -64,11 +64,9 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
         editor.set_component_value("C1", "470n")
         editor.set_component_value("V1", "SINE(0 5 2k)")
 
-        # Add a new component (inductor)
-        print("Adding inductor...")
-        editor.add_component(
-            "ind", "L1", value="10m", position1=(350, 80), position2=(450, 80)
-        )
+        # Note: Adding new components to ASC files is not directly supported
+        # Components would need to be added manually or through netlist editing
+        print("Note: Component addition to ASC files requires netlist conversion")
 
         # Modify simulation commands
         print("Updating simulation command...")
@@ -144,14 +142,17 @@ E1 out_int 0 in+ in- 100000
         for comp in components[:5]:  # Show first 5
             print(f"  {comp}")
 
-        # Get parameters (note: actual implementation may vary)
-        try:
-            params = (
-                editor.get_parameters() if hasattr(editor, "get_parameters") else {}
-            )
-            print(f"Parameters: {params}")
-        except AttributeError:
-            print("Parameters functionality not available in this version")
+        # Get individual parameters
+        print("Parameters: (checking common parameters)")
+        params = {}
+        for param in ["temp", "tnom"]:
+            try:
+                if hasattr(editor, "get_parameter"):
+                    value = editor.get_parameter(param)
+                    params[param] = value
+                    print(f"  {param} = {value}")
+            except (KeyError, AttributeError):
+                pass
 
         # Modify component values
         print("\nModifying circuit...")
@@ -178,15 +179,13 @@ E1 out_int 0 in+ in- 100000
 
         print(f"✓ Modified netlist saved to {output_path}")
 
-        # Validate the circuit (if supported)
-        print("Validating circuit...")
-        try:
-            if hasattr(editor, "validate_circuit") and editor.validate_circuit():
-                print("✓ Circuit validation passed")
-            else:
-                print("⚠ Circuit validation not available or warnings found")
-        except AttributeError:
-            print("⚠ Circuit validation not supported in this version")
+        # Note: Circuit validation is not a built-in method
+        print("\nCircuit analysis:")
+        components = editor.get_components()
+        print(f"  Total components: {len(components)}")
+        instructions = editor.get_instructions()
+        print(f"  Instructions: {len(instructions)}")
+        print("✓ Circuit structure analyzed")
 
     except (IOError, OSError, ValueError) as e:
         print(f"Error in SPICE editing: {e}")
@@ -279,9 +278,15 @@ Rout out 0 100
         editor = SpiceEditor(str(netlist_path))
 
         print("Original parametric design:")
-        params = editor.get_parameters()
-        for param, value in params.items():
-            print(f"  {param} = {value}")
+        # Get individual parameters
+        params = {}
+        for param in ["fc", "Q", "gain"]:
+            try:
+                value = editor.get_parameter(param)
+                params[param] = value
+                print(f"  {param} = {value}")
+            except (KeyError, AttributeError):
+                pass
 
         # Create design variations
         design_variants = [
@@ -346,13 +351,13 @@ L1 n1 n2 1m
 
         print("Validating problematic circuit...")
 
-        # Check for common issues
-        validation_results = editor.validate_circuit()
-
-        if validation_results:
-            print("✓ Circuit passed basic validation")
-        else:
-            print("⚠ Circuit validation found issues")
+        # Note: Circuit validation is not a built-in method
+        # Check for common issues manually
+        components = editor.get_components()
+        instructions = editor.get_instructions()
+        print(
+            f"Circuit has {len(components)} components and {len(instructions)} instructions"
+        )
 
         # Check for floating nodes (if supported)
         print("\nChecking for floating nodes...")
@@ -384,26 +389,20 @@ L1 n1 n2 1m
 
         # Connect the floating node
         editor.set_component_value("R2", "2k")  # Ensure proper connection
-        try:
-            if hasattr(editor, "add_component"):
-                editor.add_component(
-                    "resistor", "R3", nodes=["floating_node", "0"], value="10k"
-                )
-        except AttributeError:
-            print("Note: add_component method not available, adding manually")
+        # Add component using the correct API
+        from cespy.editor.base_editor import Component
+
+        component_line = "R3 floating_node 0 10k"
+        editor.add_component(Component(editor, component_line))
 
         # Fix the simulation command
         editor.remove_instruction(".tran 1m")
         editor.add_instruction(".tran 0 10m 0 10u")
 
         # Connect L1 properly
-        try:
-            if hasattr(editor, "add_component"):
-                editor.add_component(
-                    "resistor", "R_load", nodes=["n2", "0"], value="50"
-                )
-        except AttributeError:
-            print("Note: add_component method not available, adding manually")
+        # Add component using the correct API
+        component_line = "R_load n2 0 50"
+        editor.add_component(Component(editor, component_line))
 
         # Save fixed circuit
         fixed_path = netlist_path.with_name("fixed_circuit.net")
@@ -411,18 +410,16 @@ L1 n1 n2 1m
 
         print(f"✓ Fixed circuit saved to {fixed_path}")
 
-        # Re-validate (if supported)
+        # Check the fixed circuit
         fixed_editor = SpiceEditor(str(fixed_path))
-        try:
-            if (
-                hasattr(fixed_editor, "validate_circuit")
-                and fixed_editor.validate_circuit()
-            ):
-                print("✓ Fixed circuit passes validation")
-            else:
-                print("⚠ Validation not available or warnings found")
-        except AttributeError:
-            print("⚠ Circuit validation not supported")
+        fixed_components = fixed_editor.get_components()
+        fixed_instructions = fixed_editor.get_instructions()
+        if len(fixed_components) > len(components):
+            print("✓ Fixed circuit has additional components added")
+            print(f"  Components: {len(components)} → {len(fixed_components)}")
+            print(f"  Instructions: {len(instructions)} → {len(fixed_instructions)}")
+        else:
+            print("⚠ No new components added")
 
     except (IOError, OSError, ValueError) as e:
         print(f"Error in circuit validation: {e}")

@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Tuple
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator  # noqa: E402
-from cespy.utils import detect_encoding  # noqa: E402
+from cespy.utils.detect_encoding import detect_encoding  # noqa: E402
 
 
 def example_platform_detection() -> None:

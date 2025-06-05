@@ -108,7 +108,7 @@ C1 vout 0 {C_val}
         if successful_jobs:
             print("Sample results:")
             for job in successful_jobs[:3]:  # Show first 3
-                job_params = job["parameters"]
+                job_params: dict[str, object] = job["parameters"]
                 print(
                     f"  Job {job['job_id']}: R={job_params['R_val']}, "
                     f"C={job_params['C_val']}"
