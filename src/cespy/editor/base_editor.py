@@ -416,7 +416,7 @@ class Component(Primitive):
     def value(self, value: str | int | float) -> None:
         if self.parent.is_read_only():
             raise ValueError("Editor is read-only")
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             self.value_str = format_eng(value)
         else:
             self.value_str = value

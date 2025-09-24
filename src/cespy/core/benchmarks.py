@@ -322,8 +322,8 @@ class BenchmarkSuite:
                 baseline_value = baseline_metrics[metric_name]
                 current_value = current_metrics[metric_name]
 
-                if isinstance(baseline_value, (int, float)) and isinstance(
-                    current_value, (int, float)
+                if isinstance(baseline_value, int | float) and isinstance(
+                    current_value, int | float
                 ):
                     if baseline_value == 0:
                         continue  # Avoid division by zero

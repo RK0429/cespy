@@ -268,7 +268,7 @@ class ResultCollector:
         for result in self._results.values():
             if measurement_name in result.measurements:
                 value = result.measurements[measurement_name]
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     values.append(value)
 
         if not values:

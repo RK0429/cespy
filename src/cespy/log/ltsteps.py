@@ -23,7 +23,8 @@ from collections.abc import Iterator
 from typing import Any, TypeVar
 
 # Core imports
-from ..core import constants as core_constants, patterns as core_patterns
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
 from ..exceptions import CespyIOError
 from ..utils.detect_encoding import detect_encoding
 from .logfile_data import LogfileData, try_convert_value

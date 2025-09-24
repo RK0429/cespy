@@ -144,7 +144,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         # Generate parameter variations
         for param in self.parameter_deviations:
             val, dev = self.get_parameter_value_deviation_type(param)
-            if isinstance(val, (int, float)) and dev.typ != DeviationType.NONE:
+            if isinstance(val, int | float) and dev.typ != DeviationType.NONE:
                 new_val = self._get_sim_value(val, dev)
                 if new_val != val:
                     params[f"param_{param}"] = new_val
@@ -650,7 +650,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         for result in self.results:
             if result.success and meas_name in result.measurements:
                 value = result.measurements[meas_name]
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     values.append(float(value))
         return values if values else None
 

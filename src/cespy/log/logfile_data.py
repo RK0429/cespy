@@ -9,7 +9,8 @@ from collections.abc import Iterable
 from typing import Any, Protocol, TypeVar, Union, cast
 
 # Core imports
-from ..core import constants as core_constants, patterns as core_patterns
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
 
 # -------------------------------------------------------------------------------
 # Name:        logfile_data.py
@@ -108,7 +109,7 @@ def try_convert_value(value: str | int | float | list[Any] | bytes) -> ValueType
     :return: converted value, if applicable
     :rtype: int, float, str
     """
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return value
     if isinstance(value, list):
         return [try_convert_value(v) for v in value]
@@ -346,7 +347,7 @@ class LogfileData:
                 _logger.error('No measurements found for measure "%s"', measure)
                 raise IndexError(f'No measurements found for measure "{measure}"')
             raise IndexError("In stepped data, the step number needs to be provided")
-        if isinstance(step, (slice, int)):
+        if isinstance(step, slice | int):
             # Explicitly cast to the expected return type
             return cast(
                 float | int | str | LTComplex,
@@ -395,7 +396,7 @@ class LogfileData:
 
         # Handle only comparable types
         comparable_values = [
-            v for v in values if isinstance(v, (int, float, str, LTComplex))
+            v for v in values if isinstance(v, int | float | str | LTComplex)
         ]
         if not comparable_values:
             raise ValueError(f"No comparable values found for measure {measure}")
@@ -421,7 +422,7 @@ class LogfileData:
 
         # Handle only comparable types
         comparable_values = [
-            v for v in values if isinstance(v, (int, float, str, LTComplex))
+            v for v in values if isinstance(v, int | float | str | LTComplex)
         ]
         if not comparable_values:
             raise ValueError(f"No comparable values found for measure {measure}")
@@ -444,7 +445,7 @@ class LogfileData:
         values = self.get_measure_values_at_steps(measure, steps)
         # Filter to only numeric values for calculation
         numeric_values: list[NumericType] = [
-            v for v in values if isinstance(v, (int, float, complex, LTComplex))
+            v for v in values if isinstance(v, int | float | complex | LTComplex)
         ]
         if not numeric_values:
             raise ValueError(f"No numeric values found for measure {measure}")

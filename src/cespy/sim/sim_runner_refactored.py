@@ -328,7 +328,7 @@ class SimRunnerRefactored:
             from ..simulators.ltspice_simulator import LTspice
 
             self.simulator = LTspice
-        elif isinstance(simulator, (str, Path)):
+        elif isinstance(simulator, str | Path):
             from ..simulators.ltspice_simulator import LTspice
 
             self.simulator = LTspice.create_from(simulator)

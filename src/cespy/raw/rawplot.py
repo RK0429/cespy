@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+
 from cespy.raw.raw_classes import DummyTrace
 from cespy.raw.raw_read import RawRead
 

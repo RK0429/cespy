@@ -68,17 +68,8 @@ def deprecated(
             return func(*args, **kwargs)
 
         # Add deprecation metadata
-        setattr(wrapper, '__deprecated__', True)
-        setattr(
-            wrapper,
-            '__deprecation_info__',
-            {
-                'version': version,
-                'reason': reason,
-                'replacement': replacement,
-                'level': level,
-            },
-        )
+        wrapper.__deprecated__ = True
+        wrapper.__deprecation_info__ = {'version': version, 'reason': reason, 'replacement': replacement, 'level': level}
 
         return wrapper  # type: ignore
 
@@ -310,7 +301,7 @@ class ParameterValidator:
         if file_path is None:
             return None
 
-        if isinstance(file_path, (str, bytes)):
+        if isinstance(file_path, str | bytes):
             return str(file_path)
 
         # Handle Path-like objects
@@ -338,7 +329,7 @@ class ParameterValidator:
         if timeout is None:
             return None
 
-        if isinstance(timeout, (int, float)):
+        if isinstance(timeout, int | float):
             if timeout <= 0:
                 raise ValueError("Timeout must be positive")
             return float(timeout)
@@ -370,7 +361,7 @@ class ParameterValidator:
         if isinstance(value, bool):
             return value
 
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             return bool(value)
 
         if isinstance(value, str):

@@ -54,7 +54,8 @@ from typing import (
 )
 
 # Core imports
-from ..core import constants as core_constants, patterns as core_patterns
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
 from ..exceptions import FileFormatError
 
 # Module imports
@@ -609,7 +610,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
             if attribute in ("value", "model"):
                 # They are actually the same thing just the model is not
                 # converted.
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     value = format_eng(value)
                 start = match.start("value")
                 end = match.end("value")
@@ -952,7 +953,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         if self.is_read_only():
             raise ValueError("Editor is read-only")
         param_line, match = self._get_param_named(param)
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             value_str = format_eng(value)
         else:
             value_str = value

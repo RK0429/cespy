@@ -549,7 +549,7 @@ class AscEditor(BaseSchematic):
         :raises: ParameterNotFoundError - If the parameter cannot be found or set
         """
         match, directive = self._get_param_named(param)
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             value_str = format_eng(value)
         else:
             value_str = value

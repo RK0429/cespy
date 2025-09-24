@@ -32,7 +32,8 @@ from numpy import array, float32, zeros
 from numpy.typing import NDArray
 
 # Core imports
-from ..core import constants as core_constants, patterns as core_patterns
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
 from .raw_classes import DataSet, DummyTrace
 from .raw_read import RawRead
 
@@ -88,7 +89,7 @@ class Trace(DataSet):
                 raise NotImplementedError("Unsupported data type for Trace")
 
         DataSet.__init__(self, name, whattype, len(data), numerical_type=numerical_type)
-        if isinstance(data, (list, tuple)):
+        if isinstance(data, list | tuple):
             self.data = array(data, dtype=self.data.dtype)
         else:
             self.data[:] = data[:]  # This way the dtype is kept

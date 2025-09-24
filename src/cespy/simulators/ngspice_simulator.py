@@ -32,7 +32,8 @@ from pathlib import Path
 from typing import Any
 
 # Core imports
-from ..core import constants as core_constants, paths as core_paths
+from ..core import constants as core_constants
+from ..core import paths as core_paths
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
 _logger = logging.getLogger("cespy.NGSpiceSimulator")

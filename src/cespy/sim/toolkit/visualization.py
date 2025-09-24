@@ -148,7 +148,7 @@ class AnalysisVisualizer:
                     stats_text,
                     transform=ax.transAxes,
                     verticalalignment="top",
-                    bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+                    bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
                 )
 
         # Labels and title
@@ -202,7 +202,7 @@ class AnalysisVisualizer:
             for result in analysis.results:
                 if result.success and name in result.measurements:
                     value = result.measurements[name]
-                    if isinstance(value, (int, float)):
+                    if isinstance(value, int | float):
                         values.append(value)
                     else:
                         values.append(np.nan)
@@ -338,7 +338,7 @@ class AnalysisVisualizer:
         for result in sorted(analysis.results, key=lambda x: x.run_id):
             if result.success and measurement_name in result.measurements:
                 value = result.measurements[measurement_name]
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     values.append(value)
                     run_ids.append(result.run_id)
 
@@ -435,8 +435,8 @@ class AnalysisVisualizer:
                 param_val = result.parameters[parameter_name]
                 meas_val = result.measurements[measurement_name]
 
-                if isinstance(param_val, (int, float)) and isinstance(
-                    meas_val, (int, float)
+                if isinstance(param_val, int | float) and isinstance(
+                    meas_val, int | float
                 ):
                     param_values.append(param_val)
                     meas_values.append(meas_val)
@@ -476,7 +476,7 @@ class AnalysisVisualizer:
                 f"Sensitivity: {sensitivity:.3f}",
                 transform=ax.transAxes,
                 verticalalignment="top",
-                bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+                bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
             )
 
         ax.set_xlabel(parameter_name)

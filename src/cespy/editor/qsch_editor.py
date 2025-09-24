@@ -27,7 +27,8 @@ from pathlib import Path
 from typing import Any, TextIO, cast
 
 # Core imports
-from ..core import constants as core_constants, patterns as core_patterns
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
 from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
 from ..simulators.qspice_simulator import Qspice
 from ..utils.file_search import search_file_in_containers
@@ -938,7 +939,7 @@ class QschEditor(BaseSchematic):
         tag, match = self._get_param_named(param)
         if tag is not None and match is not None:
             _logger.debug("Parameter %s found in QSCH file, updating it", param)
-            if isinstance(value, (int, float)):
+            if isinstance(value, int | float):
                 value_str = format_eng(value)
             else:
                 value_str = value
@@ -1064,7 +1065,7 @@ class QschEditor(BaseSchematic):
         assert texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(QSCH_TEXT_STR_ATTR) == ref
 
         for key, value in kwargs.items():
-            if isinstance(value, (int, float)):
+            if isinstance(value, int | float):
                 value_str = format_eng(value)
             else:
                 value_str = str(value)

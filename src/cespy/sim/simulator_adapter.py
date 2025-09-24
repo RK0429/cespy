@@ -201,7 +201,7 @@ class SimulatorAdapter(ISimulator):
         # Validate timeout
         if "timeout" in options:
             if (
-                not isinstance(options["timeout"], (int, float))
+                not isinstance(options["timeout"], int | float)
                 or options["timeout"] <= 0
             ):
                 errors.append("timeout must be a positive number")

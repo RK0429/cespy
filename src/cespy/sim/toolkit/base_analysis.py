@@ -416,7 +416,7 @@ class StatisticalAnalysis(BaseAnalysis):
         for result in self.results:
             if result.success and measurement_name in result.measurements:
                 value = result.measurements[measurement_name]
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     values.append(value)
 
         if not values:
@@ -455,7 +455,7 @@ class StatisticalAnalysis(BaseAnalysis):
         for result in self.results:
             if result.success and measurement_name in result.measurements:
                 value = result.measurements[measurement_name]
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     values.append(value)
 
         if not values:
@@ -482,7 +482,7 @@ class StatisticalAnalysis(BaseAnalysis):
                 for name in measurement_names:
                     if name in result.measurements:
                         value = result.measurements[name]
-                        if isinstance(value, (int, float)):
+                        if isinstance(value, int | float):
                             data_dict[name].append(value)
                         else:
                             data_dict[name].append(np.nan)
@@ -550,7 +550,7 @@ class ParametricAnalysis(BaseAnalysis):
                 param_value = result.parameters[parameter_name]
                 if measurement_name in result.measurements:
                     meas_value = result.measurements[measurement_name]
-                    if isinstance(meas_value, (int, float)):
+                    if isinstance(meas_value, int | float):
                         param_groups[param_value].append(meas_value)
 
         if len(param_groups) < 2:

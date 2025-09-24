@@ -24,7 +24,9 @@ from pathlib import Path
 from typing import Any
 
 # Core imports
-from ..core import constants as core_constants, paths as core_paths, patterns as core_patterns
+from ..core import constants as core_constants
+from ..core import paths as core_paths
+from ..core import patterns as core_patterns
 from ..exceptions import SimulatorNotFoundError
 from ..sim.simulator import run_function
 from ..simulators.qspice_simulator import Qspice

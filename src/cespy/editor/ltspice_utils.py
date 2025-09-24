@@ -19,7 +19,8 @@
 # -------------------------------------------------------------------------------
 
 # Core imports
-from ..core import constants as core_constants, patterns as core_patterns
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
 from .base_schematic import ERotation, HorAlign, Text, VerAlign
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"

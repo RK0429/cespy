@@ -242,7 +242,8 @@ from numpy import float32, float64, frombuffer
 from numpy.typing import NDArray
 
 # Core imports
-from ..core import constants as core_constants, patterns as core_patterns
+from ..core import constants as core_constants
+from ..core import patterns as core_patterns
 from ..exceptions import (
     EncodingError,
     FileFormatError,
@@ -274,7 +275,7 @@ def _safe_eval(expr: str, variables: dict[str, Any]) -> Any:
             return _ALLOWED_OPS[type(n.op)](_eval(n.left), _eval(n.right))
         if isinstance(n, ast.UnaryOp):
             return _ALLOWED_OPS[type(n.op)](_eval(n.operand))
-        if isinstance(n, (ast.Constant, ast.Num)):
+        if isinstance(n, ast.Constant | ast.Num):
             return getattr(n, "value", n.n)
         if isinstance(n, ast.Name):
             return variables[n.id]
@@ -475,7 +476,7 @@ class RawRead:
         raw_filename_path = Path(raw_filename)
         if traces_to_read is not None:
             assert isinstance(
-                traces_to_read, (str, list, tuple)
+                traces_to_read, str | list | tuple
             ), "traces_to_read must be a string, a list or None"
 
         raw_file_size = os.stat(
@@ -690,7 +691,7 @@ class RawRead:
                     axis_numerical_type = numerical_type
                 self.axis = Axis(name, var_type, self.nPoints, axis_numerical_type)
                 trace: Axis | TraceRead | DummyTrace = self.axis
-            elif isinstance(traces_to_read, (str, list, tuple)) and (
+            elif isinstance(traces_to_read, str | list | tuple) and (
                 (traces_to_read == "*") or (name in traces_to_read)
             ):
                 if has_axis:  # Reads data
@@ -781,7 +782,7 @@ class RawRead:
                     if isinstance(var, DummyTrace):
                         # NOTE: Consider replacing this with a seek operation for better performance
                         raw_file.read(self.nPoints * self.data_size)
-                    elif isinstance(var, (Axis, TraceRead)):
+                    elif isinstance(var, Axis | TraceRead):
                         if var.numerical_type == "double":
                             s = raw_file.read(self.nPoints * 8)
                             var.data = frombuffer(s, dtype=float64)

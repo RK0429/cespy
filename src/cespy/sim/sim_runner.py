@@ -122,7 +122,8 @@ from collections.abc import Callable, Iterator
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
-from time import sleep, thread_time as clock
+from time import sleep
+from time import thread_time as clock
 from typing import (
     Any,
     Protocol,
@@ -329,7 +330,7 @@ class SimRunner(AnyRunner):
             from ..simulators.ltspice_simulator import LTspice as CustomLTspice
 
             simulator = CustomLTspice
-        elif isinstance(simulator, (str, Path)):
+        elif isinstance(simulator, str | Path):
             # Lazy import to avoid circular dependency
             from ..simulators.ltspice_simulator import LTspice as CustomLTspice
 
@@ -446,7 +447,7 @@ class SimRunner(AnyRunner):
             run_netlist_file = self._on_output_folder(run_filename)
             netlist.save_netlist(run_netlist_file)
 
-        elif isinstance(netlist, (Path, str)):
+        elif isinstance(netlist, Path | str):
             if run_filename is None:
                 run_filename = self._run_file_name(netlist)
             if isinstance(netlist, str):

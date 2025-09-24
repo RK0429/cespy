@@ -150,7 +150,7 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
             get_default_exec = getattr(self.simulator, "get_default_executable", None)
             if callable(get_default_exec):
                 default_exec = get_default_exec()
-                if isinstance(default_exec, (str, Path)):
+                if isinstance(default_exec, str | Path):
                     self.simulator = self.simulator.create_from(default_exec)
                 else:
                     _logger.warning(

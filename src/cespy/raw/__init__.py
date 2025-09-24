@@ -26,32 +26,32 @@ from .raw_stream import (
 from .raw_write import RawWrite, Trace
 
 __all__ = [
-    # Core classes
-    "RawRead",
-    "RawWrite",
-    "Trace",
-    "TraceRead",
-    "DataSet",
-    "Axis",
-    "DummyTrace",
-    "SpiceReadException",
-    # Lazy loading
-    "RawReadLazy",
-    "LazyTrace",
-    # Streaming
-    "RawFileStreamer",
-    "StreamProcessor",
-    "StreamConfig",
-    "MinMaxProcessor",
     "AverageProcessor",
-    # Caching
-    "RawDataCache",
-    "MultiLevelCache",
+    "Axis",
+    "BinaryFormat",
     "CachePolicy",
-    "LRUPolicy",
+    "DataFormat",
+    "DataSet",
+    "DummyTrace",
     "LFUPolicy",
+    "LRUPolicy",
+    "LazyTrace",
+    "MinMaxProcessor",
+    "MultiLevelCache",
     # Binary parsing
     "OptimizedBinaryParser",
-    "DataFormat",
-    "BinaryFormat",
+    # Caching
+    "RawDataCache",
+    # Streaming
+    "RawFileStreamer",
+    # Core classes
+    "RawRead",
+    # Lazy loading
+    "RawReadLazy",
+    "RawWrite",
+    "SpiceReadException",
+    "StreamConfig",
+    "StreamProcessor",
+    "Trace",
+    "TraceRead",
 ]

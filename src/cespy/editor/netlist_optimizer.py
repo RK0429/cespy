@@ -280,7 +280,7 @@ class NetlistOptimizer:
     def _remove_dangling_components(self, lines: list[str]) -> tuple[list[str], int]:
         """Remove components with unconnected nodes."""
         # First, collect all nodes
-        set(["0", "GND"])  # Ground nodes
+        {"0", "GND"}  # Ground nodes
         node_connections: defaultdict[str, int] = defaultdict(int)
 
         # Count node connections
@@ -566,7 +566,7 @@ class NetlistOptimizer:
 
         # Add warnings for significant changes
         size_reduction_pct = analysis["size_reduction_pct"]
-        assert isinstance(size_reduction_pct, (int, float))
+        assert isinstance(size_reduction_pct, int | float)
         if size_reduction_pct > 50:
             warnings = analysis["warnings"]
             assert isinstance(warnings, list)
