@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Simulator locator for finding and validating SPICE simulator installations.
 
 This module provides functionality to locate simulators on different platforms,
@@ -12,6 +13,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from typing import ClassVar
 
 # Core imports
 from ..core import constants as core_constants
@@ -23,7 +25,7 @@ class SimulatorLocator:
     """Handles locating and validating simulator installations across platforms."""
 
     # Default search paths for different simulators on different platforms
-    SEARCH_PATHS = {
+    SEARCH_PATHS: ClassVar[dict[str, dict[str, list[str]]]] = {
         core_constants.Simulators.LTSPICE: {
             "windows": [
                 "C:/Program Files/LTC/LTspiceXVII/XVIIx64.exe",
@@ -151,10 +153,13 @@ class SimulatorLocator:
         uses_wine = self._detect_wine_usage(expanded)
 
         # For Wine paths on non-Windows platforms, check wine availability
-        if uses_wine and self.platform != "windows":
-            if not self._is_wine_available():
-                _logger.debug("Wine not available for path: %s", path)
-                return None, False
+        if (
+            uses_wine
+            and self.platform != "windows"
+            and not self._is_wine_available()
+        ):
+            _logger.debug("Wine not available for path: %s", path)
+            return None, False
 
         # Check if path exists
         if path.exists() and path.is_file():
@@ -195,10 +200,9 @@ class SimulatorLocator:
         Returns:
             List of command components for Wine
         """
-        if self.platform == "darwin":
+        if self.platform == "darwin" and shutil.which("wine64"):
             # On macOS, we might need to use wine64
-            if shutil.which("wine64"):
-                return ["wine64"]
+            return ["wine64"]
         return ["wine"]
 
     def get_library_paths(self, exe_path: Path) -> list[Path]:
@@ -252,10 +256,11 @@ class SimulatorLocator:
         """
         try:
             # Build command to get version
-            if uses_wine and self.platform != "windows":
-                cmd = self.get_wine_command() + [str(exe_path)]
-            else:
-                cmd = [str(exe_path)]
+            cmd = (
+                [*self.get_wine_command(), str(exe_path)]
+                if uses_wine and self.platform != "windows"
+                else [str(exe_path)]
+            )
 
             # Add version flag based on simulator
             if self.simulator_type == core_constants.Simulators.LTSPICE:

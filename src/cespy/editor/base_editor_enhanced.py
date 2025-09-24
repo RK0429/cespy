@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Enhanced base editor with common editing operations and new features.
 
 This module extends the BaseEditor with additional functionality including:

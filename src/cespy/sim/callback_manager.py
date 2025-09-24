@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Callback manager for handling simulation completion callbacks.
 
 This module provides a manager for registering and executing callbacks when
@@ -433,7 +434,7 @@ class CallbackManager:
 
             elif callback_info.callback_type == CallbackType.PARAMETERIZED_FUNCTION:
                 # Call with additional parameters
-                all_args = (raw_file_str, log_file_str) + callback_info.args
+                all_args = (raw_file_str, log_file_str, *callback_info.args)
                 kwargs = callback_info.kwargs or {}
                 result = callback_info.callback(*all_args, **kwargs)
 

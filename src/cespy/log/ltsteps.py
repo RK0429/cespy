@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 
 """LTSpice log file parsing and analysis utilities.
 
@@ -336,12 +337,11 @@ class LTSpiceLogReader(LogfileData):
                 elif line.startswith("N-Period"):
                     # Read number of periods
                     n_periods_str = line.strip("\r\n").split("=")[-1].strip()
-                    if n_periods_str == "all":
-                        n_periods = -1
-                    else:
-                        # Now it's a float, which is compatible with the
-                        # expected type
-                        n_periods = float(n_periods_str)
+                    n_periods = (
+                        -1
+                        if n_periods_str == "all"
+                        else float(n_periods_str)
+                    )
                 elif line.startswith("Fourier components of"):
                     # Read signal name
                     line = line.strip("\r\n")
@@ -483,15 +483,19 @@ class LTSpiceLogReader(LogfileData):
                             measurements.append(try_convert_value(meas))
                             self.measure_count += 1
                         except ValueError:
-                            if len(tokens) >= 3 and (
-                                tokens[2] == "FROM" or tokens[2] == "at"
+                            if (
+                                len(tokens) >= 3
+                                and tokens[2] in {"FROM", "at"}
+                                and meas_name is not None
                             ):
-                                if meas_name is not None:
-                                    tokens[2] = meas_name + "_" + tokens[2]
-                            if len(tokens) >= 4 and tokens[3] == "TO":
-                                if meas_name is not None:
-                                    tokens[3] = meas_name + "_TO"
-                            headers = [meas_name] + tokens[2:]
+                                tokens[2] = meas_name + "_" + tokens[2]
+                            if (
+                                len(tokens) >= 4
+                                and tokens[3] == "TO"
+                                and meas_name is not None
+                            ):
+                                tokens[3] = meas_name + "_TO"
+                            headers = [meas_name, *tokens[2:]]
                             measurements = []
                     else:
                         _logger.debug("->%s", line)

@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 
 class SimulatorStatus(Enum):
@@ -66,8 +66,8 @@ class ISimulator(ABC):
 
     # Class attributes to be overridden by implementations
     simulator_name: str = ""
-    supported_platforms: list[str] = ["windows", "linux", "darwin"]
-    supported_analyses: list[str] = []
+    supported_platforms: ClassVar[list[str]] = ["windows", "linux", "darwin"]
+    supported_analyses: ClassVar[list[str]] = []
     default_timeout: float = 300.0
 
     @abstractmethod

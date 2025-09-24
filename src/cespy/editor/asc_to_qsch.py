@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# pyright: basic
 """ASC to QSCH schematic converter."""
 
 # -------------------------------------------------------------------------------
@@ -57,10 +58,9 @@ def main() -> None:
         sys.exit(-1)
 
     asc_file = args[0]
-    if len(args) > 1:
-        qsch_file = args[1]
-    else:
-        qsch_file = os.path.splitext(asc_file)[0] + ".qsch"
+    qsch_file = (
+        args[1] if len(args) > 1 else os.path.splitext(asc_file)[0] + ".qsch"
+    )
 
     search_paths = [] if options.path is None else options.path
 
@@ -111,7 +111,8 @@ def convert_asc_to_qsch(
         if symbol_tag is None:
             # Will try to get it from the sym folder
             print(f"Searching for symbol {comp.symbol}...")
-            for sym_root in search_paths + [
+            for sym_root in [
+                *search_paths,
                 os.path.split(asc_file)[0],
                 os.path.expanduser("~/AppData/Local/LTspice/lib/sym"),
                 os.path.expanduser("~/Documents/LtspiceXVII/lib/sym"),

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 # -------------------------------------------------------------------------------
 #
 """Worst-case circuit analysis for tolerance and component variations."""
@@ -100,9 +101,10 @@ class WorstCaseAnalysis(ToleranceDeviations):
 
         for prefix in self.default_tolerance:
             for ref in self.get_components(prefix):
-                if ref not in self.device_deviations:
-                    if self._set_component_deviation(ref, index):
-                        index += 1
+                if ref not in self.device_deviations and self._set_component_deviation(
+                    ref, index
+                ):
+                    index += 1
 
         self.editor.add_instruction(
             ".func binary(run,idx) {floor(run/(2**idx))-2*floor(run/(2**(idx+1)))}"

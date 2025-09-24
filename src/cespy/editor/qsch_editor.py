@@ -1,4 +1,5 @@
 
+# pyright: basic
 """QSpice schematic editor for modifying QSCH files programmatically."""
 
 # -------------------------------------------------------------------------------
@@ -333,12 +334,14 @@ class QschTag:
         if isinstance(value, int):
             value_str = str(value)
         elif isinstance(value, str):
-            if value.startswith("0x"):
-                value_str = value
-            else:
-                value_str = f'"{value}"'
-        elif isinstance(value, tuple):
-            value_str = f"({value[0]},{value[1]})"
+            value_str = value if value.startswith("0x") else f'"{value}"'
+        elif (
+            isinstance(value, tuple)
+            and len(value) == 2
+            and all(isinstance(coord, int) for coord in value)
+        ):
+            x_pos, y_pos = value
+            value_str = f"({x_pos},{y_pos})"
         else:
             raise ValueError("Object not supported in set_attr")
         self.tokens[index] = value_str
@@ -470,9 +473,8 @@ class QschEditor(BaseSchematic):
                     parameters += " " + decap(text.get_text_attr(QSCH_TEXT_STR_ATTR))
 
             ports = comp_obj.ports.copy()
-            if typ in ("¥", "Ã"):
-                if len(ports) < 16:
-                    ports += ["¥"] * (16 - len(ports))
+            if typ in ("¥", "Ã") and len(ports) < 16:
+                ports += ["¥"] * (16 - len(ports))
 
             nets = " ".join(ports)
 
@@ -500,14 +502,16 @@ class QschEditor(BaseSchematic):
                     model = f"{refdes}•{model}"
 
                 # schedule to write .SUBCKT clauses at the end
-                if model not in subcircuits_to_write:
-                    if "_SUBCKT" in comp_obj.attributes:
-                        pins = symbol_tag.get_items("pin")
-                        sub_ports = " ".join(
-                            pin.get_text_attr(QSCH_SYMBOL_PIN_NET) for pin in pins
-                        )
-                        subc = cast(QschEditor, comp_obj.attributes["_SUBCKT"])
-                        subcircuits_to_write[model] = (subc, sub_ports)
+                if (
+                    model not in subcircuits_to_write
+                    and "_SUBCKT" in comp_obj.attributes
+                ):
+                    pins = symbol_tag.get_items("pin")
+                    sub_ports = " ".join(
+                        pin.get_text_attr(QSCH_SYMBOL_PIN_NET) for pin in pins
+                    )
+                    subc = cast(QschEditor, comp_obj.attributes["_SUBCKT"])
+                    subcircuits_to_write[model] = (subc, sub_ports)
                 nets = " ".join(comp_obj.ports)
                 netlist_file.write(f"{refdes} {nets} {model}{parameters}\n")
 
@@ -552,7 +556,7 @@ class QschEditor(BaseSchematic):
                 ):  # Hack alert. I don't know why the symbol is Pwr
                     symbol = symbol[3:]  # remove the Pwr from the symbol
                 netlist_file.write(f"{refdes} {nets} {model} {symbol}{parameters}\n")
-            elif typ == "×":
+            elif typ == "x":
                 model = decap(texts[1].get_text_attr(QSCH_TEXT_STR_ATTR))
                 if have_embedded_subcircuit:
                     model = f"{refdes}•{model}"
@@ -776,12 +780,12 @@ class QschEditor(BaseSchematic):
                 # The pins that have "¥" are behavioral pins, they are not
                 # connected to any net, they will be connected
                 # to a net later.
-                if refdes[0] in ("¥", "Ã"):
-                    if (
-                        len(pin.tokens) > QSCH_SYMBOL_PIN_NET_BEHAVIORAL
-                        and pin.get_attr(QSCH_SYMBOL_PIN_NET_BEHAVIORAL) == "¥"
-                    ):
-                        net_name = "¥"
+                if (
+                    refdes[0] in ("¥", "Ã")
+                    and len(pin.tokens) > QSCH_SYMBOL_PIN_NET_BEHAVIORAL
+                    and pin.get_attr(QSCH_SYMBOL_PIN_NET_BEHAVIORAL) == "¥"
+                ):
+                    net_name = "¥"
                 if net_name is None:
                     hash_key = (x, y)
                     if hash_key in unconnected_pins:
@@ -807,24 +811,23 @@ class QschEditor(BaseSchematic):
                 sch_comp.ports.append(net_name)
 
             self.components[refdes] = sch_comp
-            if refdes.startswith("X"):
-                if not have_embedded_subcircuit:
-                    sub_circuit_name = value + os.path.extsep + "qsch"
-                    mydir = self.circuit_file.parent.absolute().as_posix()
-                    sub_circuit_schematic_file = self._qsch_file_find(
-                        sub_circuit_name, mydir
+            if refdes.startswith("X") and not have_embedded_subcircuit:
+                sub_circuit_name = value + os.path.extsep + "qsch"
+                mydir = self.circuit_file.parent.absolute().as_posix()
+                sub_circuit_schematic_file = self._qsch_file_find(
+                    sub_circuit_name, mydir
+                )
+                if sub_circuit_schematic_file:
+                    sub_schematic = type(self)(sub_circuit_schematic_file)
+                    sch_comp.attributes["_SUBCKT"] = (
+                        sub_schematic  # Store it for future use.
                     )
-                    if sub_circuit_schematic_file:
-                        sub_schematic = type(self)(sub_circuit_schematic_file)
-                        sch_comp.attributes[
-                            "_SUBCKT"
-                        ] = sub_schematic  # Store it for future use.
-                    else:
-                        _logger.warning(
-                            "Subcircuit '%s' not found. Have you set"
-                            " the correct search paths?",
-                            sub_circuit_name,
-                        )
+                else:
+                    _logger.warning(
+                        "Subcircuit '%s' not found. Have you set"
+                        " the correct search paths?",
+                        sub_circuit_name,
+                    )
 
         for text_tag in self.schematic.get_items("text"):
             x, y = text_tag.get_attr(QSCH_TEXT_POS)
@@ -911,10 +914,14 @@ class QschEditor(BaseSchematic):
     def _qsch_file_find(
         self, filename: str, work_dir: str | None = None
     ) -> str | None:
-        containers = ["."] + self.custom_lib_paths + self.simulator_lib_paths
+        containers = [
+            ".",
+            *self.custom_lib_paths,
+            *self.simulator_lib_paths,
+        ]
         # '.'  is the directory where the script is located
         if (work_dir is not None) and work_dir != ".":
-            containers = [work_dir] + containers  # put work directory first
+            containers = [work_dir, *containers]  # put work directory first
         return search_file_in_containers(filename, *containers)
 
     def get_subcircuit(self, reference: str) -> "QschEditor":
@@ -939,10 +946,9 @@ class QschEditor(BaseSchematic):
         tag, match = self._get_param_named(param)
         if tag is not None and match is not None:
             _logger.debug("Parameter %s found in QSCH file, updating it", param)
-            if isinstance(value, int | float):
-                value_str = format_eng(value)
-            else:
-                value_str = value
+            value_str = (
+                format_eng(value) if isinstance(value, int | float) else value
+            )
             text: str = tag.get_attr(QSCH_TEXT_STR_ATTR)
             if isinstance(text, str):
                 start, stop = match.span("value")
@@ -1065,10 +1071,9 @@ class QschEditor(BaseSchematic):
         assert texts[QSCH_SYMBOL_TEXT_REFDES].get_attr(QSCH_TEXT_STR_ATTR) == ref
 
         for key, value in kwargs.items():
-            if isinstance(value, int | float):
-                value_str = format_eng(value)
-            else:
-                value_str = str(value)
+            value_str = (
+                format_eng(value) if isinstance(value, int | float) else str(value)
+            )
 
             found = False
             search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
@@ -1131,8 +1136,8 @@ class QschEditor(BaseSchematic):
     def get_components(self, prefixes: str = "*") -> list[str]:
         # docstring inherited from BaseEditor
         if prefixes == "*":
-            return list(self.components.keys())
-        return [k for k in self.components.keys() if k[0] in prefixes]
+            return list(self.components)
+        return [k for k in self.components if k[0] in prefixes]
 
     def remove_component(self, designator: str) -> None:
         # docstring inherited from BaseEditor
@@ -1271,8 +1276,5 @@ class QschEditor(BaseSchematic):
         # docstring inherited from BaseEditor
         if self.is_read_only():
             raise ValueError("Editor is read-only")
-        if isinstance(value, str):
-            value_str = value
-        else:
-            value_str = format_eng(value)
+        value_str = value if isinstance(value, str) else format_eng(value)
         self.set_element_model(device, value_str)

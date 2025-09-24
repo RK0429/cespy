@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Optimized binary parsing for raw files using numpy operations.
 
 This module provides high-performance binary parsing for SPICE raw files
@@ -7,6 +8,7 @@ using numpy's efficient array operations instead of element-by-element reading.
 
 import logging
 import struct
+from contextlib import ExitStack
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -81,6 +83,7 @@ class OptimizedBinaryParser:
         """
         self.file_path = Path(file_path)
         self._file_handle: BinaryIO | None = None
+        self._exit_stack = ExitStack()
 
         # Cache file size
         self.file_size = self.file_path.stat().st_size
@@ -120,7 +123,9 @@ class OptimizedBinaryParser:
 
         # Read raw bytes
         if self._file_handle is None:
-            self._file_handle = open(self.file_path, "rb")
+            self._file_handle = self._exit_stack.enter_context(
+                self.file_path.open("rb")
+            )
 
         self._file_handle.seek(offset)
         raw_bytes = self._file_handle.read(num_bytes)
@@ -170,7 +175,9 @@ class OptimizedBinaryParser:
 
         # Read all data at once
         if self._file_handle is None:
-            self._file_handle = open(self.file_path, "rb")
+            self._file_handle = self._exit_stack.enter_context(
+                self.file_path.open("rb")
+            )
 
         self._file_handle.seek(offset)
         raw_bytes = self._file_handle.read(total_bytes)
@@ -289,7 +296,9 @@ class OptimizedBinaryParser:
             Tuple of (detected_format, byte_order)
         """
         if self._file_handle is None:
-            self._file_handle = open(self.file_path, "rb")
+            self._file_handle = self._exit_stack.enter_context(
+                self.file_path.open("rb")
+            )
 
         # Read sample data
         self._file_handle.seek(offset)
@@ -391,6 +400,8 @@ class OptimizedBinaryParser:
         if self._file_handle is not None:
             self._file_handle.close()
             self._file_handle = None
+            self._exit_stack.close()
+            self._exit_stack = ExitStack()
 
     def __enter__(self) -> "OptimizedBinaryParser":
         """Context manager entry."""

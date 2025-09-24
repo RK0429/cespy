@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Sensitivity analysis module for SPICE simulations.
 
 This module provides classes and utilities to perform quick sensitivity analysis

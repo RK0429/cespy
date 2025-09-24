@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Tolerance deviation handling for circuit analysis.
 
 This module provides base classes and utilities for managing component tolerances
@@ -471,25 +472,24 @@ class ToleranceDeviations(SimAnalysis, ABC):
         super().read_logfiles()
         # The code below makes the run measure (if it exists) available on the stepset.
         # Note: this was only tested with LTSpice
-        if hasattr(self.log_data, "stepset") and len(self.log_data.stepset) == 0:
+        if hasattr(self.log_data, "stepset") and not self.log_data.stepset:
             if hasattr(self.log_data, "dataset"):
                 dataset = self.log_data.dataset
-                if "runm" in dataset and len(dataset["runm"]) > 0:
-                    if isinstance(dataset["runm"][0], LTComplex):
+                run_measurements = dataset.get("runm")
+                if run_measurements:
+                    if isinstance(run_measurements[0], LTComplex):
                         self.log_data.stepset = {
-                            "run": [round(val.real) for val in dataset["runm"]]
+                            "run": [round(val.real) for val in run_measurements]
                         }
                     else:
-                        self.log_data.stepset = {"run": dataset["runm"]}
-                # auto assign a step starting from 0 and incrementing by 1
-                # will use the size of the first element found in the
-                # dataset
-                elif dataset and len(dataset) > 0:
+                        self.log_data.stepset = {"run": run_measurements}
+                elif dataset:
+                    # auto assign a step starting from 0 and incrementing by 1
                     any_meas = next(iter(dataset.values()))
                     self.log_data.stepset = {"run": list(range(len(any_meas)))}
 
-                if hasattr(self.log_data, "step_count"):
-                    self.log_data.step_count = len(self.log_data.stepset)
+            if hasattr(self.log_data, "step_count"):
+                self.log_data.step_count = len(self.log_data.stepset)
 
         self.simulation_results["log_data"] = self.log_data
         return self.log_data

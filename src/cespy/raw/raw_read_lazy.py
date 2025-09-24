@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Lazy loading implementation for large raw files.
 
 This module provides a lazy-loading version of RawRead that only loads
@@ -6,8 +7,10 @@ data when it's actually accessed, significantly reducing memory usage
 for large simulation files.
 """
 
+import contextlib
 import logging
 import mmap
+from contextlib import ExitStack
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, BinaryIO
@@ -201,6 +204,7 @@ class RawReadLazy(RawRead):
         # Memory-mapped file handle
         self.mmap_file: mmap.mmap | None = None
         self._file_handle: BinaryIO | None = None
+        self._exit_stack = ExitStack()
 
         # Lazy trace storage
         self._lazy_traces: dict[str, LazyTrace] = {}
@@ -220,7 +224,9 @@ class RawReadLazy(RawRead):
         # Open memory-mapped file if requested
         if self.use_mmap and self.file_path.exists():
             try:
-                self._file_handle = open(self.file_path, "rb")
+                self._file_handle = self._exit_stack.enter_context(
+                    self.file_path.open("rb")
+                )
                 self.mmap_file = mmap.mmap(
                     self._file_handle.fileno(), 0, access=mmap.ACCESS_READ
                 )
@@ -350,10 +356,8 @@ class RawReadLazy(RawRead):
             trace_names = [trace_names]
 
         if steps is None:
-            if hasattr(self, "steps") and self.steps:
-                steps = list(range(len(self.steps)))
-            else:
-                steps = [0]  # Default to single step
+            steps_attr = getattr(self, "steps", None)
+            steps = list(range(len(steps_attr))) if steps_attr else [0]
 
         for trace_name in trace_names:
             if trace_name in self._lazy_traces:
@@ -457,6 +461,8 @@ class RawReadLazy(RawRead):
         if self._file_handle is not None:
             self._file_handle.close()
             self._file_handle = None
+        self._exit_stack.close()
+        self._exit_stack = ExitStack()
 
         _logger.debug("RawReadLazy closed")
 
@@ -470,7 +476,5 @@ class RawReadLazy(RawRead):
 
     def __del__(self) -> None:
         """Destructor to ensure cleanup."""
-        try:
+        with contextlib.suppress(Exception):
             self.close()
-        except Exception:
-            pass

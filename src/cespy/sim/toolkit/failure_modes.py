@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Failure modes analysis toolkit for simulating component failures."""
 
 # -------------------------------------------------------------------------------

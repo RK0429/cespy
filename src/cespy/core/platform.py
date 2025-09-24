@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Cross-platform compatibility and platform-specific optimizations.
 
 This module provides a centralized platform management system that handles
@@ -321,10 +322,11 @@ class PlatformManager:
         Returns:
             Path to temporary directory
         """
-        if self.info.is_windows:
-            temp_dir = Path(os.environ.get("TEMP", "C:/temp"))
-        else:
-            temp_dir = Path("/tmp")
+        temp_dir = (
+            Path(os.environ.get("TEMP", "C:/temp"))
+            if self.info.is_windows
+            else Path("/tmp")
+        )
 
         # Create cespy-specific subdirectory
         cespy_temp = temp_dir / f"cespy_{os.getpid()}"

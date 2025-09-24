@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Module for handling LTSpice log file data parsing and analysis."""
 from __future__ import annotations
 
@@ -6,7 +7,7 @@ import logging
 import math
 from collections import OrderedDict
 from collections.abc import Iterable
-from typing import Any, Protocol, TypeVar, Union, cast
+from typing import Any, Protocol, TypeVar, cast
 
 # Core imports
 from ..core import constants as core_constants
@@ -82,8 +83,8 @@ class LTComplex(complex):
         return _unit
 
 
-ValueType = Union[int, float, str, list[Any], LTComplex]
-NumericType = Union[int, float, complex, LTComplex]
+ValueType = int | float | str | list[Any] | LTComplex
+NumericType = int | float | complex | LTComplex
 
 
 # Create a protocol for types that can be compared
@@ -117,11 +118,9 @@ def try_convert_value(value: str | int | float | list[Any] | bytes) -> ValueType
         value = value.decode(core_constants.Encodings.UTF8)
 
     # Initialize ans with a default type to satisfy the type checker
-    ans: ValueType
-    if isinstance(value, str):
-        ans = value.strip()
-    else:
-        ans = cast(ValueType, value)
+    ans: ValueType = (
+        value.strip() if isinstance(value, str) else cast(ValueType, value)
+    )
 
     try:
         ans = int(value)
@@ -132,10 +131,7 @@ def try_convert_value(value: str | int | float | list[Any] | bytes) -> ValueType
             try:
                 ans = LTComplex(str(value))
             except ValueError:
-                if isinstance(value, str):
-                    ans = value.strip()
-                else:
-                    ans = cast(ValueType, value)
+                ans = value.strip() if isinstance(value, str) else cast(ValueType, value)
     return ans
 
 
@@ -503,10 +499,7 @@ class LogfileData:
         :type line_terminator: str
         :return: Nothing
         """
-        if append_with_line_prefix is None:
-            mode = "w"  # rewrites the file
-        else:
-            mode = "a"  # Appends an existing file
+        mode = "w" if append_with_line_prefix is None else "a"
 
         if len(self.dataset) == 0:
             _logger.warning("Empty data set. Exiting without writing file.")
@@ -573,12 +566,8 @@ class LogfileData:
                 if self.step_count == 0:
                     step_data = []  # Empty step
                 else:
-                    step_data = [
-                        self.stepset[param][index] for param in self.stepset.keys()
-                    ]
-                meas_data = [
-                    self.dataset[param][index] for param in self.dataset.keys()
-                ]
+                    step_data = [self.stepset[param][index] for param in self.stepset]
+                meas_data = [self.dataset[param][index] for param in self.dataset]
 
                 if (
                     append_with_line_prefix is not None
@@ -666,7 +655,7 @@ class LogfileData:
 
         if normalized:
             # add a 'best fit' line
-            # Normal distribution PDF: 1/(σ√(2π)) * exp(-(x-μ)^2/(2σ^2))
+            # Normal distribution PDF: 1/(sigma*sqrt(2*pi)) * exp(-(x-mu)^2/(2*sigma^2))
             y = (1 / (sd * np.sqrt(2 * np.pi))) * np.exp(
                 -((bin_edges - mu) ** 2) / (2 * sd**2)
             )

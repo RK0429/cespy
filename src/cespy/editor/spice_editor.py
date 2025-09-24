@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -48,10 +49,7 @@ from collections import OrderedDict
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from re import Match
-from typing import (
-    IO,
-    Any,
-)
+from typing import IO, Any, ClassVar
 
 # Core imports
 from ..core import constants as core_constants
@@ -482,9 +480,8 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         """
 
         for line in self.netlist:
-            if isinstance(line, SpiceCircuit):
-                if line.name() == name:
-                    return line
+            if isinstance(line, SpiceCircuit) and line.name() == name:
+                return line
         if self.parent is not None:
             return self.parent.get_subcircuit_named(name)
         return None
@@ -953,10 +950,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         if self.is_read_only():
             raise ValueError("Editor is read-only")
         param_line, match = self._get_param_named(param)
-        if isinstance(value, int | float):
-            value_str = format_eng(value)
-        else:
-            value_str = value
+        value_str = format_eng(value) if isinstance(value, int | float) else value
         if match:
             start, stop = match.span("value")
             line = self.netlist[param_line]
@@ -1393,8 +1387,8 @@ class SpiceEditor(SpiceCircuit):
     :type create_blank: bool, optional
     """
 
-    simulation_command_update_functions: dict[
-        str, Callable[[str, str | int | float], str]
+    simulation_command_update_functions: ClassVar[
+        dict[str, Callable[[str, str | int | float], str]]
     ] = {}
 
     def __init__(

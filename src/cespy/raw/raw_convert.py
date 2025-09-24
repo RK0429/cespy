@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 
 # -------------------------------------------------------------------------------
 #
@@ -136,11 +137,11 @@ def main() -> None:
     if options.output is None:
         data = raw_data.export()
 
-        text = options.separator.join(data.keys()) + "\n"
+        text = options.separator.join(data) + "\n"
         data_size = len(data[data.__iter__().__next__()])
         for i in range(data_size):
             text += (
-                options.separator.join([str(data[col][i]) for col in data.keys()])
+                options.separator.join(str(data[col][i]) for col in data)
                 + "\n"
             )
         if options.clipboard:

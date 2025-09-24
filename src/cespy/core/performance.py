@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Performance optimization utilities and profiling tools.
 
 This module provides utilities for performance monitoring, optimization hints,

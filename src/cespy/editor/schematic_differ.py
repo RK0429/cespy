@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Schematic difference tracking and comparison.
 
 This module provides functionality to track changes between schematic

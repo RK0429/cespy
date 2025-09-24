@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Task queue management for simulation tasks.
 
 This module provides a priority-based task queue for managing simulation tasks,
@@ -173,9 +174,12 @@ class TaskQueue:  # pylint: disable=too-many-instance-attributes
         """
         with self._condition:
             # Wait for a task to be available
-            if not self._queue and not self._shutdown:
-                if not self._condition.wait(timeout):
-                    return None  # Timeout
+            if (
+                not self._queue
+                and not self._shutdown
+                and not self._condition.wait(timeout)
+            ):
+                return None  # Timeout
 
             if self._shutdown and not self._queue:
                 return None
@@ -351,9 +355,9 @@ class TaskQueue:  # pylint: disable=too-many-instance-attributes
             return True
 
         # Check if all dependencies are completed
-        for dep_id in task_info.dependencies:
-            if dep_id not in self._completed_tasks:
-                return False
+        return all(
+            dep_id in self._completed_tasks for dep_id in task_info.dependencies
+        )
 
         return True
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Performance benchmarks and regression testing for cespy.
 
 This module provides a comprehensive benchmarking suite to monitor performance

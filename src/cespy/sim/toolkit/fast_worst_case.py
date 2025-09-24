@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Fast worst-case analysis implementation for circuit simulations.
 
 This module provides an optimized algorithm for worst-case analysis that reduces

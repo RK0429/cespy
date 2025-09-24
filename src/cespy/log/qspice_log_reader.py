@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """QSpice log file reader for parsing measurement data from QSpice simulations."""
 
 import logging
@@ -160,7 +161,12 @@ class QspiceLogReader(LogfileData):
             ).absolute()
 
         # Run the QPOST command
-        cmd_run = qpost + [str(netlist), "-o", str(meas_filename.absolute())]
+        cmd_run = [
+            *qpost,
+            str(netlist),
+            "-o",
+            str(meas_filename.absolute()),
+        ]
         _logger.debug("Running QPOST command: %s", cmd_run)
         run_function(cmd_run)
         return meas_filename

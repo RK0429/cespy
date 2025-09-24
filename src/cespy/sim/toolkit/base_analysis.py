@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Enhanced base classes for circuit simulation analysis.
 
 This module provides improved base classes that extract common patterns
@@ -89,9 +90,11 @@ class ProgressReporter:  # pylint: disable=too-few-public-methods
         current_time = time.time()
 
         # Throttle reports
-        if current_time - self._last_report_time < self._report_interval:
-            if current < total:  # Always report completion
-                return
+        if (
+            current_time - self._last_report_time < self._report_interval
+            and current < total
+        ):  # Always report completion
+            return
 
         self._last_report_time = current_time
 
@@ -99,7 +102,7 @@ class ProgressReporter:  # pylint: disable=too-few-public-methods
         progress_pct = (current / total * 100) if total > 0 else 0
         elapsed = current_time - self._start_time
 
-        if current > 0 and current < total:
+        if 0 < current < total:
             eta = elapsed / current * (total - current)
             eta_str = self._format_time(eta)
         else:
@@ -260,8 +263,7 @@ class BaseAnalysis(SimAnalysis):
             futures[future] = i
 
         # Collect results
-        completed = 0
-        for future in as_completed(futures):
+        for completed, future in enumerate(as_completed(futures), start=1):
             if self._cancelled:
                 # Cancel remaining futures
                 for f in futures:
@@ -281,7 +283,6 @@ class BaseAnalysis(SimAnalysis):
                 )
                 results.append(result)
 
-            completed += 1
             self.progress_reporter.report(
                 completed, len(all_parameters), f"Completed run {run_id}"
             )
@@ -610,15 +611,15 @@ class ParametricAnalysis(BaseAnalysis):
         meas_vals = []
 
         for result in self.results:
-            if result.success:
-                if (
-                    param1_name in result.parameters
-                    and param2_name in result.parameters
-                    and measurement_name in result.measurements
-                ):
-                    param1_vals.append(float(result.parameters[param1_name]))
-                    param2_vals.append(float(result.parameters[param2_name]))
-                    meas_vals.append(float(result.measurements[measurement_name]))
+            if (
+                result.success
+                and param1_name in result.parameters
+                and param2_name in result.parameters
+                and measurement_name in result.measurements
+            ):
+                param1_vals.append(float(result.parameters[param1_name]))
+                param2_vals.append(float(result.parameters[param2_name]))
+                meas_vals.append(float(result.measurements[measurement_name]))
 
         if not param1_vals:
             return np.array([]), np.array([]), np.array([])

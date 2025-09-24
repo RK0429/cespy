@@ -1,4 +1,5 @@
 
+# pyright: basic
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -482,7 +483,7 @@ class RawRead:
         raw_file_size = os.stat(
             raw_filename_path
         ).st_size  # Get the file size in order to know the data size
-        raw_file = open(raw_filename_path, "rb")
+        raw_file = raw_filename_path.open("rb")
 
         ch = raw_file.read(6)
         if ch.decode(encoding="utf_8") == "Title:":
@@ -614,15 +615,17 @@ class RawRead:
                     )
                 autodetected_dialect = "xyce"
 
-        if dialect:
-            if autodetected_dialect is not None:
-                if dialect != autodetected_dialect:
-                    _logger.warning(
-                        "Dialect specified as %s, but the file seems to be from %s. "
-                        "Trying to read it anyway.",
-                        dialect,
-                        autodetected_dialect,
-                    )
+        if (
+            dialect
+            and autodetected_dialect is not None
+            and dialect != autodetected_dialect
+        ):
+            _logger.warning(
+                "Dialect specified as %s, but the file seems to be from %s. "
+                "Trying to read it anyway.",
+                dialect,
+                autodetected_dialect,
+            )
         else:
             # no dialect given. Take the autodetected version
             dialect = autodetected_dialect
@@ -744,28 +747,25 @@ class RawRead:
                 fun: Callable[[IO[bytes]], Any]
                 if trace.numerical_type == "double":
                     calc_block_size += 8
-                    if isinstance(trace, DummyTrace):
-                        fun = consume8bytes
-                    else:
-                        fun = read_float64
+                    fun = (
+                        consume8bytes if isinstance(trace, DummyTrace) else read_float64
+                    )
                 elif trace.numerical_type == "complex":
                     calc_block_size += 16
-                    if isinstance(trace, DummyTrace):
-                        fun = consume16bytes
-                    else:
-                        fun = read_complex
+                    fun = (
+                        consume16bytes if isinstance(trace, DummyTrace) else read_complex
+                    )
                 elif trace.numerical_type == "real":  # data size is only 4 bytes
                     calc_block_size += 4
-                    if isinstance(trace, DummyTrace):
-                        fun = consume4bytes
-                    else:
-                        fun = read_float32
-
+                    fun = (
+                        consume4bytes if isinstance(trace, DummyTrace) else read_float32
+                    )
                 else:
                     raise RuntimeError(
                         f"Invalid data type {trace.numerical_type} for trace"
                         f" {trace.name}"
                     )
+                scan_functions.append(fun)
                 scan_functions.append(fun)
 
             if check_raw_size and calc_block_size != self.block_size:
@@ -904,9 +904,9 @@ class RawRead:
         """
         if property_name is None:
             return self.raw_params
-        if property_name in self.raw_params.keys():
+        if property_name in self.raw_params:
             return self.raw_params[property_name]
-        raise ValueError(f"Invalid property. Use {self.raw_params.keys()!s}")
+        raise ValueError(f"Invalid property. Use {list(self.raw_params)!s}")
 
     def get_trace_names(self) -> list[str]:
         """Returns a list of exiting trace names of the RAW file.
@@ -915,7 +915,7 @@ class RawRead:
         :rtype: list[str]
         """
         # parsing the aliases needs to be done before implementing this.
-        return [trace.name for trace in self._traces] + list(self.aliases.keys())
+        return [trace.name for trace in self._traces] + list(self.aliases)
 
     def _compute_alias(self, alias: str) -> TraceRead:
         """Constants like mho need to be replaced and  V(ref1,ref2) need to be replaced
@@ -1070,7 +1070,7 @@ class RawRead:
                     logfile,
                     r"^((.*\n)?Circuit:|([\s\S]*)--- Expanded Netlist ---)",
                 )
-                log = open(logfile, errors="replace", encoding=encoding)
+                log = logfile.open(errors="replace", encoding=encoding)
             except OSError as exc:
                 raise SpiceReadException(f"Log file '{logfile}' not found") from exc
             except UnicodeError as exc:
@@ -1104,8 +1104,7 @@ class RawRead:
             # it should have a .log file with the same name
             logfile = filename.with_suffix(core_constants.FileExtensions.LOG)
             try:
-                log = open(
-                    logfile,
+                log = logfile.open(
                     errors="replace",
                     encoding=core_constants.Encodings.UTF8,
                 )
@@ -1167,8 +1166,7 @@ class RawRead:
             return [0]  # returns a single step
         if len(kwargs) > 0:
             ret_steps = []  # Initializing an empty array
-            i = 0
-            for step_dict in self.steps:
+            for i, step_dict in enumerate(self.steps):
                 for key, value in kwargs.items():
                     ll = step_dict.get(key, None)
                     if ll is None:
@@ -1177,7 +1175,6 @@ class RawRead:
                         break
                 else:
                     ret_steps.append(i)  # All the step parameters match
-                i += 1
             return ret_steps
         return range(len(self.steps))  # Returns all the steps
 
@@ -1301,12 +1298,12 @@ class RawRead:
             # Export to CSV using python built-in functions
             data = self.export(columns=columns, step=step)
             with open(filename, "w", encoding=core_constants.Encodings.UTF8) as f:
-                f.write(separator.join(data.keys()) + "\n")
+                f.write(separator.join(data) + "\n")
                 for i in range(
                     len(data[columns[0] if columns else self.get_trace_names()[0]])
                 ):
                     f.write(
-                        separator.join([str(data[col][i]) for col in data.keys()])
+                        separator.join(str(data[col][i]) for col in data)
                         + "\n"
                     )
 

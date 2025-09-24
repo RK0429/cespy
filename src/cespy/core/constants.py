@@ -5,6 +5,7 @@ This module contains all constants, magic strings, and default values used
 throughout the cespy library to improve maintainability and consistency.
 """
 
+from typing import ClassVar
 
 # File extensions
 
@@ -29,11 +30,16 @@ class FileExtensions:  # pylint: disable=too-few-public-methods
     MEAS = ".meas"  # Measurement file
 
     # Collections
-    NETLIST_EXTENSIONS = [NET, CIR, SP]
-    SCHEMATIC_EXTENSIONS = [ASC, QSCH]
-    OUTPUT_EXTENSIONS = [RAW, QRAW, LOG, OUT, MEAS]
-    ALL_EXTENSIONS = (
-        NETLIST_EXTENSIONS + SCHEMATIC_EXTENSIONS + OUTPUT_EXTENSIONS + [ASY, LIB, INC]
+    NETLIST_EXTENSIONS: ClassVar[tuple[str, ...]] = (NET, CIR, SP)
+    SCHEMATIC_EXTENSIONS: ClassVar[tuple[str, ...]] = (ASC, QSCH)
+    OUTPUT_EXTENSIONS: ClassVar[tuple[str, ...]] = (RAW, QRAW, LOG, OUT, MEAS)
+    ALL_EXTENSIONS: ClassVar[tuple[str, ...]] = (
+        *NETLIST_EXTENSIONS,
+        *SCHEMATIC_EXTENSIONS,
+        *OUTPUT_EXTENSIONS,
+        ASY,
+        LIB,
+        INC,
     )
 
 
@@ -48,7 +54,7 @@ class Simulators:  # pylint: disable=too-few-public-methods
     QSPICE = "qspice"
     XYCE = "xyce"
 
-    ALL = [LTSPICE, NGSPICE, QSPICE, XYCE]
+    ALL: ClassVar[tuple[str, ...]] = (LTSPICE, NGSPICE, QSPICE, XYCE)
 
 
 # Default configuration values
@@ -98,7 +104,15 @@ class Encodings:  # pylint: disable=too-few-public-methods
     WINDOWS_DEFAULT = CP1252
 
     # Encoding detection order
-    DETECTION_ORDER = [UTF8, UTF16, WINDOWS_1252, UTF16_LE, CP1252, CP1250, SHIFT_JIS]
+    DETECTION_ORDER: ClassVar[tuple[str, ...]] = (
+        UTF8,
+        UTF16,
+        WINDOWS_1252,
+        UTF16_LE,
+        CP1252,
+        CP1250,
+        SHIFT_JIS,
+    )
 
 
 # Component type identifiers
@@ -131,15 +145,21 @@ class ComponentTypes:  # pylint: disable=too-few-public-methods
     LOSSY_TRANSMISSION_LINE = "O"
 
     # Component categories
-    PASSIVE_COMPONENTS = [RESISTOR, CAPACITOR, INDUCTOR]
-    SOURCES = [VOLTAGE_SOURCE, CURRENT_SOURCE]
-    SEMICONDUCTORS = [DIODE, BIPOLAR_TRANSISTOR, JFET, MOSFET, MESFET]
-    CONTROLLED_SOURCES = [
+    PASSIVE_COMPONENTS: ClassVar[tuple[str, ...]] = (RESISTOR, CAPACITOR, INDUCTOR)
+    SOURCES: ClassVar[tuple[str, ...]] = (VOLTAGE_SOURCE, CURRENT_SOURCE)
+    SEMICONDUCTORS: ClassVar[tuple[str, ...]] = (
+        DIODE,
+        BIPOLAR_TRANSISTOR,
+        JFET,
+        MOSFET,
+        MESFET,
+    )
+    CONTROLLED_SOURCES: ClassVar[tuple[str, ...]] = (
         VOLTAGE_CONTROLLED_VOLTAGE_SOURCE,
         CURRENT_CONTROLLED_CURRENT_SOURCE,
         VOLTAGE_CONTROLLED_CURRENT_SOURCE,
         CURRENT_CONTROLLED_VOLTAGE_SOURCE,
-    ]
+    )
 
 
 # LTSpice specific constants
@@ -172,7 +192,7 @@ class LTSpiceConstants:  # pylint: disable=too-few-public-methods
     TEXT_ALIGN_INVISIBLE = "Invisible"
 
     # Rotation angles
-    ROTATION_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315]
+    ROTATION_ANGLES: ClassVar[tuple[int, ...]] = (0, 45, 90, 135, 180, 225, 270, 315)
     MIRROR_OFFSET = 360  # Add to angle for mirrored components
 
 
@@ -219,7 +239,14 @@ class SimulationTypes:  # pylint: disable=too-few-public-methods
     TF = "Transfer Function"
 
     # Short names for command line
-    SHORT_NAMES = {"op": OP, "dc": DC, "ac": AC, "tran": TRAN, "noise": NOISE, "tf": TF}
+    SHORT_NAMES: ClassVar[dict[str, str]] = {
+        "op": OP,
+        "dc": DC,
+        "ac": AC,
+        "tran": TRAN,
+        "noise": NOISE,
+        "tf": TF,
+    }
 
 
 # Line terminators
@@ -280,8 +307,8 @@ class ServerConstants:  # pylint: disable=too-few-public-methods
 
 
 # Supported simulators and file extensions mapping
-SUPPORTED_SIMULATORS: list[str] = Simulators.ALL
-SPICE_EXTENSIONS: list[str] = FileExtensions.ALL_EXTENSIONS
+SUPPORTED_SIMULATORS: tuple[str, ...] = Simulators.ALL
+SPICE_EXTENSIONS: tuple[str, ...] = FileExtensions.ALL_EXTENSIONS
 
 # Default values export
 DEFAULT_ENCODING: str = Encodings.DEFAULT

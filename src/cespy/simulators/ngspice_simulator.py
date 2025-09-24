@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """NGSpice simulator implementation for cespy.
 
 This module provides the NGSpice class which implements the Simulator interface
@@ -29,7 +30,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 # Core imports
 from ..core import constants as core_constants
@@ -43,16 +44,16 @@ class NGspiceSimulator(Simulator):
     """Stores the simulator location and command line options and runs simulations."""
 
     # Placed in order of preference. The first to be found will be used.
-    _spice_exe_paths = core_paths.get_default_simulator_paths(
+    _spice_exe_paths: ClassVar[list[str]] = core_paths.get_default_simulator_paths(
         core_constants.Simulators.NGSPICE
     )
 
     # the default lib paths, as used by get_default_library_paths
     # none
-    _default_lib_paths: list[str] = []
+    _default_lib_paths: ClassVar[list[str]] = []
 
     # defaults:
-    spice_exe = []
+    spice_exe: ClassVar[list[str]] = []
     process_name: str = ""
 
     # determine the executable to use
@@ -81,7 +82,7 @@ class NGspiceSimulator(Simulator):
         process_name = core_paths.guess_process_name(spice_exe[0])
         _logger.debug("Found ngspice installed in: '%s'", spice_exe)
 
-    ngspice_args = {
+    ngspice_args: ClassVar[dict[str, list[str]]] = {
         # '-a'            : ['-a'],
         # '--autorun'     : ['--autorun'],  # run the loaded netlist
         # '-b'            : ['-b'],
@@ -122,7 +123,7 @@ class NGspiceSimulator(Simulator):
     }
     """:meta private:"""
 
-    _default_run_switches = ["-b", "-o", "-r", "-a"]
+    _default_run_switches: ClassVar[list[str]] = ["-b", "-o", "-r", "-a"]
     _compatibility_mode = "kiltpsa"
 
     @classmethod

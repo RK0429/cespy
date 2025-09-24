@@ -2,6 +2,7 @@
 """Command-line script to run the SPICE simulation server."""
 
 import argparse
+import contextlib
 import logging
 import sys
 import time
@@ -13,12 +14,10 @@ from cespy.simulators.ngspice_simulator import NGspiceSimulator
 from cespy.simulators.xyce_simulator import XyceSimulator
 
 keyboard: Any | None = None
-try:
-    import keyboard
-except ImportError:
-    # keyboard module is optional and only needed for interactive
-    # server control
-    pass
+with contextlib.suppress(ImportError):
+    import keyboard as _keyboard
+
+    keyboard = _keyboard
 
 
 def main() -> None:

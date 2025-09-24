@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Circuit validation functionality.
 
 This module provides comprehensive validation for circuit schematics

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 
 """Module for creating histograms from simulation measurement data."""
 
@@ -138,10 +139,7 @@ def plot_multiple_measurements(
     n_rows = (n_meas + n_cols - 1) // n_cols
 
     _, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
-    if n_meas == 1:
-        axes = [axes]
-    else:
-        axes = axes.flatten()
+    axes = [axes] if n_meas == 1 else axes.flatten()
 
     for idx, (name, values) in enumerate(measurements.items()):
         if idx < len(axes):
@@ -161,7 +159,7 @@ def plot_multiple_measurements(
             ax.text(
                 0.02,
                 0.98,
-                f"μ={mean_val:.3g}\nσ={std_val:.3g}",
+                f"mu={mean_val:.3g}\nsigma={std_val:.3g}",
                 transform=ax.transAxes,
                 bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5},
                 verticalalignment="top",
@@ -248,7 +246,7 @@ def main() -> None:
         plot_single_measurement(measurements, args.measurement, args)
     elif len(measurements) == 1:
         # Single measurement - plot directly
-        name = list(measurements.keys())[0]
+        name = next(iter(measurements))
         plot_single_measurement(measurements, name, args)
     else:
         # Multiple measurements - create subplots

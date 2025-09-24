@@ -75,13 +75,16 @@ def detect_encoding(
             if len(lines) == 0:
                 # Empty file
                 continue
-            if expected_pattern:
-                # Search expected pattern at start of any line using MULTILINE
-                # flag
-                if not re.search(expected_pattern, lines, re_flags | re.MULTILINE):
-                    # File did not have the expected string for this encoding
-                    continue
-            if encoding == core_constants.Encodings.UTF8 and lines[1] == "\x00":
+            if expected_pattern and not re.search(
+                expected_pattern, lines, re_flags | re.MULTILINE
+            ):
+                # File did not have the expected string for this encoding
+                continue
+            if (
+                encoding == core_constants.Encodings.UTF8
+                and len(lines) > 1
+                and lines[1] == "\x00"
+            ):
                 continue
             return encoding
     # Handle failure after trying all encodings

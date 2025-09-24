@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Netlist optimizer for improving simulation performance.
 
 This module provides optimization techniques for SPICE netlists to improve
@@ -289,10 +290,11 @@ class NetlistOptimizer:
                 comp_type = line[0].upper()
 
                 # Extract nodes based on component type
-                if comp_type in "RCL" or comp_type in "VI" or comp_type == "D":
-                    if len(parts) >= 3:
-                        node_connections[parts[1]] += 1
-                        node_connections[parts[2]] += 1
+                if (
+                    comp_type in "RCL" or comp_type in "VI" or comp_type == "D"
+                ) and len(parts) >= 3:
+                    node_connections[parts[1]] += 1
+                    node_connections[parts[2]] += 1
                 # Add more component types as needed
 
         # Find dangling nodes (connected to only one component)

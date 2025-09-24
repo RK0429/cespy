@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Visualization helpers for circuit simulation analysis results.
 
 This module provides utilities for creating plots and visualizations from
@@ -125,13 +126,13 @@ class AnalysisVisualizer:
                     mean + std,
                     color="orange",
                     linestyle=":",
-                    label=f"+1σ: {mean + std:.3e}",
+                    label=f"+1 sigma: {mean + std:.3e}",
                 )
                 ax.axvline(
                     mean - std,
                     color="orange",
                     linestyle=":",
-                    label=f"-1σ: {mean - std:.3e}",
+                    label=f"-1 sigma: {mean - std:.3e}",
                 )
 
                 # Add text box with statistics

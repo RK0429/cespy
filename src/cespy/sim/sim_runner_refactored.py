@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Refactored SimRunner using new component architecture as a facade.
 
 This module provides a refactored SimRunner that delegates to specialized
@@ -11,7 +12,7 @@ import shutil
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from ..editor.base_editor import BaseEditor
 from ..sim.simulator import Simulator
@@ -31,7 +32,7 @@ __all__ = [
 _logger = logging.getLogger("cespy.SimRunnerRefactored")
 
 # Type aliases for clarity
-CallbackType = Union[type[ProcessCallback], Callable[[Path, Path], Any]]
+CallbackType = type[ProcessCallback] | Callable[[Path, Path], Any]
 
 
 @dataclass

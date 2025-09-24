@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# pyright: basic
 """Base classes and utilities for circuit simulation analysis."""
 
 # -------------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 
 # -------------------------------------------------------------------------------
 #
@@ -124,11 +125,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from time import sleep
 from time import thread_time as clock
-from typing import (
-    Any,
-    Protocol,
-    Union,
-)
+from typing import Any, Protocol
 
 try:
     import psutil
@@ -144,10 +141,7 @@ _logger = logging.getLogger("cespy.SimRunner")
 END_LINE_TERM = "\n"
 
 # Define a callback type alias for readability
-CallbackType = Union[
-    type[ProcessCallback],
-    Callable[[Path, Path], Any],
-]
+CallbackType = type[ProcessCallback] | Callable[[Path, Path], Any]
 
 
 @dataclass
@@ -405,15 +399,8 @@ class SimRunner(AnyRunner):
 
     def _to_output_folder(self, afile: Path, *, copy: bool, new_name: str = "") -> Path:
         if self.output_folder:
-            if new_name:
-                ddst = self.output_folder / new_name
-            else:
-                ddst = self.output_folder
-
-            if copy:
-                dest = shutil.copy(afile, ddst)
-            else:
-                dest = shutil.move(afile, ddst)
+            ddst = self.output_folder / new_name if new_name else self.output_folder
+            dest = shutil.copy(afile, ddst) if copy else shutil.move(afile, ddst)
             return Path(dest)
         if new_name:
             dest = shutil.copy(afile, afile.parent / new_name)
@@ -487,11 +474,10 @@ class SimRunner(AnyRunner):
                 )
             if isinstance(callback_args, dict):
                 for pos, param in enumerate(args):
-                    if pos > 1:
-                        if param not in callback_args:
-                            raise ValueError(
-                                f"Callback argument '{param}' not found in callback_args"
-                            )
+                    if pos > 1 and param not in callback_args:
+                        raise ValueError(
+                            f"Callback argument '{param}' not found in callback_args"
+                        )
 
             if len(args) - 2 != len(callback_args):
                 raise ValueError(
@@ -829,13 +815,10 @@ class SimRunner(AnyRunner):
             self.update_completed()
             if timeout is None:
                 stop_time = self._maximum_stop_time()
-            if (
-                stop_time is not None
-            ):  # This can happen if timeout was set as none everywhere
-                if clock_function() > stop_time:
-                    if abort_all_on_timeout:
-                        self.kill_all_spice()
-                    return False
+            if stop_time is not None and clock_function() > stop_time:
+                if abort_all_on_timeout:
+                    self.kill_all_spice()
+                return False
 
         _logger.debug(
             "wait_completion returning %s", self.stats.failed_simulations == 0

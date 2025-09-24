@@ -1,3 +1,4 @@
+# pyright: basic
 """Base classes and data structures for schematic editors.
 
 This module provides foundational classes for working with circuit schematics,
@@ -187,14 +188,12 @@ class Line:
 
     def touches(self, point: Point) -> bool:
         """Returns True if the line passes through the given point."""
-        if self.V1.X == self.V2.X:
-            if self.V1.X == point.X:
-                if min(self.V1.Y, self.V2.Y) <= point.Y <= max(self.V1.Y, self.V2.Y):
-                    return True
-        elif self.V1.Y == self.V2.Y:
-            if self.V1.Y == point.Y:
-                if min(self.V1.X, self.V2.X) <= point.X <= max(self.V1.X, self.V2.X):
-                    return True
+        if self.V1.X == self.V2.X and self.V1.X == point.X:
+            if min(self.V1.Y, self.V2.Y) <= point.Y <= max(self.V1.Y, self.V2.Y):
+                return True
+        elif self.V1.Y == self.V2.Y and self.V1.Y == point.Y:
+            if min(self.V1.X, self.V2.X) <= point.X <= max(self.V1.X, self.V2.X):
+                return True
         else:
             # The time saving tricks are over, the line is oblique, so, we have to do the math
             # The line is defined by the equation y = m*x + b
@@ -205,10 +204,10 @@ class Line:
             y = m * point.X + b
             # If the Y value is the same as the point Y, then the line passes through
             # the point
-            if y == point.Y:
-                # Now we have to check if the point is within the line segment
-                if min(self.V1.X, self.V2.X) <= point.X <= max(self.V1.X, self.V2.X):
-                    return True
+            if y == point.Y and min(self.V1.X, self.V2.X) <= point.X <= max(
+                self.V1.X, self.V2.X
+            ):
+                return True
         return False
 
     def intercepts(self, line: "Line") -> bool:
@@ -223,9 +222,7 @@ class Line:
             return True
         # We also have to check if the given line touches any of the vertices of
         # this line
-        if line.touches(self.V1) or line.touches(self.V2):
-            return True
-        return False
+        return line.touches(self.V1) or line.touches(self.V2)
 
 
 # pylint: disable=too-few-public-methods

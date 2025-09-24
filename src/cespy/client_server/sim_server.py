@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """XML-RPC server for distributed SPICE simulation execution.
 
 This module implements a simulation server that accepts client

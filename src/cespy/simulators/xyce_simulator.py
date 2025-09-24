@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Xyce simulator implementation for cespy.
 
 This module provides the Xyce class which implements the Simulator interface
@@ -29,7 +30,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 # Core imports
 from ..core import constants as core_constants
@@ -43,16 +44,16 @@ class XyceSimulator(Simulator):
     """Stores the simulator location and command line options and runs simulations."""
 
     # Placed in order of preference. The first to be found will be used.
-    _spice_exe_paths = core_paths.get_default_simulator_paths(
+    _spice_exe_paths: ClassVar[list[str]] = core_paths.get_default_simulator_paths(
         core_constants.Simulators.XYCE
     )
 
     # the default lib paths, as used by get_default_library_paths
     # none
-    _default_lib_paths: list[str] = []
+    _default_lib_paths: ClassVar[list[str]] = []
 
     # defaults:
-    spice_exe = []
+    spice_exe: ClassVar[list[str]] = []
     process_name: str = ""
 
     # determine the executable to use
@@ -81,7 +82,7 @@ class XyceSimulator(Simulator):
         process_name = core_paths.guess_process_name(spice_exe[0])
         _logger.debug("Found xyce installed in: '%s'", spice_exe)
 
-    xyce_args = {
+    xyce_args: ClassVar[dict[str, list[str]]] = {
         # '-b'                : ['-b'],  # batch mode flag for spice compatibility (ignored)
         # '-h'                : ['-h'],  # print usage and exit
         # '-v'                : ['-v'],  # print version info and exit
@@ -160,7 +161,7 @@ class XyceSimulator(Simulator):
     }
     """:meta private:"""
 
-    _default_run_switches = ["-l", "-r"]
+    _default_run_switches: ClassVar[list[str]] = ["-l", "-r"]
 
     @classmethod
     # pylint: disable=too-many-branches

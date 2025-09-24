@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Base simulator interface for running SPICE simulations."""
 from __future__ import annotations
 
@@ -10,7 +11,7 @@ import subprocess
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path, PureWindowsPath
-from typing import Any
+from typing import Any, ClassVar
 
 # -------------------------------------------------------------------------------
 #
@@ -116,7 +117,7 @@ class Simulator(ABC):
     ``from cespy.sim.simulator import run_function`` instruction.
     """
 
-    spice_exe: list[str] = []
+    spice_exe: ClassVar[list[str]] = []
     """The executable. If using a loader (like wine), make sure that the last in the
     array is the real simulator.
 
@@ -133,7 +134,7 @@ class Simulator(ABC):
     """:meta private:"""
 
     # the default lib paths, as used by get_default_library_paths
-    _default_lib_paths: list[str] = []
+    _default_lib_paths: ClassVar[list[str]] = []
 
     @classmethod
     def create_from(
@@ -153,10 +154,11 @@ class Simulator(ABC):
         plib_path_to_exe = None
         exe_parts = []
         if isinstance(path_to_exe, Path) or os.path.exists(path_to_exe):
-            if isinstance(path_to_exe, Path):
-                plib_path_to_exe = path_to_exe
-            else:
-                plib_path_to_exe = Path(path_to_exe)
+            plib_path_to_exe = (
+                path_to_exe
+                if isinstance(path_to_exe, Path)
+                else Path(path_to_exe)
+            )
             exe_parts = [plib_path_to_exe.as_posix()]
         elif "\\" in path_to_exe:  # Windows path detected.
             # Convert Windows path to posix format.
@@ -271,21 +273,21 @@ class Simulator(ABC):
         paths = []
         myexe = None
         # get the executable
-        if cls.spice_exe and len(cls.spice_exe) > 0:
+        if cls.spice_exe and os.path.exists(cls.spice_exe[-1]):
             # TODO: this will fail if the simulator executable is not in the last
             # element of the list. Maybe make this more robust.
-            if os.path.exists(cls.spice_exe[-1]):
-                myexe = cls.spice_exe[-1]
+            myexe = cls.spice_exe[-1]
         _logger.debug(
             "Using Spice executable path '%s' to determine the correct library paths.",
             myexe,
         )
         for path in cls._default_lib_paths:
             _logger.debug("Checking if library path '%s' exists.", path)
-            if myexe is not None:
-                p = cls.expand_and_check_local_dir(path, myexe)
-            else:
-                p = cls.expand_and_check_local_dir(path)
+            p = (
+                cls.expand_and_check_local_dir(path, myexe)
+                if myexe is not None
+                else cls.expand_and_check_local_dir(path)
+            )
             if p is not None:
                 _logger.debug("Adding path '%s' to the library path list", p)
                 paths.append(p)

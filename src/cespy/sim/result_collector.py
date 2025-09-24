@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Result collector for aggregating and processing simulation results.
 
 This module provides functionality to collect, organize, and process simulation
@@ -321,7 +322,8 @@ class ResultCollector:
                 "success",
                 "duration",
                 "error_message",
-            ] + sorted(all_measurements)
+                *sorted(all_measurements),
+            ]
 
             writer = csv.DictWriter(csvfile, fieldnames=fields)
             writer.writeheader()

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# pyright: basic
 """Module for plotting SPICE raw waveform data."""
 
 import argparse

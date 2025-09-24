@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """QSpice simulator implementation for cespy.
 
 This module provides the Qspice class which implements the Simulator interface
@@ -29,7 +30,7 @@ import subprocess
 # -------------------------------------------------------------------------------
 import sys
 from pathlib import Path
-from typing import IO, Any
+from typing import IO, Any, ClassVar
 
 # Core imports
 from ..core import constants as core_constants
@@ -53,16 +54,19 @@ class Qspice(Simulator):
     # windows paths (that are also valid for wine)
     # Please note that os.path.expanduser and os.path.join are sensitive to the style of slash.
     # Placed in order of preference. The first to be found will be used.
-    _spice_exe_win_paths = core_paths.get_default_simulator_paths(
+    _spice_exe_win_paths: ClassVar[list[str]] = core_paths.get_default_simulator_paths(
         core_constants.Simulators.QSPICE
     )
 
     # the default lib paths, as used by get_default_library_paths
-    _default_lib_paths = ["C:/Program Files/QSPICE", "~/Documents/QSPICE"]
+    _default_lib_paths: ClassVar[list[str]] = [
+        "C:/Program Files/QSPICE",
+        "~/Documents/QSPICE",
+    ]
 
     """Searches on the any usual locations for a simulator"""
     # defaults:
-    spice_exe = []
+    spice_exe: ClassVar[list[str]] = []
     process_name = ""
 
     if sys.platform in ("linux", "darwin"):
@@ -91,7 +95,7 @@ class Qspice(Simulator):
         process_name = core_paths.guess_process_name(spice_exe[0])
         _logger.debug("Found Qspice installed in: '%s'", spice_exe)
 
-    qspice_args = {
+    qspice_args: ClassVar[dict[str, list[str]]] = {
         # Use ASCII file format for the output data(.qraw) file.
         "-ASCII": ["-ASCII"],
         "-ascii": [
@@ -127,7 +131,7 @@ class Qspice(Simulator):
     }
     """:meta private:"""
 
-    _default_run_switches = ["-o"]
+    _default_run_switches: ClassVar[list[str]] = ["-o"]
 
     @classmethod
     def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:
@@ -238,12 +242,13 @@ class Qspice(Simulator):
         log_file = (
             Path(netlist_file).with_suffix(core_constants.FileExtensions.LOG).as_posix()
         )
-        cmd_run = (
-            cls.spice_exe
-            + ["-o", log_file]
-            + [netlist_file.as_posix()]
-            + cmd_line_switches
-        )
+        cmd_run = [
+            *cls.spice_exe,
+            "-o",
+            log_file,
+            netlist_file.as_posix(),
+            *cmd_line_switches,
+        ]
         # start execution
         if exe_log:
             log_exe_file = netlist_file.with_suffix(

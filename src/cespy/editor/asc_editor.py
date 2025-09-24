@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """LTSpice schematic file (.asc) editor and parser.
 
 This module provides comprehensive functionality for reading, parsing, modifying,
@@ -26,7 +27,7 @@ import os.path
 import re
 from pathlib import Path
 from re import Match
-from typing import Any, Union, cast
+from typing import Any, ClassVar, Union, cast
 
 # Core imports
 from ..core import constants as core_constants
@@ -94,10 +95,10 @@ class AscEditor(BaseSchematic):
     """Class made to update directly the LTspice ASC files."""
 
     # This is a class variable, so it can be shared between all instances.
-    symbol_cache: dict[str, str] = {}
+    symbol_cache: ClassVar[dict[str, str]] = {}
     """:meta private:"""
 
-    simulator_lib_paths: list[str] = LTspice.get_default_library_paths()
+    simulator_lib_paths: ClassVar[list[str]] = LTspice.get_default_library_paths()
     """This is initialised with typical locations found for LTspice. You
     can (and should, if you use wine), call `prepare_for_simulator()` once
     you've set the executable paths. This is a class variable, so it will be
@@ -193,10 +194,9 @@ class AscEditor(BaseSchematic):
                 posY = directive.coord.Y
                 alignment = asc_text_align_get(directive)
                 size = directive.size
-                if directive.type == TextTypeEnum.DIRECTIVE:
-                    directive_type = "!"
-                else:
-                    directive_type = ";"  # Otherwise assume it is a comment
+                directive_type = (
+                    "!" if directive.type == TextTypeEnum.DIRECTIVE else ";"
+                )  # Otherwise assume it is a comment
                 asc.write(
                     "TEXT "
                     f"{posX} {posY} {alignment} {size} "
@@ -549,10 +549,7 @@ class AscEditor(BaseSchematic):
         :raises: ParameterNotFoundError - If the parameter cannot be found or set
         """
         match, directive = self._get_param_named(param)
-        if isinstance(value, int | float):
-            value_str = format_eng(value)
-        else:
-            value_str = value
+        value_str = format_eng(value) if isinstance(value, int | float) else value
         if match:
             assert (
                 directive is not None
@@ -595,10 +592,7 @@ class AscEditor(BaseSchematic):
                 return
             component = self.get_component(device)
             if "Value" in component.attributes:
-                if isinstance(value, str):
-                    value_str = value
-                else:
-                    value_str = format_eng(value)
+                value_str = value if isinstance(value, str) else format_eng(value)
                 component.attributes["Value"] = value_str
                 _logger.info("Component %s updated to %s", device, value_str)
                 self.set_updated(device)
@@ -728,15 +722,46 @@ class AscEditor(BaseSchematic):
                 foundme = False
                 # not found: look in the second level dicts
                 for param_key in LTSPICE_PARAMETERS_REDUCED:
-                    if param_key in params:
-                        if key in params[param_key]:
-                            # found in the dict
-                            # update the dict
-                            if value_str is None:
-                                # remove if empty
-                                params[param_key].pop(key)
-                            else:
-                                params[param_key][key] = value_str
+                    if param_key in params and key in params[param_key]:
+                        # found in the dict
+                        # update the dict
+                        if value_str is None:
+                            # remove if empty
+                            params[param_key].pop(key)
+                        else:
+                            params[param_key][key] = value_str
+                        # and make the line out of the dict
+                        component.attributes[param_key] = " ".join(
+                            [
+                                f"{p_key}={p_value}"
+                                for p_key, p_value in params[param_key].items()
+                            ]
+                        )
+                        _logger.info(
+                            "Component %s updated with parameter %s:%s",
+                            element,
+                            key,
+                            value_str,
+                        )
+                        foundme = True
+                if not foundme and value_str is not None:
+                    # don't add if there's nothing to add
+                    if key in LTSPICE_PARAMETERS:
+                        # known parameter, set the value
+                        component.attributes[key] = value_str
+                        _logger.info(
+                            "Component %s updated with parameter %s:%s",
+                            element,
+                            key,
+                            value_str,
+                        )
+                    else:
+                        # nothing found, and not a known parameter, put it in
+                        # SpiceLine
+                        param_key = LTSPICE_PARAMETERS_REDUCED[0]
+                        if param_key in params:
+                            # if SpiceLine exists: add to the dict
+                            params[param_key][key] = value_str
                             # and make the line out of the dict
                             component.attributes[param_key] = " ".join(
                                 [
@@ -744,42 +769,9 @@ class AscEditor(BaseSchematic):
                                     for p_key, p_value in params[param_key].items()
                                 ]
                             )
-                            _logger.info(
-                                "Component %s updated with parameter %s:%s",
-                                element,
-                                key,
-                                value_str,
-                            )
-                            foundme = True
-                if not foundme:
-                    if value_str is not None:
-                        # don't add if there's nothing to add
-                        if key in LTSPICE_PARAMETERS:
-                            # known parameter, set the value
-                            component.attributes[key] = value_str
-                            _logger.info(
-                                "Component %s updated with parameter %s:%s",
-                                element,
-                                key,
-                                value_str,
-                            )
                         else:
-                            # nothing found, and not a known parameter, put it in
-                            # SpiceLine
-                            param_key = LTSPICE_PARAMETERS_REDUCED[0]
-                            if param_key in params:
-                                # if SpiceLine exists: add to the dict
-                                params[param_key][key] = value_str
-                                # and make the line out of the dict
-                                component.attributes[param_key] = " ".join(
-                                    [
-                                        f"{p_key}={p_value}"
-                                        for p_key, p_value in params[param_key].items()
-                                    ]
-                                )
-                            else:
-                                # if SpiceLine does not exist: create the line
-                                component.attributes[param_key] = f"{key}={value_str}"
+                            # if SpiceLine does not exist: create the line
+                            component.attributes[param_key] = f"{key}={value_str}"
                             _logger.info(
                                 "Component %s updated with parameter %s:%s",
                                 element,
@@ -790,8 +782,8 @@ class AscEditor(BaseSchematic):
 
     def get_components(self, prefixes: str = "*") -> list[str]:
         if prefixes == "*":
-            return list(self.components.keys())
-        return [k for k in self.components.keys() if k[0] in prefixes]
+            return list(self.components)
+        return [k for k in self.components if k[0] in prefixes]
 
     def remove_component(self, designator: str) -> None:
         sub_circuit, ref = self._get_parent(designator)
@@ -950,3 +942,4 @@ class AscEditor(BaseSchematic):
         else:
             msg = f'Instructions matching "{search_pattern}" not found'
             _logger.error(msg)
+            raise RuntimeError(msg)

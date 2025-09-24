@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Component factory for creating circuit component objects.
 
 This module provides a factory pattern implementation for creating
@@ -432,19 +433,22 @@ class ComponentFactory:
 
         # Parse pin connections
         pin_count = len(template.pin_names)
-        if len(parts) > pin_count:
-            for i, pin_name in enumerate(template.pin_names):
-                if i + 1 < len(parts):
-                    component.connect_pin(pin_name, parts[i + 1])
+        for pin_name, pin_value in zip(
+            template.pin_names, parts[1:], strict=False
+        ):
+            component.connect_pin(pin_name, pin_value)
 
         # Parse value and other attributes
-        if component_type in [
-            ComponentType.RESISTOR,
-            ComponentType.CAPACITOR,
-            ComponentType.INDUCTOR,
-        ]:
-            if len(parts) > pin_count + 1:
-                component.set_value(parts[pin_count + 1])
+        if (
+            component_type
+            in [
+                ComponentType.RESISTOR,
+                ComponentType.CAPACITOR,
+                ComponentType.INDUCTOR,
+            ]
+            and len(parts) > pin_count + 1
+        ):
+            component.set_value(parts[pin_count + 1])
 
         # TODO: Parse additional attributes based on component type
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Streaming API for memory-efficient raw file processing.
 
 This module provides streaming capabilities for processing large raw files

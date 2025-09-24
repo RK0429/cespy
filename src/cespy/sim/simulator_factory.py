@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Factory for creating simulator instances with automatic detection and configuration.
 
 This module provides a factory pattern implementation for creating simulator
@@ -7,6 +8,7 @@ instances, with support for automatic detection, custom paths, and validation.
 
 import logging
 from pathlib import Path
+from typing import ClassVar
 
 # Core imports
 from ..core import constants as core_constants
@@ -28,7 +30,7 @@ class SimulatorFactory:
     """Factory for creating and configuring simulator instances."""
 
     # Registry of simulator implementations
-    SIMULATOR_REGISTRY: dict[str, type[Simulator]] = {
+    SIMULATOR_REGISTRY: ClassVar[dict[str, type[Simulator]]] = {
         core_constants.Simulators.LTSPICE: LTspice,
         core_constants.Simulators.NGSPICE: NGspiceSimulator,
         core_constants.Simulators.QSPICE: Qspice,
@@ -36,7 +38,7 @@ class SimulatorFactory:
     }
 
     # Cache for created simulator instances
-    _simulator_cache: dict[str, Simulator] = {}
+    _simulator_cache: ClassVar[dict[str, Simulator]] = {}
 
     @classmethod
     def create(
@@ -94,20 +96,22 @@ class SimulatorFactory:
         _logger.info("Found %s at %s (wine=%s)", simulator_type, exe_path, uses_wine)
 
         # Build command list
-        if uses_wine:
-            spice_exe = locator.get_wine_command() + [str(exe_path)]
-        else:
-            spice_exe = [str(exe_path)]
+        spice_exe = (
+            [*locator.get_wine_command(), str(exe_path)]
+            if uses_wine
+            else [str(exe_path)]
+        )
 
-        # Create instance
-        simulator_instance = simulator_class()
-        # Configure the simulator instance
-        simulator_instance.spice_exe = spice_exe
-        simulator_instance.process_name = exe_path.name
+        # Configure the simulator class
+        simulator_class.spice_exe = spice_exe
+        simulator_class.process_name = exe_path.name
 
         # Get library paths
         lib_paths = locator.get_library_paths(exe_path)
-        simulator_instance._default_lib_paths = [str(p) for p in lib_paths]
+        simulator_class._default_lib_paths = [str(p) for p in lib_paths]
+
+        # Create instance
+        simulator_instance = simulator_class()
 
         # Validate if requested
         if validate:
@@ -234,10 +238,10 @@ class SimulatorFactory:
 
         # Simulator-specific additions
         specific = {
-            core_constants.Simulators.LTSPICE: common + ["four", "step"],
-            core_constants.Simulators.NGSPICE: common + ["pz", "sens", "disto"],
-            core_constants.Simulators.QSPICE: common + ["four"],
-            core_constants.Simulators.XYCE: common + ["hb", "mpde", "step"],
+            core_constants.Simulators.LTSPICE: [*common, "four", "step"],
+            core_constants.Simulators.NGSPICE: [*common, "pz", "sens", "disto"],
+            core_constants.Simulators.QSPICE: [*common, "four"],
+            core_constants.Simulators.XYCE: [*common, "hb", "mpde", "step"],
         }
 
         return specific.get(simulator_type, common)

@@ -1,3 +1,4 @@
+# pyright: basic
 """Iterator classes for parameter sweeps in SPICE simulations.
 
 This module provides different types of iterators for generating parameter

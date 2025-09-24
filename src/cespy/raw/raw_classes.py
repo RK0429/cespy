@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# pyright: basic
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -236,10 +237,11 @@ class Axis(DataSet):
         :returns: The position of parameter /t/ in the axis
         :rtype: int, float
         """
-        if self.name == "time":
-            timex = self.get_time_axis(step)
-        else:
-            timex = self.get_wave(step)
+        timex = (
+            self.get_time_axis(step)
+            if self.name == "time"
+            else self.get_wave(step)
+        )
         for i, x in enumerate(timex):
             if x == t:
                 return i
@@ -306,11 +308,7 @@ class TraceRead(DataSet):
         :rtype: float, complex
         """
         if self.axis is None:
-            if n != 0:
-                val = self.data[n]
-            else:
-                # This is for the case of stepped operation point simulation.
-                val = self.data[step]
+            val = self.data[n] if n != 0 else self.data[step]
         else:
             val = self.data[self.axis.step_offset(step) + n]
         if self.numerical_type == "complex":

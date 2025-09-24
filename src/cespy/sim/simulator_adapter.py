@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Adapter to bridge the new simulator interface with existing implementations.
 
 This module provides an adapter class that allows existing Simulator subclasses
@@ -40,13 +41,25 @@ class SimulatorAdapter(ISimulator):
         """
         self.simulator_class = simulator_class
         self.simulator_name = simulator_type
-        self.supported_analyses = ["dc", "ac", "tran", "op", "noise", "tf"]
+        self._supported_analyses = ["dc", "ac", "tran", "op", "noise", "tf"]
 
         # Determine supported platforms based on simulator
         if simulator_type == core_constants.Simulators.QSPICE:
-            self.supported_platforms = ["windows"]
+            self._supported_platforms = ["windows"]
         else:
-            self.supported_platforms = ["windows", "linux", "darwin"]
+            self._supported_platforms = ["windows", "linux", "darwin"]
+
+    @property
+    def supported_analyses(self) -> list[str]:
+        """List of analyses supported by the adapted simulator."""
+
+        return self._supported_analyses
+
+    @property
+    def supported_platforms(self) -> list[str]:
+        """Platforms where the adapted simulator is available."""
+
+        return self._supported_platforms
 
     def validate_installation(self) -> SimulatorInfo:
         """Verify simulator is properly installed and return its information."""
@@ -72,10 +85,11 @@ class SimulatorAdapter(ISimulator):
         lib_paths = [Path(p) for p in self.simulator_class.get_default_library_paths()]
 
         # Determine status
-        if is_valid:
-            status = SimulatorStatus.AVAILABLE
-        else:
-            status = SimulatorStatus.INVALID_VERSION
+        status = (
+            SimulatorStatus.AVAILABLE
+            if is_valid
+            else SimulatorStatus.INVALID_VERSION
+        )
 
         return SimulatorInfo(
             name=self.simulator_name,
@@ -202,12 +216,11 @@ class SimulatorAdapter(ISimulator):
         errors = []
 
         # Validate timeout
-        if "timeout" in options:
-            if (
-                not isinstance(options["timeout"], int | float)
-                or options["timeout"] <= 0
-            ):
-                errors.append("timeout must be a positive number")
+        if "timeout" in options and (
+            not isinstance(options["timeout"], int | float)
+            or options["timeout"] <= 0
+        ):
+            errors.append("timeout must be a positive number")
 
         # Validate threads
         if "threads" in options:

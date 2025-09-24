@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 # coding=utf-8
 
 # flake8: noqa

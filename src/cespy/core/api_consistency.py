@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """API consistency utilities and deprecation management.
 
 This module provides utilities for maintaining API consistency across the
@@ -11,7 +12,7 @@ import inspect
 import logging
 import warnings
 from collections.abc import Callable
-from typing import Any, TypeVar, cast
+from typing import Any, ClassVar, TypeVar, cast
 
 _logger = logging.getLogger("cespy.APIConsistency")
 
@@ -133,7 +134,7 @@ class APIStandardizer:
     """Utility class for API standardization across the codebase."""
 
     # Standardized method naming conventions
-    STANDARD_METHOD_NAMES = {
+    STANDARD_METHOD_NAMES: ClassVar[dict[str, str]] = {
         # File operations
         "load": "load_file",
         "save": "save_file",
@@ -162,7 +163,7 @@ class APIStandardizer:
     }
 
     # Standardized parameter naming conventions
-    STANDARD_PARAMETER_NAMES = {
+    STANDARD_PARAMETER_NAMES: ClassVar[dict[str, str]] = {
         # File paths
         "file": "file_path",
         "filename": "file_path",
@@ -191,7 +192,7 @@ class APIStandardizer:
     }
 
     # Standard parameter ordering for common operations
-    STANDARD_PARAMETER_ORDER = {
+    STANDARD_PARAMETER_ORDER: ClassVar[dict[str, list[str]]] = {
         "file_operations": ["file_path", "encoding", "mode"],
         "component_operations": ["component_reference", "value", "attributes"],
         "simulation_operations": ["circuit_file", "runner", "timeout", "callback"],

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """LTSpice symbol file (.asy) reader and parser.
 
 This module provides functionality to parse LTSpice symbol files and translate

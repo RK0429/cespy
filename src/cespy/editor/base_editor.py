@@ -1,3 +1,4 @@
+# pyright: basic
 """Abstract base classes for SPICE netlist and schematic editors.
 
 This module provides the foundation for all editor implementations in cespy,
@@ -33,7 +34,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from math import floor, log
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 # Core imports
 from ..core import paths as core_paths
@@ -457,14 +458,14 @@ class BaseEditor(ABC):
     netlist: list[str]
     """Active SPICE netlist lines for the editor instance."""
 
-    custom_lib_paths: list[str] = []
+    custom_lib_paths: ClassVar[list[str]] = []
     """The custom library paths. Not to be modified, only set via
     `set_custom_library_paths()`. This is a class variable, so it will be shared between
     all instances.
 
     :meta hide-value:
     """
-    simulator_lib_paths: list[str] = []
+    simulator_lib_paths: ClassVar[list[str]] = []
     """This is initialised with typical locations found for your simulator. You can (and
     should, if you use wine), call `prepare_for_simulator()` once you've set the
     executable paths. This is a class variable, so it will be shared between all

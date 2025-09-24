@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """LTspice simulator implementation for cespy.
 
 This module provides the LTspice class which implements the Simulator interface
@@ -29,7 +30,7 @@ import subprocess
 # -------------------------------------------------------------------------------
 import sys
 from pathlib import Path
-from typing import IO
+from typing import IO, ClassVar
 
 # Core imports
 from ..core import constants as core_constants
@@ -47,12 +48,12 @@ class LTspice(Simulator):
     """
 
     # Use default paths from core constants
-    _spice_exe_win_paths: list[str] = core_paths.get_default_simulator_paths(
+    _spice_exe_win_paths: ClassVar[list[str]] = core_paths.get_default_simulator_paths(
         core_constants.Simulators.LTSPICE
     )
 
     # the default lib paths, as used by get_default_library_paths
-    _default_lib_paths: list[str] = [
+    _default_lib_paths: ClassVar[list[str]] = [
         "~/AppData/Local/LTspice/lib",
         "~/Documents/LTspiceXVII/lib/",
         "~/Documents/LTspice/lib/",
@@ -62,9 +63,9 @@ class LTspice(Simulator):
     ]
 
     # defaults:
-    spice_exe: list[str] = []
+    spice_exe: ClassVar[list[str]] = []
     process_name: str = ""
-    ltspice_args: dict[str, list[str]] = {
+    ltspice_args: ClassVar[dict[str, list[str]]] = {
         "-alt": ["-alt"],  # Set solver to Alternate.
         # Use ASCII.raw files. Seriously degrades program performance.
         "-ascii": ["-ascii"],
@@ -83,7 +84,7 @@ class LTspice(Simulator):
         "-SOI": ["-SOI"],  # Allow up to 7 MOSFET nodes.
         "-sync": ["-sync"],  # Update component libraries.
     }
-    _default_run_switches: list[str] = ["-Run", "-b"]
+    _default_run_switches: ClassVar[list[str]] = ["-Run", "-b"]
 
     @classmethod
     def using_macos_native_sim(cls) -> bool:
@@ -223,35 +224,35 @@ class LTspice(Simulator):
                         "Simulate '.net' or '.cir' files or use LTspice under wine."
                     )
 
-                cmd_run = (
-                    cls.spice_exe
-                    + ["-b"]
-                    + [netlist_file.as_posix()]
-                    + cmd_line_switches
-                )
+                cmd_run = [
+                    *cls.spice_exe,
+                    "-b",
+                    netlist_file.as_posix(),
+                    *cmd_line_switches,
+                ]
             else:
                 # wine
                 # Drive letter 'Z' is the link from wine to the host platform's root
                 # directory.
                 # Z: is needed for netlists with absolute paths, but will also work with
                 # relative paths.
-                cmd_run = (
-                    cls.spice_exe
-                    + ["-Run"]
-                    + ["-b"]
-                    + ["Z:" + netlist_file.as_posix()]
-                    + cmd_line_switches
-                )
+                cmd_run = [
+                    *cls.spice_exe,
+                    "-Run",
+                    "-b",
+                    "Z:" + netlist_file.as_posix(),
+                    *cmd_line_switches,
+                ]
         else:
             # Windows (well, also aix, wasi, emscripten,... where it will
             # fail.)
-            cmd_run = (
-                cls.spice_exe
-                + ["-Run"]
-                + ["-b"]
-                + [netlist_file.as_posix()]
-                + cmd_line_switches
-            )
+            cmd_run = [
+                *cls.spice_exe,
+                "-Run",
+                "-b",
+                netlist_file.as_posix(),
+                *cmd_line_switches,
+            ]
         # start execution
         if exe_log:
             log_exe_file = netlist_file.with_suffix(
@@ -326,9 +327,12 @@ class LTspice(Simulator):
                 "capabilities. Use LTspice under wine."
             )
 
-        cmd_netlist = (
-            cls.spice_exe + ["-netlist"] + [circuit_file.as_posix()] + cmd_line_switches
-        )
+        cmd_netlist = [
+            *cls.spice_exe,
+            "-netlist",
+            circuit_file.as_posix(),
+            *cmd_line_switches,
+        ]
         if exe_log:
             log_exe_file = circuit_file.with_suffix(".exe.log")
             with open(log_exe_file, "wb") as outfile:

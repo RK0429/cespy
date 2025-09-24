@@ -213,37 +213,38 @@ class RawWrite:
         """
         if self._imported_data:
             self._consolidate()
-        f = open(filename, "wb")
-        f.write("Title: * cespy RawWrite\n".encode(self.encoding))
-        f.write(f"Date: {strftime('%a %b %d %H:%M:%S %Y')}\n".encode(self.encoding))
-        f.write(f"Plotname: {self.plot_name}\n".encode(self.encoding))
-        f.write(f"Flags: {self._str_flags()}\n".encode(self.encoding))
-        f.write(f"No. Variables: {len(self._traces)}\n".encode(self.encoding))
-        f.write(f"No. Points: {len(self._traces[0]):12}\n".encode(self.encoding))
-        f.write(f"Offset:   {self.offset:.16e}\n".encode(self.encoding))
-        f.write(
-            "Command: Linear Technology Corporation LTspice XVII\n".encode(
-                self.encoding
+        with open(filename, "wb") as f:
+            f.write("Title: * cespy RawWrite\n".encode(self.encoding))
+            f.write(
+                f"Date: {strftime('%a %b %d %H:%M:%S %Y')}\n".encode(self.encoding)
             )
-        )
-        # f.write("Backannotation: \n".encode(self.encoding))
-        f.write("Variables:\n".encode(self.encoding))
-        for i, trace in enumerate(self._traces):
-            f.write(f"\t{i}\t{trace.name}\t{trace.whattype}\n".encode(self.encoding))
-        total_bytes = 0
-        f.write("Binary:\n".encode(self.encoding))
-        if (
-            self.flags.fastaccess and self.flags.numtype != "complex"
-        ):  # Don't know why, but complex RAW files aren't
-            # converted to FastAccess
-            for trace in self._traces:
-                f.write(trace.data.tobytes())
-        else:
-            fmts = {trace: tobytes_for_trace(trace) for trace in self._traces}
-            for i in range(len(self._traces[0])):
+            f.write(f"Plotname: {self.plot_name}\n".encode(self.encoding))
+            f.write(f"Flags: {self._str_flags()}\n".encode(self.encoding))
+            f.write(f"No. Variables: {len(self._traces)}\n".encode(self.encoding))
+            f.write(f"No. Points: {len(self._traces[0]):12}\n".encode(self.encoding))
+            f.write(f"Offset:   {self.offset:.16e}\n".encode(self.encoding))
+            f.write(
+                "Command: Linear Technology Corporation LTspice XVII\n".encode(
+                    self.encoding
+                )
+            )
+            # f.write("Backannotation: \n".encode(self.encoding))
+            f.write("Variables:\n".encode(self.encoding))
+            for i, trace in enumerate(self._traces):
+                f.write(f"\t{i}\t{trace.name}\t{trace.whattype}\n".encode(self.encoding))
+            total_bytes = 0
+            f.write("Binary:\n".encode(self.encoding))
+            if (
+                self.flags.fastaccess and self.flags.numtype != "complex"
+            ):  # Don't know why, but complex RAW files aren't
+                # converted to FastAccess
                 for trace in self._traces:
-                    total_bytes += f.write(fmts[trace](trace.data[i]))
-        f.close()
+                    f.write(trace.data.tobytes())
+            else:
+                fmts = {trace: tobytes_for_trace(trace) for trace in self._traces}
+                for i in range(len(self._traces[0])):
+                    for trace in self._traces:
+                        total_bytes += f.write(fmts[trace](trace.data[i]))
 
     @staticmethod
     def _rename_netlabel(name: str, **kwargs: Any) -> str:
@@ -282,10 +283,7 @@ class RawWrite:
         Returns:     bool: True if the name exists, False otherwise
         """
         # first check whether it is a duplicate
-        for trace in self._traces:
-            if trace.name == name:
-                return True
-        return False
+        return any(trace.name == name for trace in self._traces)
 
     def add_traces_from_raw(
         self,
@@ -364,11 +362,11 @@ class RawWrite:
             force_axis_alignment = False
 
         if force_axis_alignment or minimum_timestep > 0.0:
-            if self._new_axis:
-                my_axis = self._new_axis
-            else:
-                # Convert ndarray to list[float] to maintain type consistency
-                my_axis = self._traces[0].get_wave().tolist()
+            my_axis = (
+                self._new_axis
+                if self._new_axis
+                else self._traces[0].get_wave().tolist()
+            )  # Convert ndarray to list[float] to maintain type consistency
             other_axis = other.get_axis(from_step)
             new_axis_list: list[float] = []
             if minimum_timestep > 0.0:

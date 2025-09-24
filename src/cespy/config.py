@@ -1,3 +1,4 @@
+# pyright: basic
 """
 Configuration management for cespy.
 

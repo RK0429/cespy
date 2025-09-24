@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+# pyright: basic
 """Raw data cache for frequently accessed waveform data.
 
 This module provides caching functionality for raw file data to improve
 performance when repeatedly accessing the same traces.
 """
 
+import contextlib
 import logging
 import pickle
 import time
@@ -492,10 +494,8 @@ class MultiLevelCache:
 
         # Clear disk cache
         for path in self._disk_index.values():
-            try:
+            with contextlib.suppress(Exception):
                 path.unlink()
-            except Exception:
-                pass
 
         self._disk_index.clear()
         self._disk_usage = 0

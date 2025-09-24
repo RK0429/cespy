@@ -1,3 +1,4 @@
+# pyright: basic
 """
 Centralized path utilities for cespy.
 

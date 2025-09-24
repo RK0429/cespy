@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+# pyright: basic
 """Process manager for handling simulation subprocess execution.
 
 This module provides a manager for executing and monitoring simulation processes,
 with support for timeouts, resource limits, and process cleanup.
 """
 
+import contextlib
 import logging
 import os
 import signal
@@ -12,6 +14,7 @@ import subprocess
 import sys
 import threading
 import time
+from contextlib import ExitStack
 from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Any
@@ -138,17 +141,25 @@ class ProcessManager:
         if env:
             process_env.update(env)
 
+        stdout_path = Path(stdout_file) if stdout_file is not None else None
+        stderr_path = Path(stderr_file) if stderr_file is not None else None
+
         # Prepare stdout/stderr
         stdout_handle: IO[str] | int | None = None
         stderr_handle: IO[str] | int | None = None
+        stack = ExitStack()
         try:
-            if stdout_file:
-                stdout_handle = open(stdout_file, "w", encoding="utf-8")
+            if stdout_path:
+                stdout_handle = stack.enter_context(
+                    stdout_path.open("w", encoding="utf-8")
+                )
             else:
                 stdout_handle = subprocess.PIPE
 
-            if stderr_file:
-                stderr_handle = open(stderr_file, "w", encoding="utf-8")
+            if stderr_path:
+                stderr_handle = stack.enter_context(
+                    stderr_path.open("w", encoding="utf-8")
+                )
             else:
                 stderr_handle = subprocess.PIPE
 
@@ -177,8 +188,8 @@ class ProcessManager:
                 command=command,
                 start_time=start_time,
                 working_directory=working_directory,
-                stdout_file=stdout_file,
-                stderr_file=stderr_file,
+                stdout_file=stdout_path,
+                stderr_file=stderr_path,
                 process=process,
             )
 
@@ -188,10 +199,8 @@ class ProcessManager:
 
             # Track with psutil if available
             if HAS_PSUTIL and psutil is not None:
-                try:
+                with contextlib.suppress(*_PSUTIL_EXCEPTIONS):
                     process_info.psutil_process = psutil.Process(process.pid)
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    pass
 
             # Store process info
             with self._lock:
@@ -223,8 +232,8 @@ class ProcessManager:
             # Create result
             result = ProcessResult(
                 return_code=return_code,
-                stdout_path=stdout_file,
-                stderr_path=stderr_file,
+                stdout_path=stdout_path,
+                stderr_path=stderr_path,
                 duration=duration,
                 terminated=terminated,
                 error_message=error_message,
@@ -244,19 +253,7 @@ class ProcessManager:
             return process_id, result
 
         finally:
-            # Close file handles if we opened them
-            if (
-                stdout_handle is not None
-                and stdout_file
-                and not isinstance(stdout_handle, int)
-            ):
-                stdout_handle.close()
-            if (
-                stderr_handle is not None
-                and stderr_file
-                and not isinstance(stderr_handle, int)
-            ):
-                stderr_handle.close()
+            stack.close()
 
     def terminate_process(self, process_id: int) -> bool:
         """Terminate a running process.
@@ -354,19 +351,17 @@ class ProcessManager:
         # Find zombie processes matching our simulator patterns
         for proc in psutil.process_iter(["pid", "name", "status"]):
             try:
-                if proc.info["status"] == psutil.STATUS_ZOMBIE:
-                    # Check if it's one of our simulators
-                    if any(
-                        sim in proc.info["name"].lower()
-                        for sim in ["ltspice", "ngspice", "qspice", "xyce"]
-                    ):
-                        _logger.info(
-                            "Cleaning up zombie process %d (%s)",
-                            proc.info["pid"],
-                            proc.info["name"],
-                        )
-                        proc.kill()
-                        cleaned += 1
+                if proc.info["status"] == psutil.STATUS_ZOMBIE and any(
+                    sim in proc.info["name"].lower()
+                    for sim in ["ltspice", "ngspice", "qspice", "xyce"]
+                ):
+                    _logger.info(
+                        "Cleaning up zombie process %d (%s)",
+                        proc.info["pid"],
+                        proc.info["name"],
+                    )
+                    proc.kill()
+                    cleaned += 1
             except _PSUTIL_EXCEPTIONS:
                 pass
 
@@ -427,7 +422,7 @@ class ProcessManager:
                 else:
                     # Unix nice values (-20 to 19)
                     proc.nice(priority)
-            except _PSUTIL_EXCEPTIONS + (OSError,):
+            except (*_PSUTIL_EXCEPTIONS, OSError):
                 pass
 
     def _terminate_process(self, process_info: ProcessInfo) -> None:

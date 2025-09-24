@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: basic
 """Monte Carlo simulation analysis for circuit components.
 
 This module provides classes to perform Monte Carlo simulations where component
@@ -226,18 +227,12 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                     tol_norm_func = True
             elif dev.typ == DeviationType.MINMAX:
                 if dev.distribution == "uniform":
-                    new_val = "{urng(%s, %s,%s)}" % (
-                        val,
-                        dev.min_val,
-                        dev.max_val,
+                    new_val = (
+                        f"{{urng({val}, {dev.min_val},{dev.max_val})}}"
                     )  # calculate expression for new value
                     min_max_uni_func = True
                 elif dev.distribution == "normal":
-                    new_val = "{nrng(%s,%s,%s)}" % (
-                        val,
-                        dev.min_val,
-                        dev.max_val,
-                    )
+                    new_val = f"{{nrng({val},{dev.min_val},{dev.max_val})}}"
                     min_max_norm_func = True
 
             if new_val != val:  # Only update the value if it has changed
@@ -250,24 +245,22 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             new_val = val
             if dev.typ == DeviationType.TOLERANCE:
                 if dev.distribution == "uniform":
-                    new_val = "{utol(%s,%s)}" % (val, dev.max_val)
+                    new_val = f"{{utol({val},{dev.max_val})}}"
                     tol_uni_func = True
                 elif dev.distribution == "normal":
-                    new_val = "{ntol(%s,%s)}" % (val, dev.max_val)
+                    new_val = f"{{ntol({val},{dev.max_val})}}"
                     tol_norm_func = True
             elif dev.typ == DeviationType.MINMAX:
                 if dev.distribution == "uniform":
-                    new_val = "{urng(%s,%s,%s)}" % (
-                        val,
-                        (dev.max_val + dev.min_val) / 2,
-                        (dev.max_val - dev.min_val) / 2,
+                    new_val = (
+                        f"{{urng({val},{(dev.max_val + dev.min_val) / 2},"
+                        f"{(dev.max_val - dev.min_val) / 2})}}"
                     )
                     min_max_uni_func = True
                 elif dev.distribution == "normal":
-                    new_val = "{nrng(%s,%s,%s)}" % (
-                        val,
-                        (dev.max_val + dev.min_val) / 2,
-                        (dev.max_val - dev.min_val) / 6,
+                    new_val = (
+                        f"{{nrng({val},{(dev.max_val + dev.min_val) / 2},"
+                        f"{(dev.max_val - dev.min_val) / 6})}}"
                     )
                     min_max_norm_func = True
             else:
