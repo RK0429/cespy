@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Performance benchmarks and regression testing for cespy.
 
 This module provides a comprehensive benchmarking suite to monitor performance
@@ -11,14 +10,15 @@ import logging
 import re
 import tempfile
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any
 
+from ..sim.toolkit import MonteCarloAnalysis
 from .constants import Simulators
 from .patterns import SPICE_PATTERNS
 from .performance import PerformanceMonitor, cached_regex
 from .platform import get_simulator_path
-from ..sim.toolkit import MonteCarloAnalysis
 
 _logger = logging.getLogger("cespy.Benchmarks")
 
@@ -27,9 +27,9 @@ class BenchmarkSuite:
     """Collection of performance benchmarks for cespy components."""
 
     def __init__(self) -> None:
-        self.results: Dict[str, Dict[str, Union[float, str]]] = {}
-        self.baseline_file: Optional[Path] = None
-        self.baseline_data: Dict[str, Dict[str, Union[float, str]]] = {}
+        self.results: dict[str, dict[str, float | str]] = {}
+        self.baseline_file: Path | None = None
+        self.baseline_data: dict[str, dict[str, float | str]] = {}
         self.performance_monitor = PerformanceMonitor()
 
     def set_baseline_file(self, file_path: Path) -> None:
@@ -48,7 +48,7 @@ class BenchmarkSuite:
             return
 
         try:
-            with open(self.baseline_file, "r", encoding="utf-8") as f:
+            with open(self.baseline_file, encoding="utf-8") as f:
                 self.baseline_data = json.load(f)
             _logger.info(
                 "Loaded baseline data with %d benchmarks", len(self.baseline_data)
@@ -66,10 +66,10 @@ class BenchmarkSuite:
             with open(self.baseline_file, "w", encoding="utf-8") as f:
                 json.dump(self.results, f, indent=2)
             _logger.info("Saved baseline data with %d benchmarks", len(self.results))
-        except (OSError, IOError, PermissionError, TypeError, ValueError) as e:
+        except (OSError, PermissionError, TypeError, ValueError) as e:
             _logger.error("Failed to save baseline data: %s", e)
 
-    def benchmark_regex_performance(self) -> Dict[str, float]:
+    def benchmark_regex_performance(self) -> dict[str, float]:
         """Benchmark regex pattern compilation and matching performance."""
         results = {}
         test_text = """
@@ -109,14 +109,14 @@ class BenchmarkSuite:
 
         return results
 
-    def benchmark_file_operations(self) -> Dict[str, float]:
+    def benchmark_file_operations(self) -> dict[str, float]:
         """Benchmark file reading and writing operations."""
         results = {}
 
         # Create test data
         test_data = []
         for i in range(10000):
-            test_data.append(f"R{i} net{i} net{i+1} {i}k\n")
+            test_data.append(f"R{i} net{i} net{i + 1} {i}k\n")
         content = "".join(test_data)
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -131,7 +131,7 @@ class BenchmarkSuite:
 
             # Benchmark file reading
             start_time = time.perf_counter()
-            with open(test_file, "r", encoding="utf-8") as f:
+            with open(test_file, encoding="utf-8") as f:
                 f.read()
             end_time = time.perf_counter()
             results["file_read_time"] = end_time - start_time
@@ -139,7 +139,7 @@ class BenchmarkSuite:
             # Benchmark line-by-line reading
             start_time = time.perf_counter()
             lines = []
-            with open(test_file, "r", encoding="utf-8") as f:
+            with open(test_file, encoding="utf-8") as f:
                 for line in f:
                     lines.append(line)
             end_time = time.perf_counter()
@@ -147,7 +147,7 @@ class BenchmarkSuite:
 
         return results
 
-    def benchmark_simulator_detection(self) -> Dict[str, float]:
+    def benchmark_simulator_detection(self) -> dict[str, float]:
         """Benchmark simulator detection and path resolution."""
         results = {}
         simulators = [
@@ -165,7 +165,7 @@ class BenchmarkSuite:
 
         return results
 
-    def benchmark_component_parsing(self) -> Dict[str, float]:
+    def benchmark_component_parsing(self) -> dict[str, float]:
         """Benchmark component value parsing and validation."""
         results = {}
 
@@ -201,7 +201,7 @@ class BenchmarkSuite:
 
         return results
 
-    def benchmark_analysis_setup(self) -> Dict[str, float]:
+    def benchmark_analysis_setup(self) -> dict[str, float]:
         """Benchmark analysis object creation and setup."""
         results = {}
 
@@ -232,14 +232,13 @@ class BenchmarkSuite:
             # Clean up
             Path(circuit_file).unlink()
 
-        except (OSError, IOError, PermissionError, ImportError,
-                ModuleNotFoundError, AttributeError, ValueError) as e:
+        except (OSError, PermissionError, ImportError, ModuleNotFoundError, AttributeError, ValueError) as e:
             _logger.warning("Failed to benchmark analysis setup: %s", e)
             results["montecarlo_setup_time"] = float("inf")
 
         return results
 
-    def run_all_benchmarks(self) -> Dict[str, Dict[str, Union[float, str]]]:
+    def run_all_benchmarks(self) -> dict[str, dict[str, float | str]]:
         """Run all benchmarks and collect results.
 
         Returns:
@@ -261,7 +260,7 @@ class BenchmarkSuite:
                 end_time = time.perf_counter()
 
                 # Add total time for the benchmark category
-                result_with_timing: Dict[str, Union[float, str]] = dict(result)
+                result_with_timing: dict[str, float | str] = dict(result)
                 result_with_timing["total_benchmark_time"] = end_time - start_time
                 self.results[name] = result_with_timing
 
@@ -269,8 +268,7 @@ class BenchmarkSuite:
                     "Completed benchmark %s in %.3fs", name, end_time - start_time
                 )
 
-            except (AttributeError, TypeError, ValueError, OSError, IOError,
-                    ImportError, RuntimeError) as e:
+            except (AttributeError, TypeError, ValueError, OSError, ImportError, RuntimeError) as e:
                 _logger.error("Benchmark %s failed: %s", name, e)
                 self.results[name] = {"error": str(e)}
 
@@ -278,7 +276,7 @@ class BenchmarkSuite:
 
     def compare_with_baseline(
         self, tolerance: float = 0.1
-    ) -> Dict[str, Any]:  # pylint: disable=too-many-branches
+    ) -> dict[str, Any]:  # pylint: disable=too-many-branches
         """Compare current results with baseline performance.
 
         Args:
@@ -290,7 +288,7 @@ class BenchmarkSuite:
         if not self.baseline_data:
             return {"status": "no_baseline", "message": "No baseline data available"}
 
-        comparison: Dict[str, Any] = {
+        comparison: dict[str, Any] = {
             "status": "passed",
             "regressions": [],
             "improvements": [],
@@ -385,7 +383,7 @@ class BenchmarkSuite:
             for metric_name, value in metrics.items():
                 if isinstance(value, float):
                     if value < 0.001:
-                        report_lines.append(f"  {metric_name}: {value*1000:.3f} ms")
+                        report_lines.append(f"  {metric_name}: {value * 1000:.3f} ms")
                     else:
                         report_lines.append(f"  {metric_name}: {value:.3f} s")
                 else:
@@ -441,7 +439,7 @@ class BenchmarkSuite:
 
 
 def run_performance_benchmarks(
-    baseline_file: Optional[Path] = None, save_as_baseline: bool = False
+    baseline_file: Path | None = None, save_as_baseline: bool = False
 ) -> BenchmarkSuite:
     """Run performance benchmarks and optionally compare with baseline.
 
@@ -468,7 +466,7 @@ def run_performance_benchmarks(
 
 
 def create_performance_test(
-    name: str, baseline_file: Optional[Path] = None
+    name: str, baseline_file: Path | None = None
 ) -> Callable[[], None]:
     """Create a performance test function for use with pytest.
 

@@ -30,7 +30,6 @@ License: GPL-3.0
 import logging
 import os
 import zipfile
-from typing import Optional
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
@@ -38,7 +37,7 @@ __copyright__ = "Copyright 2021, Fribourg Switzerland"
 _logger = logging.getLogger("cespy.Utils")
 
 
-def find_file_in_directory(directory: str, filename: str) -> Optional[str]:
+def find_file_in_directory(directory: str, filename: str) -> str | None:
     """Searches for a file with the given filename in the specified directory and its
     subdirectories.
 
@@ -69,7 +68,7 @@ def find_file_in_directory(directory: str, filename: str) -> Optional[str]:
     return None
 
 
-def search_file_in_containers(filename: str, *containers: str) -> Optional[str]:
+def search_file_in_containers(filename: str, *containers: str) -> str | None:
     """Searches for a file with the given filename in the specified containers.
 
     Containers can be directories or zip files. For zip files, the matching file will be
@@ -110,7 +109,7 @@ def search_file_in_containers(filename: str, *containers: str) -> Optional[str]:
                             )
                             return zip_ref.extract(filefound, path=temp_dir)
             else:
-                filefound_opt: Optional[str] = find_file_in_directory(
+                filefound_opt: str | None = find_file_in_directory(
                     container, filename
                 )
                 if filefound_opt is not None:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Failure modes analysis toolkit for simulating component failures."""
 
 # -------------------------------------------------------------------------------
@@ -21,8 +20,9 @@
 # -------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Optional, Type, Union
+from typing import Any
 
 from ...editor.base_editor import BaseEditor, ComponentNotFoundError
 from ..sim_runner import AnyRunner, RunTask
@@ -34,13 +34,13 @@ from .sim_analysis import SimAnalysis
 class ComponentSets:
     """Groups different component types to reduce instance attributes."""
 
-    resistors: List[str] = field(default_factory=list)
-    capacitors: List[str] = field(default_factory=list)
-    inductors: List[str] = field(default_factory=list)
-    diodes: List[str] = field(default_factory=list)
-    bipolars: List[str] = field(default_factory=list)
-    mosfets: List[str] = field(default_factory=list)
-    subcircuits: List[str] = field(default_factory=list)
+    resistors: list[str] = field(default_factory=list)
+    capacitors: list[str] = field(default_factory=list)
+    inductors: list[str] = field(default_factory=list)
+    diodes: list[str] = field(default_factory=list)
+    bipolars: list[str] = field(default_factory=list)
+    mosfets: list[str] = field(default_factory=list)
+    subcircuits: list[str] = field(default_factory=list)
 
 
 class FailureMode(SimAnalysis):
@@ -65,9 +65,9 @@ class FailureMode(SimAnalysis):
 
     def __init__(
         self,
-        circuit_file: Union[str, BaseEditor],
-        simulator: Optional[Type[Simulator]] = None,
-        runner: Optional[AnyRunner] = None,
+        circuit_file: str | BaseEditor,
+        simulator: type[Simulator] | None = None,
+        runner: AnyRunner | None = None,
     ):
         SimAnalysis.__init__(self, circuit_file, runner)
         self.simulator = simulator
@@ -81,12 +81,12 @@ class FailureMode(SimAnalysis):
             mosfets=list(self.editor.get_components("M")),
             subcircuits=list(self.editor.get_components("X")),
         )
-        self.user_failure_modes: Dict[str, Dict[str, Any]] = OrderedDict()
+        self.user_failure_modes: dict[str, dict[str, Any]] = OrderedDict()
         # Mapping of failure names to RunTask instances
-        self.failure_simulations: Dict[str, Optional[RunTask]] = {}
+        self.failure_simulations: dict[str, RunTask | None] = {}
 
     def add_failure_circuit(
-        self, component: str, sub_circuit: Union[str, BaseEditor]
+        self, component: str, sub_circuit: str | BaseEditor
     ) -> None:
         """Add a failure circuit to replace a component during failure mode analysis.
 
@@ -161,7 +161,7 @@ class FailureMode(SimAnalysis):
                 self.editor.remove_component(two_pin_component)
                 self.failure_simulations[f"{two_pin_component}_O"] = self.run()
                 # Short Circuit: insert short resistor
-                netlist = getattr(self.editor, "netlist")
+                netlist = self.editor.netlist
                 netlist[
                     cinfo["line"]
                 ] = f"Rfmea_short_{two_pin_component}{cinfo['nodes']} 1f"

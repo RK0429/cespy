@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Schematic difference tracking and comparison.
 
 This module provides functionality to track changes between schematic
@@ -9,7 +8,7 @@ versions and generate detailed change reports.
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 _logger = logging.getLogger("cespy.SchematicDiffer")
 
@@ -30,11 +29,11 @@ class ComponentChange:
 
     change_type: ChangeType
     component_name: str
-    component_type: Optional[str] = None
-    old_value: Optional[Any] = None
-    new_value: Optional[Any] = None
-    attributes_changed: Dict[str, Tuple[Any, Any]] = field(default_factory=dict)
-    position_change: Optional[Tuple[Tuple[float, float], Tuple[float, float]]] = None
+    component_type: str | None = None
+    old_value: Any | None = None
+    new_value: Any | None = None
+    attributes_changed: dict[str, tuple[Any, Any]] = field(default_factory=dict)
+    position_change: tuple[tuple[float, float], tuple[float, float]] | None = None
 
     def describe(self) -> str:
         """Get human-readable description of change."""
@@ -64,11 +63,11 @@ class WireChange:
     """Represents a change to a wire/connection."""
 
     change_type: ChangeType
-    start_point: Tuple[float, float]
-    end_point: Tuple[float, float]
-    net_name: Optional[str] = None
-    old_net: Optional[str] = None
-    new_net: Optional[str] = None
+    start_point: tuple[float, float]
+    end_point: tuple[float, float]
+    net_name: str | None = None
+    old_net: str | None = None
+    new_net: str | None = None
 
     def describe(self) -> str:
         """Get human-readable description of change."""
@@ -88,8 +87,8 @@ class DirectiveChange:
 
     change_type: ChangeType
     directive_type: str
-    old_value: Optional[str] = None
-    new_value: Optional[str] = None
+    old_value: str | None = None
+    new_value: str | None = None
 
     def describe(self) -> str:
         """Get human-readable description of change."""
@@ -106,10 +105,10 @@ class DirectiveChange:
 class SchematicDiff:
     """Contains all differences between two schematics."""
 
-    component_changes: List[ComponentChange] = field(default_factory=list)
-    wire_changes: List[WireChange] = field(default_factory=list)
-    directive_changes: List[DirectiveChange] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    component_changes: list[ComponentChange] = field(default_factory=list)
+    wire_changes: list[WireChange] = field(default_factory=list)
+    directive_changes: list[DirectiveChange] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def total_changes(self) -> int:
@@ -125,7 +124,7 @@ class SchematicDiff:
         """Check if there are any changes."""
         return self.total_changes > 0
 
-    def get_summary(self) -> Dict[str, int]:
+    def get_summary(self) -> dict[str, int]:
         """Get summary of changes by type."""
         summary = {
             "components_added": sum(
@@ -215,16 +214,16 @@ class SchematicDiffer:
 
     def __init__(self) -> None:
         """Initialize schematic differ."""
-        self._change_history: List[SchematicDiff] = []
+        self._change_history: list[SchematicDiff] = []
         self._position_tolerance = 0.1  # Tolerance for position comparison
 
         _logger.info("SchematicDiffer initialized")
 
     def compare_components(
         self,
-        old_components: Dict[str, Dict[str, Any]],
-        new_components: Dict[str, Dict[str, Any]],
-    ) -> List[ComponentChange]:
+        old_components: dict[str, dict[str, Any]],
+        new_components: dict[str, dict[str, Any]],
+    ) -> list[ComponentChange]:
         """Compare component dictionaries.
 
         Args:
@@ -319,8 +318,8 @@ class SchematicDiffer:
         return changes
 
     def compare_wires(
-        self, old_wires: List[Dict[str, Any]], new_wires: List[Dict[str, Any]]
-    ) -> List[WireChange]:
+        self, old_wires: list[dict[str, Any]], new_wires: list[dict[str, Any]]
+    ) -> list[WireChange]:
         """Compare wire lists.
 
         Args:
@@ -334,8 +333,8 @@ class SchematicDiffer:
 
         # Create wire signatures for comparison
         def wire_signature(
-            wire: Dict[str, Any]
-        ) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+            wire: dict[str, Any]
+        ) -> tuple[tuple[float, float], tuple[float, float]]:
             start_data = wire.get("start", (0.0, 0.0))
             end_data = wire.get("end", (0.0, 0.0))
             start = (float(start_data[0]), float(start_data[1]))
@@ -394,8 +393,8 @@ class SchematicDiffer:
         return changes
 
     def compare_directives(
-        self, old_directives: List[Dict[str, str]], new_directives: List[Dict[str, str]]
-    ) -> List[DirectiveChange]:
+        self, old_directives: list[dict[str, str]], new_directives: list[dict[str, str]]
+    ) -> list[DirectiveChange]:
         """Compare simulation directives.
 
         Args:
@@ -408,8 +407,8 @@ class SchematicDiffer:
         changes = []
 
         # Group directives by type
-        def group_directives(directives: List[Dict[str, Any]]) -> Dict[str, List[str]]:
-            grouped: Dict[str, List[str]] = {}
+        def group_directives(directives: list[dict[str, Any]]) -> dict[str, list[str]]:
+            grouped: dict[str, list[str]] = {}
             for d in directives:
                 dir_type = d.get("type", "")
                 if dir_type not in grouped:
@@ -452,7 +451,7 @@ class SchematicDiffer:
         return changes
 
     def create_diff(
-        self, old_schematic: Dict[str, Any], new_schematic: Dict[str, Any]
+        self, old_schematic: dict[str, Any], new_schematic: dict[str, Any]
     ) -> SchematicDiff:
         """Create a complete diff between two schematics.
 
@@ -493,7 +492,7 @@ class SchematicDiffer:
 
         return diff
 
-    def get_change_history(self) -> List[SchematicDiff]:
+    def get_change_history(self) -> list[SchematicDiff]:
         """Get the change history.
 
         Returns:
@@ -507,7 +506,7 @@ class SchematicDiffer:
         _logger.info("Cleared change history")
 
     def _positions_differ(
-        self, pos1: Tuple[float, float], pos2: Tuple[float, float]
+        self, pos1: tuple[float, float], pos2: tuple[float, float]
     ) -> bool:
         """Check if two positions are different beyond tolerance.
 

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Base classes and data structures for schematic editors.
 
 This module provides foundational classes for working with circuit schematics,
@@ -23,12 +22,13 @@ rotation/alignment enumerations used across different schematic formats.
 # -------------------------------------------------------------------------------
 
 
-from copy import deepcopy
 import dataclasses
 import enum
 import logging
 from collections import OrderedDict
-from typing import Any, Callable, List, Optional, Tuple, Union, cast
+from collections.abc import Callable
+from copy import deepcopy
+from typing import Any, cast
 
 from .base_editor import SUBCKT_DIVIDER, BaseEditor, Component, ComponentNotFoundError
 
@@ -174,7 +174,7 @@ class Line:
         self,
         v1: Point,
         v2: Point,
-        style: Optional[LineStyle] = None,
+        style: LineStyle | None = None,
         net: str = "",
     ):
         self.V1 = v1
@@ -241,8 +241,8 @@ class Shape:
     def __init__(
         self,
         name: str,
-        points: List[Point],
-        line_style: Optional[LineStyle] = None,
+        points: list[Point],
+        line_style: LineStyle | None = None,
         fill: str = "",
     ):
         self.name = name
@@ -327,12 +327,12 @@ class SchematicElements:
     components: OrderedDict[str, SchematicComponent] = dataclasses.field(
         default_factory=OrderedDict
     )
-    wires: List[Line] = dataclasses.field(default_factory=list)
-    labels: List[Text] = dataclasses.field(default_factory=list)
-    directives: List[Text] = dataclasses.field(default_factory=list)
-    ports: List[Port] = dataclasses.field(default_factory=list)
-    lines: List[Line] = dataclasses.field(default_factory=list)
-    shapes: List[Shape] = dataclasses.field(default_factory=list)
+    wires: list[Line] = dataclasses.field(default_factory=list)
+    labels: list[Text] = dataclasses.field(default_factory=list)
+    directives: list[Text] = dataclasses.field(default_factory=list)
+    ports: list[Port] = dataclasses.field(default_factory=list)
+    lines: list[Line] = dataclasses.field(default_factory=list)
+    shapes: list[Shape] = dataclasses.field(default_factory=list)
 
 
 class BaseSchematic(BaseEditor):
@@ -351,32 +351,32 @@ class BaseSchematic(BaseEditor):
         return self.elements.components
 
     @property
-    def wires(self) -> List[Line]:
+    def wires(self) -> list[Line]:
         """Access to wires list."""
         return self.elements.wires
 
     @property
-    def labels(self) -> List[Text]:
+    def labels(self) -> list[Text]:
         """Access to labels list."""
         return self.elements.labels
 
     @property
-    def directives(self) -> List[Text]:
+    def directives(self) -> list[Text]:
         """Access to directives list."""
         return self.elements.directives
 
     @property
-    def ports(self) -> List[Port]:
+    def ports(self) -> list[Port]:
         """Access to ports list."""
         return self.elements.ports
 
     @property
-    def lines(self) -> List[Line]:
+    def lines(self) -> list[Line]:
         """Access to lines list."""
         return self.elements.lines
 
     @property
-    def shapes(self) -> List[Shape]:
+    def shapes(self) -> list[Shape]:
         """Access to shapes list."""
         return self.elements.shapes
 
@@ -395,7 +395,7 @@ class BaseSchematic(BaseEditor):
         self.elements = deepcopy(editor.elements)
         self.updated = True
 
-    def _get_parent(self, reference: str) -> Tuple["BaseSchematic", str]:
+    def _get_parent(self, reference: str) -> tuple["BaseSchematic", str]:
         if SUBCKT_DIVIDER in reference:
             sub_ref, sub_comp = reference.split(SUBCKT_DIVIDER, 1)
 
@@ -430,7 +430,7 @@ class BaseSchematic(BaseEditor):
             )
         return sub_circuit.components[ref]
 
-    def get_component_position(self, reference: str) -> Tuple[Point, ERotation]:
+    def get_component_position(self, reference: str) -> tuple[Point, ERotation]:
         """Returns the position and rotation of the component."""
         comp = self.get_component(reference)
         return comp.position, comp.rotation
@@ -475,7 +475,7 @@ class BaseSchematic(BaseEditor):
         offset_y: float,
         scale_x: float,
         scale_y: float,
-        round_fun: Optional[Callable[[float], Union[int, float]]] = None,
+        round_fun: Callable[[float], int | float] | None = None,
     ) -> None:
         """Scales the schematic."""
         if round_fun is None:

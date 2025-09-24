@@ -1,6 +1,6 @@
 """Utility functions and classes for cespy."""
 
-from .sweep_iterators import sweep, sweep_lin, sweep_log, sweep_log_n
 from .histogram import create_histogram as Histogram
+from .sweep_iterators import sweep, sweep_lin, sweep_log, sweep_log_n
 
-__all__ = ["sweep", "sweep_lin", "sweep_log", "sweep_log_n", "Histogram"]
+__all__ = ["Histogram", "sweep", "sweep_lin", "sweep_log", "sweep_log_n"]

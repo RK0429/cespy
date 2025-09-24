@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 # -------------------------------------------------------------------------------
 #
@@ -37,7 +36,6 @@ with the I() qualifier.
 """
 
 from optparse import OptionParser
-from typing import List, Union
 
 import clipboard  # type: ignore
 
@@ -81,7 +79,7 @@ def main() -> None:
 
     (options, args) = parser.parse_args()
 
-    traces: Union[str, List[str]]
+    traces: str | list[str]
     if len(args) < 1:
         print("Error: Missing arguments")
         parser.print_help()
@@ -151,19 +149,18 @@ def main() -> None:
 
         else:
             print(text)
+    elif options.output.endswith(".csv"):
+        print("Writing CSV file...", end="")
+        raw_data.to_csv(options.output, separator=options.separator, index=False)
+        print("Done")
+    elif options.output.endswith(".xlsx"):
+        print("Writing Excel file...", end="")
+        raw_data.to_excel(options.output, index=False)
+        print("Done")
     else:
-        if options.output.endswith(".csv"):
-            print("Writing CSV file...", end="")
-            raw_data.to_csv(options.output, separator=options.separator, index=False)
-            print("Done")
-        elif options.output.endswith(".xlsx"):
-            print("Writing Excel file...", end="")
-            raw_data.to_excel(options.output, index=False)
-            print("Done")
-        else:
-            print("Error: Unknown output format. Valid formats are '.csv' and '.xlsx'")
-            parser.print_help()
-            exit(1)
+        print("Error: Unknown output format. Valid formats are '.csv' and '.xlsx'")
+        parser.print_help()
+        exit(1)
     exit(0)
 
 

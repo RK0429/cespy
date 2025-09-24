@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """LTSpice symbol file (.asy) reader and parser.
 
 This module provides functionality to parse LTSpice symbol files and translate
@@ -28,7 +27,7 @@ import re
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from .base_schematic import (
@@ -53,11 +52,11 @@ SCALE_Y = -6.25
 class SymbolElements:
     """Groups symbol elements to reduce instance attributes."""
 
-    pins: List[Any] = field(default_factory=list)
-    lines: List[Any] = field(default_factory=list)
-    shapes: List[Any] = field(default_factory=list)
-    windows: List[Any] = field(default_factory=list)
-    attributes: Dict[str, str] = field(default_factory=OrderedDict)
+    pins: list[Any] = field(default_factory=list)
+    lines: list[Any] = field(default_factory=list)
+    shapes: list[Any] = field(default_factory=list)
+    windows: list[Any] = field(default_factory=list)
+    attributes: dict[str, str] = field(default_factory=OrderedDict)
 
 
 class AsyReader:
@@ -65,7 +64,7 @@ class AsyReader:
 
     # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def __init__(
-        self, asy_file: Union[Path, str], encoding: str = "autodetect"
+        self, asy_file: Path | str, encoding: str = "autodetect"
     ) -> None:
         super().__init__()
         self.version: str = "4"  # Store version as string
@@ -87,7 +86,7 @@ class AsyReader:
         else:
             self.encoding = encoding
 
-        with open(self._asy_file_path, "r", encoding=self.encoding) as asc_file:
+        with open(self._asy_file_path, encoding=self.encoding) as asc_file:
             _logger.info("Parsing ASY file %s", self._asy_file_path)
             for line_text in asc_file:
                 if line_text.startswith("WINDOW"):
@@ -162,13 +161,12 @@ class AsyReader:
                                     VerAlign.TOP
                                 )  # Keep vertical alignment as VerAlign
                             # else other two cases are the default
-                        else:
-                            if justification == "TOP":
-                                vertical_alignment = VerAlign.TOP
-                            # elif justification == "BOTTOM":
-                            #     vertical_alignment = VerAlign.BOTTOM (default)
-                            elif justification == "RIGHT":
-                                text_alignment = HorAlign.RIGHT
+                        elif justification == "TOP":
+                            vertical_alignment = VerAlign.TOP
+                        # elif justification == "BOTTOM":
+                        #     vertical_alignment = VerAlign.BOTTOM (default)
+                        elif justification == "RIGHT":
+                            text_alignment = HorAlign.RIGHT
                             # else: justification == "LEFT" (default)
 
                     pin = Text(
@@ -369,7 +367,7 @@ class AsyReader:
             self.symbol_type == "BLOCK" or self.elements.attributes.get("Prefix") == "X"
         )
 
-    def get_library(self) -> Optional[str]:
+    def get_library(self) -> str | None:
         """Returns the library name of the model.
 
         If not found, returns None.
@@ -411,7 +409,7 @@ class AsyReader:
                 return self.elements.attributes[attr]
         raise ValueError("No Value or Value2 attribute found")
 
-    def get_value(self) -> Union[int, float, str]:
+    def get_value(self) -> int | float | str:
         """Returns the value of the component.
 
         If not found, returns None. If found it tries to convert the value to a number.

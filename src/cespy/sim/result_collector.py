@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Result collector for aggregating and processing simulation results.
 
 This module provides functionality to collect, organize, and process simulation
@@ -14,7 +13,7 @@ import statistics
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 _logger = logging.getLogger("cespy.ResultCollector")
 
@@ -25,23 +24,23 @@ class SimulationResult:
 
     task_id: str
     netlist_path: Path
-    raw_file: Optional[Path] = None
-    log_file: Optional[Path] = None
+    raw_file: Path | None = None
+    log_file: Path | None = None
     start_time: datetime = field(default_factory=datetime.now)
-    end_time: Optional[datetime] = None
+    end_time: datetime | None = None
     success: bool = False
-    error_message: Optional[str] = None
-    measurements: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    error_message: str | None = None
+    measurements: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
-    def duration(self) -> Optional[float]:
+    def duration(self) -> float | None:
         """Get simulation duration in seconds."""
         if self.end_time:
             return (self.end_time - self.start_time).total_seconds()
         return None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "task_id": self.task_id,
@@ -63,9 +62,9 @@ class BatchResult:
     """Container for a batch of simulation results."""
 
     batch_id: str
-    results: List[SimulationResult] = field(default_factory=list)
+    results: list[SimulationResult] = field(default_factory=list)
     start_time: datetime = field(default_factory=datetime.now)
-    end_time: Optional[datetime] = None
+    end_time: datetime | None = None
 
     @property
     def success_count(self) -> int:
@@ -89,7 +88,7 @@ class BatchResult:
             return 0.0
         return (self.success_count / self.total_count) * 100.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "batch_id": self.batch_id,
@@ -114,7 +113,7 @@ class ResultCollector:
     - Result filtering and searching
     """
 
-    def __init__(self, storage_path: Optional[Path] = None):
+    def __init__(self, storage_path: Path | None = None):
         """Initialize result collector.
 
         Args:
@@ -125,15 +124,15 @@ class ResultCollector:
             storage_path.mkdir(parents=True, exist_ok=True)
 
         # Result storage
-        self._results: Dict[str, SimulationResult] = {}
-        self._batches: Dict[str, BatchResult] = {}
+        self._results: dict[str, SimulationResult] = {}
+        self._batches: dict[str, BatchResult] = {}
 
         # Indexing for fast lookup
-        self._results_by_netlist: Dict[Path, List[str]] = {}
-        self._results_by_status: Dict[bool, Set[str]] = {True: set(), False: set()}
+        self._results_by_netlist: dict[Path, list[str]] = {}
+        self._results_by_status: dict[bool, set[str]] = {True: set(), False: set()}
 
         # Measurement tracking
-        self._all_measurements: Set[str] = set()
+        self._all_measurements: set[str] = set()
 
         _logger.info("ResultCollector initialized with storage at %s", storage_path)
 
@@ -141,12 +140,12 @@ class ResultCollector:
         self,
         task_id: str,
         netlist_path: Path,
-        raw_file: Optional[Path] = None,
-        log_file: Optional[Path] = None,
+        raw_file: Path | None = None,
+        log_file: Path | None = None,
         success: bool = True,
-        error_message: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        batch_id: Optional[str] = None,
+        error_message: str | None = None,
+        metadata: dict[str, Any] | None = None,
+        batch_id: str | None = None,
     ) -> SimulationResult:
         """Add a simulation result.
 
@@ -209,7 +208,7 @@ class ResultCollector:
 
         return result
 
-    def get_result(self, task_id: str) -> Optional[SimulationResult]:
+    def get_result(self, task_id: str) -> SimulationResult | None:
         """Get a specific simulation result.
 
         Args:
@@ -220,7 +219,7 @@ class ResultCollector:
         """
         return self._results.get(task_id)
 
-    def get_batch(self, batch_id: str) -> Optional[BatchResult]:
+    def get_batch(self, batch_id: str) -> BatchResult | None:
         """Get results for a batch.
 
         Args:
@@ -231,7 +230,7 @@ class ResultCollector:
         """
         return self._batches.get(batch_id)
 
-    def get_results_by_status(self, success: bool) -> List[SimulationResult]:
+    def get_results_by_status(self, success: bool) -> list[SimulationResult]:
         """Get all results with a specific status.
 
         Args:
@@ -243,7 +242,7 @@ class ResultCollector:
         task_ids = self._results_by_status.get(success, set())
         return [self._results[tid] for tid in task_ids if tid in self._results]
 
-    def get_results_by_netlist(self, netlist_path: Path) -> List[SimulationResult]:
+    def get_results_by_netlist(self, netlist_path: Path) -> list[SimulationResult]:
         """Get all results for a specific netlist.
 
         Args:
@@ -255,7 +254,7 @@ class ResultCollector:
         task_ids = self._results_by_netlist.get(netlist_path, [])
         return [self._results[tid] for tid in task_ids if tid in self._results]
 
-    def get_measurement_summary(self, measurement_name: str) -> Dict[str, Any]:
+    def get_measurement_summary(self, measurement_name: str) -> dict[str, Any]:
         """Get statistical summary for a measurement across all results.
 
         Args:
@@ -284,11 +283,11 @@ class ResultCollector:
             "std": statistics.stdev(values) if len(values) > 1 else 0.0,
         }
 
-    def get_all_measurements(self) -> Set[str]:
+    def get_all_measurements(self) -> set[str]:
         """Get set of all measurement names seen."""
         return self._all_measurements.copy()
 
-    def export_to_csv(self, output_path: Path, batch_id: Optional[str] = None) -> None:
+    def export_to_csv(self, output_path: Path, batch_id: str | None = None) -> None:
         """Export results to CSV file.
 
         Args:
@@ -347,7 +346,7 @@ class ResultCollector:
     def archive_results(
         self,
         archive_path: Path,
-        batch_id: Optional[str] = None,
+        batch_id: str | None = None,
         include_files: bool = True,
     ) -> None:
         """Archive results to a directory.
@@ -420,7 +419,7 @@ class ResultCollector:
 
         _logger.info("Cleared all results")
 
-    def _extract_measurements(self, log_file: Path) -> Dict[str, Any]:
+    def _extract_measurements(self, log_file: Path) -> dict[str, Any]:
         """Extract measurements from a log file.
 
         Args:
@@ -482,7 +481,7 @@ class ResultCollector:
         loaded = 0
         for json_file in self.storage_path.glob("*.json"):
             try:
-                with open(json_file, "r", encoding="utf-8") as f:
+                with open(json_file, encoding="utf-8") as f:
                     data = json.load(f)
 
                 # Skip batch files

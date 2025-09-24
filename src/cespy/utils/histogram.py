@@ -1,20 +1,17 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 """Module for creating histograms from simulation measurement data."""
 
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from cespy.log.ltsteps import LTSpiceLogReader
 
 
-def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
+def read_measurement_data(log_file: Path) -> dict[str, list[float]]:
     """Read measurement data from a log file.
 
     :param log_file: Path to the log file
@@ -39,16 +36,16 @@ def read_measurement_data(log_file: Path) -> Dict[str, List[float]]:
 
         return measurements
 
-    except (OSError, IOError) as e:
+    except OSError as e:
         print(f"Error reading log file: {e}")
         return {}
 
 
 def create_histogram(
-    data: List[float],
+    data: list[float],
     title: str,
     bins: int = 50,
-    output: Optional[str] = None,
+    output: str | None = None,
     show_stats: bool = True,
 ) -> None:
     """Create a histogram from the data.
@@ -117,7 +114,7 @@ def create_histogram(
 
 
 def plot_single_measurement(
-    measurements: Dict[str, List[float]],
+    measurements: dict[str, list[float]],
     measurement_name: str,
     args: argparse.Namespace,
 ) -> None:
@@ -132,7 +129,7 @@ def plot_single_measurement(
 
 
 def plot_multiple_measurements(
-    measurements: Dict[str, List[float]], args: argparse.Namespace
+    measurements: dict[str, list[float]], args: argparse.Namespace
 ) -> None:
     """Plot multiple measurements in subplots."""
     n_meas = len(measurements)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """QSpice log file reader for parsing measurement data from QSpice simulations."""
 
 import logging
@@ -22,14 +21,11 @@ import logging
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
-from ..core import paths as core_paths
+from ..core import constants as core_constants, paths as core_paths, patterns as core_patterns
 from ..exceptions import SimulatorNotFoundError
-
 from ..sim.simulator import run_function
 from ..simulators.qspice_simulator import Qspice
 from .logfile_data import LogfileData, split_line_into_values, try_convert_value
@@ -71,8 +67,8 @@ class QspiceLogReader(LogfileData):
         self,
         log_filename: str,
         read_measures: bool = True,
-        step_set: Optional[Dict[str, Any]] = None,
-        encoding: Optional[str] = None,
+        step_set: dict[str, Any] | None = None,
+        encoding: str | None = None,
     ) -> None:
         super().__init__(step_set)
         self.logname = Path(log_filename)
@@ -84,7 +80,7 @@ class QspiceLogReader(LogfileData):
         step_regex = core_patterns.QSPICE_STEP_PATTERN
 
         _logger.debug("Processing LOG file:%s", log_filename)
-        with open(log_filename, "r", encoding=self.encoding) as fin:
+        with open(log_filename, encoding=self.encoding) as fin:
             line = fin.readline()
             while line:
                 match = step_regex.match(line)
@@ -119,7 +115,7 @@ class QspiceLogReader(LogfileData):
 
     # pylint: enable=too-many-locals
 
-    def obtain_measures(self, meas_filename: Optional[Path] = None) -> Path:
+    def obtain_measures(self, meas_filename: Path | None = None) -> Path:
         """In QSpice the measures are obtained by calling the QPOST command giving as
         arguments the .qraw file and the .log file This function makes this call to
         QPOST and returns the measurement output file path.
@@ -167,7 +163,7 @@ class QspiceLogReader(LogfileData):
         run_function(cmd_run)
         return meas_filename
 
-    def parse_meas_file(self, meas_filename: Union[str, Path]) -> None:
+    def parse_meas_file(self, meas_filename: str | Path) -> None:
         """Parses the .meas file and reads all measurements contained in the file.
         Access to the measurements is done using this class interface.
 
@@ -179,7 +175,7 @@ class QspiceLogReader(LogfileData):
         meas_name = None
         headers = None
 
-        with open(meas_filename, "r", encoding=self.encoding) as fin:
+        with open(meas_filename, encoding=self.encoding) as fin:
             line = fin.readline()
             while line:
                 match = meas_regex.match(line)
@@ -200,27 +196,26 @@ class QspiceLogReader(LogfileData):
                         sim_type,
                         meas_expr,
                     )
-                else:
-                    if meas_name:
-                        values = split_line_into_values(line)
-                        if headers is None:
-                            if self.has_steps():
-                                headers = ["step"] + [
-                                    meas_name + "_" + str(i)
-                                    for i in range(len(values) - 1)
-                                ]
-                                # first column is the measure name without _0
-                                headers[1] = meas_name
-                            else:
-                                headers = [
-                                    meas_name + "_" + str(i) for i in range(len(values))
-                                ]
-                                # first column is the measure name without _0
-                                headers[0] = meas_name
+                elif meas_name:
+                    values = split_line_into_values(line)
+                    if headers is None:
+                        if self.has_steps():
+                            headers = ["step"] + [
+                                meas_name + "_" + str(i)
+                                for i in range(len(values) - 1)
+                            ]
+                            # first column is the measure name without _0
+                            headers[1] = meas_name
+                        else:
+                            headers = [
+                                meas_name + "_" + str(i) for i in range(len(values))
+                            ]
+                            # first column is the measure name without _0
+                            headers[0] = meas_name
 
-                            for title in headers:
-                                self.dataset[title.lower()] = []
-                        self.measure_count += 1
-                        for k, title in enumerate(headers):
-                            self.dataset[title.lower()].append(values[k])
+                        for title in headers:
+                            self.dataset[title.lower()] = []
+                    self.measure_count += 1
+                    for k, title in enumerate(headers):
+                        self.dataset[title.lower()].append(values[k])
                 line = fin.readline()

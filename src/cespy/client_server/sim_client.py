@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Simulation client for distributed SPICE simulations.
 
 This module provides a client interface for connecting to remote
@@ -37,8 +36,9 @@ import sys
 import time
 import zipfile
 from collections import OrderedDict
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, cast
+from typing import cast
 from xmlrpc.client import Binary, Fault, ServerProxy
 
 _logger = logging.getLogger("cespy.SimClient")

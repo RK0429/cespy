@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Refactored SimRunner using new component architecture as a facade.
 
 This module provides a refactored SimRunner that delegates to specialized
@@ -9,9 +8,10 @@ while maintaining backward compatibility with the existing API.
 
 import logging
 import shutil
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Union
 
 from ..editor.base_editor import BaseEditor
 from ..sim.simulator import Simulator
@@ -23,26 +23,26 @@ from .run_task import RunTask
 from .task_queue import TaskPriority, TaskQueue
 
 __all__ = [
-    "SimRunnerRefactored",
-    "SimRunnerConfig",
     "RunConfig",
+    "SimRunnerConfig",
+    "SimRunnerRefactored",
 ]
 
 _logger = logging.getLogger("cespy.SimRunnerRefactored")
 
 # Type aliases for clarity
-CallbackType = Union[Type[ProcessCallback], Callable[[Path, Path], Any]]
+CallbackType = Union[type[ProcessCallback], Callable[[Path, Path], Any]]
 
 
 @dataclass
 class SimRunnerConfig:
     """Configuration for SimRunner initialization."""
 
-    simulator: Optional[Union[str, Path, Type[Simulator]]] = None
+    simulator: str | Path | type[Simulator] | None = None
     parallel_sims: int = 4
     timeout: float = 600.0
     verbose: bool = False
-    output_folder: Optional[str] = None
+    output_folder: str | None = None
     max_callback_errors: int = 3
     cleanup_interval: float = 60.0
 
@@ -52,11 +52,11 @@ class RunConfig:
     """Configuration for SimRunner.run() method."""
 
     wait_resource: bool = True
-    callback: Optional[CallbackType] = None
-    callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]] = None
-    switches: Optional[List[str]] = None
-    timeout: Optional[float] = None
-    run_filename: Optional[str] = None
+    callback: CallbackType | None = None
+    callback_args: tuple[Any, ...] | dict[str, Any] | None = None
+    switches: list[str] | None = None
+    timeout: float | None = None
+    run_filename: str | None = None
     exe_log: bool = False
     priority: TaskPriority = TaskPriority.NORMAL
 
@@ -72,12 +72,12 @@ class SimRunnerRefactored:
     def __init__(
         self,
         *,
-        config: Optional[SimRunnerConfig] = None,
-        simulator: Optional[Union[str, Path, Type[Simulator]]] = None,
-        parallel_sims: Optional[int] = None,
-        timeout: Optional[float] = None,
-        verbose: Optional[bool] = None,
-        output_folder: Optional[str] = None,
+        config: SimRunnerConfig | None = None,
+        simulator: str | Path | type[Simulator] | None = None,
+        parallel_sims: int | None = None,
+        timeout: float | None = None,
+        verbose: bool | None = None,
+        output_folder: str | None = None,
     ) -> None:
         """Initialize SimRunner with component architecture.
 
@@ -113,10 +113,10 @@ class SimRunnerRefactored:
         self.verbose = verbose
         self.timeout = timeout
         self.parallel_sims = parallel_sims
-        self.cmdline_switches: List[str] = []
+        self.cmdline_switches: list[str] = []
 
         # Setup output folder
-        self.output_folder: Optional[Path] = None
+        self.output_folder: Path | None = None
         if output_folder:
             self.output_folder = Path(output_folder)
             if not self.output_folder.exists():
@@ -173,7 +173,7 @@ class SimRunnerRefactored:
         """Get number of active simulation threads."""
         return len(self._process_manager.get_active_processes())
 
-    def set_simulator(self, spice_tool: Type[Simulator]) -> None:
+    def set_simulator(self, spice_tool: type[Simulator]) -> None:
         """Set the simulator to use.
 
         Args:
@@ -200,17 +200,17 @@ class SimRunnerRefactored:
 
     def run(
         self,
-        netlist: Union[str, Path, BaseEditor],
+        netlist: str | Path | BaseEditor,
         *,
         wait_resource: bool = True,
-        callback: Optional[CallbackType] = None,
-        callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]] = None,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
-        run_filename: Optional[str] = None,
+        callback: CallbackType | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
+        run_filename: str | None = None,
         exe_log: bool = False,
         priority: TaskPriority = TaskPriority.NORMAL,
-    ) -> Optional[RunTask]:
+    ) -> RunTask | None:
         """Execute a simulation run.
 
         Args:
@@ -279,7 +279,7 @@ class SimRunnerRefactored:
 
     def wait_completion(
         self,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         abort_all_on_timeout: bool = False,
     ) -> bool:
         """Wait for all simulations to complete.
@@ -320,7 +320,7 @@ class SimRunnerRefactored:
             time.sleep(0.1)
 
     def _setup_simulator(
-        self, simulator: Optional[Union[str, Path, Type[Simulator]]]
+        self, simulator: str | Path | type[Simulator] | None
     ) -> None:
         """Setup the simulator instance."""
         if simulator is None:
@@ -339,8 +339,8 @@ class SimRunnerRefactored:
 
     def _prepare_netlist(
         self,
-        netlist: Union[str, Path, BaseEditor],
-        run_filename: Optional[str],
+        netlist: str | Path | BaseEditor,
+        run_filename: str | None,
         run_number: int,
     ) -> Path:
         """Prepare netlist file for simulation."""
@@ -367,8 +367,8 @@ class SimRunnerRefactored:
         return output_path
 
     def _prepare_run_config(
-        self, switches: Optional[List[str]], timeout: Optional[float], exe_log: bool
-    ) -> Dict[str, Any]:
+        self, switches: list[str] | None, timeout: float | None, exe_log: bool
+    ) -> dict[str, Any]:
         """Prepare run configuration."""
         config = {
             "switches": (switches or []) + self.cmdline_switches,
@@ -379,9 +379,9 @@ class SimRunnerRefactored:
 
     def _validate_callback_args(
         self,
-        callback: Optional[CallbackType],
-        callback_args: Optional[Union[tuple[Any, ...], dict[str, Any]]],
-    ) -> Optional[Dict[str, Any]]:
+        callback: CallbackType | None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
         """Validate and convert callback arguments."""
         if callback is None:
             return None

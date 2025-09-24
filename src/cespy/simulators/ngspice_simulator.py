@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """NGSpice simulator implementation for cespy.
 
 This module provides the NGSpice class which implements the Simulator interface
@@ -30,12 +29,10 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import paths as core_paths
-
+from ..core import constants as core_constants, paths as core_paths
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
 _logger = logging.getLogger("cespy.NGSpiceSimulator")
@@ -51,7 +48,7 @@ class NGspiceSimulator(Simulator):
 
     # the default lib paths, as used by get_default_library_paths
     # none
-    _default_lib_paths: List[str] = []
+    _default_lib_paths: list[str] = []
 
     # defaults:
     spice_exe = []
@@ -88,16 +85,16 @@ class NGspiceSimulator(Simulator):
         # '--autorun'     : ['--autorun'],  # run the loaded netlist
         # '-b'            : ['-b'],
         # '--batch'       : ['--batch'],  # process FILE in batch mode
-        "-c": ["-c", "<FILE>"],  #
+        "-c": ["-c", "<FILE>"],
         "--circuitfile": ["--circuitfile", "<FILE>"],  # set the circuitfile
-        "-D": ["-D", "var_value"],  #
+        "-D": ["-D", "var_value"],
         "--define": [
             "--define",
             "var_value",
         ],  # define variable to true/[value]
-        "-i": ["-i"],  #
+        "-i": ["-i"],
         "--interactive": ["--interactive"],  # run in interactive mode
-        "-n": ["-n"],  #
+        "-n": ["-n"],
         "--no-spiceinit": [
             "--no-spiceinit"
         ],  # don't load the local or user's config file
@@ -105,7 +102,7 @@ class NGspiceSimulator(Simulator):
         # '--output'      : ['--output', '<FILE>'],  # set the outputfile
         # '-p'            : ['-p'],  #
         # '--pipe'        : ['--pipe'],  # run in I/O pipe mode
-        "-q": ["-q"],  #
+        "-q": ["-q"],
         "--completion": ["--completion"],  # activate command completion
         # '-r'            : ['-r'],  #
         # '--rawfile'     : ['--rawfile', '<FILE>'],  # set the rawfile output
@@ -113,9 +110,9 @@ class NGspiceSimulator(Simulator):
             "--soa-log",
             "<FILE>",
         ],  # set the outputfile for SOA warnings
-        "-s": ["-s"],  #
+        "-s": ["-s"],
         "--server": ["--server"],  # run spice as a server process
-        "-t": ["-t", "<TERM>"],  #
+        "-t": ["-t", "<TERM>"],
         "--term": ["--term", "<TERM>"],  # set the terminal type
         # '-h'            : ['-h'],  #
         # '--help'        : ['--help'],  # display this help and exit
@@ -128,7 +125,7 @@ class NGspiceSimulator(Simulator):
     _compatibility_mode = "kiltpsa"
 
     @classmethod
-    def valid_switch(cls, switch: str, parameter: str = "") -> List[str]:
+    def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:
         """Validates a command line switch. The following options are available for
         NGSpice:
 
@@ -155,7 +152,7 @@ class NGspiceSimulator(Simulator):
         :return: the correct formatting for the switch
         :rtype: list
         """
-        ret: List[str] = []  # This is an empty switch
+        ret: list[str] = []  # This is an empty switch
         parameter = parameter.strip()
 
         # format check
@@ -209,12 +206,12 @@ class NGspiceSimulator(Simulator):
     @classmethod
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
-        netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[Union[List[Any], str]] = None,
-        timeout: Optional[float] = None,
+        netlist_file: str | Path,
+        cmd_line_switches: list[Any] | str | None = None,
+        timeout: float | None = None,
         *,
-        stdout: Optional[Any] = None,
-        stderr: Optional[Any] = None,
+        stdout: Any | None = None,
+        stderr: Any | None = None,
         exe_log: bool = False,
     ) -> int:
         """Executes a NGspice simulation run.
@@ -330,12 +327,12 @@ class NGspiceSimulator(Simulator):
     @classmethod
     def create_netlist(
         cls,
-        circuit_file: Union[str, Path],
-        cmd_line_switches: Optional[List[Any]] = None,
-        timeout: Optional[float] = None,
+        circuit_file: str | Path,
+        cmd_line_switches: list[Any] | None = None,
+        timeout: float | None = None,
         *,
-        stdout: Optional[Any] = None,
-        stderr: Optional[Any] = None,
+        stdout: Any | None = None,
+        stderr: Any | None = None,
         exe_log: bool = False,
     ) -> Path:
         """Create netlist (not supported by NGspice)."""

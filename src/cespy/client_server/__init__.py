@@ -8,4 +8,4 @@ from .sim_client import SimClient
 from .sim_server import SimServer
 from .srv_sim_runner import ServerSimRunner
 
-__all__ = ["SimClient", "SimServer", "ServerSimRunner"]
+__all__ = ["ServerSimRunner", "SimClient", "SimServer"]

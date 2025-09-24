@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Process manager for handling simulation subprocess execution.
 
 This module provides a manager for executing and monitoring simulation processes,
@@ -15,7 +14,7 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, IO
+from typing import IO, Any
 
 try:
     import psutil
@@ -33,13 +32,13 @@ class ProcessInfo:
     """Information about a running process."""
 
     pid: int
-    command: List[str]
+    command: list[str]
     start_time: float
     working_directory: Path
-    stdout_file: Optional[Path] = None
-    stderr_file: Optional[Path] = None
-    process: Optional[subprocess.Popen[bytes]] = None
-    psutil_process: Optional[Any] = None  # psutil.Process if available
+    stdout_file: Path | None = None
+    stderr_file: Path | None = None
+    process: subprocess.Popen[bytes] | None = None
+    psutil_process: Any | None = None  # psutil.Process if available
 
 
 @dataclass
@@ -47,11 +46,11 @@ class ProcessResult:
     """Result of a process execution."""
 
     return_code: int
-    stdout_path: Optional[Path]
-    stderr_path: Optional[Path]
+    stdout_path: Path | None
+    stderr_path: Path | None
     duration: float
     terminated: bool = False
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 class ProcessManager:
@@ -76,16 +75,16 @@ class ProcessManager:
         self.cleanup_interval = cleanup_interval
 
         # Process tracking
-        self._processes: Dict[int, ProcessInfo] = {}
+        self._processes: dict[int, ProcessInfo] = {}
         self._lock = threading.Lock()
         self._process_counter = 0
 
         # Resource monitoring
-        self._cpu_percent_history: List[float] = []
-        self._memory_usage_history: List[float] = []
+        self._cpu_percent_history: list[float] = []
+        self._memory_usage_history: list[float] = []
 
         # Cleanup thread
-        self._cleanup_thread: Optional[threading.Thread] = None
+        self._cleanup_thread: threading.Thread | None = None
         self._stop_cleanup = threading.Event()
         self._start_cleanup_thread()
 
@@ -93,14 +92,14 @@ class ProcessManager:
 
     def execute(
         self,
-        command: List[str],
+        command: list[str],
         working_directory: Path,
-        timeout: Optional[float] = None,
-        env: Optional[Dict[str, str]] = None,
-        stdout_file: Optional[Path] = None,
-        stderr_file: Optional[Path] = None,
-        priority: Optional[int] = None,
-    ) -> Tuple[int, ProcessResult]:
+        timeout: float | None = None,
+        env: dict[str, str] | None = None,
+        stdout_file: Path | None = None,
+        stderr_file: Path | None = None,
+        priority: int | None = None,
+    ) -> tuple[int, ProcessResult]:
         """Execute a command as a subprocess.
 
         Args:
@@ -132,8 +131,8 @@ class ProcessManager:
             process_env.update(env)
 
         # Prepare stdout/stderr
-        stdout_handle: Optional[Union[IO[str], int]] = None
-        stderr_handle: Optional[Union[IO[str], int]] = None
+        stdout_handle: IO[str] | int | None = None
+        stderr_handle: IO[str] | int | None = None
         try:
             if stdout_file:
                 stdout_handle = open(stdout_file, "w", encoding="utf-8")
@@ -273,7 +272,7 @@ class ProcessManager:
 
         return True
 
-    def get_active_processes(self) -> Dict[int, Dict[str, Any]]:
+    def get_active_processes(self) -> dict[int, dict[str, Any]]:
         """Get information about active processes.
 
         Returns:
@@ -305,7 +304,7 @@ class ProcessManager:
 
             return result
 
-    def get_resource_usage(self) -> Dict[str, float]:
+    def get_resource_usage(self) -> dict[str, float]:
         """Get current resource usage statistics.
 
         Returns:

@@ -5,13 +5,13 @@ This module defines a comprehensive exception hierarchy for all error
 conditions that can occur in the cespy library.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class CespyError(Exception):
     """Base exception for all cespy errors."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
         """
         Initialize CespyError.
 
@@ -21,7 +21,7 @@ class CespyError(Exception):
         """
         super().__init__(message)
         self.message = message
-        self.details: Dict[str, Any] = details or {}
+        self.details: dict[str, Any] = details or {}
 
 
 # Simulator-related exceptions
@@ -33,7 +33,7 @@ class SimulatorNotFoundError(SimulatorError):
     """Raised when a simulator executable cannot be found."""
 
     def __init__(
-        self, simulator_name: str, search_paths: Optional[List[str]] = None
+        self, simulator_name: str, search_paths: list[str] | None = None
     ) -> None:
         """
         Initialize SimulatorNotFoundError.
@@ -58,7 +58,7 @@ class InvalidSimulatorError(SimulatorError):
 class SimulationTimeoutError(SimulatorError):
     """Raised when a simulation exceeds its timeout."""
 
-    def __init__(self, timeout: float, netlist: Optional[str] = None) -> None:
+    def __init__(self, timeout: float, netlist: str | None = None) -> None:
         """
         Initialize SimulationTimeoutError.
 
@@ -77,8 +77,8 @@ class SimulationFailedError(SimulatorError):
     def __init__(
         self,
         message: str,
-        exit_code: Optional[int] = None,
-        stderr: Optional[str] = None,
+        exit_code: int | None = None,
+        stderr: str | None = None,
     ) -> None:
         """
         Initialize SimulationFailedError.
@@ -113,7 +113,7 @@ class UnsupportedFormatError(FileFormatError):
     """Raised when a file format is not supported."""
 
     def __init__(
-        self, file_format: str, supported_formats: Optional[List[str]] = None
+        self, file_format: str, supported_formats: list[str] | None = None
     ) -> None:
         """
         Initialize UnsupportedFormatError.
@@ -136,7 +136,7 @@ class ComponentNotFoundError(ComponentError):
     """Raised when a component reference is not found in the circuit."""
 
     def __init__(
-        self, component_ref: str, available_components: Optional[List[str]] = None
+        self, component_ref: str, available_components: list[str] | None = None
     ) -> None:
         """
         Initialize ComponentNotFoundError.
@@ -205,8 +205,8 @@ class ValidationError(ComponentError):
     def __init__(
         self,
         message: str,
-        component_ref: Optional[str] = None,
-        validation_errors: Optional[List[str]] = None,
+        component_ref: str | None = None,
+        validation_errors: list[str] | None = None,
     ) -> None:
         """
         Initialize ValidationError.
@@ -228,7 +228,7 @@ class AnalysisError(CespyError):
 class OptimizationError(AnalysisError):
     """Raised when an optimization operation fails."""
 
-    def __init__(self, message: str, optimization_type: Optional[str] = None) -> None:
+    def __init__(self, message: str, optimization_type: str | None = None) -> None:
         """
         Initialize OptimizationError.
 
@@ -276,7 +276,7 @@ class EncodingError(CespyIOError):
     """Raised when there's an encoding/decoding error."""
 
     def __init__(
-        self, filepath: str, encoding: str, original_error: Optional[Exception] = None
+        self, filepath: str, encoding: str, original_error: Exception | None = None
     ) -> None:
         """
         Initialize EncodingError.
@@ -329,7 +329,7 @@ class ServerTimeoutError(ServerError):
 class DeprecationError(CespyError):
     """Raised when using deprecated functionality."""
 
-    def __init__(self, old_feature: str, new_feature: Optional[str] = None) -> None:
+    def __init__(self, old_feature: str, new_feature: str | None = None) -> None:
         """
         Initialize DeprecationError.
 

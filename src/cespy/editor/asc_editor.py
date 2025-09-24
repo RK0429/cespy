@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """LTSpice schematic file (.asc) editor and parser.
 
 This module provides comprehensive functionality for reading, parsing, modifying,
@@ -26,17 +25,17 @@ import logging
 import os.path
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Match, Optional, Tuple, Union, cast
+from re import Match
+from typing import Any, Union, cast
 
 # Core imports
 from ..core import constants as core_constants
-
+from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
 from ..log.logfile_data import try_convert_value
 from ..simulators.ltspice_simulator import LTspice
 from ..utils.detect_encoding import EncodingDetectError, detect_encoding
 from ..utils.file_search import search_file_in_containers
 from .asy_reader import AsyReader
-from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
 from .base_editor import (
     PARAM_REGEX,
     UNIQUE_SIMULATION_DOT_INSTRUCTIONS,
@@ -95,10 +94,10 @@ class AscEditor(BaseSchematic):
     """Class made to update directly the LTspice ASC files."""
 
     # This is a class variable, so it can be shared between all instances.
-    symbol_cache: Dict[str, str] = {}
+    symbol_cache: dict[str, str] = {}
     """:meta private:"""
 
-    simulator_lib_paths: List[str] = LTspice.get_default_library_paths()
+    simulator_lib_paths: list[str] = LTspice.get_default_library_paths()
     """This is initialised with typical locations found for LTspice. You
     can (and should, if you use wine), call `prepare_for_simulator()` once
     you've set the executable paths. This is a class variable, so it will be
@@ -108,7 +107,7 @@ class AscEditor(BaseSchematic):
     """
 
     def __init__(
-        self, asc_file: Union[str, Path], encoding: str = "autodetect"
+        self, asc_file: str | Path, encoding: str = "autodetect"
     ) -> None:
         super().__init__()
         self.version: str = "4"
@@ -127,7 +126,7 @@ class AscEditor(BaseSchematic):
         else:
             self.encoding = encoding
         # initialize include directives list
-        self.includes: List[str] = []
+        self.includes: list[str] = []
         # read the file into memory
         self.reset_netlist()
 
@@ -135,7 +134,7 @@ class AscEditor(BaseSchematic):
     def circuit_file(self) -> Path:
         return self.asc_file_path
 
-    def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
+    def save_netlist(self, run_netlist_file: str | Path) -> None:
         if isinstance(run_netlist_file, str):
             run_netlist_file = Path(run_netlist_file)
         run_netlist_file = run_netlist_file.with_suffix(
@@ -181,7 +180,7 @@ class AscEditor(BaseSchematic):
                     and "_SUBCKT" in component.attributes
                 ):
                     # writing the sub-circuit if it was updated
-                    sub_circuit: Optional[AscEditor] = component.attributes["_SUBCKT"]
+                    sub_circuit: AscEditor | None = component.attributes["_SUBCKT"]
                     if sub_circuit is not None and sub_circuit.updated:
                         sub_circuit.save_netlist(sub_circuit.asc_file_path)
                 for attr, value in component.attributes.items():
@@ -225,7 +224,7 @@ class AscEditor(BaseSchematic):
         super().reset_netlist()
         # create_blank parameter is not used in ASC files - they are always
         # reset from file
-        with open(self.asc_file_path, "r", encoding=self.encoding) as asc_file:
+        with open(self.asc_file_path, encoding=self.encoding) as asc_file:
             _logger.info("Parsing ASC file %s", self.asc_file_path)
             component = None
             for line in asc_file:
@@ -344,9 +343,9 @@ class AscEditor(BaseSchematic):
                     _, posX, posY, direction = line.split()
                     # Assuming it is the last FLAG parsed
                     text = self.labels[-1]
-                    assert text.coord.X == int(posX) and text.coord.Y == int(
+                    assert int(posX) == text.coord.X and int(
                         posY
-                    ), "Syntax Error, getting a IOPIN without an associated label"
+                    ) == text.coord.Y, "Syntax Error, getting a IOPIN without an associated label"
                     port = Port(text, direction)
                     self.ports.append(port)
 
@@ -485,7 +484,7 @@ class AscEditor(BaseSchematic):
         component = self.get_component(element)
         return component.symbol if component.symbol is not None else ""
 
-    def get_component_info(self, reference: str) -> Dict[str, Any]:
+    def get_component_info(self, reference: str) -> dict[str, Any]:
         """Returns the reference information as a dictionary."""
         component = self.get_component(reference)
         info = {
@@ -496,7 +495,7 @@ class AscEditor(BaseSchematic):
         info["InstName"] = reference  # For legacy purposes
         return info
 
-    def get_component_position(self, reference: str) -> Tuple[Point, ERotation]:
+    def get_component_position(self, reference: str) -> tuple[Point, ERotation]:
         component = self.get_component(reference)
         return component.position, component.rotation
 
@@ -509,7 +508,7 @@ class AscEditor(BaseSchematic):
 
     def _get_param_named(
         self, param_name: str
-    ) -> Tuple[Optional[Match[str]], Optional[Text]]:
+    ) -> tuple[Match[str] | None, Text | None]:
         param_name_uppercase = param_name.upper()
         search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
         for directive in self.directives:
@@ -520,7 +519,7 @@ class AscEditor(BaseSchematic):
                         return match, directive
         return None, None
 
-    def get_all_parameter_names(self, param: str = "") -> List[str]:
+    def get_all_parameter_names(self, param: str = "") -> list[str]:
         # docstring inherited from BaseEditor
         param_names = []
         search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
@@ -539,7 +538,7 @@ class AscEditor(BaseSchematic):
             return str(match.group("value"))
         raise ParameterNotFoundError(param, f"Parameter {param} not found in ASC file")
 
-    def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
+    def set_parameter(self, param: str, value: str | int | float) -> None:
         """Sets a parameter value in the ASC file.
 
         :param param: The parameter name to set
@@ -577,7 +576,7 @@ class AscEditor(BaseSchematic):
             self.directives.append(directive)
         self.updated = True
 
-    def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
+    def set_component_value(self, device: str, value: str | int | float) -> None:
         """Sets the value of the component.
 
         :param device: The reference of the component
@@ -640,7 +639,7 @@ class AscEditor(BaseSchematic):
 
     def get_component_parameters(
         self, element: str, as_dicts: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Returns the parameters of a component that are related with Spice operation.
         That is: Value, Value2, SpiceModel, SpiceLine, SpiceLine2, plus all contents of
         SpiceLine, SpiceLine2.
@@ -680,7 +679,7 @@ class AscEditor(BaseSchematic):
         return parameters
 
     def set_component_parameters(
-        self, element: str, **kwargs: Union[str, int, float]
+        self, element: str, **kwargs: str | int | float
     ) -> None:
         """Sets the parameters of a component that are related with Spice operation.
         That is: Value, Value2, SpiceModel, SpiceLine, SpiceLine2, or any parameters are
@@ -789,7 +788,7 @@ class AscEditor(BaseSchematic):
                             )
         self.set_updated(element)
 
-    def get_components(self, prefixes: str = "*") -> List[str]:
+    def get_components(self, prefixes: str = "*") -> list[str]:
         if prefixes == "*":
             return list(self.components.keys())
         return [k for k in self.components.keys() if k[0] in prefixes]
@@ -799,7 +798,7 @@ class AscEditor(BaseSchematic):
         del sub_circuit.components[ref]
         sub_circuit.updated = True
 
-    def _get_text_space(self) -> Tuple[float, float]:
+    def _get_text_space(self) -> tuple[float, float]:
         """Returns the coordinate on the Schematic File canvas where a text can be
         appended."""
         min_x: float = 100000.0  # High enough to be sure it will be replaced
@@ -844,7 +843,7 @@ class AscEditor(BaseSchematic):
         """
         self.set_custom_library_paths(*paths)
 
-    def _lib_file_find(self, filename: str) -> Optional[str]:
+    def _lib_file_find(self, filename: str) -> str | None:
         # create list of directories to search, based on the simulator_lib_paths.
         # Just add "/sub" to the path
         my_lib_paths = [os.path.join(x, "sub") for x in self.simulator_lib_paths]
@@ -863,7 +862,7 @@ class AscEditor(BaseSchematic):
         )
         return file_found
 
-    def _asy_file_find(self, filename: str) -> Optional[str]:
+    def _asy_file_find(self, filename: str) -> str | None:
         if filename in self.symbol_cache:
             return self.symbol_cache[filename]
         _logger.info("Searching for symbol %s...", filename)

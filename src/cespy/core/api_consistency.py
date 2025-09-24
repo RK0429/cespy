@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """API consistency utilities and deprecation management.
 
 This module provides utilities for maintaining API consistency across the
@@ -11,7 +10,8 @@ import functools
 import inspect
 import logging
 import warnings
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 _logger = logging.getLogger("cespy.APIConsistency")
 
@@ -30,7 +30,7 @@ class DeprecationLevel:  # pylint: disable=too-few-public-methods
 def deprecated(
     version: str,
     reason: str,
-    replacement: Optional[str] = None,
+    replacement: str | None = None,
     level: str = DeprecationLevel.WARNING,
     stacklevel: int = 2,
 ) -> Callable[[F], F]:
@@ -68,15 +68,15 @@ def deprecated(
             return func(*args, **kwargs)
 
         # Add deprecation metadata
-        setattr(wrapper, "__deprecated__", True)
+        setattr(wrapper, '__deprecated__', True)
         setattr(
             wrapper,
-            "__deprecation_info__",
+            '__deprecation_info__',
             {
-                "version": version,
-                "reason": reason,
-                "replacement": replacement,
-                "level": level,
+                'version': version,
+                'reason': reason,
+                'replacement': replacement,
+                'level': level,
             },
         )
 
@@ -85,7 +85,7 @@ def deprecated(
     return decorator
 
 
-def standardize_parameters(parameter_map: Dict[str, str]) -> Callable[[F], F]:
+def standardize_parameters(parameter_map: dict[str, str]) -> Callable[[F], F]:
     """Decorator to standardize parameter names while maintaining backward
     compatibility.
 
@@ -227,8 +227,8 @@ class APIStandardizer:
 
     @classmethod
     def validate_parameter_order(
-        cls, operation_type: str, parameters: List[str]
-    ) -> List[str]:
+        cls, operation_type: str, parameters: list[str]
+    ) -> list[str]:
         """Validate and suggest correct parameter order.
 
         Args:
@@ -260,7 +260,7 @@ class APIStandardizer:
 
 
 def create_compatibility_wrapper(
-    old_name: str, new_name: str, version: str, module_dict: Dict[str, Any]
+    old_name: str, new_name: str, version: str, module_dict: dict[str, Any]
 ) -> None:
     """Create a compatibility wrapper for renamed functions/classes.
 
@@ -295,7 +295,7 @@ class ParameterValidator:
     def __init__(self) -> None:
         self.standardizer = APIStandardizer()
 
-    def validate_file_path_parameter(self, file_path: Any) -> Union[str, None]:
+    def validate_file_path_parameter(self, file_path: Any) -> str | None:
         """Validate and standardize file path parameter.
 
         Args:
@@ -323,7 +323,7 @@ class ParameterValidator:
 
         raise TypeError(f"Invalid file_path type: {type(file_path)}")
 
-    def validate_timeout_parameter(self, timeout: Any) -> Optional[float]:
+    def validate_timeout_parameter(self, timeout: Any) -> float | None:
         """Validate and standardize timeout parameter.
 
         Args:
@@ -404,7 +404,7 @@ def ensure_api_consistency(func: F) -> F:
         sig = inspect.signature(func)
 
         # Validate common parameter types
-        validated_kwargs: Dict[str, Any] = {}
+        validated_kwargs: dict[str, Any] = {}
         for param_name, param_value in kwargs.items():
             if param_name in sig.parameters:
                 param = sig.parameters[param_name]

@@ -11,12 +11,11 @@ import sys
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
 from cespy.core.constants import Simulators
 
 
-def normalize_path(path: Union[str, Path]) -> str:
+def normalize_path(path: str | Path) -> str:
     """
     Normalize a path for the current platform.
 
@@ -29,7 +28,7 @@ def normalize_path(path: Union[str, Path]) -> str:
     return os.path.normpath(str(path))
 
 
-def join_paths(*paths: Union[str, Path]) -> str:
+def join_paths(*paths: str | Path) -> str:
     """
     Join path components intelligently.
 
@@ -43,7 +42,7 @@ def join_paths(*paths: Union[str, Path]) -> str:
 
 
 def resolve_path(
-    path: Union[str, Path], base_path: Optional[Union[str, Path]] = None
+    path: str | Path, base_path: str | Path | None = None
 ) -> str:
     """
     Resolve a path to its absolute form.
@@ -61,7 +60,7 @@ def resolve_path(
     return str(path.resolve())
 
 
-def get_absolute_path(path: Union[str, Path]) -> str:
+def get_absolute_path(path: str | Path) -> str:
     """
     Get the absolute path, expanding user directory if needed.
 
@@ -95,7 +94,7 @@ def is_linux() -> bool:
     return sys.platform.startswith("linux")
 
 
-def is_wine_environment(exe_path: Optional[str] = None) -> bool:
+def is_wine_environment(exe_path: str | None = None) -> bool:
     """
     Check if running under Wine or if the executable path suggests Wine.
 
@@ -118,7 +117,7 @@ def is_wine_environment(exe_path: Optional[str] = None) -> bool:
     return False
 
 
-def convert_wine_path(path: str, c_drive: Optional[str] = None) -> str:
+def convert_wine_path(path: str, c_drive: str | None = None) -> str:
     """
     Convert Windows path to Wine path format.
 
@@ -147,8 +146,8 @@ def convert_wine_path(path: str, c_drive: Optional[str] = None) -> str:
 
 
 def expand_and_check_local_dir(
-    path: Union[str, Path], wine_c_drive: Optional[str] = None
-) -> Tuple[str, bool]:
+    path: str | Path, wine_c_drive: str | None = None
+) -> tuple[str, bool]:
     """
     Expand path and check if it exists, handling Wine paths.
 
@@ -176,7 +175,7 @@ def expand_and_check_local_dir(
 
 
 # File and directory operations
-def find_file(filename: str, search_paths: List[Union[str, Path]]) -> Optional[str]:
+def find_file(filename: str, search_paths: list[str | Path]) -> str | None:
     """
     Find a file in the given search paths.
 
@@ -195,8 +194,8 @@ def find_file(filename: str, search_paths: List[Union[str, Path]]) -> Optional[s
 
 
 def find_executable(
-    exe_names: List[str], search_paths: Optional[List[Union[str, Path]]] = None
-) -> Optional[str]:
+    exe_names: list[str], search_paths: list[str | Path] | None = None
+) -> str | None:
     """
     Find an executable in system PATH or given search paths.
 
@@ -223,7 +222,7 @@ def find_executable(
     return None
 
 
-def ensure_directory_exists(path: Union[str, Path]) -> str:
+def ensure_directory_exists(path: str | Path) -> str:
     """
     Ensure a directory exists, creating it if necessary.
 
@@ -238,18 +237,18 @@ def ensure_directory_exists(path: Union[str, Path]) -> str:
     return str(path)
 
 
-def is_valid_directory(path: Union[str, Path]) -> bool:
+def is_valid_directory(path: str | Path) -> bool:
     """Check if path is a valid directory."""
     return Path(path).is_dir()
 
 
-def is_valid_file(path: Union[str, Path]) -> bool:
+def is_valid_file(path: str | Path) -> bool:
     """Check if path is a valid file."""
     return Path(path).is_file()
 
 
 # Simulator-specific paths
-def get_default_simulator_paths(simulator_type: str) -> List[str]:
+def get_default_simulator_paths(simulator_type: str) -> list[str]:
     """
     Get default installation paths for a simulator.
 
@@ -328,7 +327,7 @@ def get_default_simulator_paths(simulator_type: str) -> List[str]:
     return [p for p in paths if p]  # Filter out empty strings
 
 
-def get_simulator_library_paths(simulator_exe: str) -> List[str]:
+def get_simulator_library_paths(simulator_exe: str) -> list[str]:
     """
     Get default library paths for a simulator based on its executable location.
 
@@ -370,7 +369,7 @@ def create_temp_directory(prefix: str = "cespy_") -> str:
     return tempfile.mkdtemp(prefix=prefix)
 
 
-def extract_to_temp(archive_path: str, filename: str) -> Optional[str]:
+def extract_to_temp(archive_path: str, filename: str) -> str | None:
     """
     Extract a file from an archive to a temporary location.
 
@@ -475,7 +474,7 @@ def is_wine_available() -> bool:
     return shutil.which("wine") is not None
 
 
-def get_wine_prefix() -> Optional[Path]:
+def get_wine_prefix() -> Path | None:
     """
     Get the Wine prefix directory.
 

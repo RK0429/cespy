@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Fast worst-case analysis implementation for circuit simulations.
 
 This module provides an optimized algorithm for worst-case analysis that reduces
@@ -25,8 +24,9 @@ and skipping unnecessary simulation combinations.
 # -------------------------------------------------------------------------------
 
 import logging
+from collections.abc import Callable
 from enum import IntEnum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import Any, cast
 
 from ..process_callback import ProcessCallback
 from .tolerance_deviations import ComponentDeviation, DeviationType
@@ -87,13 +87,13 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
     def run_testbench(
         self,
         *,
-        runs_per_sim: Optional[int] = None,  # This parameter is ignored
+        runs_per_sim: int | None = None,  # This parameter is ignored
         wait_resource: bool = True,  # This parameter is ignored
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
-        run_filename: Optional[str] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
+        run_filename: str | None = None,
         exe_log: bool = False,
     ) -> None:
         raise NotImplementedError("run_testbench() is not implemented in this class")
@@ -102,18 +102,18 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
     # pylint: disable=too-many-branches,too-many-statements,too-many-return-statements
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
         exe_log: bool = True,
-        measure: Optional[str] = None,
-    ) -> Tuple[
+        measure: str | None = None,
+    ) -> tuple[
         float,
         float,
-        Dict[str, Union[str, float]],
+        dict[str, str | float],
         float,
-        Dict[str, Union[str, float]],
+        dict[str, str | float],
     ]:
         """As described in the class description, this method will perform a worst case
         analysis using a faster algorithm."""
@@ -133,8 +133,8 @@ class FastWorstCaseAnalysis(WorstCaseAnalysis):
             self.elements_analysed.append(ref1)
 
         def value_change(
-            val: Union[str, float], dev: ComponentDeviation, to: WorstCaseType
-        ) -> Union[str, float]:
+            val: str | float, dev: ComponentDeviation, to: WorstCaseType
+        ) -> str | float:
             """Sets the reference component to the maximum or minimum based on deviation type."""
             if isinstance(val, str):
                 return val

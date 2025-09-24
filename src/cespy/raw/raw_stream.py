@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Streaming API for memory-efficient raw file processing.
 
 This module provides streaming capabilities for processing large raw files
@@ -8,15 +7,16 @@ without loading all data into memory at once.
 
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
 
-from .raw_read import RawRead
 from .raw_classes import DummyTrace
+from .raw_read import RawRead
 
 _logger = logging.getLogger("cespy.RawStream")
 
@@ -28,8 +28,8 @@ class StreamConfig:
     chunk_size: int = 1000  # Points per chunk
     buffer_size: int = 10  # Number of chunks to buffer
     skip_steps: int = 1  # Process every N steps (1 = process all)
-    trace_filter: Optional[Callable[[str], bool]] = None  # Filter traces to process
-    progress_callback: Optional[Callable[[int, int], None]] = None  # Progress reporting
+    trace_filter: Callable[[str], bool] | None = None  # Filter traces to process
+    progress_callback: Callable[[int, int], None] | None = None  # Progress reporting
 
 
 class StreamProcessor(ABC):
@@ -42,7 +42,7 @@ class StreamProcessor(ABC):
         step: int,
         time_data: NDArray[np.float64],
         trace_data: NDArray[np.float64],
-    ) -> Optional[Any]:
+    ) -> Any | None:
         """Process a chunk of data.
 
         Args:
@@ -74,7 +74,7 @@ class RawFileStreamer:
     """
 
     def __init__(
-        self, raw_file: Union[str, Path], config: Optional[StreamConfig] = None
+        self, raw_file: str | Path, config: StreamConfig | None = None
     ):
         """Initialize raw file streamer.
 
@@ -108,9 +108,9 @@ class RawFileStreamer:
 
     def stream_traces(
         self,
-        traces: Optional[Union[str, List[str]]] = None,
-        steps: Optional[List[int]] = None,
-    ) -> Iterator[Tuple[str, int, NDArray[np.float64], NDArray[np.float64]]]:
+        traces: str | list[str] | None = None,
+        steps: list[int] | None = None,
+    ) -> Iterator[tuple[str, int, NDArray[np.float64], NDArray[np.float64]]]:
         """Stream trace data in chunks.
 
         Args:
@@ -159,7 +159,7 @@ class RawFileStreamer:
 
     def _stream_trace_step(
         self, trace_name: str, step: int
-    ) -> Iterator[Tuple[str, int, NDArray[np.float64], NDArray[np.float64]]]:
+    ) -> Iterator[tuple[str, int, NDArray[np.float64], NDArray[np.float64]]]:
         """Stream a single trace/step combination in chunks.
 
         Args:
@@ -226,7 +226,7 @@ class MinMaxProcessor(StreamProcessor):
 
     def __init__(self) -> None:
         """Initialize min/max processor."""
-        self.results: Dict[str, Dict[int, Tuple[float, float]]] = {}
+        self.results: dict[str, dict[int, tuple[float, float]]] = {}
 
     def process_chunk(
         self,
@@ -251,7 +251,7 @@ class MinMaxProcessor(StreamProcessor):
         else:
             self.results[trace_name][step] = (chunk_min, chunk_max)
 
-    def finalize(self) -> Dict[str, Dict[int, Tuple[float, float]]]:
+    def finalize(self) -> dict[str, dict[int, tuple[float, float]]]:
         """Return min/max results."""
         return self.results
 
@@ -261,8 +261,8 @@ class AverageProcessor(StreamProcessor):
 
     def __init__(self) -> None:
         """Initialize average processor."""
-        self.sums: Dict[str, Dict[int, float]] = {}
-        self.counts: Dict[str, Dict[int, int]] = {}
+        self.sums: dict[str, dict[int, float]] = {}
+        self.counts: dict[str, dict[int, int]] = {}
 
     def process_chunk(
         self,
@@ -286,9 +286,9 @@ class AverageProcessor(StreamProcessor):
             self.sums[trace_name][step] = chunk_sum
             self.counts[trace_name][step] = chunk_count
 
-    def finalize(self) -> Dict[str, Dict[int, float]]:
+    def finalize(self) -> dict[str, dict[int, float]]:
         """Calculate and return averages."""
-        results: Dict[str, Dict[int, float]] = {}
+        results: dict[str, dict[int, float]] = {}
 
         for trace_name in self.sums:
             results[trace_name] = {}
@@ -312,9 +312,9 @@ class ThresholdCrossingProcessor(StreamProcessor):
         """
         self.threshold = threshold
         self.rising = rising
-        self.crossings: Dict[str, Dict[int, List[float]]] = {}
-        self._last_values: Dict[Tuple[str, int], float] = {}
-        self._last_times: Dict[Tuple[str, int], float] = {}
+        self.crossings: dict[str, dict[int, list[float]]] = {}
+        self._last_values: dict[tuple[str, int], float] = {}
+        self._last_times: dict[tuple[str, int], float] = {}
 
     def process_chunk(
         self,
@@ -337,13 +337,7 @@ class ThresholdCrossingProcessor(StreamProcessor):
             last_val = self._last_values[key]
             first_val = float(np.real(trace_data[0]))
 
-            if self.rising and last_val < self.threshold <= first_val:
-                # Interpolate crossing time
-                t_cross = self._interpolate_crossing(
-                    self._last_times[key], float(time_data[0]), last_val, first_val
-                )
-                self.crossings[trace_name][step].append(t_cross)
-            elif not self.rising and last_val > self.threshold >= first_val:
+            if (self.rising and last_val < self.threshold <= first_val) or (not self.rising and last_val > self.threshold >= first_val):
                 # Interpolate crossing time
                 t_cross = self._interpolate_crossing(
                     self._last_times[key], float(time_data[0]), last_val, first_val
@@ -387,7 +381,7 @@ class ThresholdCrossingProcessor(StreamProcessor):
         fraction = (self.threshold - v1) / (v2 - v1)
         return t1 + fraction * (t2 - t1)
 
-    def finalize(self) -> Dict[str, Dict[int, List[float]]]:
+    def finalize(self) -> dict[str, dict[int, list[float]]]:
         """Return crossing times."""
         return self.crossings
 
@@ -402,8 +396,8 @@ class DataSamplerProcessor(StreamProcessor):
             sample_rate: Sample every N points
         """
         self.sample_rate = sample_rate
-        self.samples: Dict[str, Dict[int, Tuple[List[float], List[float]]]] = {}
-        self._point_counter: Dict[Tuple[str, int], int] = {}
+        self.samples: dict[str, dict[int, tuple[list[float], list[float]]]] = {}
+        self._point_counter: dict[tuple[str, int], int] = {}
 
     def process_chunk(
         self,
@@ -433,10 +427,10 @@ class DataSamplerProcessor(StreamProcessor):
 
     def finalize(
         self,
-    ) -> Dict[str, Dict[int, Tuple[NDArray[np.float64], NDArray[np.float64]]]]:
+    ) -> dict[str, dict[int, tuple[NDArray[np.float64], NDArray[np.float64]]]]:
         """Convert lists to arrays and return."""
-        results: Dict[
-            str, Dict[int, Tuple[NDArray[np.float64], NDArray[np.float64]]]
+        results: dict[
+            str, dict[int, tuple[NDArray[np.float64], NDArray[np.float64]]]
         ] = {}
 
         for trace_name in self.samples:

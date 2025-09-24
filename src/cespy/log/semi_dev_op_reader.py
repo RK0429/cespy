@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 # -------------------------------------------------------------------------------
 #
@@ -23,18 +22,16 @@
 LTSpice log file."""
 
 import re
-from typing import Dict, List, Union
 
 # Core imports
 from ..core import patterns as core_patterns
-
 from ..utils.detect_encoding import detect_encoding
 
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-nested-blocks
 def op_log_reader(
     filename: str,
-) -> Dict[str, Dict[str, Dict[str, Union[float, str]]]]:
+) -> dict[str, dict[str, dict[str, float | str]]]:
     """This function is exclusively dedicated to retrieving operation point parameters
     of Semiconductor Devices. This is handled separately from the main LogReader class
     because of its specialization and therefore not judged to be of interest to the
@@ -140,15 +137,15 @@ def op_log_reader(
     :return: Dictionary containing the information as described above.
     :rtype: dict
     """
-    dataset: Dict[str, Dict[str, Dict[str, Union[float, str]]]] = {}
+    dataset: dict[str, dict[str, dict[str, float | str]]] = {}
     is_title = core_patterns.SECTION_TITLE_PATTERN
     encoding = detect_encoding(filename)
 
-    with open(filename, "r", encoding=encoding) as log:
-        where: Union[str, None] = None
+    with open(filename, encoding=encoding) as log:
+        where: str | None = None
         n_devices = 0
         line = None
-        devices: List[str] = []
+        devices: list[str] = []
 
         for line in log:
             if line.startswith("Semiconductor Device Operating Points:"):
@@ -182,19 +179,18 @@ def op_log_reader(
                             ):  # Ensure where is not None before using lower()
                                 for dev in cols[1:]:
                                     dataset[where.lower()][dev] = {}
-                        else:
-                            if (
-                                n_devices > 0
-                                and len(cols) == (n_devices + 1)
-                                and where is not None
-                            ):
-                                param = cols[0].rstrip(":")
-                                for i, val in enumerate(cols[1:]):
-                                    try:
-                                        value: Union[float, str] = float(val)
-                                    except ValueError:
-                                        value = val
-                                    dataset[where.lower()][devices[i]][param] = value
+                        elif (
+                            n_devices > 0
+                            and len(cols) == (n_devices + 1)
+                            and where is not None
+                        ):
+                            param = cols[0].rstrip(":")
+                            for i, val in enumerate(cols[1:]):
+                                try:
+                                    value: float | str = float(val)
+                                except ValueError:
+                                    value = val
+                                dataset[where.lower()][devices[i]][param] = value
 
     return dataset
 

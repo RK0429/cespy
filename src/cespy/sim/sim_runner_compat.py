@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Compatibility layer for transitioning from SimRunner to SimRunnerRefactored.
 
 This module provides a drop-in replacement for the original SimRunner that uses
@@ -8,7 +7,7 @@ the refactored implementation while maintaining full backward compatibility.
 
 import warnings
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from .sim_runner import SimRunner as OriginalSimRunner
 from .sim_runner_refactored import SimRunnerRefactored
@@ -139,7 +138,7 @@ class SimRunner(SimRunnerRefactored):
         self._result_collector.export_to_csv(Path(filepath))
 
     # Override methods that need special handling
-    def run(self, *args: Any, **kwargs: Any) -> Optional[Any]:
+    def run(self, *args: Any, **kwargs: Any) -> Any | None:
         """Run simulation with backward compatibility."""
         # Handle old-style arguments
         if args and not kwargs.get("netlist"):

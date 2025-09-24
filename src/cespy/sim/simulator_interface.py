@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Enhanced simulator interface for standardized SPICE simulator interactions.
 
 This module provides an improved abstract base class for simulators with:
@@ -13,7 +12,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class SimulatorStatus(Enum):
@@ -33,8 +32,8 @@ class SimulatorInfo:
     version: str
     executable_path: Path
     status: SimulatorStatus
-    library_paths: List[Path]
-    supported_analyses: List[str]
+    library_paths: list[Path]
+    supported_analyses: list[str]
     max_threads: int = 1
 
     def __str__(self) -> str:
@@ -46,13 +45,13 @@ class SimulatorInfo:
 class SimulationCommand:
     """Encapsulates a simulation command with all necessary parameters."""
 
-    executable: List[str]
-    arguments: List[str]
-    environment: Dict[str, str]
+    executable: list[str]
+    arguments: list[str]
+    environment: dict[str, str]
     working_directory: Path
-    timeout: Optional[float] = None
+    timeout: float | None = None
 
-    def to_command_list(self) -> List[str]:
+    def to_command_list(self) -> list[str]:
         """Convert to a command list for subprocess execution."""
         return self.executable + self.arguments
 
@@ -67,8 +66,8 @@ class ISimulator(ABC):
 
     # Class attributes to be overridden by implementations
     simulator_name: str = ""
-    supported_platforms: List[str] = ["windows", "linux", "darwin"]
-    supported_analyses: List[str] = []
+    supported_platforms: list[str] = ["windows", "linux", "darwin"]
+    supported_analyses: list[str] = []
     default_timeout: float = 300.0
 
     @abstractmethod
@@ -107,8 +106,8 @@ class ISimulator(ABC):
     def prepare_command(
         self,
         netlist: Path,
-        options: Optional[Dict[str, Any]] = None,
-        raw_switches: Optional[List[str]] = None,
+        options: dict[str, Any] | None = None,
+        raw_switches: list[str] | None = None,
     ) -> SimulationCommand:
         """Prepare command line for execution.
 
@@ -129,7 +128,7 @@ class ISimulator(ABC):
         pass
 
     @abstractmethod
-    def parse_arguments(self, args: List[str]) -> Dict[str, Any]:
+    def parse_arguments(self, args: list[str]) -> dict[str, Any]:
         """Parse command-line arguments into structured options.
 
         This method provides the reverse of prepare_command, allowing
@@ -147,8 +146,8 @@ class ISimulator(ABC):
     def create_netlist(
         self,
         schematic: Path,
-        output_path: Optional[Path] = None,
-        options: Optional[Dict[str, Any]] = None,
+        output_path: Path | None = None,
+        options: dict[str, Any] | None = None,
     ) -> Path:
         """Create a netlist from a schematic file.
 
@@ -167,7 +166,7 @@ class ISimulator(ABC):
         pass
 
     @abstractmethod
-    def get_default_options(self) -> Dict[str, Any]:
+    def get_default_options(self) -> dict[str, Any]:
         """Get default simulation options for this simulator.
 
         Returns:
@@ -176,7 +175,7 @@ class ISimulator(ABC):
         pass
 
     @abstractmethod
-    def validate_options(self, options: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    def validate_options(self, options: dict[str, Any]) -> tuple[bool, list[str]]:
         """Validate simulation options.
 
         Args:
@@ -198,7 +197,7 @@ class ISimulator(ABC):
         """
         return analysis_type.lower() in [a.lower() for a in self.supported_analyses]
 
-    def get_library_paths(self) -> List[Path]:
+    def get_library_paths(self) -> list[Path]:
         """Get default library search paths for this simulator.
 
         Returns:

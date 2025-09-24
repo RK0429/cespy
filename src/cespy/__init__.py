@@ -8,8 +8,9 @@ tools for circuit editing, simulation management, and result analysis.
 # Add top-level version and imports for key simulator classes
 __version__ = "0.1.0"
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from cespy.editor.asc_editor import AscEditor
 from cespy.editor.spice_editor import SpiceCircuit, SpiceEditor
@@ -25,35 +26,35 @@ from .simulators.qspice_simulator import Qspice
 from .simulators.xyce_simulator import XyceSimulator
 
 __all__ = [
+    "AscEditor",
+    "LTSpiceLogReader",
     "LTspice",
     "NGspiceSimulator",
     "Qspice",
-    "XyceSimulator",
-    "AscEditor",
-    "SpiceEditor",
-    "SpiceCircuit",
-    "SimRunner",
-    "LTSpiceLogReader",
     "RawRead",
-    "SpiceReadException",
     "RawWrite",
+    "SimRunner",
+    "SpiceCircuit",
+    "SpiceEditor",
+    "SpiceReadException",
     "Trace",
+    "XyceSimulator",
 ]
 
 
 def simulate(  # pylint: disable=too-many-arguments,too-many-locals
-    circuit: Union[str, Path, Any],
+    circuit: str | Path | Any,
     engine: str = "ltspice",
     *,
     parallel_sims: int = 4,
     timeout: float = 600.0,
     verbose: bool = False,
-    output_folder: Optional[str] = None,
+    output_folder: str | None = None,
     wait_resource: bool = True,
-    callback: Optional[Callable[..., Any]] = None,
-    callback_args: Optional[Union[tuple[Any, ...], Dict[str, Any]]] = None,
-    switches: Optional[List[str]] = None,
-    run_filename: Optional[str] = None,
+    callback: Callable[..., Any] | None = None,
+    callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+    switches: list[str] | None = None,
+    run_filename: str | None = None,
     exe_log: bool = False,
 ) -> SimRunner:
     """Run a simulation for a given circuit file or editor using the

@@ -6,7 +6,7 @@ organized by category to reduce duplication and improve maintainability.
 """
 
 import re
-from typing import Dict, Pattern
+from re import Pattern
 
 # Component value patterns
 COMPONENT_VALUE_PATTERN: Pattern[str] = re.compile(r'value=([^"\s]+)')
@@ -58,7 +58,7 @@ COMPLEX_NUMBER_PATTERN: Pattern[str] = re.compile(
 )
 
 # SPICE component patterns
-SPICE_PATTERNS: Dict[str, Pattern[str]] = {
+SPICE_PATTERNS: dict[str, Pattern[str]] = {
     # Behavioral source
     "B": re.compile(
         r"^(?P<designator>B§?[VI]?\w+)(?P<nodes>(\s+\S+){2})\s+(?P<value>.*)$"

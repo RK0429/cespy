@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Adapter to bridge the new simulator interface with existing implementations.
 
 This module provides an adapter class that allows existing Simulator subclasses
@@ -9,18 +8,18 @@ enabling the use of enhanced features.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
+from ..core import constants as core_constants
+from ..exceptions import SimulatorNotInstalledError
 from .simulator import Simulator
 from .simulator_interface import (
     ISimulator,
+    SimulationCommand,
     SimulatorInfo,
     SimulatorStatus,
-    SimulationCommand,
 )
 from .simulator_locator import SimulatorLocator
-from ..core import constants as core_constants
-from ..exceptions import SimulatorNotInstalledError
 
 _logger = logging.getLogger("cespy.SimulatorAdapter")
 
@@ -32,7 +31,7 @@ class SimulatorAdapter(ISimulator):
     backward compatibility with existing code.
     """
 
-    def __init__(self, simulator_class: Type[Simulator], simulator_type: str):
+    def __init__(self, simulator_class: type[Simulator], simulator_type: str):
         """Initialize adapter with an existing simulator class.
 
         Args:
@@ -96,8 +95,8 @@ class SimulatorAdapter(ISimulator):
     def prepare_command(
         self,
         netlist: Path,
-        options: Optional[Dict[str, Any]] = None,
-        raw_switches: Optional[List[str]] = None,
+        options: dict[str, Any] | None = None,
+        raw_switches: list[str] | None = None,
     ) -> SimulationCommand:
         """Prepare command line for execution."""
         # Get base executable
@@ -109,9 +108,7 @@ class SimulatorAdapter(ISimulator):
         # Add simulator-specific flags
         if self.simulator_name == core_constants.Simulators.LTSPICE:
             arguments.extend(["-Run", "-b", str(netlist)])
-        elif self.simulator_name == core_constants.Simulators.NGSPICE:
-            arguments.extend(["-b", str(netlist)])
-        elif self.simulator_name == core_constants.Simulators.QSPICE:
+        elif self.simulator_name == core_constants.Simulators.NGSPICE or self.simulator_name == core_constants.Simulators.QSPICE:
             arguments.extend(["-b", str(netlist)])
         elif self.simulator_name == core_constants.Simulators.XYCE:
             arguments.append(str(netlist))
@@ -127,7 +124,7 @@ class SimulatorAdapter(ISimulator):
             arguments.extend(raw_switches)
 
         # Prepare environment
-        environment: Dict[str, str] = {}
+        environment: dict[str, str] = {}
 
         return SimulationCommand(
             executable=executable,
@@ -137,9 +134,9 @@ class SimulatorAdapter(ISimulator):
             timeout=options.get("timeout") if options else None,
         )
 
-    def parse_arguments(self, args: List[str]) -> Dict[str, Any]:
+    def parse_arguments(self, args: list[str]) -> dict[str, Any]:
         """Parse command-line arguments into structured options."""
-        options: Dict[str, Any] = {}
+        options: dict[str, Any] = {}
 
         # Simple parsing for common flags
         i = 0
@@ -165,8 +162,8 @@ class SimulatorAdapter(ISimulator):
     def create_netlist(
         self,
         schematic: Path,
-        output_path: Optional[Path] = None,
-        options: Optional[Dict[str, Any]] = None,
+        output_path: Path | None = None,
+        options: dict[str, Any] | None = None,
     ) -> Path:
         """Create a netlist from a schematic file."""
         if hasattr(self.simulator_class, "create_netlist"):
@@ -179,7 +176,7 @@ class SimulatorAdapter(ISimulator):
             f"{self.simulator_name} does not support netlist creation from schematics"
         )
 
-    def get_default_options(self) -> Dict[str, Any]:
+    def get_default_options(self) -> dict[str, Any]:
         """Get default simulation options for this simulator."""
         defaults = {
             "timeout": 300.0,
@@ -197,7 +194,7 @@ class SimulatorAdapter(ISimulator):
 
         return defaults
 
-    def validate_options(self, options: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    def validate_options(self, options: dict[str, Any]) -> tuple[bool, list[str]]:
         """Validate simulation options."""
         errors = []
 
@@ -225,7 +222,7 @@ class SimulatorAdapter(ISimulator):
                 try:
                     self.simulator_class.valid_switch(key, value)
                 except (ValueError, TypeError, AttributeError) as e:
-                    errors.append(f"Invalid option {key}: {str(e)}")
+                    errors.append(f"Invalid option {key}: {e!s}")
 
         return len(errors) == 0, errors
 

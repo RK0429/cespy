@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Visualization helpers for circuit simulation analysis results.
 
 This module provides utilities for creating plots and visualizations from
@@ -9,7 +8,7 @@ and statistical summaries.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -45,7 +44,7 @@ class AnalysisVisualizer:
     """Visualization helper for analysis results."""
 
     def __init__(
-        self, style: str = "seaborn-v0_8", figsize: Tuple[int, int] = (10, 6)
+        self, style: str = "seaborn-v0_8", figsize: tuple[int, int] = (10, 6)
     ) -> None:
         """Initialize visualizer.
 
@@ -70,10 +69,10 @@ class AnalysisVisualizer:
         self,
         analysis: StatisticalAnalysis,
         measurement_name: str,
-        bins: Union[int, str] = "auto",
+        bins: int | str = "auto",
         density: bool = True,
         show_stats: bool = True,
-        save_path: Optional[Union[str, Path]] = None,
+        save_path: str | Path | None = None,
         **kwargs: Any,
     ) -> Figure:
         """Create histogram plot for a measurement.
@@ -172,9 +171,9 @@ class AnalysisVisualizer:
     def plot_scatter_matrix(
         self,
         analysis: StatisticalAnalysis,
-        measurement_names: List[str],
+        measurement_names: list[str],
         show_correlation: bool = True,
-        save_path: Optional[Union[str, Path]] = None,
+        save_path: str | Path | None = None,
         **kwargs: Any,
     ) -> Figure:
         """Create scatter plot matrix for multiple measurements.
@@ -226,7 +225,7 @@ class AnalysisVisualizer:
 
         # Get correlation matrix if requested
         corr_matrix = np.array([[]])
-        valid_names: List[str] = []
+        valid_names: list[str] = []
         if show_correlation:
             corr_matrix, valid_names = analysis.get_correlation_matrix(
                 measurement_names
@@ -314,7 +313,7 @@ class AnalysisVisualizer:
         analysis: StatisticalAnalysis,
         measurement_name: str,
         window_size: int = 100,
-        save_path: Optional[Union[str, Path]] = None,
+        save_path: str | Path | None = None,
         **kwargs: Any,
     ) -> Figure:
         """Plot convergence of statistics over simulation runs.
@@ -405,7 +404,7 @@ class AnalysisVisualizer:
         analysis: Any,  # Parametric analysis
         parameter_name: str,
         measurement_name: str,
-        save_path: Optional[Union[str, Path]] = None,
+        save_path: str | Path | None = None,
         **kwargs: Any,
     ) -> Figure:
         """Plot measurement vs parameter for sensitivity analysis.
@@ -499,8 +498,8 @@ class AnalysisVisualizer:
     def create_analysis_report(
         self,
         analysis: StatisticalAnalysis,
-        measurement_names: List[str],
-        output_dir: Union[str, Path],
+        measurement_names: list[str],
+        output_dir: str | Path,
         report_name: str = "analysis_report",
     ) -> Path:
         """Create a comprehensive analysis report with multiple plots.
@@ -633,7 +632,7 @@ class AnalysisVisualizer:
         return index_file
 
 
-def check_plotting_availability() -> Dict[str, bool]:
+def check_plotting_availability() -> dict[str, bool]:
     """Check availability of plotting libraries.
 
     Returns:
@@ -646,8 +645,8 @@ def check_plotting_availability() -> Dict[str, bool]:
 
 
 def create_simple_histogram(
-    values: List[float], title: str = "Histogram"
-) -> Optional[Figure]:
+    values: list[float], title: str = "Histogram"
+) -> Figure | None:
     """Create a simple histogram without analysis dependencies.
 
     Args:

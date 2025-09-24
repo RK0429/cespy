@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # -------------------------------------------------------------------------------
 #
 #  ███████╗██████╗ ██╗ ██████╗███████╗██╗     ██╗██████╗
@@ -46,24 +45,16 @@ import logging
 import os
 import re
 from collections import OrderedDict
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from re import Match
 from typing import (
     IO,
     Any,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Match,
-    Optional,
-    Tuple,
-    Type,
-    Union,
 )
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
+from ..core import constants as core_constants, patterns as core_patterns
 from ..exceptions import FileFormatError
 
 # Module imports
@@ -123,7 +114,7 @@ lib_inc_regex = core_patterns.LIB_INC_PATTERN
 # LibSearchPaths = []
 
 
-def get_line_command(line: Union[str, "SpiceCircuit"]) -> str:
+def get_line_command(line: str | SpiceCircuit) -> str:
     """Retrives the type of SPICE command in the line.
 
     Starts by removing the leading spaces and the evaluates if it is a comment, a
@@ -266,7 +257,7 @@ class SpiceComponent(Component):
         return str(self.attributes["value"])
 
     @value_str.setter
-    def value_str(self, value: Union[str, int, float]) -> None:
+    def value_str(self, value: str | int | float) -> None:
         # docstring inherited from Component
         if self.parent.is_read_only():
             raise ValueError("Editor is read-only")
@@ -327,7 +318,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
     """
 
     netlist_file: Path
-    simulator_lib_paths: List[str] = LTspice.get_default_library_paths()
+    simulator_lib_paths: list[str] = LTspice.get_default_library_paths()
     """This is initialised with typical locations found for LTspice. You can (and
     should, if you use wine), call `prepare_for_simulator()` once you've set the
     executable paths. This is a class variable, so it will be shared between all
@@ -336,11 +327,11 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
     :meta hide-value:
     """
 
-    def __init__(self, parent: Optional["SpiceCircuit"] = None) -> None:
+    def __init__(self, parent: SpiceCircuit | None = None) -> None:
         super().__init__()
-        self.netlist: List[Any] = []
+        self.netlist: list[Any] = []
         self._readonly = False
-        self.modified_subcircuits: dict[str, "SpiceCircuit"] = {}
+        self.modified_subcircuits: dict[str, SpiceCircuit] = {}
         self.parent = parent
         # Default encoding to handle file operations
         self.encoding = core_constants.Encodings.UTF8
@@ -426,7 +417,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
                         # pylint: enable=protected-access
                 f.write(command)
 
-    def _get_param_named(self, param_name: str) -> Tuple[int, Optional[Match[str]]]:
+    def _get_param_named(self, param_name: str) -> tuple[int, Match[str] | None]:
         """Internal function.
 
         Do not use. Returns a line starting with command and matching the search with
@@ -454,7 +445,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
             None,
         )  # If it fails, it returns an invalid line number and No match
 
-    def get_all_parameter_names(self, param: str = "") -> List[str]:
+    def get_all_parameter_names(self, param: str = "") -> list[str]:
         # docstring inherited from BaseEditor
         param_names = []
         search_expression = re.compile(PARAM_REGEX(r"\w+"), re.IGNORECASE)
@@ -467,20 +458,20 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
                     param_names.append(param_name.upper())
         return sorted(param_names)
 
-    def get_subcircuit_names(self) -> List[str]:
+    def get_subcircuit_names(self) -> list[str]:
         """Returns a list of the names of the sub-circuits in the netlist.
 
         :return: list of sub-circuit names
         :rtype: List[str]
         """
 
-        subckt_names: List[str] = []
+        subckt_names: list[str] = []
         for line in self.netlist:
             if isinstance(line, SpiceCircuit):
                 subckt_names.append(line.name())
         return subckt_names
 
-    def get_subcircuit_named(self, name: str) -> Optional["SpiceCircuit"]:
+    def get_subcircuit_named(self, name: str) -> SpiceCircuit | None:
         """Returns the sub-circuit object with the given name.
 
         :param name: name of the subcircuit
@@ -497,7 +488,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
             return self.parent.get_subcircuit_named(name)
         return None
 
-    def get_subcircuit(self, reference: str) -> "SpiceCircuit":
+    def get_subcircuit(self, reference: str) -> SpiceCircuit:
         """Returns an object representing a Subcircuit. This object can manipulate
         elements such as the SpiceEditor does.
 
@@ -550,7 +541,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         # The search was not successful
         raise ComponentNotFoundError(f'Sub-circuit "{subcircuit_name}" not found')
 
-    def _get_component_line_and_regex(self, reference: str) -> Tuple[int, Match[str]]:
+    def _get_component_line_and_regex(self, reference: str) -> tuple[int, Match[str]]:
         """Internal function.
 
         Do not use.
@@ -676,7 +667,6 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         elif hasattr(self, "netlist_file") and self.netlist_file.exists():
             with open(
                 self.netlist_file,
-                "r",
                 encoding=self.encoding,
                 errors="replace",
             ) as f:
@@ -690,7 +680,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         elif hasattr(self, "netlist_file"):
             _logger.error("Netlist file not found: %s", self.netlist_file)
 
-    def clone(self, **kwargs: Any) -> "SpiceCircuit":
+    def clone(self, **kwargs: Any) -> SpiceCircuit:
         """Creates a new copy of the SpiceCircuit. Changes done at the new copy do not
         affect the original.
 
@@ -706,7 +696,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
             "***** SpiceEditor Manipulated this sub-circuit ****" + END_LINE_TERM,
         )
         clone.netlist.append("***** ENDS SpiceEditor ****" + END_LINE_TERM)
-        new_name = kwargs.get("new_name", None)
+        new_name = kwargs.get("new_name")
         if new_name is not None:
             clone.setname(new_name)
         return clone
@@ -916,7 +906,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         return {}
 
     def set_component_parameters(
-        self, element: str, **kwargs: Union[str, int, float]
+        self, element: str, **kwargs: str | int | float
     ) -> None:
         # docstring inherited from BaseEditor
         if self.is_read_only():
@@ -938,7 +928,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
             return str(match.group("value"))
         raise ParameterNotFoundError(param)
 
-    def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
+    def set_parameter(self, param: str, value: str | int | float) -> None:
         """Sets the value of a parameter in the netlist. If the parameter is not found,
         it is added to the netlist.
 
@@ -983,7 +973,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
                 f".PARAM {param}={value_str}  ; Batch instruction" + END_LINE_TERM,
             )
 
-    def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
+    def set_component_value(self, device: str, value: str | int | float) -> None:
         """Changes the value of a component, such as a Resistor, Capacitor or Inductor.
         For components inside sub-circuits, use the sub-circuit designator prefix with
         ':' as separator (Example X1:R1).
@@ -1050,7 +1040,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
             return str(component.attributes.get("model", ""))
         return str(component)
 
-    def get_component_nodes(self, reference: str) -> List[str]:
+    def get_component_nodes(self, reference: str) -> list[str]:
         """Returns the nodes to which the component is attached to.
 
         :param reference: Reference of the circuit element to get the nodes.
@@ -1065,7 +1055,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         # ports at this level
         return []
 
-    def get_components(self, prefixes: str = "*") -> List[str]:
+    def get_components(self, prefixes: str = "*") -> list[str]:
         """Returns a list of components that match the list of prefixes indicated on the
         parameter prefixes. In case prefixes is left empty, it returns all the ones that
         are defined by the REPLACE_REGEXES. The list will contain the designators of all
@@ -1078,7 +1068,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         :type prefixes: str
         :return: A list of components matching the prefixes demanded.
         """
-        answer: List[str] = []
+        answer: list[str] = []
         if prefixes == "*":
             prefixes = "".join(REPLACE_REGEXS.keys())
         for line in self.netlist:
@@ -1163,13 +1153,13 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         """
         SpiceCircuit.set_custom_library_paths(*paths)
 
-    def get_all_nodes(self) -> List[str]:
+    def get_all_nodes(self) -> list[str]:
         """Retrieves all nodes existing on a Netlist.
 
         :returns: Circuit Nodes
         :rtype: list[str]
         """
-        circuit_nodes: List[str] = []
+        circuit_nodes: list[str] = []
         for line in self.netlist:
             prefix = get_line_command(line)
             if prefix in component_replace_regexs:
@@ -1182,7 +1172,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
                             circuit_nodes.append(node)
         return circuit_nodes
 
-    def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
+    def save_netlist(self, run_netlist_file: str | Path) -> None:
         # docstring is in the parent class
         # SpiceCircuit objects are only used as subcircuits within a parent netlist
         # They don't save themselves directly to files
@@ -1296,7 +1286,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
         return self._readonly
 
     @staticmethod
-    def find_subckt_in_lib(library: str, subckt_name: str) -> Optional["SpiceCircuit"]:
+    def find_subckt_in_lib(library: str, subckt_name: str) -> SpiceCircuit | None:
         """Finds a sub-circuit in a library. The search is case-insensitive.
 
         :param library: path to the library to search
@@ -1337,7 +1327,7 @@ class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
 
     def find_subckt_in_included_libs(
         self, subcircuit_name: str
-    ) -> Optional["SpiceCircuit"]:
+    ) -> SpiceCircuit | None:
         """Find the subcircuit in the list of libraries.
 
         :param subckt_name: sub-circuit to search for
@@ -1402,13 +1392,13 @@ class SpiceEditor(SpiceCircuit):
     :type create_blank: bool, optional
     """
 
-    simulation_command_update_functions: Dict[
-        str, Callable[[str, Union[str, int, float]], str]
+    simulation_command_update_functions: dict[
+        str, Callable[[str, str | int | float], str]
     ] = {}
 
     def __init__(
         self,
-        netlist_file: Union[str, Path],
+        netlist_file: str | Path,
         encoding: str = "autodetect",
         create_blank: bool = False,
     ) -> None:
@@ -1418,16 +1408,15 @@ class SpiceEditor(SpiceCircuit):
             # when user want to create a blank netlist file, and didn't set
             # encoding.
             self.encoding = core_constants.Encodings.UTF8
+        elif encoding == "autodetect":
+            try:
+                self.encoding = detect_encoding(
+                    self.netlist_file, r"^\*"
+                )  # Normally the file will start with a '*'
+            except EncodingDetectError as err:
+                raise err
         else:
-            if encoding == "autodetect":
-                try:
-                    self.encoding = detect_encoding(
-                        self.netlist_file, r"^\*"
-                    )  # Normally the file will start with a '*'
-                except EncodingDetectError as err:
-                    raise err
-            else:
-                self.encoding = encoding
+            self.encoding = encoding
         self.reset_netlist(create_blank)
 
     @property
@@ -1529,7 +1518,7 @@ class SpiceEditor(SpiceCircuit):
         """
         self.remove_Xinstruction(search_pattern)
 
-    def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
+    def save_netlist(self, run_netlist_file: str | Path) -> None:
         # docstring is in the parent class
         if isinstance(run_netlist_file, str):
             run_netlist_file = Path(run_netlist_file)
@@ -1570,7 +1559,6 @@ class SpiceEditor(SpiceCircuit):
         elif hasattr(self, "netlist_file") and self.netlist_file.exists():
             with open(
                 self.netlist_file,
-                "r",
                 encoding=self.encoding,
                 errors="replace",
             ) as f:
@@ -1587,11 +1575,11 @@ class SpiceEditor(SpiceCircuit):
     def run(
         self,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[Any], Callable[[Path, Path], Any]]] = None,
-        timeout: Optional[float] = None,
+        callback: type[Any] | Callable[[Path, Path], Any] | None = None,
+        timeout: float | None = None,
         *,
-        run_filename: Optional[str] = None,
-        simulator: Optional[Any] = None,
+        run_filename: str | None = None,
+        simulator: Any | None = None,
     ) -> Any:
         """.. deprecated:: 1.0 Use the `run` method from the `SimRunner` class instead.
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """QSpice simulator implementation for cespy.
 
 This module provides the Qspice class which implements the Simulator interface
@@ -30,12 +29,10 @@ import subprocess
 # -------------------------------------------------------------------------------
 import sys
 from pathlib import Path
-from typing import IO, Any, List, Optional, Union
+from typing import IO, Any
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import paths as core_paths
-
+from ..core import constants as core_constants, paths as core_paths
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
 _logger = logging.getLogger("cespy.QSpiceSimulator")
@@ -180,12 +177,12 @@ class Qspice(Simulator):
     @classmethod
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
-        netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[Union[list[Any], str]] = None,
-        timeout: Optional[float] = None,
+        netlist_file: str | Path,
+        cmd_line_switches: list[Any] | str | None = None,
+        timeout: float | None = None,
         *,
-        stdout: Optional[IO[Any]] = None,
-        stderr: Optional[IO[Any]] = None,
+        stdout: IO[Any] | None = None,
+        stderr: IO[Any] | None = None,
         exe_log: bool = False,
     ) -> int:
         """Executes a Qspice simulation run.
@@ -267,12 +264,12 @@ class Qspice(Simulator):
     @classmethod
     def create_netlist(
         cls,
-        circuit_file: Union[str, Path],
-        cmd_line_switches: Optional[List[Any]] = None,
-        timeout: Optional[float] = None,
+        circuit_file: str | Path,
+        cmd_line_switches: list[Any] | None = None,
+        timeout: float | None = None,
         *,
-        stdout: Optional[Any] = None,
-        stderr: Optional[Any] = None,
+        stdout: Any | None = None,
+        stderr: Any | None = None,
         exe_log: bool = False,
     ) -> Path:
         """Create netlist (not supported by Qspice)."""

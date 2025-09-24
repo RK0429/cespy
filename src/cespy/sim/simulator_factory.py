@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Factory for creating simulator instances with automatic detection and configuration.
 
 This module provides a factory pattern implementation for creating simulator
@@ -8,21 +7,19 @@ instances, with support for automatic detection, custom paths, and validation.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Type, Union
 
 # Core imports
 from ..core import constants as core_constants
-from ..exceptions import SimulatorNotFoundError, InvalidSimulatorError
+from ..exceptions import InvalidSimulatorError, SimulatorNotFoundError
 
 # Import simulator implementations
 from ..simulators.ltspice_simulator import LTspice
 from ..simulators.ngspice_simulator import NGspiceSimulator
 from ..simulators.qspice_simulator import Qspice
 from ..simulators.xyce_simulator import XyceSimulator
-
+from .simulator import Simulator
 from .simulator_interface import SimulatorInfo, SimulatorStatus
 from .simulator_locator import SimulatorLocator
-from .simulator import Simulator
 
 _logger = logging.getLogger("cespy.SimulatorFactory")
 
@@ -31,7 +28,7 @@ class SimulatorFactory:
     """Factory for creating and configuring simulator instances."""
 
     # Registry of simulator implementations
-    SIMULATOR_REGISTRY: Dict[str, Type[Simulator]] = {
+    SIMULATOR_REGISTRY: dict[str, type[Simulator]] = {
         core_constants.Simulators.LTSPICE: LTspice,
         core_constants.Simulators.NGSPICE: NGspiceSimulator,
         core_constants.Simulators.QSPICE: Qspice,
@@ -39,13 +36,13 @@ class SimulatorFactory:
     }
 
     # Cache for created simulator instances
-    _simulator_cache: Dict[str, Simulator] = {}
+    _simulator_cache: dict[str, Simulator] = {}
 
     @classmethod
     def create(
         cls,
         simulator_type: str,
-        custom_path: Optional[Union[str, Path]] = None,
+        custom_path: str | Path | None = None,
         validate: bool = True,
         use_cache: bool = True,
     ) -> Simulator:
@@ -129,7 +126,7 @@ class SimulatorFactory:
         return simulator_instance
 
     @classmethod
-    def detect_all(cls) -> Dict[str, SimulatorInfo]:
+    def detect_all(cls) -> dict[str, SimulatorInfo]:
         """Detect all available simulators on the system.
 
         Returns:
@@ -170,7 +167,7 @@ class SimulatorFactory:
 
     @classmethod
     def create_from_path(
-        cls, executable_path: Union[str, Path], simulator_type: Optional[str] = None
+        cls, executable_path: str | Path, simulator_type: str | None = None
     ) -> Simulator:
         """Create a simulator from a specific executable path.
 
@@ -197,7 +194,7 @@ class SimulatorFactory:
         return cls.create(simulator_type, custom_path=path, validate=True)
 
     @classmethod
-    def _detect_type_from_path(cls, path: Path) -> Optional[str]:
+    def _detect_type_from_path(cls, path: Path) -> str | None:
         """Detect simulator type from executable path.
 
         Args:
@@ -223,7 +220,7 @@ class SimulatorFactory:
         return None
 
     @classmethod
-    def _get_supported_analyses(cls, simulator_type: str) -> List[str]:
+    def _get_supported_analyses(cls, simulator_type: str) -> list[str]:
         """Get supported analysis types for a simulator.
 
         Args:

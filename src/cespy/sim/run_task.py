@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 # -------------------------------------------------------------------------------
 #
@@ -25,9 +24,10 @@ __copyright__ = "Copyright 2023, Fribourg Switzerland"
 import logging
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
 from time import sleep
-from typing import Any, Callable, Optional, Tuple, Type, Union
+from typing import Any
 
 from .process_callback import ProcessCallback
 from .simulator import Simulator
@@ -76,32 +76,32 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
     """This is an internal Class and should not be used directly by the User."""
 
     # Instance variable annotations for type checking
-    start_time: Optional[float]
-    stop_time: Optional[float]
+    start_time: float | None
+    stop_time: float | None
     verbose: bool
     switches: Any
-    timeout: Optional[float]
-    simulator: Type[Simulator]
+    timeout: float | None
+    simulator: type[Simulator]
     runno: int
     netlist_file: Path
     callback: Any
-    callback_args: Optional[dict[str, Any]]
+    callback_args: dict[str, Any] | None
     retcode: int
-    raw_file: Optional[Path]
-    log_file: Optional[Path]
+    raw_file: Path | None
+    log_file: Path | None
     callback_return: Any
     exe_log: bool
     logger: Any
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
-        simulator: Type[Simulator],
+        simulator: type[Simulator],
         runno: int,
         netlist_file: Path,
         callback: Any,
-        callback_args: Optional[dict[str, Any]] = None,
+        callback_args: dict[str, Any] | None = None,
         switches: Any = None,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         verbose: bool = False,
         exe_log: bool = False,
     ) -> None:
@@ -211,18 +211,17 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
                             )
                         else:
                             return_or_process = self.callback(raw_str, log_str)
+                    # Function callback uses Path parameters
+                    elif self.callback_args is not None:
+                        return_or_process = self.callback(
+                            self.raw_file,
+                            self.log_file,
+                            **self.callback_args,
+                        )
                     else:
-                        # Function callback uses Path parameters
-                        if self.callback_args is not None:
-                            return_or_process = self.callback(
-                                self.raw_file,
-                                self.log_file,
-                                **self.callback_args,
-                            )
-                        else:
-                            return_or_process = self.callback(
-                                self.raw_file, self.log_file
-                            )
+                        return_or_process = self.callback(
+                            self.raw_file, self.log_file
+                        )
                     try:
                         if isinstance(return_or_process, ProcessCallback):
                             proc = return_or_process
@@ -261,7 +260,7 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
                     self.log_file.with_suffix(".fail")
                 )
 
-    def get_results(self) -> Union[None, Any, Tuple[str, str]]:
+    def get_results(self) -> None | Any | tuple[str, str]:
         """Returns the simulation outputs if the simulation and callback function has
         already finished.
 
@@ -283,7 +282,7 @@ class RunTask:  # pylint: disable=too-many-instance-attributes
             return None
         return self.raw_file, self.log_file
 
-    def wait_results(self) -> Union[Any, Tuple[str, str]]:
+    def wait_results(self) -> Any | tuple[str, str]:
         """Waits for the completion of the task and returns a tuple with the raw and log
         files.
 

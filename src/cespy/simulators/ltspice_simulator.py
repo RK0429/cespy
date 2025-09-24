@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """LTspice simulator implementation for cespy.
 
 This module provides the LTspice class which implements the Simulator interface
@@ -30,12 +29,10 @@ import subprocess
 # -------------------------------------------------------------------------------
 import sys
 from pathlib import Path
-from typing import IO, Dict, List, Optional, Union
+from typing import IO
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import paths as core_paths
-
+from ..core import constants as core_constants, paths as core_paths
 from ..sim.simulator import Simulator, SpiceSimulatorError, run_function
 
 _logger = logging.getLogger("cespy.LTSpiceSimulator")
@@ -49,12 +46,12 @@ class LTspice(Simulator):
     """
 
     # Use default paths from core constants
-    _spice_exe_win_paths: List[str] = core_paths.get_default_simulator_paths(
+    _spice_exe_win_paths: list[str] = core_paths.get_default_simulator_paths(
         core_constants.Simulators.LTSPICE
     )
 
     # the default lib paths, as used by get_default_library_paths
-    _default_lib_paths: List[str] = [
+    _default_lib_paths: list[str] = [
         "~/AppData/Local/LTspice/lib",
         "~/Documents/LTspiceXVII/lib/",
         "~/Documents/LTspice/lib/",
@@ -64,9 +61,9 @@ class LTspice(Simulator):
     ]
 
     # defaults:
-    spice_exe: List[str] = []
+    spice_exe: list[str] = []
     process_name: str = ""
-    ltspice_args: Dict[str, List[str]] = {
+    ltspice_args: dict[str, list[str]] = {
         "-alt": ["-alt"],  # Set solver to Alternate.
         # Use ASCII.raw files. Seriously degrades program performance.
         "-ascii": ["-ascii"],
@@ -85,7 +82,7 @@ class LTspice(Simulator):
         "-SOI": ["-SOI"],  # Allow up to 7 MOSFET nodes.
         "-sync": ["-sync"],  # Update component libraries.
     }
-    _default_run_switches: List[str] = ["-Run", "-b"]
+    _default_run_switches: list[str] = ["-Run", "-b"]
 
     @classmethod
     def using_macos_native_sim(cls) -> bool:
@@ -102,7 +99,7 @@ class LTspice(Simulator):
         )
 
     @classmethod
-    def valid_switch(cls, switch: str, parameter: str = "") -> List[str]:
+    def valid_switch(cls, switch: str, parameter: str = "") -> list[str]:
         """Validate a command line switch.
 
         Available options for Windows/wine LTspice:
@@ -158,12 +155,12 @@ class LTspice(Simulator):
     @classmethod
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
-        netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[Union[List[str], str]] = None,
-        timeout: Optional[float] = None,
+        netlist_file: str | Path,
+        cmd_line_switches: list[str] | str | None = None,
+        timeout: float | None = None,
         *,
-        stdout: Optional[Union[int, IO[bytes]]] = None,
-        stderr: Optional[Union[int, IO[bytes]]] = None,
+        stdout: int | IO[bytes] | None = None,
+        stderr: int | IO[bytes] | None = None,
         exe_log: bool = False,
     ) -> int:
         """Executes a LTspice simulation run.
@@ -273,12 +270,12 @@ class LTspice(Simulator):
     @classmethod
     def create_netlist(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
-        circuit_file: Union[str, Path],
-        cmd_line_switches: Optional[Union[List[str], str]] = None,
-        timeout: Optional[float] = None,
+        circuit_file: str | Path,
+        cmd_line_switches: list[str] | str | None = None,
+        timeout: float | None = None,
         *,
-        stdout: Optional[Union[int, IO[bytes]]] = None,
-        stderr: Optional[Union[int, IO[bytes]]] = None,
+        stdout: int | IO[bytes] | None = None,
+        stderr: int | IO[bytes] | None = None,
         exe_log: bool = False,
     ) -> Path:
         """Create a netlist out of the circuit file.

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Monte Carlo simulation analysis for circuit components.
 
 This module provides classes to perform Monte Carlo simulations where component
@@ -26,17 +25,10 @@ statistical analysis of circuit behavior under component variations.
 
 import logging
 import random
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import (
     Any,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    Union,
     cast,
 )
 
@@ -82,9 +74,9 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
     def __init__(
         self,
-        circuit_file: Union[str, BaseEditor],
+        circuit_file: str | BaseEditor,
         num_runs: int = 1000,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         use_testbench_mode: bool = True,
         **kwargs: Any,
     ):
@@ -105,13 +97,13 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
         # Monte Carlo specific attributes
         self.use_testbench_mode = use_testbench_mode
-        self._current_run_params: List[Dict[str, Any]] = []
+        self._current_run_params: list[dict[str, Any]] = []
 
         # Set random seed for Random class too (for backward compatibility)
         if seed is not None:
             random.seed(seed)
 
-    def prepare_runs(self) -> List[Dict[str, Any]]:
+    def prepare_runs(self) -> list[dict[str, Any]]:
         """Prepare parameter sets for all Monte Carlo runs.
 
         Returns:
@@ -130,7 +122,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         self._current_run_params = all_params
         return all_params
 
-    def _generate_run_parameters(self, run_id: int) -> Dict[str, Any]:
+    def _generate_run_parameters(self, run_id: int) -> dict[str, Any]:
         """Generate parameters for a single run.
 
         Args:
@@ -139,7 +131,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         Returns:
             Dictionary of parameters for this run
         """
-        params: Dict[str, Any] = {"run_id": run_id}
+        params: dict[str, Any] = {"run_id": run_id}
 
         # Generate component variations
         for ref in self.get_components("*"):
@@ -159,7 +151,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
         return params
 
-    def apply_parameters(self, parameters: Dict[str, Any]) -> None:
+    def apply_parameters(self, parameters: dict[str, Any]) -> None:
         """Apply parameters to the circuit.
 
         Args:
@@ -178,7 +170,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                 param = key[6:]  # Remove "param_" prefix
                 self.editor.set_parameter(param, value)
 
-    def extract_results(self, run_task: RunTask) -> Dict[str, Any]:
+    def extract_results(self, run_task: RunTask) -> dict[str, Any]:
         """Extract measurements from a completed run.
 
         Args:
@@ -375,13 +367,13 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         *,
         runs_per_sim: int = 512,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
-        run_filename: Optional[str] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
+        run_filename: str | None = None,
         exe_log: bool = False,
-    ) -> Optional[Iterator[Any]]:
+    ) -> Iterator[Any] | None:
         """Run Monte Carlo analysis using testbench mode.
 
         This is the original method for running simulations using simulator
@@ -455,12 +447,12 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
     def run_separate_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[list[str]] = None,
-        timeout: Optional[float] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
         exe_log: bool = True,
-    ) -> List[AnalysisResult]:
+    ) -> list[AnalysisResult]:
         """Run Monte Carlo analysis with separate simulations.
 
         This method runs each simulation separately, allowing for better control
@@ -568,8 +560,8 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
     def _setup_callback_forwarding(
         self,
-        callback: Union[Type[ProcessCallback], Callable[..., Any]],
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]],
+        callback: type[ProcessCallback] | Callable[..., Any],
+        callback_args: tuple[Any, ...] | dict[str, Any] | None,
     ) -> None:
         """Set up callback forwarding for individual runs."""
         # Store original runner callback settings
@@ -582,7 +574,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         if hasattr(self.runner, "set_default_callback"):
             cast(Any, self.runner).set_default_callback(callback, callback_args)
 
-    def _process_callback_results(self, results: List[AnalysisResult]) -> None:
+    def _process_callback_results(self, results: list[AnalysisResult]) -> None:
         """Process callback results from individual runs."""
         callback_returns = []
         for result in results:
@@ -599,8 +591,8 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
     def _create_run_task(
         self,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
         exe_log: bool = True,
     ) -> RunTask:
         """Create a run task for simulation execution."""
@@ -630,7 +622,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
             verbose=exe_log,
         )
 
-    def analyse_measurement(self, meas_name: str) -> Optional[List[float]]:
+    def analyse_measurement(self, meas_name: str) -> list[float] | None:
         """Returns the measurement data for the given measurement name.
 
         If the measurement is not found, it returns None Note: It is up to the user to
@@ -662,7 +654,7 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
                     values.append(float(value))
         return values if values else None
 
-    def get_measurement_statistics(self, meas_name: str) -> Dict[str, float]:
+    def get_measurement_statistics(self, meas_name: str) -> dict[str, float]:
         """Get statistics for a measurement.
 
         This is a convenience method that combines analyse_measurement
@@ -691,25 +683,14 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
     def run_analysis(  # type: ignore[override]
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
         exe_log: bool = True,
-        measure: Optional[str] = None,
-        num_runs: Optional[int] = None,
-    ) -> Union[
-        List[AnalysisResult],
-        Optional[
-            Tuple[
-                float,
-                float,
-                Dict[str, Union[str, float]],
-                float,
-                Dict[str, Union[str, float]],
-            ]
-        ],
-    ]:
+        measure: str | None = None,
+        num_runs: int | None = None,
+    ) -> list[AnalysisResult] | tuple[float, float, dict[str, str | float], float, dict[str, str | float]] | None:
         """Run the Monte Carlo analysis.
 
         This method supports both the new BaseAnalysis interface (no args)
@@ -736,37 +717,28 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
 
             # Run separate analysis mode
             return self.run_separate_analysis()
-        else:
-            # Legacy mode - delegate to run_analysis_legacy
-            return self.run_analysis_legacy(
-                callback=callback,
-                callback_args=callback_args,
-                switches=switches,
-                timeout=timeout,
-                exe_log=exe_log,
-                measure=measure,
-                num_runs=num_runs,
-            )
+        # Legacy mode - delegate to run_analysis_legacy
+        return self.run_analysis_legacy(
+            callback=callback,
+            callback_args=callback_args,
+            switches=switches,
+            timeout=timeout,
+            exe_log=exe_log,
+            measure=measure,
+            num_runs=num_runs,
+        )
 
     # Backward compatibility methods
     def run_analysis_legacy(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[list[str]] = None,
-        timeout: Optional[float] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
         exe_log: bool = True,
-        measure: Optional[str] = None,  # pylint: disable=unused-argument
-        num_runs: Optional[int] = None,
-    ) -> Optional[
-        Tuple[
-            float,
-            float,
-            Dict[str, Union[str, float]],
-            float,
-            Dict[str, Union[str, float]],
-        ]
-    ]:
+        measure: str | None = None,  # pylint: disable=unused-argument
+        num_runs: int | None = None,
+    ) -> tuple[float, float, dict[str, str | float], float, dict[str, str | float]] | None:
         """Run Monte Carlo analysis (backward compatibility method).
 
         This method maintains backward compatibility while directing to the

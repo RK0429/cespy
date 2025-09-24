@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # pylint: disable=unnecessary-ellipsis
 """Component interface protocol for editor components.
 
@@ -8,7 +7,7 @@ must implement, ensuring consistent behavior across different editor types.
 """
 
 from abc import abstractmethod
-from typing import Any, Dict, List, Protocol, Union
+from typing import Any, Protocol
 
 
 class ComponentInterface(Protocol):
@@ -37,7 +36,7 @@ class ComponentInterface(Protocol):
         pass
 
     @abstractmethod
-    def set_value(self, value: Union[str, float]) -> None:
+    def set_value(self, value: str | float) -> None:
         """Set the component's primary value.
 
         Args:
@@ -49,7 +48,7 @@ class ComponentInterface(Protocol):
         pass
 
     @abstractmethod
-    def get_value(self) -> Union[str, float, None]:
+    def get_value(self) -> str | float | None:
         """Get the component's primary value.
 
         Returns:
@@ -58,7 +57,7 @@ class ComponentInterface(Protocol):
         pass
 
     @abstractmethod
-    def get_attributes(self) -> Dict[str, Any]:
+    def get_attributes(self) -> dict[str, Any]:
         """Get all component attributes.
 
         Returns:
@@ -95,7 +94,7 @@ class ComponentInterface(Protocol):
         pass
 
     @abstractmethod
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate the component configuration.
 
         Returns:
@@ -104,7 +103,7 @@ class ComponentInterface(Protocol):
         pass
 
     @abstractmethod
-    def get_pins(self) -> List[str]:
+    def get_pins(self) -> list[str]:
         """Get list of component pins/terminals.
 
         Returns:
@@ -113,7 +112,7 @@ class ComponentInterface(Protocol):
         pass
 
     @abstractmethod
-    def get_connected_nets(self) -> Dict[str, str]:
+    def get_connected_nets(self) -> dict[str, str]:
         """Get nets connected to each pin.
 
         Returns:

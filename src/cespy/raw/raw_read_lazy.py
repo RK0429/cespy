@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Lazy loading implementation for large raw files.
 
 This module provides a lazy-loading version of RawRead that only loads
@@ -11,13 +10,13 @@ import logging
 import mmap
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO
+from typing import Any, BinaryIO
 
 import numpy as np
 from numpy.typing import NDArray
 
-from .raw_read import RawRead, read_float32, read_float64, read_complex
-from .raw_classes import Axis, TraceRead, DummyTrace
+from .raw_classes import Axis, DummyTrace, TraceRead
+from .raw_read import RawRead, read_complex, read_float32, read_float64
 
 _logger = logging.getLogger("cespy.RawReadLazy")
 
@@ -29,7 +28,7 @@ class TraceInfo:
     name: str
     index: int
     var_type: str
-    step_info: Dict[int, Tuple[int, int]] = field(
+    step_info: dict[int, tuple[int, int]] = field(
         default_factory=dict
     )  # step -> (offset, length)
 
@@ -43,7 +42,7 @@ class LazyTrace:
         file_path: Path,
         is_complex: bool,
         is_float64: bool,
-        mmap_file: Optional[mmap.mmap] = None,
+        mmap_file: mmap.mmap | None = None,
     ) -> None:
         """Initialize lazy trace.
 
@@ -59,7 +58,7 @@ class LazyTrace:
         self.is_complex = is_complex
         self.is_float64 = is_float64
         self.mmap_file = mmap_file
-        self._cache: Dict[int, NDArray[np.float64]] = {}  # Cache loaded data by step
+        self._cache: dict[int, NDArray[np.float64]] = {}  # Cache loaded data by step
 
         # Determine data size
         if is_complex:
@@ -150,7 +149,7 @@ class LazyTrace:
 
         return data
 
-    def clear_cache(self, step: Optional[int] = None) -> None:
+    def clear_cache(self, step: int | None = None) -> None:
         """Clear cached data.
 
         Args:
@@ -178,9 +177,9 @@ class RawReadLazy(RawRead):
 
     def __init__(
         self,
-        raw_filename: Union[str, Path],
-        traces_to_read: Union[str, List[str], None] = "*",
-        dialect: Optional[str] = None,
+        raw_filename: str | Path,
+        traces_to_read: str | list[str] | None = "*",
+        dialect: str | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize lazy raw file reader.
@@ -200,12 +199,12 @@ class RawReadLazy(RawRead):
         self.file_path = Path(raw_filename)
 
         # Memory-mapped file handle
-        self.mmap_file: Optional[mmap.mmap] = None
-        self._file_handle: Optional[BinaryIO] = None
+        self.mmap_file: mmap.mmap | None = None
+        self._file_handle: BinaryIO | None = None
 
         # Lazy trace storage
-        self._lazy_traces: Dict[str, LazyTrace] = {}
-        self._trace_info: Dict[str, TraceInfo] = {}
+        self._lazy_traces: dict[str, LazyTrace] = {}
+        self._trace_info: dict[str, TraceInfo] = {}
 
         # Initialize parent with headeronly=True to avoid loading data
         kwargs["headeronly"] = True
@@ -282,8 +281,8 @@ class RawReadLazy(RawRead):
             self._lazy_traces[trace_name] = lazy_trace
 
     def get_trace(  # type: ignore[override]
-        self, trace_ref: Union[str, int]
-    ) -> Union[Axis, TraceRead, DummyTrace, LazyTrace]:
+        self, trace_ref: str | int
+    ) -> Axis | TraceRead | DummyTrace | LazyTrace:
         """Get a trace by name.
 
         Returns LazyTrace instead of TraceRead for lazy loading.
@@ -311,7 +310,7 @@ class RawReadLazy(RawRead):
         return super().get_trace(trace_ref)
 
     def get_wave(
-        self, trace_ref: Union[str, int], step: int = 0
+        self, trace_ref: str | int, step: int = 0
     ) -> NDArray[np.float64]:
         """Get waveform data for a trace.
 
@@ -339,7 +338,7 @@ class RawReadLazy(RawRead):
         return super().get_wave(trace_ref, step)
 
     def preload_traces(
-        self, trace_names: Union[str, List[str]], steps: Optional[List[int]] = None
+        self, trace_names: str | list[str], steps: list[int] | None = None
     ) -> None:
         """Preload specific traces into memory.
 
@@ -363,7 +362,7 @@ class RawReadLazy(RawRead):
                     # This will load and cache the data
                     lazy_trace.get_wave(step)
 
-    def clear_cache(self, trace_name: Optional[str] = None) -> None:
+    def clear_cache(self, trace_name: str | None = None) -> None:
         """Clear cached trace data.
 
         Args:
@@ -376,7 +375,7 @@ class RawReadLazy(RawRead):
         elif trace_name in self._lazy_traces:
             self._lazy_traces[trace_name].clear_cache()
 
-    def get_memory_usage(self) -> Dict[str, Any]:
+    def get_memory_usage(self) -> dict[str, Any]:
         """Get memory usage statistics.
 
         Returns:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Utilities for working with LTSpice files and configurations."""
 # -------------------------------------------------------------------------------
 #
@@ -20,9 +19,7 @@
 # -------------------------------------------------------------------------------
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
-
+from ..core import constants as core_constants, patterns as core_patterns
 from .base_schematic import ERotation, HorAlign, Text, VerAlign
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
@@ -97,21 +94,19 @@ def asc_text_align_get(text: Text) -> str:
     """Returns the alignment of the text in the ASC format."""
     if not text.visible:
         ans = "Invisible"
-    else:
-        if text.verticalAlignment == VerAlign.CENTER:
-            if text.textAlignment == HorAlign.RIGHT:
-                ans = "Right"
-            elif text.textAlignment == HorAlign.CENTER:
-                ans = "Center"
-            else:
-                ans = "Left"
+    elif text.verticalAlignment == VerAlign.CENTER:
+        if text.textAlignment == HorAlign.RIGHT:
+            ans = "Right"
+        elif text.textAlignment == HorAlign.CENTER:
+            ans = "Center"
         else:
-            if text.verticalAlignment == VerAlign.TOP:
-                ans = "Top"
-            elif text.verticalAlignment == VerAlign.BOTTOM:
-                ans = "Bottom"
-            else:
-                ans = "Left"
+            ans = "Left"
+    elif text.verticalAlignment == VerAlign.TOP:
+        ans = "Top"
+    elif text.verticalAlignment == VerAlign.BOTTOM:
+        ans = "Bottom"
+    else:
+        ans = "Left"
 
     if text.angle == ERotation.R90:
         ans = "V" + ans

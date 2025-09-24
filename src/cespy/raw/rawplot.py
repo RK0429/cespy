@@ -1,21 +1,18 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 """Module for plotting SPICE raw waveform data."""
 
 import argparse
 import sys
 from pathlib import Path
-from typing import List, Optional
 
 import matplotlib.pyplot as plt
-
 from cespy.raw.raw_classes import DummyTrace
 from cespy.raw.raw_read import RawRead
 
 
 def plot_traces(
-    raw_file: Path, traces: List[str], output: Optional[str] = None
+    raw_file: Path, traces: list[str], output: str | None = None
 ) -> None:
     """Plot specified traces from a raw file.
 

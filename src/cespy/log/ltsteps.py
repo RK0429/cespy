@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 """LTSpice log file parsing and analysis utilities.
 
@@ -20,13 +19,12 @@ import logging
 import os
 import os.path
 import sys
-from typing import Any, Dict, Iterator, List, Optional, TypeVar, Union
+from collections.abc import Iterator
+from typing import Any, TypeVar
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
+from ..core import constants as core_constants, patterns as core_patterns
 from ..exceptions import CespyIOError
-
 from ..utils.detect_encoding import detect_encoding
 from .logfile_data import LogfileData, try_convert_value
 
@@ -84,7 +82,7 @@ def reformat_LTSpice_export(export_file: str, tabular_file: str) -> None:
     """
     encoding = detect_encoding(export_file)
     with (
-        open(export_file, "r", encoding=encoding) as fin,
+        open(export_file, encoding=encoding) as fin,
         open(tabular_file, "w", encoding=encoding) as fout,
     ):
         headers = fin.readline()
@@ -149,15 +147,15 @@ class LTSpiceExport:  # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-locals
     def __init__(self, export_filename: str):
         self.encoding = detect_encoding(export_filename)
-        with open(export_filename, "r", encoding=self.encoding) as fin:
+        with open(export_filename, encoding=self.encoding) as fin:
             file_header = fin.readline()
 
             self.headers = file_header.split("\t")
             # Set to read header
             go_header = True
 
-            curr_dic: Dict[str, Any] = {}
-            self.dataset: Dict[str, List[Any]] = {}
+            curr_dic: dict[str, Any] = {}
+            self.dataset: dict[str, list[Any]] = {}
 
             regx = core_patterns.LTSPICE_RUN_INFO_PATTERN
             for line in fin:
@@ -242,7 +240,7 @@ class FourierData:
     dc_component: float
     phd: float  # Partial Harmonic Distortion
     thd: float  # Total Harmonic Distortion
-    harmonics: List[HarmonicData]
+    harmonics: list[HarmonicData]
     step: int
 
     @property
@@ -294,12 +292,12 @@ class LTSpiceLogReader(LogfileData):
         self,
         log_filename: str,
         read_measures: bool = True,
-        step_set: Optional[Dict[str, List[Any]]] = None,
-        encoding: Optional[str] = None,
+        step_set: dict[str, list[Any]] | None = None,
+        encoding: str | None = None,
     ):
         super().__init__(step_set)
         self.logname = log_filename
-        self.fourier: Dict[str, List[FourierData]] = {}
+        self.fourier: dict[str, list[FourierData]] = {}
         if encoding is None:
             self.encoding = detect_encoding(
                 log_filename,
@@ -322,12 +320,12 @@ class LTSpiceLogReader(LogfileData):
         regx = core_patterns.MEAS_DATA_PATTERN
 
         _logger.debug("Processing LOG file: %s", log_filename)
-        with open(log_filename, "r", encoding=self.encoding) as fin:
+        with open(log_filename, encoding=self.encoding) as fin:
             line = fin.readline()
             # init variables, just in case. Not needed really, but helps
             # debugging
-            signal: Optional[str] = None
-            n_periods: Union[int, float] = 0
+            signal: str | None = None
+            n_periods: int | float = 0
             dc_component: float = 0.0
 
             while line:
@@ -355,9 +353,9 @@ class LTSpiceLogReader(LogfileData):
                     # Skip next header line
                     fin.readline()
                     # Read Harmonics table
-                    phd: Optional[float] = None
-                    thd: Optional[float] = None
-                    harmonics: List[HarmonicData] = []
+                    phd: float | None = None
+                    thd: float | None = None
+                    harmonics: list[HarmonicData] = []
                     while True:
                         line = fin.readline().strip("\r\n")
                         if line.startswith("Total Harmonic"):
@@ -447,7 +445,7 @@ class LTSpiceLogReader(LogfileData):
                             ]  # need to be a list for compatibility
                 line = fin.readline()
 
-            meas_name: Optional[str] = None
+            meas_name: str | None = None
 
             headers = []  # Initializing an empty parameters
             measurements = []
@@ -526,8 +524,8 @@ class LTSpiceLogReader(LogfileData):
     def export_data(
         self,
         export_file: str,
-        encoding: Optional[str] = None,
-        append_with_line_prefix: Optional[str] = None,
+        encoding: str | None = None,
+        append_with_line_prefix: str | None = None,
         *,
         value_separator: str = "\t",
         line_terminator: str = "\n",

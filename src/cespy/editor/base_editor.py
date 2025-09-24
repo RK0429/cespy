@@ -1,4 +1,3 @@
-# coding=utf-8
 """Abstract base classes for SPICE netlist and schematic editors.
 
 This module provides the foundation for all editor implementations in cespy,
@@ -34,7 +33,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from math import floor, log
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any
 
 # Core imports
 from ..core import paths as core_paths
@@ -204,7 +203,7 @@ def scan_eng(value: str) -> float:
     return f
 
 
-def to_float(value: str, accept_invalid: bool = True) -> Union[float, str]:
+def to_float(value: str, accept_invalid: bool = True) -> float | str:
     """Convert a SPICE value string to float, handling SI suffixes.
 
     Args:
@@ -287,7 +286,7 @@ class ComponentNotFoundError(Exception):
     This exception is raised when a component reference is not found in the circuit.
     """
 
-    def __init__(self, component_ref: str, message: Optional[str] = None):
+    def __init__(self, component_ref: str, message: str | None = None):
         """Initialize ComponentNotFoundError.
 
         Args:
@@ -306,7 +305,7 @@ class ParameterNotFoundError(Exception):
     This exception is raised when a parameter is not found in the circuit.
     """
 
-    def __init__(self, parameter: str, message: Optional[str] = None) -> None:
+    def __init__(self, parameter: str, message: str | None = None) -> None:
         """Initialize ParameterNotFoundError.
 
         Args:
@@ -344,7 +343,7 @@ class Component(Primitive):
         super().__init__(line)
         self.reference = ""
         self.attributes: OrderedDict[str, Any] = OrderedDict()
-        self.ports: List[str] = []
+        self.ports: list[str] = []
         self.parent = parent
 
     @property
@@ -387,7 +386,7 @@ class Component(Primitive):
             raise ValueError("Editor is read-only")
         self.parent.set_component_parameters(self.reference, **param_dict)
 
-    def set_params(self, **param_dict: Union[str, int, float]) -> None:
+    def set_params(self, **param_dict: str | int | float) -> None:
         """Adds one or more parameters to the component.
 
         The argument is in the form of a key-value pair where each parameter is the key
@@ -404,7 +403,7 @@ class Component(Primitive):
         self.parent.set_component_parameters(self.reference, **param_dict)
 
     @property
-    def value(self) -> Union[float, int, str]:
+    def value(self) -> float | int | str:
         """The Value.
 
         :getter: Returns the value as a number. If the value is not a number,
@@ -414,7 +413,7 @@ class Component(Primitive):
         return to_float(self.value_str, accept_invalid=True)
 
     @value.setter
-    def value(self, value: Union[str, int, float]) -> None:
+    def value(self, value: str | int | float) -> None:
         if self.parent.is_read_only():
             raise ValueError("Editor is read-only")
         if isinstance(value, (int, float)):
@@ -455,14 +454,17 @@ class BaseEditor(ABC):
     """This defines the primitives (protocol) to be used for both SpiceEditor and
     AscEditor classes."""
 
-    custom_lib_paths: List[str] = []
+    netlist: list[str]
+    """Active SPICE netlist lines for the editor instance."""
+
+    custom_lib_paths: list[str] = []
     """The custom library paths. Not to be modified, only set via
     `set_custom_library_paths()`. This is a class variable, so it will be shared between
     all instances.
 
     :meta hide-value:
     """
-    simulator_lib_paths: List[str] = []
+    simulator_lib_paths: list[str] = []
     """This is initialised with typical locations found for your simulator. You can (and
     should, if you use wine), call `prepare_for_simulator()` once you've set the
     executable paths. This is a class variable, so it will be shared between all
@@ -486,7 +488,7 @@ class BaseEditor(ABC):
         """
 
     @abstractmethod
-    def save_netlist(self, run_netlist_file: Union[str, Path]) -> None:
+    def save_netlist(self, run_netlist_file: str | Path) -> None:
         """Saves the current state of the netlist to a file.
 
         :param run_netlist_file: File name of the netlist file.
@@ -494,7 +496,7 @@ class BaseEditor(ABC):
         :returns: Nothing
         """
 
-    def write_netlist(self, run_netlist_file: Union[str, Path]) -> None:
+    def write_netlist(self, run_netlist_file: str | Path) -> None:
         """.. deprecated:: 1.x Use `save_netlist()` instead.
 
         Writes the netlist to a file. This is an alias to save_netlist.
@@ -507,7 +509,7 @@ class BaseEditor(ABC):
         netlist."""
 
     @abstractmethod
-    def get_subcircuit(self, reference: str) -> "BaseEditor":
+    def get_subcircuit(self, reference: str) -> BaseEditor:
         """Returns a hierarchical subdesign."""
 
     def __getitem__(self, item: str) -> Component:
@@ -515,7 +517,7 @@ class BaseEditor(ABC):
         component = circuit['R1']"""
         return self.get_component(item)
 
-    def __setitem__(self, key: str, value: Union[str, int, float]) -> None:
+    def __setitem__(self, key: str, value: str | int | float) -> None:
         self.set_component_value(key, value)
 
     def get_component_attribute(self, reference: str, attribute: str) -> Any:
@@ -567,7 +569,7 @@ class BaseEditor(ABC):
         :rtype: List[str]
         """
 
-    def set_parameter(self, param: str, value: Union[str, int, float]) -> None:
+    def set_parameter(self, param: str, value: str | int | float) -> None:
         """Adds a parameter to the SPICE netlist.
 
         Usage: ::
@@ -588,7 +590,7 @@ class BaseEditor(ABC):
         :return: Nothing
         """
 
-    def set_parameters(self, **kwargs: Union[str, int, float]) -> None:
+    def set_parameters(self, **kwargs: str | int | float) -> None:
         """Adds one or more parameters to the netlist.
 
         Usage::
@@ -605,7 +607,7 @@ class BaseEditor(ABC):
             self.set_parameter(param, value)
 
     @abstractmethod
-    def set_component_value(self, device: str, value: Union[str, int, float]) -> None:
+    def set_component_value(self, device: str, value: str | int | float) -> None:
         """Changes the value of a component, such as a Resistor, Capacitor or Inductor.
         For components inside sub-circuits, use the sub-circuit designator prefix with
         ':' as separator (Example X1:R1).
@@ -651,7 +653,7 @@ class BaseEditor(ABC):
 
     @abstractmethod
     def set_component_parameters(
-        self, element: str, **kwargs: Union[str, int, float]
+        self, element: str, **kwargs: str | int | float
     ) -> None:
         """Adds one or more parameters to the component on the netlist. The argument is
         in the form of a key-value pair where each parameter is the key and the value is
@@ -731,7 +733,7 @@ class BaseEditor(ABC):
         """
         return scan_eng(self.get_component_value(element))
 
-    def set_component_values(self, **kwargs: Union[str, int, float]) -> None:
+    def set_component_values(self, **kwargs: str | int | float) -> None:
         """Adds one or more components on the netlist. The argument is in the form of a
         key-value pair where each component designator is the key and the value is value
         to be set in the netlist.
@@ -913,7 +915,7 @@ class BaseEditor(ABC):
             )
 
     @classmethod
-    def set_custom_library_paths(cls, *paths: Union[str, list[str]]) -> None:
+    def set_custom_library_paths(cls, *paths: str | list[str]) -> None:
         """Set the given library search paths to the list of directories to search when
         needed. It will delete any previous list of custom paths, but will not affect
         the default paths (be it from `init()` or from `prepare_for_simulator()`).

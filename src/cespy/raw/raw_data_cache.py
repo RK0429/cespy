@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Raw data cache for frequently accessed waveform data.
 
 This module provides caching functionality for raw file data to improve
@@ -10,9 +9,10 @@ import logging
 import pickle
 import time
 from collections import OrderedDict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -120,8 +120,8 @@ class RawDataCache:
     def __init__(
         self,
         max_size: int = 1024 * 1024 * 1024,  # 1GB default
-        policy: Optional[CachePolicy] = None,
-        persist_path: Optional[Path] = None,
+        policy: CachePolicy | None = None,
+        persist_path: Path | None = None,
     ):
         """Initialize raw data cache.
 
@@ -150,7 +150,7 @@ class RawDataCache:
             "RawDataCache initialized with %d MB limit", max_size / 1024 / 1024
         )
 
-    def get(self, key: str) -> Optional[NDArray[np.float64]]:
+    def get(self, key: str) -> NDArray[np.float64] | None:
         """Get data from cache.
 
         Args:
@@ -253,7 +253,7 @@ class RawDataCache:
         """
         return sum(entry.size_bytes for entry in self._cache.values())
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get cache statistics.
 
         Returns:
@@ -357,7 +357,7 @@ class MultiLevelCache:
         self,
         memory_size: int = 512 * 1024 * 1024,  # 512MB memory
         disk_size: int = 10 * 1024 * 1024 * 1024,  # 10GB disk
-        cache_dir: Optional[Path] = None,
+        cache_dir: Path | None = None,
     ):
         """Initialize multi-level cache.
 
@@ -376,7 +376,7 @@ class MultiLevelCache:
 
         self.disk_size = disk_size
         self._disk_usage = 0
-        self._disk_index: Dict[str, Path] = {}
+        self._disk_index: dict[str, Path] = {}
 
         # Load disk index
         self._load_disk_index()
@@ -387,7 +387,7 @@ class MultiLevelCache:
             disk_size / 1024 / 1024 / 1024,
         )
 
-    def get(self, key: str) -> Optional[NDArray[np.float64]]:
+    def get(self, key: str) -> NDArray[np.float64] | None:
         """Get data from cache (checks memory then disk).
 
         Args:

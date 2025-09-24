@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Enhanced base editor with common editing operations and new features.
 
 This module extends the BaseEditor with additional functionality including:
@@ -12,17 +11,18 @@ This module extends the BaseEditor with additional functionality including:
 
 import logging
 import re
+from abc import ABC
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any
 
 from ..exceptions import ComponentNotFoundError, ParameterNotFoundError
-from abc import ABC
-from .base_editor import BaseEditor, Component, scan_eng, format_eng
+from .base_editor import BaseEditor, Component, format_eng, scan_eng
 from .circuit_validator import CircuitValidator, ValidationResult
 from .component_factory import ComponentFactory, ComponentType
-from .schematic_differ import SchematicDiffer, SchematicDiff
+from .schematic_differ import SchematicDiff, SchematicDiffer
 
 _logger = logging.getLogger("cespy.BaseEditorEnhanced")
 
@@ -35,8 +35,8 @@ class EditOperation:
     target: str  # component ref, parameter name, or instruction
     old_value: Any = None
     new_value: Any = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    sub_operations: List["EditOperation"] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    sub_operations: list["EditOperation"] = field(default_factory=list)
 
 
 class BaseEditorEnhanced(BaseEditor, ABC):
@@ -57,7 +57,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
         # Undo/redo support
         self._undo_stack: deque[EditOperation] = deque(maxlen=100)
         self._redo_stack: deque[EditOperation] = deque(maxlen=100)
-        self._batch_operation: Optional[EditOperation] = None
+        self._batch_operation: EditOperation | None = None
 
         # Component factory and validation
         self._component_factory = ComponentFactory()
@@ -66,7 +66,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
 
         # Change tracking
         self._track_changes = False
-        self._change_listeners: List[Callable[[EditOperation], None]] = []
+        self._change_listeners: list[Callable[[EditOperation], None]] = []
 
         _logger.info("BaseEditorEnhanced initialized")
 
@@ -157,10 +157,10 @@ class BaseEditorEnhanced(BaseEditor, ABC):
 
     def replace_component_value(
         self,
-        old_value: Union[str, float],
-        new_value: Union[str, float],
-        component_types: Optional[str] = None,
-    ) -> List[str]:
+        old_value: str | float,
+        new_value: str | float,
+        component_types: str | None = None,
+    ) -> list[str]:
         """Replace all components with a specific value.
 
         Args:
@@ -196,10 +196,10 @@ class BaseEditorEnhanced(BaseEditor, ABC):
     def scale_component_values(
         self,
         scale_factor: float,
-        component_types: Optional[str] = None,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
-    ) -> List[str]:
+        component_types: str | None = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
+    ) -> list[str]:
         """Scale component values by a factor.
 
         Args:
@@ -245,8 +245,8 @@ class BaseEditorEnhanced(BaseEditor, ABC):
     def add_component_from_template(
         self,
         component_type: ComponentType,
-        name: Optional[str] = None,
-        nodes: Optional[List[str]] = None,
+        name: str | None = None,
+        nodes: list[str] | None = None,
         **attributes: Any,
     ) -> Component:
         """Add a component using the component factory.
@@ -283,9 +283,9 @@ class BaseEditorEnhanced(BaseEditor, ABC):
     def find_components_by_value(
         self,
         value_pattern: str,
-        component_types: Optional[str] = None,
+        component_types: str | None = None,
         use_regex: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Find components matching a value pattern.
 
         Args:
@@ -307,16 +307,15 @@ class BaseEditorEnhanced(BaseEditor, ABC):
                 if use_regex:
                     if re.search(value_pattern, value):
                         matches.append(comp_ref)
-                else:
-                    if value_pattern.lower() in value.lower():
-                        matches.append(comp_ref)
+                elif value_pattern.lower() in value.lower():
+                    matches.append(comp_ref)
             except (ComponentNotFoundError, NotImplementedError):
                 continue
 
         return matches
 
     def copy_component(
-        self, source_ref: str, new_ref: str, new_nodes: Optional[List[str]] = None
+        self, source_ref: str, new_ref: str, new_nodes: list[str] | None = None
     ) -> Component:
         """Copy a component with a new reference.
 
@@ -358,7 +357,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
         temp_file = Path("temp_validation.net")
         try:
             self.save_netlist(temp_file)
-            with open(temp_file, "r", encoding="utf-8") as f:
+            with open(temp_file, encoding="utf-8") as f:
                 netlist_content = f.read()
 
             result = self._validator.validate_netlist(netlist_content)
@@ -407,7 +406,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
         """Disable change tracking."""
         self._track_changes = False
 
-    def get_changes(self) -> Optional[SchematicDiff]:
+    def get_changes(self) -> SchematicDiff | None:
         """Get changes since change tracking was enabled.
 
         Returns:
@@ -439,8 +438,8 @@ class BaseEditorEnhanced(BaseEditor, ABC):
     # === Bulk Operations ===
 
     def update_components_batch(
-        self, updates: Dict[str, Union[str, Dict[str, Any]]]
-    ) -> List[str]:
+        self, updates: dict[str, str | dict[str, Any]]
+    ) -> list[str]:
         """Update multiple components in a single batch.
 
         Args:
@@ -473,7 +472,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
 
         return updated
 
-    def remove_components_by_type(self, component_type: str) -> List[str]:
+    def remove_components_by_type(self, component_type: str) -> list[str]:
         """Remove all components of a specific type.
 
         Args:
@@ -501,7 +500,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
 
     # === Analysis Helpers ===
 
-    def get_connected_components(self, node: str) -> List[str]:
+    def get_connected_components(self, node: str) -> list[str]:
         """Get all components connected to a specific node.
 
         Args:
@@ -522,13 +521,13 @@ class BaseEditorEnhanced(BaseEditor, ABC):
 
         return connected
 
-    def get_component_statistics(self) -> Dict[str, Any]:
+    def get_component_statistics(self) -> dict[str, Any]:
         """Get statistics about components in the circuit.
 
         Returns:
             Dictionary with component counts and statistics
         """
-        stats: Dict[str, Any] = {
+        stats: dict[str, Any] = {
             "total": 0,
             "by_type": {},
             "unique_values": set(),
@@ -628,7 +627,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
             )
 
     def _apply_modification(
-        self, target: str, value: Any, metadata: Dict[str, Any]
+        self, target: str, value: Any, metadata: dict[str, Any]
     ) -> None:
         """Apply a modification without recording it."""
         mod_type = metadata.get("type", "component_value")
@@ -643,7 +642,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
             self.set_element_model(target, value)
 
     def _apply_addition(
-        self, target: str, value: Any, metadata: Dict[str, Any]
+        self, target: str, value: Any, metadata: dict[str, Any]
     ) -> None:
         """Apply an addition without recording it."""
         add_type = metadata.get("type", "instruction")
@@ -653,7 +652,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
         elif add_type == "instruction":
             self.add_instruction(value)
 
-    def _apply_removal(self, target: str, metadata: Dict[str, Any]) -> None:
+    def _apply_removal(self, target: str, metadata: dict[str, Any]) -> None:
         """Apply a removal without recording it."""
         remove_type = metadata.get("type", "component")
 
@@ -662,7 +661,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
         elif remove_type == "instruction":
             self.remove_instruction(target)
 
-    def _values_match(self, value1: str, value2: Union[str, float]) -> bool:
+    def _values_match(self, value1: str, value2: str | float) -> bool:
         """Check if two component values match."""
 
         if isinstance(value2, str):
@@ -680,11 +679,11 @@ class BaseEditorEnhanced(BaseEditor, ABC):
         """Take a snapshot of current state for change tracking."""
         self._baseline_state = self._capture_state()
 
-    def _capture_state(self) -> Dict[str, Any]:
+    def _capture_state(self) -> dict[str, Any]:
         """Capture current circuit state."""
         # This is a simplified implementation
         # A full implementation would capture all circuit details
-        state: Dict[str, Any] = {
+        state: dict[str, Any] = {
             "components": {},
             "parameters": {},
             "instructions": [],
@@ -715,7 +714,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
     # === Override Methods to Add Recording ===
 
     def _record_component_value_change(
-        self, device: str, old_value: Optional[str], new_value: Union[str, int, float]
+        self, device: str, old_value: str | None, new_value: str | int | float
     ) -> None:
         """Record component value change for undo support.
 
@@ -732,7 +731,7 @@ class BaseEditorEnhanced(BaseEditor, ABC):
         )
 
     def _record_component_parameters_change(
-        self, element: str, old_params: Dict[str, Any], new_params: Dict[str, Any]
+        self, element: str, old_params: dict[str, Any], new_params: dict[str, Any]
     ) -> None:
         """Record component parameters change for undo support.
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Task queue management for simulation tasks.
 
 This module provides a priority-based task queue for managing simulation tasks,
@@ -11,7 +10,7 @@ import logging
 import threading
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 from uuid import uuid4
 
 from .run_task import RunTask
@@ -49,11 +48,11 @@ class TaskInfo:
     """Information about a queued task."""
 
     task_id: str = field(default_factory=lambda: str(uuid4()))
-    run_task: Optional[RunTask] = field(default=None)
+    run_task: RunTask | None = field(default=None)
     priority: TaskPriority = field(default=TaskPriority.NORMAL)
-    dependencies: Set[str] = field(default_factory=set)
+    dependencies: set[str] = field(default_factory=set)
     status: TaskStatus = field(default=TaskStatus.PENDING)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Post-initialization hook."""
@@ -83,16 +82,16 @@ class TaskQueue:  # pylint: disable=too-many-instance-attributes
             max_concurrent_tasks: Maximum number of tasks that can run concurrently
         """
         self.max_concurrent_tasks = max_concurrent_tasks
-        self._queue: List[TaskInfo] = []  # Priority queue
-        self._running_tasks: Dict[str, TaskInfo] = {}
-        self._completed_tasks: Dict[str, TaskInfo] = {}
-        self._task_dependencies: Dict[str, Set[str]] = {}
+        self._queue: list[TaskInfo] = []  # Priority queue
+        self._running_tasks: dict[str, TaskInfo] = {}
+        self._completed_tasks: dict[str, TaskInfo] = {}
+        self._task_dependencies: dict[str, set[str]] = {}
         self._lock = threading.Lock()
         self._condition = threading.Condition(self._lock)
         self._shutdown = False
 
         # Task groups for batch management
-        self._task_groups: Dict[str, List[str]] = {}
+        self._task_groups: dict[str, list[str]] = {}
 
         # Statistics
         self._total_submitted = 0
@@ -103,9 +102,9 @@ class TaskQueue:  # pylint: disable=too-many-instance-attributes
         self,
         run_task: RunTask,
         priority: TaskPriority = TaskPriority.NORMAL,
-        dependencies: Optional[Set[str]] = None,
-        group: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        dependencies: set[str] | None = None,
+        group: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Submit a task to the queue.
 
@@ -161,7 +160,7 @@ class TaskQueue:  # pylint: disable=too-many-instance-attributes
 
             return task_info.task_id
 
-    def get_next(self, timeout: Optional[float] = None) -> Optional[TaskInfo]:
+    def get_next(self, timeout: float | None = None) -> TaskInfo | None:
         """Get the next task to execute.
 
         This method blocks until a task is available or timeout occurs.
@@ -270,7 +269,7 @@ class TaskQueue:  # pylint: disable=too-many-instance-attributes
 
         return cancelled
 
-    def get_status(self, task_id: str) -> Optional[TaskStatus]:
+    def get_status(self, task_id: str) -> TaskStatus | None:
         """Get the status of a task.
 
         Args:
@@ -299,7 +298,7 @@ class TaskQueue:  # pylint: disable=too-many-instance-attributes
 
             return None
 
-    def get_statistics(self) -> Dict[str, int]:
+    def get_statistics(self) -> dict[str, int]:
         """Get queue statistics.
 
         Returns:
@@ -364,7 +363,7 @@ class TaskQueue:  # pylint: disable=too-many-instance-attributes
         Args:
             completed_task_id: ID of the task that just completed
         """
-        tasks_to_queue: List[TaskInfo] = []
+        tasks_to_queue: list[TaskInfo] = []
 
         # Find tasks that were waiting on this dependency
         for task_id, deps in list(self._task_dependencies.items()):

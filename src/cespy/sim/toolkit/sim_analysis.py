@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 """Base classes and utilities for circuit simulation analysis."""
 
@@ -23,8 +22,9 @@
 # -------------------------------------------------------------------------------
 
 import logging
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import Any, cast
 
 from ...editor.base_editor import BaseEditor
 from ...editor.spice_editor import SpiceEditor
@@ -49,8 +49,8 @@ class SimAnalysis:
 
     def __init__(
         self,
-        circuit_file: Union[str, BaseEditor],
-        runner: Optional[AnyRunner] = None,
+        circuit_file: str | BaseEditor,
+        runner: AnyRunner | None = None,
     ):
         self.editor: BaseEditor
         if isinstance(circuit_file, str):
@@ -58,9 +58,9 @@ class SimAnalysis:
         else:
             self.editor = circuit_file
         self._runner = runner
-        self.simulations: List[Optional[RunTask]] = []
+        self.simulations: list[RunTask | None] = []
         self.last_run_number = 0
-        self.received_instructions: List[Tuple[str, ...]] = []
+        self.received_instructions: list[tuple[str, ...]] = []
         self.instructions_added = False
         self.log_data = LogfileData()
 
@@ -83,18 +83,18 @@ class SimAnalysis:
         self,
         *,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[Any] = None,
-        timeout: Optional[float] = None,
-        run_filename: Optional[str] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: Any | None = None,
+        timeout: float | None = None,
+        run_filename: str | None = None,
         exe_log: bool = True,
-    ) -> Optional[RunTask]:
+    ) -> RunTask | None:
         """Runs the simulations.
 
         See runner.run() method for details on arguments.
         """
-        sim: Optional[RunTask] = self.runner.run(
+        sim: RunTask | None = self.runner.run(
             self.editor,
             wait_resource=wait_resource,
             callback=callback,
@@ -191,17 +191,17 @@ class SimAnalysis:
         """
         cast(Any, self.runner).cleanup_files()
 
-    def simulation(self, index: int) -> Optional[RunTask]:
+    def simulation(self, index: int) -> RunTask | None:
         """Returns a simulation object."""
         return self.simulations[index]
 
-    def __getitem__(self, item: int) -> Optional[RunTask]:
+    def __getitem__(self, item: int) -> RunTask | None:
         return self.simulations[item]
 
     @staticmethod
-    def read_logfile(run_task: RunTask) -> Optional[LogfileData]:
+    def read_logfile(run_task: RunTask) -> LogfileData | None:
         """Reads the log file and returns a dictionary with the results."""
-        log_reader_cls: Type[Union[LTSpiceLogReader, QspiceLogReader]]
+        log_reader_cls: type[LTSpiceLogReader | QspiceLogReader]
         if run_task.simulator.__name__ == "LTspice":
             log_reader_cls = LTSpiceLogReader
         elif run_task.simulator.__name__ == "Qspice":

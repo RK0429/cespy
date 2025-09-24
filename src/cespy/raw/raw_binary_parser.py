@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Optimized binary parsing for raw files using numpy operations.
 
 This module provides high-performance binary parsing for SPICE raw files
@@ -11,7 +10,7 @@ import struct
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO, Literal
+from typing import Any, BinaryIO, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -74,14 +73,14 @@ class OptimizedBinaryParser:
     significantly improving performance for large files.
     """
 
-    def __init__(self, file_path: Union[str, Path]):
+    def __init__(self, file_path: str | Path):
         """Initialize binary parser.
 
         Args:
             file_path: Path to raw file
         """
         self.file_path = Path(file_path)
-        self._file_handle: Optional[BinaryIO] = None
+        self._file_handle: BinaryIO | None = None
 
         # Cache file size
         self.file_size = self.file_path.stat().st_size
@@ -127,7 +126,7 @@ class OptimizedBinaryParser:
         raw_bytes = self._file_handle.read(num_bytes)
 
         if len(raw_bytes) < num_bytes:
-            raise IOError(f"Could only read {len(raw_bytes)} of {num_bytes} bytes")
+            raise OSError(f"Could only read {len(raw_bytes)} of {num_bytes} bytes")
 
         # Convert to numpy array
         dtype = fmt_info.numpy_dtype
@@ -142,9 +141,9 @@ class OptimizedBinaryParser:
         offset: int,
         num_traces: int,
         num_points: int,
-        trace_formats: List[DataFormat],
+        trace_formats: list[DataFormat],
         byte_order: str = "<",
-    ) -> List[NDArray[Any]]:
+    ) -> list[NDArray[Any]]:
         """Read interleaved trace data efficiently.
 
         This handles the common case where trace data is interleaved:
@@ -177,7 +176,7 @@ class OptimizedBinaryParser:
         raw_bytes = self._file_handle.read(total_bytes)
 
         if len(raw_bytes) < total_bytes:
-            raise IOError(f"Could only read {len(raw_bytes)} of {total_bytes} bytes")
+            raise OSError(f"Could only read {len(raw_bytes)} of {total_bytes} bytes")
 
         # Parse interleaved data
         traces = []
@@ -216,9 +215,9 @@ class OptimizedBinaryParser:
         offset: int,
         num_traces: int,
         num_points: int,
-        trace_formats: List[DataFormat],
+        trace_formats: list[DataFormat],
         byte_order: str = "<",
-    ) -> List[NDArray[Any]]:
+    ) -> list[NDArray[Any]]:
         """Read sequential trace data efficiently.
 
         This handles the case where all data for one trace is stored
@@ -254,9 +253,9 @@ class OptimizedBinaryParser:
         offset: int,
         num_traces: int,
         num_points: int,
-        trace_formats: List[DataFormat],
+        trace_formats: list[DataFormat],
         byte_order: str = "<",
-    ) -> List[NDArray[Any]]:
+    ) -> list[NDArray[Any]]:
         """Read FastAccess format data.
 
         In FastAccess format, data is organized for efficient access:
@@ -279,7 +278,7 @@ class OptimizedBinaryParser:
 
     def detect_format(
         self, offset: int, sample_size: int = 1000
-    ) -> Tuple[DataFormat, str]:
+    ) -> tuple[DataFormat, str]:
         """Auto-detect binary format by analyzing data patterns.
 
         Args:
@@ -368,7 +367,7 @@ class OptimizedBinaryParser:
     def create_memory_map(
         self,
         offset: int,
-        shape: Tuple[int, ...],
+        shape: tuple[int, ...],
         dtype: np.dtype[Any],
         mode: Literal["r", "r+", "w+", "c"] = "r",
     ) -> np.memmap[Any, np.dtype[np.float64]]:
@@ -408,7 +407,7 @@ class OptimizedBinaryParser:
 
 def benchmark_parser(
     file_path: Path, num_traces: int = 10, num_points: int = 100000
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Benchmark different parsing methods.
 
     Args:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Simulator locator for finding and validating SPICE simulator installations.
 
 This module provides functionality to locate simulators on different platforms,
@@ -13,7 +12,6 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 # Core imports
 from ..core import constants as core_constants
@@ -84,11 +82,11 @@ class SimulatorLocator:
         """
         self.simulator_type = simulator_type
         self.platform = platform.system().lower()
-        self._cached_location: Optional[Path] = None
+        self._cached_location: Path | None = None
 
     def find_simulator(
-        self, custom_path: Optional[str] = None
-    ) -> Tuple[Optional[Path], bool]:
+        self, custom_path: str | None = None
+    ) -> tuple[Path | None, bool]:
         """Find the simulator executable.
 
         Args:
@@ -136,7 +134,7 @@ class SimulatorLocator:
 
         return None, False
 
-    def _check_path(self, path_str: str) -> Tuple[Optional[Path], bool]:
+    def _check_path(self, path_str: str) -> tuple[Path | None, bool]:
         """Check if a path exists and determine if it uses Wine.
 
         Args:
@@ -191,7 +189,7 @@ class SimulatorLocator:
 
         return shutil.which("wine") is not None
 
-    def get_wine_command(self) -> List[str]:
+    def get_wine_command(self) -> list[str]:
         """Get the Wine command prefix for running Windows executables.
 
         Returns:
@@ -203,7 +201,7 @@ class SimulatorLocator:
                 return ["wine64"]
         return ["wine"]
 
-    def get_library_paths(self, exe_path: Path) -> List[Path]:
+    def get_library_paths(self, exe_path: Path) -> list[Path]:
         """Get default library paths for a simulator executable.
 
         Args:
@@ -242,7 +240,7 @@ class SimulatorLocator:
 
     def validate_executable(
         self, exe_path: Path, uses_wine: bool = False
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """Validate that an executable can be run and get version info.
 
         Args:
@@ -264,9 +262,7 @@ class SimulatorLocator:
                 cmd.append("-v")
             elif self.simulator_type == core_constants.Simulators.NGSPICE:
                 cmd.append("--version")
-            elif self.simulator_type == core_constants.Simulators.QSPICE:
-                cmd.append("-v")
-            elif self.simulator_type == core_constants.Simulators.XYCE:
+            elif self.simulator_type == core_constants.Simulators.QSPICE or self.simulator_type == core_constants.Simulators.XYCE:
                 cmd.append("-v")
 
             # Run command with timeout
@@ -283,9 +279,9 @@ class SimulatorLocator:
         except subprocess.TimeoutExpired:
             return False, "Timeout while checking version"
         except (subprocess.CalledProcessError, FileNotFoundError, OSError) as e:
-            return False, f"Error: {str(e)}"
+            return False, f"Error: {e!s}"
 
-    def _parse_version(self, output: str) -> Optional[str]:
+    def _parse_version(self, output: str) -> str | None:
         """Parse version string from simulator output.
 
         Args:

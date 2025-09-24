@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Process callback utilities for handling simulator subprocess output and events."""
 from __future__ import annotations
 

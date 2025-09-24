@@ -5,12 +5,13 @@ This module provides centralized configuration management with support for
 environment variables, configuration files, and runtime updates.
 """
 
-import os
 import json
 import logging
-from dataclasses import dataclass, field, asdict
+import os
+from collections.abc import Callable
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union, Callable
+from typing import Any
 
 from cespy.core.constants import Defaults, Encodings, Simulators
 from cespy.exceptions import ConfigurationError, InvalidConfigurationError
@@ -20,12 +21,12 @@ from cespy.exceptions import ConfigurationError, InvalidConfigurationError
 class SimulatorConfig:
     """Configuration for individual simulators."""
 
-    executable_path: Optional[str] = None
-    library_paths: List[str] = field(default_factory=list)
+    executable_path: str | None = None
+    library_paths: list[str] = field(default_factory=list)
     default_timeout: float = Defaults.SIMULATION_TIMEOUT
-    wine_prefix: Optional[str] = None
-    environment: Dict[str, str] = field(default_factory=dict)
-    command_line_args: List[str] = field(default_factory=list)
+    wine_prefix: str | None = None
+    environment: dict[str, str] = field(default_factory=dict)
+    command_line_args: list[str] = field(default_factory=list)
 
     def merge(self, other: "SimulatorConfig") -> None:
         """Merge another configuration into this one."""
@@ -67,17 +68,17 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
 
     # File handling
     output_folder: str = Defaults.OUTPUT_FOLDER
-    temp_folder: Optional[str] = None
+    temp_folder: str | None = None
     auto_cleanup: bool = True
     max_output_size: int = Defaults.MAX_OUTPUT_SIZE
 
     # Platform-specific
     use_wine: bool = False
-    wine_prefix: Optional[str] = None
+    wine_prefix: str | None = None
     force_windows_paths: bool = False
 
     # Simulator configurations
-    simulators: Dict[str, SimulatorConfig] = field(default_factory=dict)
+    simulators: dict[str, SimulatorConfig] = field(default_factory=dict)
 
     # Server configuration
     server: ServerConfig = field(default_factory=ServerConfig)
@@ -113,7 +114,7 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
             )
         return self.simulators[simulator]
 
-    def update_from_dict(self, config_dict: Dict[str, Any]) -> None:
+    def update_from_dict(self, config_dict: dict[str, Any]) -> None:
         """
         Update configuration from a dictionary.
 
@@ -128,7 +129,7 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
             elif hasattr(self, key):
                 setattr(self, key, value)
 
-    def _update_simulators_config(self, simulators_config: Dict[str, Any]) -> None:
+    def _update_simulators_config(self, simulators_config: dict[str, Any]) -> None:
         """Update simulators configuration."""
         for sim_name, sim_config in simulators_config.items():
             if sim_name not in self.simulators:
@@ -137,20 +138,20 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
                 self._update_simulator_attributes(sim_name, sim_config)
 
     def _update_simulator_attributes(
-        self, sim_name: str, sim_config: Dict[str, Any]
+        self, sim_name: str, sim_config: dict[str, Any]
     ) -> None:
         """Update individual simulator attributes."""
         for attr, val in sim_config.items():
             if hasattr(self.simulators[sim_name], attr):
                 setattr(self.simulators[sim_name], attr, val)
 
-    def _update_server_config(self, server_config: Dict[str, Any]) -> None:
+    def _update_server_config(self, server_config: dict[str, Any]) -> None:
         """Update server configuration."""
         for attr, val in server_config.items():
             if hasattr(self.server, attr):
                 setattr(self.server, attr, val)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
         result = asdict(self)
         # Convert simulator configs
@@ -160,7 +161,7 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
         return result
 
     @classmethod
-    def from_file(cls, filepath: Union[str, Path]) -> "CespyConfig":
+    def from_file(cls, filepath: str | Path) -> "CespyConfig":
         """
         Load configuration from a JSON file.
 
@@ -178,7 +179,7 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
             raise ConfigurationError(f"Configuration file not found: {filepath}")
 
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 config_dict = json.load(f)
         except json.JSONDecodeError as e:
             raise InvalidConfigurationError(
@@ -191,7 +192,7 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
         config.update_from_dict(config_dict)
         return config
 
-    def save_to_file(self, filepath: Union[str, Path]) -> None:
+    def save_to_file(self, filepath: str | Path) -> None:
         """
         Save configuration to a JSON file.
 
@@ -220,7 +221,7 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
         config = cls()
 
         # Map environment variables to config attributes
-        env_mapping: Dict[str, tuple[str, Callable[[str], Any]]] = {
+        env_mapping: dict[str, tuple[str, Callable[[str], Any]]] = {
             "CESPY_DEFAULT_ENCODING": ("default_encoding", str),
             "CESPY_DEFAULT_TIMEOUT": ("default_timeout", float),
             "CESPY_PARALLEL_SIMS": ("parallel_sims", int),
@@ -262,7 +263,7 @@ class CespyConfig:  # pylint: disable=too-many-instance-attributes
 
 
 # Global configuration instance
-_global_config: Optional[CespyConfig] = None
+_global_config: CespyConfig | None = None
 
 
 def get_config() -> CespyConfig:
@@ -289,7 +290,7 @@ def set_config(config: CespyConfig) -> None:
     _global_config = config
 
 
-def load_config(filepath: Optional[Union[str, Path]] = None) -> CespyConfig:
+def load_config(filepath: str | Path | None = None) -> CespyConfig:
     """
     Load configuration from file or environment.
 
@@ -309,7 +310,7 @@ def load_config(filepath: Optional[Union[str, Path]] = None) -> CespyConfig:
             Path.cwd() / ".cespy.json",
         ]
 
-        loaded_config: Optional[CespyConfig] = None
+        loaded_config: CespyConfig | None = None
         for location in config_locations:
             if location.exists():
                 try:

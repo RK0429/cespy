@@ -1,19 +1,18 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Command-line script to run the SPICE simulation server."""
 
 import argparse
 import logging
 import sys
 import time
-from typing import Any, Optional, Type
+from typing import Any
 
 from cespy.client_server.sim_server import SimServer
 from cespy.simulators.ltspice_simulator import LTspice
 from cespy.simulators.ngspice_simulator import NGspiceSimulator
 from cespy.simulators.xyce_simulator import XyceSimulator
 
-keyboard: Optional[Any] = None
+keyboard: Any | None = None
 try:
     import keyboard
 except ImportError:
@@ -25,7 +24,7 @@ except ImportError:
 def main() -> None:
     """Run the main SPICE server with command-line arguments."""
     # declare simulator variable with default
-    simulator: Type[LTspice] | Type[NGspiceSimulator] | Type[XyceSimulator] = LTspice
+    simulator: type[LTspice] | type[NGspiceSimulator] | type[XyceSimulator] = LTspice
     parser = argparse.ArgumentParser(
         description=(
             "Run the SPICE server with specified simulator " "(LTSpice, NGSpice, XYCE)."

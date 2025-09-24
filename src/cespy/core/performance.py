@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Performance optimization utilities and profiling tools.
 
 This module provides utilities for performance monitoring, optimization hints,
@@ -11,9 +10,11 @@ import logging
 import re
 import statistics
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Pattern, TypeVar, Union
+from re import Pattern
+from typing import Any, TypeVar
 
 import psutil
 
@@ -52,7 +53,7 @@ class PerformanceMetrics:  # pylint: disable=too-many-instance-attributes
         self.last_call_time = execution_time
         self.memory_usage_mb = memory_mb
 
-    def to_dict(self) -> Dict[str, Union[str, int, float]]:
+    def to_dict(self) -> dict[str, str | int | float]:
         """Convert metrics to dictionary."""
         return {
             "function_name": self.function_name,
@@ -70,7 +71,7 @@ class PerformanceMonitor:
     """Centralized performance monitoring and optimization."""
 
     def __init__(self) -> None:
-        self.metrics: Dict[str, PerformanceMetrics] = {}
+        self.metrics: dict[str, PerformanceMetrics] = {}
         self.enabled = True
         self.threshold_warning_time = 1.0  # Warn if function takes > 1 second
         self.threshold_critical_time = 5.0  # Critical if function takes > 5 seconds
@@ -112,8 +113,8 @@ class PerformanceMonitor:
             )
 
     def get_metrics(
-        self, function_name: Optional[str] = None
-    ) -> Union[PerformanceMetrics, Dict[str, PerformanceMetrics]]:
+        self, function_name: str | None = None
+    ) -> PerformanceMetrics | dict[str, PerformanceMetrics]:
         """Get performance metrics.
 
         Args:
@@ -126,7 +127,7 @@ class PerformanceMonitor:
             return self.metrics.get(function_name, PerformanceMetrics(function_name))
         return self.metrics.copy()
 
-    def get_slowest_functions(self, count: int = 10) -> List[PerformanceMetrics]:
+    def get_slowest_functions(self, count: int = 10) -> list[PerformanceMetrics]:
         """Get list of slowest functions by average time.
 
         Args:
@@ -139,7 +140,7 @@ class PerformanceMonitor:
             :count
         ]
 
-    def get_most_called_functions(self, count: int = 10) -> List[PerformanceMetrics]:
+    def get_most_called_functions(self, count: int = 10) -> list[PerformanceMetrics]:
         """Get list of most frequently called functions.
 
         Args:
@@ -152,7 +153,7 @@ class PerformanceMonitor:
             :count
         ]
 
-    def reset_metrics(self, function_name: Optional[str] = None) -> None:
+    def reset_metrics(self, function_name: str | None = None) -> None:
         """Reset performance metrics.
 
         Args:
@@ -291,7 +292,7 @@ class RegexCache:
     """Cache for compiled regular expressions to improve performance."""
 
     def __init__(self, max_size: int = 1000):
-        self.cache: Dict[tuple[str, int], Pattern[str]] = {}
+        self.cache: dict[tuple[str, int], Pattern[str]] = {}
         self.max_size = max_size
         self.hit_count = 0
         self.miss_count = 0
@@ -325,7 +326,7 @@ class RegexCache:
         self.cache[cache_key] = compiled_pattern
         return compiled_pattern
 
-    def get_stats(self) -> Dict[str, Union[int, float]]:
+    def get_stats(self) -> dict[str, int | float]:
         """Get cache statistics.
 
         Returns:
@@ -372,7 +373,7 @@ class PerformanceOptimizer:
     """Utility class for performance optimization recommendations."""
 
     @staticmethod
-    def optimize_file_operations(file_size_mb: float) -> Dict[str, Any]:
+    def optimize_file_operations(file_size_mb: float) -> dict[str, Any]:
         """Get optimization recommendations for file operations.
 
         Args:
@@ -381,7 +382,7 @@ class PerformanceOptimizer:
         Returns:
             Dictionary with optimization recommendations
         """
-        recommendations: Dict[str, Any] = {}
+        recommendations: dict[str, Any] = {}
 
         if file_size_mb < 1:
             # Small files
@@ -403,7 +404,7 @@ class PerformanceOptimizer:
         return recommendations
 
     @staticmethod
-    def optimize_regex_patterns(patterns: List[str]) -> Dict[str, Any]:
+    def optimize_regex_patterns(patterns: list[str]) -> dict[str, Any]:
         """Analyze and optimize regex patterns.
 
         Args:
@@ -412,7 +413,7 @@ class PerformanceOptimizer:
         Returns:
             Dictionary with optimization recommendations
         """
-        recommendations: Dict[str, Any] = {
+        recommendations: dict[str, Any] = {
             "compile_patterns": True,
             "use_cache": True,
             "problematic_patterns": [],
@@ -460,7 +461,7 @@ class PerformanceOptimizer:
     @staticmethod
     def optimize_memory_usage(
         data_size_mb: float, operation_type: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get memory optimization recommendations.
 
         Args:
@@ -470,7 +471,7 @@ class PerformanceOptimizer:
         Returns:
             Dictionary with memory optimization recommendations
         """
-        recommendations: Dict[str, Any] = {}
+        recommendations: dict[str, Any] = {}
 
         # Get platform info for memory-aware recommendations
         try:
@@ -504,7 +505,7 @@ class PerformanceOptimizer:
 
 def benchmark_function(
     func: Callable[..., Any], *args: Any, iterations: int = 100, **kwargs: Any
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Benchmark a function's performance.
 
     Args:

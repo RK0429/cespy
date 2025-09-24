@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Callback manager for handling simulation completion callbacks.
 
 This module provides a manager for registering and executing callbacks when
@@ -11,10 +10,11 @@ import inspect
 import logging
 import threading
 import traceback
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any
 
 from .process_callback import ProcessCallback
 
@@ -33,11 +33,11 @@ class CallbackType(Enum):
 class CallbackInfo:
     """Information about a registered callback."""
 
-    callback: Union[Type[ProcessCallback], Callable[..., Any]]
+    callback: type[ProcessCallback] | Callable[..., Any]
     callback_type: CallbackType
-    args: Tuple[Any, ...] = ()
-    kwargs: Optional[Dict[str, Any]] = None
-    error_handler: Optional[Callable[[Exception], None]] = None
+    args: tuple[Any, ...] = ()
+    kwargs: dict[str, Any] | None = None
+    error_handler: Callable[[Exception], None] | None = None
 
     def __post_init__(self) -> None:
         if self.kwargs is None:
@@ -64,9 +64,9 @@ class CallbackManager:
         self.max_callback_errors = max_callback_errors
 
         # Callback storage
-        self._callbacks: Dict[str, CallbackInfo] = {}
-        self._callback_errors: Dict[str, int] = {}
-        self._disabled_callbacks: Set[str] = set()
+        self._callbacks: dict[str, CallbackInfo] = {}
+        self._callback_errors: dict[str, int] = {}
+        self._disabled_callbacks: set[str] = set()
 
         # Thread safety
         self._lock = threading.Lock()
@@ -80,10 +80,10 @@ class CallbackManager:
     def register(
         self,
         callback_id: str,
-        callback: Union[Type[ProcessCallback], Callable[..., Any]],
-        args: Optional[Tuple[Any, ...]] = None,
-        kwargs: Optional[Dict[str, Any]] = None,
-        error_handler: Optional[Callable[[Exception], None]] = None,
+        callback: type[ProcessCallback] | Callable[..., Any],
+        args: tuple[Any, ...] | None = None,
+        kwargs: dict[str, Any] | None = None,
+        error_handler: Callable[[Exception], None] | None = None,
         replace: bool = False,
     ) -> None:
         """Register a callback.
@@ -153,7 +153,7 @@ class CallbackManager:
         callback_id: str,
         raw_file: Path,
         log_file: Path,
-    ) -> Tuple[bool, Optional[Any]]:
+    ) -> tuple[bool, Any | None]:
         """Execute a specific callback.
 
         Args:
@@ -185,7 +185,7 @@ class CallbackManager:
         raw_file: Path,
         log_file: Path,
         stop_on_error: bool = False,
-    ) -> Dict[str, Tuple[bool, Optional[Any]]]:
+    ) -> dict[str, tuple[bool, Any | None]]:
         """Execute all registered callbacks.
 
         Args:
@@ -224,7 +224,7 @@ class CallbackManager:
 
     def create_chain(
         self, *callback_ids: str
-    ) -> Callable[[Path, Path], List[Tuple[bool, Any]]]:
+    ) -> Callable[[Path, Path], list[tuple[bool, Any]]]:
         """Create a chained callback that executes multiple callbacks in sequence.
 
         Args:
@@ -234,7 +234,7 @@ class CallbackManager:
             Callable that executes all callbacks in order
         """
 
-        def chained_callback(raw_file: Path, log_file: Path) -> List[Tuple[bool, Any]]:
+        def chained_callback(raw_file: Path, log_file: Path) -> list[tuple[bool, Any]]:
             results = []
             for callback_id in callback_ids:
                 success, result = self.execute(callback_id, raw_file, log_file)
@@ -248,7 +248,7 @@ class CallbackManager:
 
     def create_parallel(
         self, *callback_ids: str
-    ) -> Callable[[Path, Path], Dict[str, Tuple[bool, Any]]]:
+    ) -> Callable[[Path, Path], dict[str, tuple[bool, Any]]]:
         """Create a parallel callback that executes multiple callbacks concurrently.
 
         Args:
@@ -260,7 +260,7 @@ class CallbackManager:
 
         def parallel_callback(
             raw_file: Path, log_file: Path
-        ) -> Dict[str, Tuple[bool, Any]]:
+        ) -> dict[str, tuple[bool, Any]]:
             results = {}
 
             with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -288,17 +288,17 @@ class CallbackManager:
 
         return parallel_callback
 
-    def get_registered_callbacks(self) -> List[str]:
+    def get_registered_callbacks(self) -> list[str]:
         """Get list of registered callback IDs."""
         with self._lock:
             return list(self._callbacks.keys())
 
-    def get_disabled_callbacks(self) -> List[str]:
+    def get_disabled_callbacks(self) -> list[str]:
         """Get list of disabled callback IDs."""
         with self._lock:
             return list(self._disabled_callbacks)
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get callback execution statistics."""
         with self._lock:
             return {
@@ -355,8 +355,8 @@ class CallbackManager:
         self,
         callback: Any,
         callback_type: CallbackType,
-        args: Optional[Tuple[Any, ...]],
-        kwargs: Optional[Dict[str, Any]],
+        args: tuple[Any, ...] | None,
+        kwargs: dict[str, Any] | None,
     ) -> None:
         """Validate callback parameters.
 
@@ -398,7 +398,7 @@ class CallbackManager:
         callback_info: CallbackInfo,
         raw_file: Path,
         log_file: Path,
-    ) -> Tuple[bool, Optional[Any]]:
+    ) -> tuple[bool, Any | None]:
         """Execute a single callback with error handling.
 
         Args:

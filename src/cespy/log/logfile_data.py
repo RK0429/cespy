@@ -1,16 +1,15 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Module for handling LTSpice log file data parsing and analysis."""
 from __future__ import annotations
 
 import logging
 import math
 from collections import OrderedDict
-from typing import Any, Dict, Iterable, List, Optional, Protocol, TypeVar, Union, cast
+from collections.abc import Iterable
+from typing import Any, Protocol, TypeVar, Union, cast
 
 # Core imports
-from ..core import constants as core_constants
-from ..core import patterns as core_patterns
+from ..core import constants as core_constants, patterns as core_patterns
 
 # -------------------------------------------------------------------------------
 # Name:        logfile_data.py
@@ -30,7 +29,7 @@ class LTComplex(complex):
 
     complex_match = core_patterns.COMPLEX_NUMBER_PATTERN
 
-    def __new__(cls, strvalue: str) -> "LTComplex":
+    def __new__(cls, strvalue: str) -> LTComplex:
         match = cls.complex_match.match(strvalue)
         if match:
             mag = float(match.group("mag"))
@@ -73,7 +72,7 @@ class LTComplex(complex):
         return math.atan2(self.imag, self.real)
 
     @property
-    def unit(self) -> Optional[str]:
+    def unit(self) -> str | None:
         """Return the unit of the complex value if present."""
         _unit = None
         match = self.complex_match.match(self.strvalue)
@@ -82,7 +81,7 @@ class LTComplex(complex):
         return _unit
 
 
-ValueType = Union[int, float, str, List[Any], LTComplex]
+ValueType = Union[int, float, str, list[Any], LTComplex]
 NumericType = Union[int, float, complex, LTComplex]
 
 
@@ -100,7 +99,7 @@ class Comparable(Protocol):
 T = TypeVar("T", bound=Comparable)
 
 
-def try_convert_value(value: Union[str, int, float, List[Any], bytes]) -> ValueType:
+def try_convert_value(value: str | int | float | list[Any] | bytes) -> ValueType:
     """Tries to convert the string into an integer and if it fails, tries to convert to
     a float, if it fails, then returns the value as string.
 
@@ -140,7 +139,7 @@ def try_convert_value(value: Union[str, int, float, List[Any], bytes]) -> ValueT
 
 
 # pylint: disable=too-many-branches
-def split_line_into_values(line: str) -> List[ValueType]:
+def split_line_into_values(line: str) -> list[ValueType]:
     """Splits a line into values.
 
     The values are separated by tabs or spaces. If a value starts with ( and ends with
@@ -148,10 +147,10 @@ def split_line_into_values(line: str) -> List[ValueType]:
     converting values within () fails, then the value is returned as a tuple with the
     values inside the ().
     """
-    parenthesis: List[str] = []
+    parenthesis: list[str] = []
     i = 0
     value_start = 0
-    values: List[ValueType] = []
+    values: list[ValueType] = []
     for i, c in enumerate(line):
         if (
             c == "("
@@ -200,11 +199,11 @@ class LogfileData:
 
     def __init__(
         self,
-        step_set: Optional[Dict[str, List[Any]]] = None,
-        dataset: Optional[Dict[str, List[Any]]] = None,
+        step_set: dict[str, list[Any]] | None = None,
+        dataset: dict[str, list[Any]] | None = None,
     ) -> None:
         if step_set is None:
-            self.stepset: Dict[str, List[Any]] = {}
+            self.stepset: dict[str, list[Any]] = {}
         else:
             self.stepset = (
                 step_set.copy()
@@ -213,7 +212,7 @@ class LogfileData:
 
         if dataset is None:
             # Dictionary in which the order of the keys is kept
-            self.dataset: Dict[str, List[Any]] = OrderedDict()
+            self.dataset: dict[str, list[Any]] = OrderedDict()
         else:
             self.dataset = (
                 dataset.copy()
@@ -225,7 +224,7 @@ class LogfileData:
         # For storing the encoding when exporting
         self.encoding: str = core_constants.Encodings.UTF8
 
-    def __getitem__(self, key: str) -> List[Any]:
+    def __getitem__(self, key: str) -> list[Any]:
         """__getitem__ implements :key: step or measurement name.
 
         This is case insensitive.
@@ -249,8 +248,8 @@ class LogfileData:
         return self.step_count > 0
 
     def steps_with_parameter_equal_to(
-        self, param: str, value: Union[str, int, float]
-    ) -> List[int]:
+        self, param: str, value: str | int | float
+    ) -> list[int]:
         """Returns the steps that contain a given condition.
 
         :param param: parameter identifier on a stepped simulation. This is case
@@ -277,7 +276,7 @@ class LogfileData:
         # returns the positions where there is match
         return [i for i, a in enumerate(condition_set) if a == v]
 
-    def steps_with_conditions(self, **conditions: Union[str, int, float]) -> List[int]:
+    def steps_with_conditions(self, **conditions: str | int | float) -> list[int]:
         """Returns the steps that respect one or more equality conditions.
 
         :key conditions: parameters within the Spice simulation. Values are the matches
@@ -297,7 +296,7 @@ class LogfileData:
                 current_set = [v for v in current_set if v in condition_set]
         return current_set if current_set is not None else []
 
-    def get_step_vars(self) -> List[str]:
+    def get_step_vars(self) -> list[str]:
         """Returns the stepped variable names on the log file.
 
         :return: List of step variables.
@@ -305,7 +304,7 @@ class LogfileData:
         """
         return list(self.stepset.keys())
 
-    def get_measure_names(self) -> List[str]:
+    def get_measure_names(self) -> list[str]:
         """Returns the names of the measurements read from the log file.
 
         :return: List of measurement names.
@@ -316,9 +315,9 @@ class LogfileData:
     def get_measure_value(
         self,
         measure: str,
-        step: Optional[Union[int, slice]] = None,
-        **kwargs: Union[str, int, float],
-    ) -> Union[float, int, str, LTComplex]:
+        step: int | slice | None = None,
+        **kwargs: str | int | float,
+    ) -> float | int | str | LTComplex:
         """Returns a measure value on a given step.
 
         :param measure: name of the measurement to get. This is case insensitive.
@@ -336,13 +335,13 @@ class LogfileData:
                 if len(steps) == 1:
                     # Explicitly cast to the expected return type
                     return cast(
-                        Union[float, int, str, LTComplex],
+                        float | int | str | LTComplex,
                         self.dataset[measure][steps[0]],
                     )
                 raise IndexError("Not sufficient conditions to identify a single step")
             if len(self.dataset[measure]) == 1:
                 # Explicitly cast to the expected return type
-                return cast(Union[float, int, str, LTComplex], self.dataset[measure][0])
+                return cast(float | int | str | LTComplex, self.dataset[measure][0])
             if len(self.dataset[measure]) == 0:
                 _logger.error('No measurements found for measure "%s"', measure)
                 raise IndexError(f'No measurements found for measure "{measure}"')
@@ -350,14 +349,14 @@ class LogfileData:
         if isinstance(step, (slice, int)):
             # Explicitly cast to the expected return type
             return cast(
-                Union[float, int, str, LTComplex],
+                float | int | str | LTComplex,
                 self.dataset[measure][step],
             )
         raise TypeError("Step must be an integer or a slice")
 
     def get_measure_values_at_steps(
-        self, measure: str, steps: Union[None, int, Iterable[int]]
-    ) -> List[ValueType]:
+        self, measure: str, steps: None | int | Iterable[int]
+    ) -> list[ValueType]:
         """Returns the measurements taken at a list of steps provided by the steps list.
 
         :param measure: name of the measurement to get. This is case insensitive.
@@ -379,7 +378,7 @@ class LogfileData:
         return [self.dataset[measure][step] for step in steps]
 
     def max_measure_value(
-        self, measure: str, steps: Union[None, int, Iterable[int]] = None
+        self, measure: str, steps: None | int | Iterable[int] = None
     ) -> ValueType:
         """Returns the maximum value of a measurement.
 
@@ -405,7 +404,7 @@ class LogfileData:
         return cast(ValueType, max(cast(Iterable[Comparable], comparable_values)))
 
     def min_measure_value(
-        self, measure: str, steps: Union[None, int, Iterable[int]] = None
+        self, measure: str, steps: None | int | Iterable[int] = None
     ) -> ValueType:
         """Returns the minimum value of a measurement.
 
@@ -431,7 +430,7 @@ class LogfileData:
         return cast(ValueType, min(cast(Iterable[Comparable], comparable_values)))
 
     def avg_measure_value(
-        self, measure: str, steps: Union[None, int, Iterable[int]] = None
+        self, measure: str, steps: None | int | Iterable[int] = None
     ) -> NumericType:
         """Returns the average value of a measurement.
 
@@ -444,7 +443,7 @@ class LogfileData:
         """
         values = self.get_measure_values_at_steps(measure, steps)
         # Filter to only numeric values for calculation
-        numeric_values: List[NumericType] = [
+        numeric_values: list[NumericType] = [
             v for v in values if isinstance(v, (int, float, complex, LTComplex))
         ]
         if not numeric_values:
@@ -475,8 +474,8 @@ class LogfileData:
     def export_data(
         self,
         export_file: str,
-        encoding: Optional[str] = None,
-        append_with_line_prefix: Optional[str] = None,
+        encoding: str | None = None,
+        append_with_line_prefix: str | None = None,
         *,
         value_separator: str = "\t",
         line_terminator: str = "\n",
@@ -531,11 +530,10 @@ class LogfileData:
             for title, values in self.stepset.items():
                 if data_size is None:
                     data_size = len(values)
-                else:
-                    if len(values) != data_size:
-                        raise ValueError(
-                            "Data size mismatch. Not all measurements have the same length."
-                        )
+                elif len(values) != data_size:
+                    raise ValueError(
+                        "Data size mismatch. Not all measurements have the same length."
+                    )
 
                 if isinstance(values[0], list) and len(values[0]) > 1:
                     for n in range(len(values[0])):
@@ -548,15 +546,14 @@ class LogfileData:
             for title, values in self.dataset.items():
                 if data_size is None:
                     data_size = len(values)
-                else:
-                    if len(values) != data_size:
-                        logging.error(
-                            "Data size mismatch. Not all measurements have the same"
-                            ' length. Expected %d. "%s" has %d',
-                            data_size,
-                            title,
-                            len(values),
-                        )
+                elif len(values) != data_size:
+                    logging.error(
+                        "Data size mismatch. Not all measurements have the same"
+                        ' length. Expected %d. "%s" has %d',
+                        data_size,
+                        title,
+                        len(values),
+                    )
 
                 if isinstance(values[0], list) and len(values[0]) > 1:
                     for n in range(len(values[0])):
@@ -620,13 +617,13 @@ class LogfileData:
     def plot_histogram(
         self,
         param: str,
-        steps: Optional[Union[int, Iterable[int]]] = None,
+        steps: int | Iterable[int] | None = None,
         bins: int = 50,
         *,
         normalized: bool = True,
         sigma: float = 3.0,
-        title: Optional[str] = None,
-        image_file: Optional[str] = None,
+        title: str | None = None,
+        image_file: str | None = None,
         **kwargs: Any,
     ) -> None:
         """Plots a histogram of the parameter."""

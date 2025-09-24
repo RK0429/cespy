@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """XML-RPC server for distributed SPICE simulation execution.
 
 This module implements a simulation server that accepts client
@@ -14,7 +13,6 @@ import threading
 import uuid
 import zipfile
 from pathlib import Path
-from typing import List, Tuple, Type
 from xmlrpc.client import Binary
 from xmlrpc.server import SimpleXMLRPCServer
 
@@ -54,7 +52,7 @@ class SimServer:
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        simulator: Type[Simulator],
+        simulator: type[Simulator],
         parallel_sims: int = 4,
         output_folder: str = "./temp",
         *,
@@ -142,7 +140,7 @@ class SimServer:
         self.sessions[session_id] = []
         return session_id
 
-    def status(self, session_id: str) -> List[int]:
+    def status(self, session_id: str) -> list[int]:
         """Returns a dictionary with task information. The key for
         the dictionary is the simulation identifier returned by the
         simulation start command. The value associated with each
@@ -168,7 +166,7 @@ class SimServer:
         _logger.debug("Server: Returning status %s", ret)
         return ret
 
-    def get_files(self, session_id: str, runno: int) -> Tuple[str, Binary]:
+    def get_files(self, session_id: str, runno: int) -> tuple[str, Binary]:
         """Retrieve simulation results for a given run number.
 
         Args:

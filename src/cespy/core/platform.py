@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Cross-platform compatibility and platform-specific optimizations.
 
 This module provides a centralized platform management system that handles
@@ -15,7 +14,7 @@ import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
 from .constants import Simulators
 from .paths import get_wine_prefix, is_wine_available
@@ -50,7 +49,7 @@ class PlatformInfo:  # pylint: disable=too-many-instance-attributes
     os_version: str
     python_version: str
     is_wine_available: bool
-    wine_prefix: Optional[Path]
+    wine_prefix: Path | None
     cpu_count: int
     total_memory_gb: float
 
@@ -97,7 +96,7 @@ class PlatformManager:
     """Centralized platform management for cross-platform compatibility."""
 
     _instance: Optional["PlatformManager"] = None
-    _platform_info: Optional[PlatformInfo] = None
+    _platform_info: PlatformInfo | None = None
 
     def __new__(cls) -> "PlatformManager":
         """Singleton pattern for platform manager."""
@@ -155,7 +154,7 @@ class PlatformManager:
         try:
             if os_type == OSType.LINUX:
                 # Read from /proc/meminfo
-                with open("/proc/meminfo", "r", encoding="utf-8") as f:
+                with open("/proc/meminfo", encoding="utf-8") as f:
                     for line in f:
                         if line.startswith("MemTotal:"):
                             kb = int(line.split()[1])
@@ -221,7 +220,7 @@ class PlatformManager:
             total_memory_gb,
         )
 
-    def get_simulator_search_paths(self, simulator: str) -> List[Path]:
+    def get_simulator_search_paths(self, simulator: str) -> list[Path]:
         """Get platform-specific search paths for simulators.
 
         Args:
@@ -389,7 +388,7 @@ class PlatformManager:
             return min(self.info.recommended_workers, max_by_memory)
         return self.info.recommended_workers
 
-    def setup_process_environment(self, wine_mode: bool = False) -> Dict[str, str]:
+    def setup_process_environment(self, wine_mode: bool = False) -> dict[str, str]:
         """Setup environment variables for subprocess execution.
 
         Args:
@@ -419,7 +418,7 @@ class PlatformManager:
 
         return env
 
-    def get_executable_extensions(self) -> List[str]:
+    def get_executable_extensions(self) -> list[str]:
         """Get platform-specific executable file extensions.
 
         Returns:
@@ -430,8 +429,8 @@ class PlatformManager:
         return [""]  # No extension on Unix-like systems
 
     def find_executable(
-        self, name: str, search_paths: Optional[List[Path]] = None
-    ) -> Optional[Path]:
+        self, name: str, search_paths: list[Path] | None = None
+    ) -> Path | None:
         """Find executable in system PATH or provided search paths.
 
         Args:
@@ -500,13 +499,13 @@ class PlatformManager:
             _logger.debug("Failed to check process status: %s", e)
             return False
 
-    def get_performance_hints(self) -> Dict[str, Union[str, int, bool, float]]:
+    def get_performance_hints(self) -> dict[str, str | int | bool | float]:
         """Get platform-specific performance optimization hints.
 
         Returns:
             Dictionary of performance hints
         """
-        hints: Dict[str, Union[str, int, bool, float]] = {
+        hints: dict[str, str | int | bool | float] = {
             "recommended_workers": self.info.recommended_workers,
             "memory_per_worker_gb": self.info.memory_per_worker_gb,
             "use_memory_mapping": self.info.is_unix_like,
@@ -567,7 +566,7 @@ def is_simulator_available(simulator: str) -> bool:
     return platform_manager.find_executable(simulator.lower(), search_paths) is not None
 
 
-def get_simulator_path(simulator: str) -> Optional[Path]:
+def get_simulator_path(simulator: str) -> Path | None:
     """Get path to simulator executable.
 
     Args:

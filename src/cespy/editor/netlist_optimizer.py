@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Netlist optimizer for improving simulation performance.
 
 This module provides optimization techniques for SPICE netlists to improve
@@ -16,7 +15,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 _logger = logging.getLogger("cespy.NetlistOptimizer")
 
@@ -89,7 +88,7 @@ class OptimizationResult:
     nodes_renamed: int = 0
     subcircuits_flattened: int = 0
     models_simplified: int = 0
-    warnings: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     @property
     def reduction_percentage(self) -> float:
@@ -110,23 +109,23 @@ class NetlistOptimizer:
     simulation speed without significantly affecting accuracy.
     """
 
-    def __init__(self, config: Optional[OptimizationConfig] = None):
+    def __init__(self, config: OptimizationConfig | None = None):
         """Initialize netlist optimizer.
 
         Args:
             config: Optimization configuration
         """
         self.config = config or OptimizationConfig()
-        self._node_map: Dict[str, str] = {}
-        self._component_map: Dict[str, List[str]] = defaultdict(list)
-        self._subcircuit_defs: Dict[str, List[str]] = {}
-        self._model_defs: Dict[str, str] = {}
+        self._node_map: dict[str, str] = {}
+        self._component_map: dict[str, list[str]] = defaultdict(list)
+        self._subcircuit_defs: dict[str, list[str]] = {}
+        self._model_defs: dict[str, str] = {}
 
         _logger.info(
             "NetlistOptimizer initialized with level: %s", self.config.level.value
         )
 
-    def optimize_netlist(self, netlist_content: str) -> Tuple[str, OptimizationResult]:
+    def optimize_netlist(self, netlist_content: str) -> tuple[str, OptimizationResult]:
         """Optimize a SPICE netlist.
 
         Args:
@@ -195,7 +194,7 @@ class NetlistOptimizer:
         Returns:
             OptimizationResult
         """
-        with open(input_file, "r", encoding="utf-8") as f:
+        with open(input_file, encoding="utf-8") as f:
             content = f.read()
 
         optimized_content, result = self.optimize_netlist(content)
@@ -207,7 +206,7 @@ class NetlistOptimizer:
 
         return result
 
-    def _parse_netlist(self, lines: List[str]) -> None:
+    def _parse_netlist(self, lines: list[str]) -> None:
         """Parse netlist structure for optimization."""
         self._node_map.clear()
         self._component_map.clear()
@@ -246,11 +245,11 @@ class NetlistOptimizer:
                 comp_type = line[0].upper()
                 self._component_map[comp_type].append(line)
 
-    def _remove_comments(self, lines: List[str]) -> List[str]:
+    def _remove_comments(self, lines: list[str]) -> list[str]:
         """Remove comment lines."""
         return [line for line in lines if not line.strip().startswith("*")]
 
-    def _remove_small_parasitics(self, lines: List[str]) -> Tuple[List[str], int]:
+    def _remove_small_parasitics(self, lines: list[str]) -> tuple[list[str], int]:
         """Remove small parasitic components."""
         from ..editor.base_editor import scan_eng
 
@@ -278,7 +277,7 @@ class NetlistOptimizer:
 
         return filtered_lines, removed_count
 
-    def _remove_dangling_components(self, lines: List[str]) -> Tuple[List[str], int]:
+    def _remove_dangling_components(self, lines: list[str]) -> tuple[list[str], int]:
         """Remove components with unconnected nodes."""
         # First, collect all nodes
         set(["0", "GND"])  # Ground nodes
@@ -291,15 +290,7 @@ class NetlistOptimizer:
                 comp_type = line[0].upper()
 
                 # Extract nodes based on component type
-                if comp_type in "RCL":
-                    if len(parts) >= 3:
-                        node_connections[parts[1]] += 1
-                        node_connections[parts[2]] += 1
-                elif comp_type in "VI":
-                    if len(parts) >= 3:
-                        node_connections[parts[1]] += 1
-                        node_connections[parts[2]] += 1
-                elif comp_type == "D":
+                if comp_type in "RCL" or comp_type in "VI" or comp_type == "D":
                     if len(parts) >= 3:
                         node_connections[parts[1]] += 1
                         node_connections[parts[2]] += 1
@@ -337,9 +328,9 @@ class NetlistOptimizer:
 
         return filtered_lines, removed_count
 
-    def _merge_components(self, lines: List[str]) -> Tuple[List[str], int]:
+    def _merge_components(self, lines: list[str]) -> tuple[list[str], int]:
         """Merge series resistors and parallel capacitors."""
-        from ..editor.base_editor import scan_eng, format_eng
+        from ..editor.base_editor import format_eng, scan_eng
 
         merged_count = 0
 
@@ -404,14 +395,14 @@ class NetlistOptimizer:
         for i, line in enumerate(lines):
             if i in lines_to_remove:
                 continue
-            elif i in lines_to_modify:
+            if i in lines_to_modify:
                 result_lines.append(lines_to_modify[i])
             else:
                 result_lines.append(line)
 
         return result_lines, merged_count
 
-    def _simplify_models(self, lines: List[str]) -> Tuple[List[str], int]:
+    def _simplify_models(self, lines: list[str]) -> tuple[list[str], int]:
         """Simplify device models by removing less significant parameters."""
         simplified_count = 0
 
@@ -462,14 +453,14 @@ class NetlistOptimizer:
 
         return result_lines, simplified_count
 
-    def _flatten_subcircuits(self, lines: List[str]) -> Tuple[List[str], int]:
+    def _flatten_subcircuits(self, lines: list[str]) -> tuple[list[str], int]:
         """Flatten simple subcircuits inline."""
         # This is a complex operation that would require full netlist parsing
         # For now, we'll just return the original lines
         _logger.warning("Subcircuit flattening not yet implemented")
         return lines, 0
 
-    def _optimize_node_order(self, lines: List[str]) -> List[str]:
+    def _optimize_node_order(self, lines: list[str]) -> list[str]:
         """Optimize node ordering for better matrix structure."""
         # This would require sophisticated graph analysis
         # For now, we'll just ensure ground node is first
@@ -493,7 +484,7 @@ class NetlistOptimizer:
 
         return result_lines
 
-    def _compress_node_names(self, lines: List[str]) -> Tuple[List[str], int]:
+    def _compress_node_names(self, lines: list[str]) -> tuple[list[str], int]:
         """Compress node names to shorter versions."""
         # Build node mapping
         node_map = {"0": "0", "GND": "0"}  # Keep ground as-is
@@ -534,7 +525,7 @@ class NetlistOptimizer:
 
     def analyze_optimization_impact(
         self, original: str, optimized: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Analyze the impact of optimization on the netlist.
 
         Args:
@@ -544,7 +535,7 @@ class NetlistOptimizer:
         Returns:
             Dictionary with impact analysis
         """
-        analysis: Dict[str, Any] = {
+        analysis: dict[str, Any] = {
             "size_reduction": len(original) - len(optimized),
             "size_reduction_pct": (1 - len(optimized) / len(original)) * 100
             if len(original) > 0

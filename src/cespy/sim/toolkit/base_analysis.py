@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Enhanced base classes for circuit simulation analysis.
 
 This module provides improved base classes that extract common patterns
@@ -11,11 +10,12 @@ import logging
 import time
 from abc import abstractmethod
 from collections import defaultdict
+from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -44,15 +44,15 @@ class AnalysisResult:  # pylint: disable=too-many-instance-attributes
     run_id: int
     status: AnalysisStatus
     start_time: float = field(default_factory=time.time)
-    end_time: Optional[float] = None
-    measurements: Dict[str, Any] = field(default_factory=dict)
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    error_message: Optional[str] = None
-    raw_file: Optional[Path] = None
-    log_file: Optional[Path] = None
+    end_time: float | None = None
+    measurements: dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
+    error_message: str | None = None
+    raw_file: Path | None = None
+    log_file: Path | None = None
 
     @property
-    def duration(self) -> Optional[float]:
+    def duration(self) -> float | None:
         """Get run duration in seconds."""
         if self.end_time:
             return self.end_time - self.start_time
@@ -67,7 +67,7 @@ class AnalysisResult:  # pylint: disable=too-many-instance-attributes
 class ProgressReporter:  # pylint: disable=too-few-public-methods
     """Interface for progress reporting during analysis."""
 
-    def __init__(self, callback: Optional[Callable[[int, int, str], None]] = None):
+    def __init__(self, callback: Callable[[int, int, str], None] | None = None):
         """Initialize progress reporter.
 
         Args:
@@ -123,8 +123,8 @@ class ProgressReporter:  # pylint: disable=too-few-public-methods
         if seconds < 60:
             return f"{seconds:.0f}s"
         if seconds < 3600:
-            return f"{seconds/60:.1f}m"
-        return f"{seconds/3600:.1f}h"
+            return f"{seconds / 60:.1f}m"
+        return f"{seconds / 3600:.1f}h"
 
 
 class BaseAnalysis(SimAnalysis):
@@ -132,11 +132,11 @@ class BaseAnalysis(SimAnalysis):
 
     def __init__(
         self,
-        circuit_file: Union[str, BaseEditor],
-        runner: Optional[AnyRunner] = None,
+        circuit_file: str | BaseEditor,
+        runner: AnyRunner | None = None,
         parallel: bool = False,
-        max_workers: Optional[int] = None,
-        progress_callback: Optional[Callable[[int, int, str], None]] = None,
+        max_workers: int | None = None,
+        progress_callback: Callable[[int, int, str], None] | None = None,
     ):
         """Initialize base analysis.
 
@@ -154,15 +154,15 @@ class BaseAnalysis(SimAnalysis):
         self.progress_reporter = ProgressReporter(progress_callback)
 
         # Results storage
-        self.results: List[AnalysisResult] = []
-        self._result_cache: Dict[int, AnalysisResult] = {}
+        self.results: list[AnalysisResult] = []
+        self._result_cache: dict[int, AnalysisResult] = {}
 
         # Execution control
-        self._executor: Optional[Union[ThreadPoolExecutor, ProcessPoolExecutor]] = None
+        self._executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
         self._cancelled = False
 
     @abstractmethod
-    def prepare_runs(self) -> List[Dict[str, Any]]:
+    def prepare_runs(self) -> list[dict[str, Any]]:
         """Prepare parameter sets for all runs.
 
         Returns:
@@ -171,7 +171,7 @@ class BaseAnalysis(SimAnalysis):
         ...
 
     @abstractmethod
-    def apply_parameters(self, parameters: Dict[str, Any]) -> None:
+    def apply_parameters(self, parameters: dict[str, Any]) -> None:
         """Apply parameters to the circuit.
 
         Args:
@@ -180,7 +180,7 @@ class BaseAnalysis(SimAnalysis):
         ...
 
     @abstractmethod
-    def extract_results(self, run_task: RunTask) -> Dict[str, Any]:
+    def extract_results(self, run_task: RunTask) -> dict[str, Any]:
         """Extract measurements from a completed run.
 
         Args:
@@ -191,7 +191,7 @@ class BaseAnalysis(SimAnalysis):
         """
         ...
 
-    def run_analysis(self) -> List[AnalysisResult]:
+    def run_analysis(self) -> list[AnalysisResult]:
         """Run the complete analysis.
 
         Returns:
@@ -223,8 +223,8 @@ class BaseAnalysis(SimAnalysis):
         return results
 
     def _run_sequential(
-        self, all_parameters: List[Dict[str, Any]]
-    ) -> List[AnalysisResult]:
+        self, all_parameters: list[dict[str, Any]]
+    ) -> list[AnalysisResult]:
         """Run analysis sequentially."""
         results = []
 
@@ -244,8 +244,8 @@ class BaseAnalysis(SimAnalysis):
         return results
 
     def _run_parallel(
-        self, all_parameters: List[Dict[str, Any]]
-    ) -> List[AnalysisResult]:
+        self, all_parameters: list[dict[str, Any]]
+    ) -> list[AnalysisResult]:
         """Run analysis in parallel."""
         results = []
 
@@ -288,7 +288,7 @@ class BaseAnalysis(SimAnalysis):
 
         return results
 
-    def _run_single(self, run_id: int, parameters: Dict[str, Any]) -> AnalysisResult:
+    def _run_single(self, run_id: int, parameters: dict[str, Any]) -> AnalysisResult:
         """Run a single simulation with given parameters."""
         result = AnalysisResult(
             run_id=run_id, status=AnalysisStatus.RUNNING, parameters=parameters.copy()
@@ -337,7 +337,7 @@ class BaseAnalysis(SimAnalysis):
         self._cancelled = True
         _logger.info("Analysis cancelled")
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get analysis statistics.
 
         Returns:
@@ -381,9 +381,9 @@ class StatisticalAnalysis(BaseAnalysis):
 
     def __init__(
         self,
-        circuit_file: Union[str, BaseEditor],
+        circuit_file: str | BaseEditor,
         num_runs: int = 1000,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize statistical analysis.
@@ -402,7 +402,7 @@ class StatisticalAnalysis(BaseAnalysis):
         if seed is not None:
             np.random.seed(seed)
 
-    def calculate_statistics(self, measurement_name: str) -> Dict[str, float]:
+    def calculate_statistics(self, measurement_name: str) -> dict[str, float]:
         """Calculate statistics for a measurement across all runs.
 
         Args:
@@ -439,8 +439,8 @@ class StatisticalAnalysis(BaseAnalysis):
         }
 
     def get_histogram_data(
-        self, measurement_name: str, bins: Union[int, str] = "auto"
-    ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
+        self, measurement_name: str, bins: int | str = "auto"
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Get histogram data for a measurement.
 
         Args:
@@ -464,8 +464,8 @@ class StatisticalAnalysis(BaseAnalysis):
         return np.histogram(values, bins=bins)
 
     def get_correlation_matrix(
-        self, measurement_names: List[str]
-    ) -> Tuple[NDArray[np.floating[Any]], List[str]]:
+        self, measurement_names: list[str]
+    ) -> tuple[NDArray[np.floating[Any]], list[str]]:
         """Calculate correlation matrix between measurements.
 
         Args:
@@ -475,7 +475,7 @@ class StatisticalAnalysis(BaseAnalysis):
             Tuple of (correlation_matrix, valid_measurements)
         """
         # Collect data for each measurement
-        data_dict: Dict[str, List[float]] = {name: [] for name in measurement_names}
+        data_dict: dict[str, list[float]] = {name: [] for name in measurement_names}
 
         for result in self.results:
             if result.success:
@@ -516,8 +516,8 @@ class ParametricAnalysis(BaseAnalysis):
 
     def __init__(
         self,
-        circuit_file: Union[str, BaseEditor],
-        parameters: Dict[str, List[Any]],
+        circuit_file: str | BaseEditor,
+        parameters: dict[str, list[Any]],
         **kwargs: Any,
     ) -> None:
         """Initialize parametric analysis.
@@ -593,7 +593,7 @@ class ParametricAnalysis(BaseAnalysis):
 
     def get_response_surface(
         self, param1_name: str, param2_name: str, measurement_name: str
-    ) -> Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
         """Get 2D response surface for two parameters.
 
         Args:
@@ -631,7 +631,7 @@ class ParametricAnalysis(BaseAnalysis):
         meas_grid = np.full(param1_grid.shape, np.nan)
 
         # Fill grid
-        for p1, p2, m in zip(param1_vals, param2_vals, meas_vals):
+        for p1, p2, m in zip(param1_vals, param2_vals, meas_vals, strict=False):
             i = param2_unique.index(p2)
             j = param1_unique.index(p1)
             meas_grid[i, j] = m

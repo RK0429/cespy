@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Sensitivity analysis module for SPICE simulations.
 
 This module provides classes and utilities to perform quick sensitivity analysis
@@ -26,7 +25,8 @@ from __future__ import annotations
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from collections.abc import Callable
+from typing import Any
 
 from ...log.logfile_data import LogfileData
 from ..sim_runner import ProcessCallback
@@ -73,7 +73,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
 
     def get_sensitivity_data(
         self, ref: str, measure: str
-    ) -> Union[float, Dict[str, float], None]:
+    ) -> float | dict[str, float] | None:
         """Returns the sensitivity data for a given component and measurement in terms
         of percentage of the total error.
 
@@ -93,13 +93,13 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
             component
         """
         if (
-            self.testbench.prepared
-            and self.testbench.executed
+            (self.testbench.prepared
+            and self.testbench.executed)
             or self.testbench.analysis_executed
         ):
             log_data: LogfileData = self.read_logfiles()
             nominal_data = log_data.get_measure_value(measure, run=-1)
-            error_data: List[float] = []
+            error_data: list[float] = []
             for idx in range(len(self.elements_analysed)):
                 step_data = log_data.get_measure_value(measure, run=idx)
                 # Convert data to float to ensure proper subtraction
@@ -133,21 +133,13 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
 
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
         exe_log: bool = True,
-        measure: Optional[str] = None,
-    ) -> Optional[
-        Tuple[
-            float,
-            float,
-            Dict[str, Union[str, float]],
-            float,
-            Dict[str, Union[str, float]],
-        ]
-    ]:
+        measure: str | None = None,
+    ) -> tuple[float, float, dict[str, str | float], float, dict[str, str | float]] | None:
         self.clear_simulation_data()
         self.elements_analysed.clear()
         del measure  # unused measure parameter
@@ -267,7 +259,7 @@ class QuickSensitivityAnalysis(ToleranceDeviations):
         # Force already the reading of logfiles
         log_data: LogfileData = self.read_logfiles()
         # if applicable, the run parameter shall be transformed into an int
-        runs: List[Any] = []
+        runs: list[Any] = []
 
         # Access dataset safely
         if hasattr(log_data, "dataset"):

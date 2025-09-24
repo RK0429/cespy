@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Tolerance deviation handling for circuit analysis.
 
 This module provides base classes and utilities for managing component tolerances
@@ -26,19 +25,11 @@ from __future__ import annotations
 # Licence:     refer to the LICENSE file
 # -------------------------------------------------------------------------------
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
 from enum import Enum
 from typing import (
     Any,
-    Callable,
-    Dict,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    Union,
     cast,
 )
 
@@ -124,19 +115,19 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
     def __init__(
         self,
-        circuit_file: Union[str, BaseEditor],
-        runner: Optional[AnyRunner] = None,
+        circuit_file: str | BaseEditor,
+        runner: AnyRunner | None = None,
     ):
         super().__init__(circuit_file, runner)
         self.default_tolerance = {
             prefix: ComponentDeviation.none()
             for prefix in self.devices_with_deviation_allowed
         }
-        self.device_deviations: Dict[str, ComponentDeviation] = {}
-        self.parameter_deviations: Dict[str, ComponentDeviation] = {}
+        self.device_deviations: dict[str, ComponentDeviation] = {}
+        self.parameter_deviations: dict[str, ComponentDeviation] = {}
         self.testbench = TestbenchState()
-        self.simulation_results: Dict[str, Any] = {}
-        self.elements_analysed: List[str] = []
+        self.simulation_results: dict[str, Any] = {}
+        self.elements_analysed: list[str] = []
 
     def reset_tolerances(self) -> None:
         """Clears all the settings for the simulation."""
@@ -163,14 +154,13 @@ class ToleranceDeviations(SimAnalysis, ABC):
             self.default_tolerance[ref] = ComponentDeviation.from_tolerance(
                 new_tolerance, distribution
             )
-        else:
-            if ref in self.editor.get_components(ref[0]):
-                self.device_deviations[ref] = ComponentDeviation.from_tolerance(
-                    new_tolerance, distribution
-                )
+        elif ref in self.editor.get_components(ref[0]):
+            self.device_deviations[ref] = ComponentDeviation.from_tolerance(
+                new_tolerance, distribution
+            )
 
     def set_tolerances(
-        self, new_tolerances: Dict[str, float], distribution: str = "uniform"
+        self, new_tolerances: dict[str, float], distribution: str = "uniform"
     ) -> None:
         """Sets the tolerances for a set of components.
 
@@ -217,7 +207,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
     def get_component_value_deviation_type(
         self, ref: str
-    ) -> Tuple[Union[str, float], ComponentDeviation]:
+    ) -> tuple[str | float, ComponentDeviation]:
         """Get the value and deviation type for a component.
 
         Args:
@@ -265,7 +255,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
 
     def get_parameter_value_deviation_type(
         self, param: str
-    ) -> Tuple[Any, ComponentDeviation]:
+    ) -> tuple[Any, ComponentDeviation]:
         """Get the value and deviation type for a parameter.
 
         Args:
@@ -310,13 +300,13 @@ class ToleranceDeviations(SimAnalysis, ABC):
         *,
         runs_per_sim: int = 512,
         wait_resource: bool = True,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
-        run_filename: Optional[str] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
+        run_filename: str | None = None,
         exe_log: bool = False,
-    ) -> Optional[Iterator[Any]]:
+    ) -> Iterator[Any] | None:
         """Run the simulation testbench with specified parameters.
 
         :param runs_per_sim: Maximum number of runs per simulation. If the number of
@@ -412,7 +402,7 @@ class ToleranceDeviations(SimAnalysis, ABC):
         self.testbench.executed = True
         return None
 
-    def add_log(self, run_task: RunTask) -> Optional[LogfileData]:
+    def add_log(self, run_task: RunTask) -> LogfileData | None:
         """Reads a log file and adds it to the simulation_results.
 
         It does so making sure that the run number is correctly set.
@@ -491,13 +481,12 @@ class ToleranceDeviations(SimAnalysis, ABC):
                         }
                     else:
                         self.log_data.stepset = {"run": dataset["runm"]}
-                else:
-                    # auto assign a step starting from 0 and incrementing by 1
-                    # will use the size of the first element found in the
-                    # dataset
-                    if dataset and len(dataset) > 0:
-                        any_meas = next(iter(dataset.values()))
-                        self.log_data.stepset = {"run": list(range(len(any_meas)))}
+                # auto assign a step starting from 0 and incrementing by 1
+                # will use the size of the first element found in the
+                # dataset
+                elif dataset and len(dataset) > 0:
+                    any_meas = next(iter(dataset.values()))
+                    self.log_data.stepset = {"run": list(range(len(any_meas)))}
 
                 if hasattr(self.log_data, "step_count"):
                     self.log_data.step_count = len(self.log_data.stepset)
@@ -509,21 +498,13 @@ class ToleranceDeviations(SimAnalysis, ABC):
     # pylint: disable=too-many-positional-arguments
     def run_analysis(
         self,
-        callback: Optional[Union[Type[ProcessCallback], Callable[..., Any]]] = None,
-        callback_args: Optional[Union[Tuple[Any, ...], Dict[str, Any]]] = None,
-        switches: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
+        callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+        callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+        switches: list[str] | None = None,
+        timeout: float | None = None,
         exe_log: bool = True,
-        measure: Optional[str] = None,
-    ) -> Optional[
-        Tuple[
-            float,
-            float,
-            Dict[str, Union[str, float]],
-            float,
-            Dict[str, Union[str, float]],
-        ]
-    ]:
+        measure: str | None = None,
+    ) -> tuple[float, float, dict[str, str | float], float, dict[str, str | float]] | None:
         """Run the tolerance analysis.
 
         This abstract method must be implemented by subclasses to perform the actual

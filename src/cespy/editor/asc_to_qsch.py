@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 """ASC to QSCH schematic converter."""
 

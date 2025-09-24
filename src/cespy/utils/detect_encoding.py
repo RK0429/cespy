@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 # -------------------------------------------------------------------------------
 #
@@ -28,7 +27,6 @@ LTSpice only supports for the time being a reduced set of encodings.
 
 import re
 from pathlib import Path
-from typing import Union
 
 # Core imports
 from ..core import constants as core_constants
@@ -39,9 +37,9 @@ class EncodingDetectError(Exception):
 
 
 def detect_encoding(
-    file_path: Union[str, Path],
+    file_path: str | Path,
     expected_pattern: str = "",
-    re_flags: Union[int, re.RegexFlag] = 0,
+    re_flags: int | re.RegexFlag = 0,
 ) -> str:
     """Simple strategy to detect file encoding.  If an expected_str is given the
     function will scan through the possible encodings and return a match. If an expected
@@ -64,7 +62,7 @@ def detect_encoding(
         core_constants.Encodings.SHIFT_JIS,
     ):
         try:
-            with open(file_path, "r", encoding=encoding) as f:
+            with open(file_path, encoding=encoding) as f:
                 lines = f.read()
                 f.seek(0)
         except UnicodeDecodeError:

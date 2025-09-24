@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 # -------------------------------------------------------------------------------
 #
@@ -21,7 +20,8 @@
 """Defines base classes for the RAW file data structures."""
 from __future__ import annotations
 
-from typing import Any, Dict, Iterator, List, Optional, Union, cast
+from collections.abc import Iterator
+from typing import Any, cast
 
 import numpy as np
 from numpy import complex128, float32, float64, zeros
@@ -73,7 +73,7 @@ class DataSet:
     def __iter__(self) -> Iterator[np.generic]:
         return iter(self.data)
 
-    def __getitem__(self, item: int) -> Union[float, complex]:
+    def __getitem__(self, item: int) -> float | complex:
         val = self.data[item]
         if self.numerical_type == "complex":
             return complex(val)
@@ -110,10 +110,10 @@ class Axis(DataSet):
         numerical_type: str = "double",
     ) -> None:
         super().__init__(name, whattype, datalen, numerical_type)
-        self.step_info: Optional[List[Dict[str, Any]]] = None
-        self.step_offsets: List[Optional[int]] = []
+        self.step_info: list[dict[str, Any]] | None = None
+        self.step_offsets: list[int | None] = []
 
-    def _set_steps(self, step_info: List[Dict[str, Any]]) -> None:
+    def _set_steps(self, step_info: list[dict[str, Any]]) -> None:
         self.step_info = step_info
 
         self.step_offsets = [None for _ in range(len(step_info))]
@@ -197,7 +197,7 @@ class Axis(DataSet):
         )
         return self.get_wave(step)
 
-    def get_point(self, n: int, step: int = 0) -> Union[float, complex]:
+    def get_point(self, n: int, step: int = 0) -> float | complex:
         """Get a point from the dataset.
 
         :param n: position on the vector
@@ -212,7 +212,7 @@ class Axis(DataSet):
             return complex(val)
         return float(val)
 
-    def __getitem__(self, item: int) -> Union[float, complex]:
+    def __getitem__(self, item: int) -> float | complex:
         """This is only here for compatibility with previous code."""
         assert (
             self.step_info is None
@@ -222,7 +222,7 @@ class Axis(DataSet):
             return complex(val)
         return float(val)
 
-    def get_position(self, t: float, step: int = 0) -> Union[int, float]:
+    def get_position(self, t: float, step: int = 0) -> int | float:
         """Returns the position of a point in the axis. If the point doesn't exist, an
         interpolation is done between the two closest points. For example, if the point
         requested is 1.0001ms and the closest points that exist in the axis are
@@ -247,7 +247,7 @@ class Axis(DataSet):
                 # Needs to interpolate the data
                 if i == 0:
                     raise IndexError("Time position is lower than t0")
-                frac = (t - timex[i - 1]) / (timex[i] - timex[i - 1])
+                frac = (t - timex[i - 1]) / (x - timex[i - 1])
                 return (i - 1) + float(frac)
         # Handle case where t is greater than all values in timex
         raise IndexError(f"Value {t} is greater than the maximum value in the axis")
@@ -289,13 +289,13 @@ class TraceRead(DataSet):
         name: str,
         whattype: str,
         datalen: int,
-        axis: Optional[Axis],
+        axis: Axis | None,
         numerical_type: str = "real",
     ) -> None:
         super().__init__(name, whattype, datalen, numerical_type)
         self.axis = axis
 
-    def get_point(self, n: int, step: int = 0) -> Union[float, complex]:
+    def get_point(self, n: int, step: int = 0) -> float | complex:
         """Implementation of the [] operator.
 
         :param n: item in the array
@@ -317,7 +317,7 @@ class TraceRead(DataSet):
             return complex(val)
         return float(val)
 
-    def __getitem__(self, item: int) -> Union[float, complex]:
+    def __getitem__(self, item: int) -> float | complex:
         """This is only here for compatibility with previous code."""
         assert (
             self.axis is None or self.axis.step_info is None
@@ -347,7 +347,7 @@ class TraceRead(DataSet):
             return self.data[: self.axis.step_offset(1)]
         return self.data[self.axis.step_offset(step) : self.axis.step_offset(step + 1)]
 
-    def get_point_at(self, t: float, step: int = 0) -> Union[float, complex]:
+    def get_point_at(self, t: float, step: int = 0) -> float | complex:
         """Get a point from the trace at the point specified by the /t/ argument. If the
         point doesn't exist on the axis, the data is interpolated using a linear
         regression between the two adjacent points.

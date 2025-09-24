@@ -29,12 +29,12 @@ License: GPL-3.0
 # -------------------------------------------------------------------------------
 
 import math
-from typing import Iterable, Optional, Union
+from collections.abc import Iterable
 
 __author__ = "Nuno Canto Brum <nuno.brum@gmail.com>"
 __copyright__ = "Copyright 2021, Fribourg Switzerland"
 
-__all__ = ["sweep", "sweep_lin", "sweep_n", "sweep_log", "sweep_log_n"]
+__all__ = ["sweep", "sweep_lin", "sweep_log", "sweep_log_n", "sweep_n"]
 
 
 class BaseIterator:
@@ -42,13 +42,13 @@ class BaseIterator:
 
     def __init__(
         self,
-        start: Union[int, float],
-        stop: Optional[Union[int, float]] = None,
-        step: Union[int, float] = 1,
+        start: int | float,
+        stop: int | float | None = None,
+        step: int | float = 1,
     ):
-        self.start: Union[int, float]
-        self.stop: Union[int, float]
-        self.step: Union[int, float] = step
+        self.start: int | float
+        self.stop: int | float
+        self.step: int | float = step
 
         if stop is None:
             self.stop = start
@@ -62,7 +62,7 @@ class BaseIterator:
         self.finished = False
         return self
 
-    def __next__(self) -> Union[int, float]:
+    def __next__(self) -> int | float:
         raise NotImplementedError("This function needs to be overriden")
 
 
@@ -82,9 +82,9 @@ class Sweep(BaseIterator):
 
     def __init__(
         self,
-        start: Union[int, float],
-        stop: Optional[Union[int, float]] = None,
-        step: Union[int, float] = 1,
+        start: int | float,
+        stop: int | float | None = None,
+        step: int | float = 1,
     ):
         super().__init__(start, stop, step)
         assert step != 0, "Step cannot be 0"
@@ -101,7 +101,7 @@ class Sweep(BaseIterator):
         self.niter = 0
         return self
 
-    def __next__(self) -> Union[int, float]:
+    def __next__(self) -> int | float:
         val = self.start + self.niter * self.step
         self.niter += 1
         if (self.step > 0 and val <= self.stop) or (self.step < 0 and val >= self.stop):
@@ -111,7 +111,7 @@ class Sweep(BaseIterator):
 
 
 def sweep_n(
-    start: Union[int, float], stop: Union[int, float], n: int
+    start: int | float, stop: int | float, n: int
 ) -> Iterable[float]:
     """Helper function. Generator function that generates a 'N' number of points between
     a start and a stop interval.
@@ -145,15 +145,15 @@ class SweepLog(BaseIterator):
 
     def __init__(
         self,
-        start: Union[int, float],
-        stop: Optional[Union[int, float]] = None,
-        step: Union[int, float] = 10,
+        start: int | float,
+        stop: int | float | None = None,
+        step: int | float = 10,
     ):
         if stop is None:
             stop = start
             start = 1
         # Ensure step is not None before using it
-        actual_step: Union[int, float] = step if step is not None else 10
+        actual_step: int | float = step if step is not None else 10
         super().__init__(start, stop, actual_step)
         assert (
             actual_step != 1 and actual_step > 0
@@ -169,7 +169,7 @@ class SweepLog(BaseIterator):
         self.val = self.start
         return self
 
-    def __next__(self) -> Union[int, float]:
+    def __next__(self) -> int | float:
         val = self.val  # Store previous value
         self.val *= self.step  # Calculate the next item
         if (self.start < self.stop and val <= self.stop) or (
@@ -194,8 +194,8 @@ class SweepLogN(BaseIterator):
 
     def __init__(
         self,
-        start: Union[int, float],
-        stop: Union[int, float],
+        start: int | float,
+        stop: int | float,
         number_of_elements: int,
     ):
         # Ensure stop is not None before using it in division
@@ -211,7 +211,7 @@ class SweepLogN(BaseIterator):
         self.niter = 0
         return self
 
-    def __next__(self) -> Union[int, float]:
+    def __next__(self) -> int | float:
         if self.niter < self.stop:
             val = self.start * (self.step**self.niter)
             self.niter += 1

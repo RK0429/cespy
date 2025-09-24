@@ -5,7 +5,6 @@ This module contains all constants, magic strings, and default values used
 throughout the cespy library to improve maintainability and consistency.
 """
 
-from typing import List
 
 # File extensions
 
@@ -281,8 +280,8 @@ class ServerConstants:  # pylint: disable=too-few-public-methods
 
 
 # Supported simulators and file extensions mapping
-SUPPORTED_SIMULATORS: List[str] = Simulators.ALL
-SPICE_EXTENSIONS: List[str] = FileExtensions.ALL_EXTENSIONS
+SUPPORTED_SIMULATORS: list[str] = Simulators.ALL
+SPICE_EXTENSIONS: list[str] = FileExtensions.ALL_EXTENSIONS
 
 # Default values export
 DEFAULT_ENCODING: str = Encodings.DEFAULT

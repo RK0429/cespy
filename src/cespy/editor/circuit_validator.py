@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Circuit validation functionality.
 
 This module provides comprehensive validation for circuit schematics
@@ -9,10 +8,11 @@ and netlists, checking for common errors and potential simulation issues.
 import logging
 import re
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any
 
 from ..core import patterns as core_patterns
 
@@ -32,17 +32,17 @@ class ValidationIssue:
     """A single validation issue."""
 
     level: ValidationLevel
-    component: Optional[str]
+    component: str | None
     message: str
-    location: Optional[str] = None
-    suggestion: Optional[str] = None
+    location: str | None = None
+    suggestion: str | None = None
 
 
 @dataclass
 class ValidationResult:
     """Result of circuit validation."""
 
-    issues: List[ValidationIssue] = field(default_factory=list)
+    issues: list[ValidationIssue] = field(default_factory=list)
 
     @property
     def is_valid(self) -> bool:
@@ -66,10 +66,10 @@ class ValidationResult:
 
     def add_error(
         self,
-        component: Optional[str],
+        component: str | None,
         message: str,
-        location: Optional[str] = None,
-        suggestion: Optional[str] = None,
+        location: str | None = None,
+        suggestion: str | None = None,
     ) -> None:
         """Add an error."""
         self.issues.append(
@@ -84,10 +84,10 @@ class ValidationResult:
 
     def add_warning(
         self,
-        component: Optional[str],
+        component: str | None,
         message: str,
-        location: Optional[str] = None,
-        suggestion: Optional[str] = None,
+        location: str | None = None,
+        suggestion: str | None = None,
     ) -> None:
         """Add a warning."""
         self.issues.append(
@@ -101,7 +101,7 @@ class ValidationResult:
         )
 
     def add_info(
-        self, component: Optional[str], message: str, location: Optional[str] = None
+        self, component: str | None, message: str, location: str | None = None
     ) -> None:
         """Add an info message."""
         self.issues.append(
@@ -137,9 +137,9 @@ class CircuitValidator:
 
     def __init__(self) -> None:
         """Initialize circuit validator."""
-        self._model_library: Set[str] = set()
-        self._custom_rules: List[Callable[..., Any]] = []
-        self._known_subcircuits: Set[str] = set()
+        self._model_library: set[str] = set()
+        self._custom_rules: list[Callable[..., Any]] = []
+        self._known_subcircuits: set[str] = set()
 
         _logger.info("CircuitValidator initialized")
 
@@ -170,7 +170,7 @@ class CircuitValidator:
         return result
 
     def validate_component(
-        self, component_type: str, name: str, value: str, nodes: List[str]
+        self, component_type: str, name: str, value: str, nodes: list[str]
     ) -> ValidationResult:
         """Validate a single component.
 
@@ -208,7 +208,7 @@ class CircuitValidator:
 
         return result
 
-    def add_model_library(self, model_names: Union[str, List[str]]) -> None:
+    def add_model_library(self, model_names: str | list[str]) -> None:
         """Add known model names to the library.
 
         Args:
@@ -238,14 +238,14 @@ class CircuitValidator:
 
     def _parse_netlist(
         self, netlist_content: str
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], Set[str]]:
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], set[str]]:
         """Parse netlist into components and directives.
 
         Returns:
             Tuple of (components, directives, nodes)
         """
-        components: List[Dict[str, Any]] = []
-        directives: List[Dict[str, Any]] = []
+        components: list[dict[str, Any]] = []
+        directives: list[dict[str, Any]] = []
         nodes = set()
 
         lines = netlist_content.strip().split("\n")
@@ -303,7 +303,7 @@ class CircuitValidator:
 
         return components, directives, nodes
 
-    def _extract_component_nodes(self, comp_type: str, parts: List[str]) -> List[str]:
+    def _extract_component_nodes(self, comp_type: str, parts: list[str]) -> list[str]:
         """Extract node names from component definition."""
         # Node count based on component type
         node_counts = {
@@ -334,8 +334,8 @@ class CircuitValidator:
         return parts[1 : count + 1] if count > 0 else []
 
     def _extract_component_value(
-        self, comp_type: str, parts: List[str]
-    ) -> Optional[str]:
+        self, comp_type: str, parts: list[str]
+    ) -> str | None:
         """Extract component value from definition."""
         if comp_type in "RCL":
             # Simple passive components
@@ -352,13 +352,13 @@ class CircuitValidator:
 
     def _check_connectivity(
         self,
-        components: List[Dict[str, Any]],
-        nodes: Set[str],
+        components: list[dict[str, Any]],
+        nodes: set[str],
         result: ValidationResult,
     ) -> None:
         """Check circuit connectivity."""
         # Count connections per node
-        node_connections: Dict[str, int] = defaultdict(int)
+        node_connections: dict[str, int] = defaultdict(int)
         for comp in components:
             for node in comp["nodes"]:
                 node_connections[node] += 1
@@ -386,7 +386,7 @@ class CircuitValidator:
                 result.add_error(comp["name"], "Component has no node connections")
 
     def _check_component_values(
-        self, components: List[Dict[str, Any]], result: ValidationResult
+        self, components: list[dict[str, Any]], result: ValidationResult
     ) -> None:
         """Check component values."""
         for comp in components:
@@ -435,7 +435,7 @@ class CircuitValidator:
                             )
 
     def _check_models(
-        self, components: List[Dict[str, Any]], result: ValidationResult
+        self, components: list[dict[str, Any]], result: ValidationResult
     ) -> None:
         """Check model references."""
         for comp in components:
@@ -461,7 +461,7 @@ class CircuitValidator:
                         )
 
     def _check_directives(
-        self, directives: List[Dict[str, Any]], result: ValidationResult
+        self, directives: list[dict[str, Any]], result: ValidationResult
     ) -> None:
         """Check simulation directives."""
         # Track what analyses are defined
@@ -523,8 +523,8 @@ class CircuitValidator:
 
     def _check_common_mistakes(
         self,
-        components: List[Dict[str, Any]],
-        directives: List[Dict[str, Any]],
+        components: list[dict[str, Any]],
+        directives: list[dict[str, Any]],
         result: ValidationResult,
     ) -> None:
         """Check for common circuit mistakes."""
@@ -571,8 +571,8 @@ class CircuitValidator:
 
     def _check_custom_rules(
         self,
-        components: List[Dict[str, Any]],
-        directives: List[Dict[str, Any]],
+        components: list[dict[str, Any]],
+        directives: list[dict[str, Any]],
         result: ValidationResult,
     ) -> None:
         """Run custom validation rules."""
@@ -582,7 +582,7 @@ class CircuitValidator:
             except Exception as e:
                 _logger.error("Error in custom rule: %s", e)
 
-    def _get_expected_node_count(self, comp_type: str) -> Optional[int]:
+    def _get_expected_node_count(self, comp_type: str) -> int | None:
         """Get expected node count for component type."""
         node_counts = {
             "R": 2,
@@ -607,7 +607,7 @@ class CircuitValidator:
             return bool(re.match(core_patterns.FLOAT_NUMBER_PATTERN, value))
         return True  # Other components have complex value formats
 
-    def _parse_spice_value(self, value: str) -> Optional[float]:
+    def _parse_spice_value(self, value: str) -> float | None:
         """Parse SPICE value to float."""
         try:
             # Remove any trailing units

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Component factory for creating circuit component objects.
 
 This module provides a factory pattern implementation for creating
@@ -10,7 +9,8 @@ schematic formats.
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Pattern, Type, Union
+from re import Pattern
+from typing import Any
 
 from ..core import patterns as core_patterns
 from ..exceptions import InvalidComponentError
@@ -54,12 +54,12 @@ class ComponentTemplate:
 
     component_type: ComponentType
     prefix: str
-    default_value: Optional[str] = None
-    required_attributes: List[str] = field(default_factory=list)
-    optional_attributes: List[str] = field(default_factory=list)
-    pin_names: List[str] = field(default_factory=list)
+    default_value: str | None = None
+    required_attributes: list[str] = field(default_factory=list)
+    optional_attributes: list[str] = field(default_factory=list)
+    pin_names: list[str] = field(default_factory=list)
     spice_template: str = ""
-    validation_pattern: Optional[Pattern[str]] = None
+    validation_pattern: Pattern[str] | None = None
 
 
 class BaseComponent:
@@ -74,11 +74,11 @@ class BaseComponent:
         """
         self.name = name
         self.component_type = component_type
-        self.attributes: Dict[str, Any] = {}
+        self.attributes: dict[str, Any] = {}
         self.position = (0.0, 0.0)
         self.rotation = 0.0
         self.flipped = False
-        self.pin_connections: Dict[str, str] = {}
+        self.pin_connections: dict[str, str] = {}
 
     def get_name(self) -> str:
         """Get component name."""
@@ -88,15 +88,15 @@ class BaseComponent:
         """Get component type."""
         return self.component_type.value
 
-    def set_value(self, value: Union[str, float]) -> None:
+    def set_value(self, value: str | float) -> None:
         """Set component value."""
         self.attributes["value"] = str(value)
 
-    def get_value(self) -> Union[str, float, None]:
+    def get_value(self) -> str | float | None:
         """Get component value."""
         return self.attributes.get("value")
 
-    def get_attributes(self) -> Dict[str, Any]:
+    def get_attributes(self) -> dict[str, Any]:
         """Get all attributes."""
         return self.attributes.copy()
 
@@ -110,7 +110,7 @@ class BaseComponent:
             raise KeyError(f"Attribute '{name}' not found")
         return self.attributes[name]
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate component."""
         errors = []
 
@@ -137,14 +137,14 @@ class BaseComponent:
 
         return errors
 
-    def get_pins(self) -> List[str]:
+    def get_pins(self) -> list[str]:
         """Get component pins."""
         template = COMPONENT_TEMPLATES.get(self.component_type)
         if template:
             return template.pin_names.copy()
         return []
 
-    def get_connected_nets(self) -> Dict[str, str]:
+    def get_connected_nets(self) -> dict[str, str]:
         """Get connected nets."""
         return self.pin_connections.copy()
 
@@ -207,7 +207,7 @@ class BaseComponent:
         pins = self.get_pins()
         for i, pin in enumerate(pins):
             net = self.pin_connections.get(pin, f"NC_{pin}")
-            spice_line = spice_line.replace(f"{{pin{i+1}}}", net)
+            spice_line = spice_line.replace(f"{{pin{i + 1}}}", net)
 
         # Replace attributes
         for attr, value in self.attributes.items():
@@ -331,15 +331,15 @@ class ComponentFactory:
 
     def __init__(self) -> None:
         """Initialize component factory."""
-        self._custom_templates: Dict[str, ComponentTemplate] = {}
-        self._component_classes: Dict[ComponentType, Type[BaseComponent]] = {}
+        self._custom_templates: dict[str, ComponentTemplate] = {}
+        self._component_classes: dict[ComponentType, type[BaseComponent]] = {}
 
         _logger.info("ComponentFactory initialized")
 
     def create_component(
         self,
-        component_type: Union[ComponentType, str],
-        name: Optional[str] = None,
+        component_type: ComponentType | str,
+        name: str | None = None,
         **attributes: Any,
     ) -> BaseComponent:
         """Create a component instance.
@@ -393,7 +393,7 @@ class ComponentFactory:
 
         return component
 
-    def create_from_spice_line(self, spice_line: str) -> Optional[BaseComponent]:
+    def create_from_spice_line(self, spice_line: str) -> BaseComponent | None:
         """Create component from SPICE netlist line.
 
         Args:
@@ -461,7 +461,7 @@ class ComponentFactory:
         _logger.info("Registered custom template: %s", name)
 
     def register_component_class(
-        self, component_type: ComponentType, component_class: Type[BaseComponent]
+        self, component_type: ComponentType, component_class: type[BaseComponent]
     ) -> None:
         """Register a custom component class.
 
@@ -472,7 +472,7 @@ class ComponentFactory:
         self._component_classes[component_type] = component_class
         _logger.info("Registered custom class for %s", component_type.value)
 
-    def get_component_types(self) -> List[ComponentType]:
+    def get_component_types(self) -> list[ComponentType]:
         """Get list of available component types.
 
         Returns:
@@ -482,7 +482,7 @@ class ComponentFactory:
 
     def get_template(
         self, component_type: ComponentType
-    ) -> Optional[ComponentTemplate]:
+    ) -> ComponentTemplate | None:
         """Get template for a component type.
 
         Args:
