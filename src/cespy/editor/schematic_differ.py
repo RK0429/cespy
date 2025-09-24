@@ -182,22 +182,22 @@ class SchematicDiff:
             # Component changes
             if self.component_changes:
                 lines.append("Component Changes:")
-                for change in self.component_changes:
-                    lines.append(f"  - {change.describe()}")
+                for comp_change in self.component_changes:
+                    lines.append(f"  - {comp_change.describe()}")
                 lines.append("")
 
             # Wire changes
             if self.wire_changes:
                 lines.append("Wire Changes:")
-                for change in self.wire_changes:
-                    lines.append(f"  - {change.describe()}")
+                for wire_change in self.wire_changes:
+                    lines.append(f"  - {wire_change.describe()}")
                 lines.append("")
 
             # Directive changes
             if self.directive_changes:
                 lines.append("Directive Changes:")
-                for change in self.directive_changes:
-                    lines.append(f"  - {change.describe()}")
+                for dir_change in self.directive_changes:
+                    lines.append(f"  - {dir_change.describe()}")
                 lines.append("")
 
         return "\n".join(lines)

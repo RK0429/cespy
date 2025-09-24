@@ -42,7 +42,7 @@ class Architecture(Enum):
 
 
 @dataclass
-class PlatformInfo:
+class PlatformInfo:  # pylint: disable=too-many-instance-attributes
     """Information about the current platform."""
 
     os_type: OSType
@@ -119,7 +119,7 @@ class PlatformManager:
         assert self._platform_info is not None
         return self._platform_info
 
-    def _detect_platform(self) -> None:
+    def _detect_platform(self) -> None:  # pylint: disable=too-many-branches
         """Detect current platform characteristics."""
         # Detect OS type
         system = platform.system().lower()
@@ -188,8 +188,13 @@ class PlatformManager:
                             bytes_mem = int(line.split("=")[1])
                             total_memory_gb = bytes_mem / (1024**3)
                             break
-        except (subprocess.TimeoutExpired, subprocess.CalledProcessError,
-                FileNotFoundError, ValueError, OSError) as e:
+        except (
+            subprocess.TimeoutExpired,
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            ValueError,
+            OSError,
+        ) as e:
             _logger.debug("Failed to detect memory size: %s", e)
 
         # Check Wine availability
@@ -486,8 +491,12 @@ class PlatformManager:
                 check=False,
             )
             return result.returncode == 0
-        except (subprocess.TimeoutExpired, subprocess.CalledProcessError,
-                FileNotFoundError, OSError) as e:
+        except (
+            subprocess.TimeoutExpired,
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            OSError,
+        ) as e:
             _logger.debug("Failed to check process status: %s", e)
             return False
 

@@ -6,6 +6,7 @@ This module provides a manager for registering and executing callbacks when
 simulations complete, with support for different callback types and error handling.
 """
 
+import concurrent.futures
 import inspect
 import logging
 import threading
@@ -152,7 +153,6 @@ class CallbackManager:
         callback_id: str,
         raw_file: Path,
         log_file: Path,
-        context: Optional[Dict[str, Any]] = None,
     ) -> Tuple[bool, Optional[Any]]:
         """Execute a specific callback.
 
@@ -160,7 +160,6 @@ class CallbackManager:
             callback_id: ID of callback to execute
             raw_file: Path to simulation raw file
             log_file: Path to simulation log file
-            context: Optional context data
 
         Returns:
             Tuple of (success, result)
@@ -178,14 +177,13 @@ class CallbackManager:
 
         # Execute outside lock to avoid blocking
         return self._execute_callback(
-            callback_id, callback_info, raw_file, log_file, context
+            callback_id, callback_info, raw_file, log_file
         )
 
     def execute_all(
         self,
         raw_file: Path,
         log_file: Path,
-        context: Optional[Dict[str, Any]] = None,
         stop_on_error: bool = False,
     ) -> Dict[str, Tuple[bool, Optional[Any]]]:
         """Execute all registered callbacks.
@@ -212,7 +210,7 @@ class CallbackManager:
         # Execute callbacks
         for callback_id, callback_info in callbacks_to_execute:
             success, result = self._execute_callback(
-                callback_id, callback_info, raw_file, log_file, context
+                callback_id, callback_info, raw_file, log_file
             )
             results[callback_id] = (success, result)
 
@@ -224,7 +222,9 @@ class CallbackManager:
 
         return results
 
-    def create_chain(self, *callback_ids: str) -> Callable:
+    def create_chain(
+        self, *callback_ids: str
+    ) -> Callable[[Path, Path], List[Tuple[bool, Any]]]:
         """Create a chained callback that executes multiple callbacks in sequence.
 
         Args:
@@ -246,7 +246,9 @@ class CallbackManager:
 
         return chained_callback
 
-    def create_parallel(self, *callback_ids: str) -> Callable:
+    def create_parallel(
+        self, *callback_ids: str
+    ) -> Callable[[Path, Path], Dict[str, Tuple[bool, Any]]]:
         """Create a parallel callback that executes multiple callbacks concurrently.
 
         Args:
@@ -255,7 +257,6 @@ class CallbackManager:
         Returns:
             Callable that executes all callbacks concurrently
         """
-        import concurrent.futures
 
         def parallel_callback(
             raw_file: Path, log_file: Path
@@ -275,7 +276,9 @@ class CallbackManager:
                     try:
                         success, result = future.result()
                         results[callback_id] = (success, result)
-                    except Exception as e:
+                    except (concurrent.futures.CancelledError,
+                            concurrent.futures.TimeoutError,
+                            RuntimeError, ValueError, TypeError) as e:
                         _logger.error(
                             "Error in parallel execution of '%s': %s", callback_id, e
                         )
@@ -344,8 +347,7 @@ class CallbackManager:
             # Simple function with just raw_file and log_file
             if len(params) == 2:
                 return CallbackType.SIMPLE_FUNCTION
-            else:
-                return CallbackType.PARAMETERIZED_FUNCTION
+            return CallbackType.PARAMETERIZED_FUNCTION
 
         raise TypeError(f"Unsupported callback type: {type(callback)}")
 
@@ -388,7 +390,7 @@ class CallbackManager:
                     test_args = (Path("dummy"), Path("dummy")) + (args or ())
                     sig.bind(*test_args, **(kwargs or {}))
             except TypeError as e:
-                raise TypeError(f"Callback signature mismatch: {e}")
+                raise TypeError(f"Callback signature mismatch: {e}") from e
 
     def _execute_callback(
         self,
@@ -396,7 +398,6 @@ class CallbackManager:
         callback_info: CallbackInfo,
         raw_file: Path,
         log_file: Path,
-        context: Optional[Dict[str, Any]],
     ) -> Tuple[bool, Optional[Any]]:
         """Execute a single callback with error handling.
 

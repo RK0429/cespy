@@ -56,7 +56,6 @@ from typing import (
     List,
     Match,
     Optional,
-    Pattern,
     Tuple,
     Type,
     Union,
@@ -65,11 +64,7 @@ from typing import (
 # Core imports
 from ..core import constants as core_constants
 from ..core import patterns as core_patterns
-from ..core import paths as core_paths
-from ..exceptions import (
-    FileFormatError,
-    EncodingError,
-)
+from ..exceptions import FileFormatError
 
 # Module imports
 from ..log.logfile_data import try_convert_value
@@ -323,7 +318,7 @@ class SpiceComponent(Component):
             self.set_params(**{key: value})
 
 
-class SpiceCircuit(BaseEditor):
+class SpiceCircuit(BaseEditor):  # pylint: disable=too-many-public-methods
     """Represents sub-circuits within a SPICE circuit.
 
     Since sub-circuits can have sub-circuits inside them, it serves as base for the top
@@ -533,7 +528,9 @@ class SpiceCircuit(BaseEditor):
             # last_token of the line before Params:
             subcircuit_name = m.group("value")
         else:
-            raise UnrecognizedSyntaxError(sub_circuit_instance, REPLACE_REGEXS["X"].pattern)
+            raise UnrecognizedSyntaxError(
+                sub_circuit_instance, REPLACE_REGEXS["X"].pattern
+            )
 
         # Search for the sub-circuit in the netlist
         sub_circuit = self.get_subcircuit_named(subcircuit_name)

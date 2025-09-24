@@ -38,9 +38,9 @@ _logger = logging.getLogger("cespy.SimAnalysis")
 class WorstCaseType(IntEnum):
     """Enumeration for worst case analysis types."""
 
-    nom = 0
-    max = 1
-    min = 2
+    nom = 0  # pylint: disable=invalid-name
+    max = 1  # pylint: disable=invalid-name
+    min = 2  # pylint: disable=invalid-name
 
 
 class FastWorstCaseAnalysis(WorstCaseAnalysis):

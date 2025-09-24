@@ -19,18 +19,13 @@ import dataclasses
 import logging
 import os
 import os.path
-import re
 import sys
 from typing import Any, Dict, Iterator, List, Optional, TypeVar, Union
 
 # Core imports
 from ..core import constants as core_constants
 from ..core import patterns as core_patterns
-from ..core import paths as core_paths
-from ..exceptions import (
-    FileFormatError,
-    CespyIOError,
-)
+from ..exceptions import CespyIOError
 
 from ..utils.detect_encoding import detect_encoding
 from .logfile_data import LogfileData, try_convert_value
@@ -668,7 +663,7 @@ def main() -> None:
 
     if not filename or args.last:
         # Find the most recent valid file
-        newer_date = 0
+        newer_date = 0.0
         for f in os.listdir():
             if valid_extension(f):
                 date = os.path.getmtime(f)

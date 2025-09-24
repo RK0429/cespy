@@ -48,32 +48,18 @@ src/cespy/core/benchmarks.py:245:15: W0718: Catching too general exception Excep
 src/cespy/core/benchmarks.py:235:16: C0415: Import outside toplevel (sim.toolkit.MonteCarloAnalysis) (import-outside-toplevel)
 src/cespy/core/benchmarks.py:281:19: W0718: Catching too general exception Exception (broad-exception-caught)
 src/cespy/core/benchmarks.py:287:4: R0912: Too many branches (13/12) (too-many-branches)
-************* Module cespy.simulators.ltspice_simulator
-src/cespy/simulators/ltspice_simulator.py:38:0: W0611: Unused SimulatorNotFoundError imported from exceptions (unused-import)
-src/cespy/simulators/ltspice_simulator.py:38:0: W0611: Unused SimulationTimeoutError imported from exceptions (unused-import)
-src/cespy/simulators/ltspice_simulator.py:38:0: W0611: Unused FileFormatError imported from exceptions (unused-import)
 ************* Module cespy.utils.histogram
 src/cespy/utils/histogram.py:22:8: C0415: Import outside toplevel (cespy.log.ltsteps.LTSpiceLogReader) (import-outside-toplevel)
-************* Module cespy.utils.windows_short_names
-src/cespy/utils/windows_short_names.py:34:0: W0611: Unused TYPE_CHECKING imported from typing (unused-import)
-************* Module cespy.log.ltsteps
-src/cespy/log/ltsteps.py:22:0: W0611: Unused import re (unused-import)
-src/cespy/log/ltsteps.py:29:0: W0611: Unused paths imported from core as core_paths (unused-import)
-src/cespy/log/ltsteps.py:30:0: W0611: Unused FileFormatError imported from exceptions (unused-import)
-************* Module cespy.log.logfile_data
-src/cespy/log/logfile_data.py:8:0: W0611: Unused import re (unused-import)
 ************* Module cespy.log.qspice_log_reader
-src/cespy/log/qspice_log_reader.py:150:29: W0212: Access to a protected member _spice_exe_win_paths of a client class (protected-access)
-src/cespy/log/qspice_log_reader.py:24:0: W0611: Unused import re (unused-import)
+src/cespy/log/qspice_log_reader.py:149:29: W0212: Access to a protected member _spice_exe_win_paths of a client class (protected-access)
 ************* Module cespy.sim.callback_manager
-src/cespy/sim/callback_manager.py:249:0: C0301: Line too long (105/100) (line-too-long)
-src/cespy/sim/callback_manager.py:258:8: C0415: Import outside toplevel (concurrent.futures) (import-outside-toplevel)
-src/cespy/sim/callback_manager.py:278:27: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/callback_manager.py:345:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
-src/cespy/sim/callback_manager.py:391:16: W0707: Consider explicitly re-raising using 'raise TypeError(f'Callback signature mismatch: {e}') from e' (raise-missing-from)
-src/cespy/sim/callback_manager.py:445:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/callback_manager.py:468:23: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/callback_manager.py:399:8: W0613: Unused argument 'context' (unused-argument)
+src/cespy/sim/callback_manager.py:260:8: C0415: Import outside toplevel (concurrent.futures) (import-outside-toplevel)
+src/cespy/sim/callback_manager.py:280:27: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/callback_manager.py:347:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+src/cespy/sim/callback_manager.py:393:16: W0707: Consider explicitly re-raising using 'raise TypeError(f'Callback signature mismatch: {e}') from e' (raise-missing-from)
+src/cespy/sim/callback_manager.py:447:15: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/callback_manager.py:470:23: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/callback_manager.py:401:8: W0613: Unused argument 'context' (unused-argument)
 ************* Module cespy.sim.sim_runner_compat
 src/cespy/sim/sim_runner_compat.py:49:4: C0103: Attribute name "failSim" doesn't conform to snake_case naming style (invalid-name)
 src/cespy/sim/sim_runner_compat.py:59:4: C0103: Attribute name "okSim" doesn't conform to snake_case naming style (invalid-name)
@@ -90,77 +76,59 @@ src/cespy/sim/sim_batch.py:364:8: C0103: Constant name "tduration" doesn't confo
 src/cespy/sim/sim_batch.py:372:8: C0103: Constant name "bias_file" doesn't conform to UPPER_CASE naming style (invalid-name)
 src/cespy/sim/sim_batch.py:374:8: C0103: Constant name "tstart" doesn't conform to UPPER_CASE naming style (invalid-name)
 ************* Module cespy.sim.task_queue
-src/cespy/sim/task_queue.py:62:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/task_queue.py:71:0: R0902: Too many instance attributes (12/7) (too-many-instance-attributes)
-src/cespy/sim/task_queue.py:14:0: W0611: Unused Path imported from pathlib (unused-import)
+src/cespy/sim/task_queue.py:61:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/task_queue.py:70:0: R0902: Too many instance attributes (12/7) (too-many-instance-attributes)
 ************* Module cespy.sim.simulator_adapter
 src/cespy/sim/simulator_adapter.py:172:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
 src/cespy/sim/simulator_adapter.py:228:23: W0718: Catching too general exception Exception (broad-exception-caught)
 ************* Module cespy.sim.simulator_locator
-src/cespy/sim/simulator_locator.py:302:0: C0301: Line too long (103/100) (line-too-long)
-src/cespy/sim/simulator_locator.py:286:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/simulator_locator.py:273:21: W1510: 'subprocess.run' used without explicitly defining the value for 'check'. (subprocess-run-check)
-src/cespy/sim/simulator_locator.py:279:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
-src/cespy/sim/simulator_locator.py:298:8: C0415: Import outside toplevel (re) (import-outside-toplevel)
-src/cespy/sim/simulator_locator.py:15:0: W0611: Unused Dict imported from typing (unused-import)
-src/cespy/sim/simulator_locator.py:19:0: W0611: Unused paths imported from core as core_paths (unused-import)
+src/cespy/sim/simulator_locator.py:285:15: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/simulator_locator.py:272:21: W1510: 'subprocess.run' used without explicitly defining the value for 'check'. (subprocess-run-check)
+src/cespy/sim/simulator_locator.py:278:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+src/cespy/sim/simulator_locator.py:297:8: C0415: Import outside toplevel (re) (import-outside-toplevel)
 ************* Module cespy.sim
 src/cespy/sim/__init__.py:21:8: W0621: Redefining name 'SimCommander' from outer scope (line 9) (redefined-outer-name)
 src/cespy/sim/__init__.py:21:8: C0415: Import outside toplevel (sim_batch.SimCommander) (import-outside-toplevel)
 ************* Module cespy.sim.simulator_factory
-src/cespy/sim/simulator_factory.py:107:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/simulator_factory.py:126:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/simulator_factory.py:114:8: W0212: Access to a protected member _default_lib_paths of a client class (protected-access)
-src/cespy/sim/simulator_factory.py:23:0: W0611: Unused ISimulator imported from simulator_interface (unused-import)
+src/cespy/sim/simulator_factory.py:113:8: W0212: Access to a protected member _default_lib_paths of a client class (protected-access)
 ************* Module cespy.sim.result_collector
-src/cespy/sim/result_collector.py:24:0: R0902: Too many instance attributes (10/7) (too-many-instance-attributes)
-src/cespy/sim/result_collector.py:141:4: R0913: Too many arguments (9/7) (too-many-arguments)
-src/cespy/sim/result_collector.py:141:4: R0917: Too many positional arguments (9/7) (too-many-positional-arguments)
-src/cespy/sim/result_collector.py:184:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/result_collector.py:279:8: C0415: Import outside toplevel (statistics) (import-outside-toplevel)
-src/cespy/sim/result_collector.py:301:8: C0415: Import outside toplevel (csv) (import-outside-toplevel)
-src/cespy/sim/result_collector.py:460:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/result_collector.py:439:12: C0415: Import outside toplevel (log.ltsteps.LTSpiceLogReader) (import-outside-toplevel)
-src/cespy/sim/result_collector.py:450:16: W0702: No exception type(s) specified (bare-except)
-src/cespy/sim/result_collector.py:455:20: W0702: No exception type(s) specified (bare-except)
-src/cespy/sim/result_collector.py:518:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/result_collector.py:15:0: W0611: Unused Tuple imported from typing (unused-import)
-src/cespy/sim/result_collector.py:17:0: W0611: Unused LogfileData imported from log.logfile_data (unused-import)
-src/cespy/sim/result_collector.py:18:0: W0611: Unused RawRead imported from raw.raw_read (unused-import)
+src/cespy/sim/result_collector.py:21:0: R0902: Too many instance attributes (10/7) (too-many-instance-attributes)
+src/cespy/sim/result_collector.py:138:4: R0913: Too many arguments (9/7) (too-many-arguments)
+src/cespy/sim/result_collector.py:138:4: R0917: Too many positional arguments (9/7) (too-many-positional-arguments)
+src/cespy/sim/result_collector.py:181:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/result_collector.py:276:8: C0415: Import outside toplevel (statistics) (import-outside-toplevel)
+src/cespy/sim/result_collector.py:298:8: C0415: Import outside toplevel (csv) (import-outside-toplevel)
+src/cespy/sim/result_collector.py:457:15: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/result_collector.py:436:12: C0415: Import outside toplevel (log.ltsteps.LTSpiceLogReader) (import-outside-toplevel)
+src/cespy/sim/result_collector.py:447:23: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/result_collector.py:452:27: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/result_collector.py:515:19: W0718: Catching too general exception Exception (broad-exception-caught)
 ************* Module cespy.sim.simulator_interface
-src/cespy/sim/simulator_interface.py:97:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/simulator_interface.py:109:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/simulator_interface.py:134:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/simulator_interface.py:149:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/simulator_interface.py:172:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/simulator_interface.py:181:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/simulator_interface.py:193:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/simulator_interface.py:16:0: W0611: Unused Union imported from typing (unused-import)
-src/cespy/sim/simulator_interface.py:19:0: W0611: Unused constants imported from core as core_constants (unused-import)
-src/cespy/sim/simulator_interface.py:20:0: W0611: Unused paths imported from core as core_paths (unused-import)
-src/cespy/sim/simulator_interface.py:21:0: W0611: Unused SimulatorNotInstalledError imported from exceptions (unused-import)
-src/cespy/sim/simulator_interface.py:21:0: W0611: Unused InvalidSimulatorError imported from exceptions (unused-import)
+src/cespy/sim/simulator_interface.py:92:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/simulator_interface.py:104:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/simulator_interface.py:129:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/simulator_interface.py:144:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/simulator_interface.py:167:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/simulator_interface.py:176:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/simulator_interface.py:188:8: W0107: Unnecessary pass statement (unnecessary-pass)
 ************* Module cespy.sim.sim_stepping
 src/cespy/sim/sim_stepping.py:226:13: W0511: TODO: Make a first simulation and storing the bias (fixme)
 src/cespy/sim/sim_stepping.py:247:21: W0511: TODO: develop other types of sweeps EX: add .STEP (fixme)
 ************* Module cespy.sim.process_manager
-src/cespy/sim/process_manager.py:139:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/process_manager.py:34:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
-src/cespy/sim/process_manager.py:59:0: R0902: Too many instance attributes (9/7) (too-many-instance-attributes)
-src/cespy/sim/process_manager.py:96:4: R0913: Too many arguments (8/7) (too-many-arguments)
-src/cespy/sim/process_manager.py:96:4: R0917: Too many positional arguments (8/7) (too-many-positional-arguments)
-src/cespy/sim/process_manager.py:96:4: R0914: Too many local variables (21/20) (too-many-locals)
-src/cespy/sim/process_manager.py:209:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/process_manager.py:96:4: R0912: Too many branches (14/12) (too-many-branches)
-src/cespy/sim/process_manager.py:96:4: R0915: Too many statements (59/50) (too-many-statements)
-src/cespy/sim/process_manager.py:142:32: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
-src/cespy/sim/process_manager.py:147:32: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
-src/cespy/sim/process_manager.py:158:22: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
-src/cespy/sim/process_manager.py:435:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/process_manager.py:450:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/process_manager.py:479:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/process_manager.py:22:4: W0611: Unused ModuleType imported from types (unused-import)
-src/cespy/sim/process_manager.py:28:0: W0611: Unused constants imported from core as core_constants (unused-import)
+src/cespy/sim/process_manager.py:31:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
+src/cespy/sim/process_manager.py:56:0: R0902: Too many instance attributes (9/7) (too-many-instance-attributes)
+src/cespy/sim/process_manager.py:93:4: R0913: Too many arguments (8/7) (too-many-arguments)
+src/cespy/sim/process_manager.py:93:4: R0917: Too many positional arguments (8/7) (too-many-positional-arguments)
+src/cespy/sim/process_manager.py:93:4: R0914: Too many local variables (21/20) (too-many-locals)
+src/cespy/sim/process_manager.py:205:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/process_manager.py:93:4: R0912: Too many branches (14/12) (too-many-branches)
+src/cespy/sim/process_manager.py:93:4: R0915: Too many statements (59/50) (too-many-statements)
+src/cespy/sim/process_manager.py:138:32: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+src/cespy/sim/process_manager.py:143:32: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+src/cespy/sim/process_manager.py:154:22: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+src/cespy/sim/process_manager.py:431:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/process_manager.py:446:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/process_manager.py:475:19: W0718: Catching too general exception Exception (broad-exception-caught)
 ************* Module cespy.sim.simulator
 src/cespy/sim/simulator.py:279:13: W0511: TODO: this will fail if the simulator executable is not in the last (fixme)
 src/cespy/sim/simulator.py:194:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
@@ -170,64 +138,52 @@ src/cespy/sim/sim_runner_refactored.py:64:0: R0902: Too many instance attributes
 src/cespy/sim/sim_runner_refactored.py:165:15: C2801: Unnecessarily calls dunder method __len__. Use len built-in function. (unnecessary-dunder-call)
 src/cespy/sim/sim_runner_refactored.py:170:15: C2801: Unnecessarily calls dunder method __len__. Use len built-in function. (unnecessary-dunder-call)
 src/cespy/sim/sim_runner_refactored.py:201:4: R0913: Too many arguments (10/7) (too-many-arguments)
-src/cespy/sim/sim_runner_refactored.py:269:8: W0612: Unused variable 'task_id' (unused-variable)
 src/cespy/sim/sim_runner_refactored.py:294:8: C0415: Import outside toplevel (time) (import-outside-toplevel)
 src/cespy/sim/sim_runner_refactored.py:328:12: C0415: Import outside toplevel (simulators.ltspice_simulator.LTspice) (import-outside-toplevel)
 src/cespy/sim/sim_runner_refactored.py:332:12: C0415: Import outside toplevel (simulators.ltspice_simulator.LTspice) (import-outside-toplevel)
 src/cespy/sim/sim_runner_refactored.py:391:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
-src/cespy/sim/sim_runner_refactored.py:441:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/sim_runner_refactored.py:423:12: W0612: Unused variable 'process_id' (unused-variable)
+src/cespy/sim/sim_runner_refactored.py:445:15: W0718: Catching too general exception Exception (broad-exception-caught)
 src/cespy/sim/sim_runner_refactored.py:184:8: W0201: Attribute 'simulator' defined outside __init__ (attribute-defined-outside-init)
-src/cespy/sim/sim_runner_refactored.py:18:0: W0611: Unused CallbackType imported from callback_manager as CallbackManagerType (unused-import)
-src/cespy/sim/sim_runner_refactored.py:21:0: W0611: Unused SimulationResult imported from result_collector (unused-import)
-src/cespy/sim/sim_runner_refactored.py:22:0: W0611: Unused clock_function imported from run_task (unused-import)
 ************* Module cespy.sim.sim_runner
 src/cespy/sim/sim_runner.py:1:0: C0302: Too many lines in module (1004/1000) (too-many-lines)
 src/cespy/sim/sim_runner.py:338:12: C0415: Import outside toplevel (simulators.ltspice_simulator.LTspice) (import-outside-toplevel)
 src/cespy/sim/sim_runner.py:343:12: C0415: Import outside toplevel (simulators.ltspice_simulator.LTspice) (import-outside-toplevel)
 src/cespy/sim/sim_runner.py:350:12: C0415: Import outside toplevel (simulators.ltspice_simulator.LTspice) (import-outside-toplevel)
 ************* Module cespy.sim.toolkit.base_analysis
-src/cespy/sim/toolkit/base_analysis.py:43:0: R0902: Too many instance attributes (9/7) (too-many-instance-attributes)
-src/cespy/sim/toolkit/base_analysis.py:104:11: R1716: Simplify chained comparison between the operands (chained-comparison)
-src/cespy/sim/toolkit/base_analysis.py:125:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
-src/cespy/sim/toolkit/base_analysis.py:69:0: R0903: Too few public methods (1/2) (too-few-public-methods)
-src/cespy/sim/toolkit/base_analysis.py:174:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/toolkit/base_analysis.py:183:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/toolkit/base_analysis.py:195:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/sim/toolkit/base_analysis.py:280:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/toolkit/base_analysis.py:330:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/toolkit/base_analysis.py:382:0: W0223: Method 'apply_parameters' is abstract in class 'BaseAnalysis' but is not overridden in child class 'StatisticalAnalysis' (abstract-method)
-src/cespy/sim/toolkit/base_analysis.py:382:0: W0223: Method 'extract_results' is abstract in class 'BaseAnalysis' but is not overridden in child class 'StatisticalAnalysis' (abstract-method)
-src/cespy/sim/toolkit/base_analysis.py:382:0: W0223: Method 'prepare_runs' is abstract in class 'BaseAnalysis' but is not overridden in child class 'StatisticalAnalysis' (abstract-method)
-src/cespy/sim/toolkit/base_analysis.py:517:0: W0223: Method 'apply_parameters' is abstract in class 'BaseAnalysis' but is not overridden in child class 'ParametricAnalysis' (abstract-method)
-src/cespy/sim/toolkit/base_analysis.py:517:0: W0223: Method 'extract_results' is abstract in class 'BaseAnalysis' but is not overridden in child class 'ParametricAnalysis' (abstract-method)
-src/cespy/sim/toolkit/base_analysis.py:517:0: W0223: Method 'prepare_runs' is abstract in class 'BaseAnalysis' but is not overridden in child class 'ParametricAnalysis' (abstract-method)
-src/cespy/sim/toolkit/base_analysis.py:593:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
-src/cespy/sim/toolkit/base_analysis.py:12:0: W0611: Unused ABC imported from abc (unused-import)
-src/cespy/sim/toolkit/base_analysis.py:24:0: W0611: Unused SpiceEditor imported from editor.spice_editor (unused-import)
-src/cespy/sim/toolkit/base_analysis.py:25:0: W0611: Unused LogfileData imported from log.logfile_data (unused-import)
-src/cespy/sim/toolkit/base_analysis.py:26:0: W0611: Unused ProcessCallback imported from sim_runner (unused-import)
-src/cespy/sim/toolkit/base_analysis.py:26:0: W0611: Unused SimRunner imported from sim_runner (unused-import)
+src/cespy/sim/toolkit/base_analysis.py:41:0: R0902: Too many instance attributes (9/7) (too-many-instance-attributes)
+src/cespy/sim/toolkit/base_analysis.py:102:11: R1716: Simplify chained comparison between the operands (chained-comparison)
+src/cespy/sim/toolkit/base_analysis.py:123:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+src/cespy/sim/toolkit/base_analysis.py:67:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+src/cespy/sim/toolkit/base_analysis.py:172:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/toolkit/base_analysis.py:181:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/toolkit/base_analysis.py:193:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/sim/toolkit/base_analysis.py:278:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/toolkit/base_analysis.py:328:15: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/toolkit/base_analysis.py:380:0: W0223: Method 'apply_parameters' is abstract in class 'BaseAnalysis' but is not overridden in child class 'StatisticalAnalysis' (abstract-method)
+src/cespy/sim/toolkit/base_analysis.py:380:0: W0223: Method 'extract_results' is abstract in class 'BaseAnalysis' but is not overridden in child class 'StatisticalAnalysis' (abstract-method)
+src/cespy/sim/toolkit/base_analysis.py:380:0: W0223: Method 'prepare_runs' is abstract in class 'BaseAnalysis' but is not overridden in child class 'StatisticalAnalysis' (abstract-method)
+src/cespy/sim/toolkit/base_analysis.py:515:0: W0223: Method 'apply_parameters' is abstract in class 'BaseAnalysis' but is not overridden in child class 'ParametricAnalysis' (abstract-method)
+src/cespy/sim/toolkit/base_analysis.py:515:0: W0223: Method 'extract_results' is abstract in class 'BaseAnalysis' but is not overridden in child class 'ParametricAnalysis' (abstract-method)
+src/cespy/sim/toolkit/base_analysis.py:515:0: W0223: Method 'prepare_runs' is abstract in class 'BaseAnalysis' but is not overridden in child class 'ParametricAnalysis' (abstract-method)
+src/cespy/sim/toolkit/base_analysis.py:591:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
 ************* Module cespy.sim.toolkit.sim_analysis
 src/cespy/sim/toolkit/sim_analysis.py:82:4: R0913: Too many arguments (8/7) (too-many-arguments)
 src/cespy/sim/toolkit/sim_analysis.py:153:4: C0103: Method name "remove_Xinstruction" doesn't conform to snake_case naming style (invalid-name)
 ************* Module cespy.sim.toolkit.visualization
-src/cespy/sim/toolkit/visualization.py:59:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/toolkit/visualization.py:141:25: R1735: Consider using '{"boxstyle": 'round', "facecolor": 'white', "alpha": 0.8}' instead of a call to 'dict'. (use-dict-literal)
-src/cespy/sim/toolkit/visualization.py:160:4: R0914: Too many local variables (31/20) (too-many-locals)
-src/cespy/sim/toolkit/visualization.py:236:48: E0606: Possibly using variable 'corr_matrix' before assignment (possibly-used-before-assignment)
-src/cespy/sim/toolkit/visualization.py:239:36: E0606: Possibly using variable 'valid_names' before assignment (possibly-used-before-assignment)
-src/cespy/sim/toolkit/visualization.py:160:4: R0912: Too many branches (22/12) (too-many-branches)
-src/cespy/sim/toolkit/visualization.py:160:4: R0915: Too many statements (57/50) (too-many-statements)
-src/cespy/sim/toolkit/visualization.py:452:21: R1735: Consider using '{"boxstyle": 'round', "facecolor": 'white', "alpha": 0.8}' instead of a call to 'dict'. (use-dict-literal)
-src/cespy/sim/toolkit/visualization.py:501:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/toolkit/visualization.py:514:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/toolkit/visualization.py:528:23: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/sim/toolkit/visualization.py:535:13: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
-src/cespy/sim/toolkit/visualization.py:564:13: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
-src/cespy/sim/toolkit/visualization.py:470:4: R0912: Too many branches (16/12) (too-many-branches)
-src/cespy/sim/toolkit/visualization.py:470:4: R0915: Too many statements (58/50) (too-many-statements)
-src/cespy/sim/toolkit/visualization.py:33:4: W0611: Unused seaborn imported as sns (unused-import)
+src/cespy/sim/toolkit/visualization.py:64:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/toolkit/visualization.py:150:25: R1735: Consider using '{"boxstyle": 'round', "facecolor": 'white', "alpha": 0.8}' instead of a call to 'dict'. (use-dict-literal)
+src/cespy/sim/toolkit/visualization.py:170:4: R0914: Too many local variables (31/20) (too-many-locals)
+src/cespy/sim/toolkit/visualization.py:170:4: R0912: Too many branches (23/12) (too-many-branches)
+src/cespy/sim/toolkit/visualization.py:170:4: R0915: Too many statements (63/50) (too-many-statements)
+src/cespy/sim/toolkit/visualization.py:478:21: R1735: Consider using '{"boxstyle": 'round', "facecolor": 'white', "alpha": 0.8}' instead of a call to 'dict'. (use-dict-literal)
+src/cespy/sim/toolkit/visualization.py:529:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/toolkit/visualization.py:543:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/toolkit/visualization.py:558:23: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/sim/toolkit/visualization.py:565:13: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+src/cespy/sim/toolkit/visualization.py:594:13: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+src/cespy/sim/toolkit/visualization.py:497:4: R0912: Too many branches (16/12) (too-many-branches)
+src/cespy/sim/toolkit/visualization.py:497:4: R0915: Too many statements (61/50) (too-many-statements)
+src/cespy/sim/toolkit/visualization.py:37:4: W0611: Unused seaborn imported as sns (unused-import)
 ************* Module cespy.sim.toolkit.sensitivity_analysis
 src/cespy/sim/toolkit/sensitivity_analysis.py:134:4: R0914: Too many local variables (30/20) (too-many-locals)
 src/cespy/sim/toolkit/sensitivity_analysis.py:134:4: R0912: Too many branches (26/12) (too-many-branches)
@@ -238,61 +194,27 @@ src/cespy/sim/toolkit/fast_worst_case.py:42:4: C0103: Class constant name "max" 
 src/cespy/sim/toolkit/fast_worst_case.py:43:4: C0103: Class constant name "min" doesn't conform to UPPER_CASE naming style (invalid-name)
 src/cespy/sim/toolkit/fast_worst_case.py:261:0: C0206: Consider iterating with .items() (consider-using-dict-items)
 ************* Module cespy.sim.toolkit.montecarlo
-src/cespy/sim/toolkit/montecarlo.py:483:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:488:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:495:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:510:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:519:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:531:0: C0301: Line too long (115/100) (line-too-long)
-src/cespy/sim/toolkit/montecarlo.py:533:0: C0301: Line too long (114/100) (line-too-long)
-src/cespy/sim/toolkit/montecarlo.py:538:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:545:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:548:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:591:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:599:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:674:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:696:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:706:0: C0301: Line too long (135/100) (line-too-long)
-src/cespy/sim/toolkit/montecarlo.py:716:0: C0301: Line too long (126/100) (line-too-long)
-src/cespy/sim/toolkit/montecarlo.py:736:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/sim/toolkit/montecarlo.py:113:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
-src/cespy/sim/toolkit/montecarlo.py:366:4: R0913: Too many arguments (9/7) (too-many-arguments)
-src/cespy/sim/toolkit/montecarlo.py:414:12: W0612: Unused variable 'rt' (unused-variable)
+src/cespy/sim/toolkit/montecarlo.py:109:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+src/cespy/sim/toolkit/montecarlo.py:362:4: R0913: Too many arguments (9/7) (too-many-arguments)
 src/cespy/sim/toolkit/montecarlo.py:536:27: W0718: Catching too general exception Exception (broad-exception-caught)
 src/cespy/sim/toolkit/montecarlo.py:537:24: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
-src/cespy/sim/toolkit/montecarlo.py:476:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+src/cespy/sim/toolkit/montecarlo.py:472:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
 src/cespy/sim/toolkit/montecarlo.py:597:12: C0415: Import outside toplevel (simulator.Simulator) (import-outside-toplevel)
 src/cespy/sim/toolkit/montecarlo.py:619:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
-src/cespy/sim/toolkit/montecarlo.py:671:4: W0221: Number of parameters was 7 in 'ToleranceDeviations.run_analysis' and is now 1 in overriding 'Montecarlo.run_analysis' method (arguments-differ)
-src/cespy/sim/toolkit/montecarlo.py:673:8: W2301: Unnecessary ellipsis constant (unnecessary-ellipsis)
-src/cespy/sim/toolkit/montecarlo.py:676:4: R0913: Too many arguments (8/7) (too-many-arguments)
-src/cespy/sim/toolkit/montecarlo.py:676:4: R0917: Too many positional arguments (8/7) (too-many-positional-arguments)
-src/cespy/sim/toolkit/montecarlo.py:695:8: W2301: Unnecessary ellipsis constant (unnecessary-ellipsis)
-src/cespy/sim/toolkit/montecarlo.py:697:4: R0913: Too many arguments (8/7) (too-many-arguments)
-src/cespy/sim/toolkit/montecarlo.py:697:4: R0917: Too many positional arguments (8/7) (too-many-positional-arguments)
-src/cespy/sim/toolkit/montecarlo.py:717:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
-src/cespy/sim/toolkit/montecarlo.py:738:4: R0913: Too many arguments (8/7) (too-many-arguments)
-src/cespy/sim/toolkit/montecarlo.py:738:4: R0917: Too many positional arguments (8/7) (too-many-positional-arguments)
-src/cespy/sim/toolkit/montecarlo.py:777:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
-src/cespy/sim/toolkit/montecarlo.py:745:8: W0613: Unused argument 'measure' (unused-argument)
+src/cespy/sim/toolkit/montecarlo.py:670:4: R0913: Too many arguments (8/7) (too-many-arguments)
+src/cespy/sim/toolkit/montecarlo.py:670:4: R0917: Too many positional arguments (8/7) (too-many-positional-arguments)
+src/cespy/sim/toolkit/montecarlo.py:706:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+src/cespy/sim/toolkit/montecarlo.py:727:4: R0913: Too many arguments (8/7) (too-many-arguments)
+src/cespy/sim/toolkit/montecarlo.py:727:4: R0917: Too many positional arguments (8/7) (too-many-positional-arguments)
+src/cespy/sim/toolkit/montecarlo.py:766:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+src/cespy/sim/toolkit/montecarlo.py:734:8: W0613: Unused argument 'measure' (unused-argument)
 src/cespy/sim/toolkit/montecarlo.py:561:8: W0201: Attribute '_original_callback' defined outside __init__ (attribute-defined-outside-init)
 src/cespy/sim/toolkit/montecarlo.py:562:8: W0201: Attribute '_original_callback_args' defined outside __init__ (attribute-defined-outside-init)
-src/cespy/sim/toolkit/montecarlo.py:29:0: W0611: Unused defaultdict imported from collections (unused-import)
-src/cespy/sim/toolkit/montecarlo.py:33:0: W0611: Unused numpy imported as np (unused-import)
-src/cespy/sim/toolkit/montecarlo.py:34:0: W0611: Unused NDArray imported from numpy.typing (unused-import)
 ************* Module cespy.raw.raw_read_lazy
-src/cespy/raw/raw_read_lazy.py:115:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/raw/raw_read_lazy.py:285:0: C0301: Line too long (127/100) (line-too-long)
-src/cespy/raw/raw_read_lazy.py:305:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/raw/raw_read_lazy.py:331:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/raw/raw_read_lazy.py:232:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/raw/raw_read_lazy.py:227:36: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
-src/cespy/raw/raw_read_lazy.py:473:8: W0702: No exception type(s) specified (bare-except)
-src/cespy/raw/raw_read_lazy.py:12:0: W0611: Unused import os (unused-import)
-src/cespy/raw/raw_read_lazy.py:21:0: W0611: Unused SpiceReadException imported from raw_classes (unused-import)
-src/cespy/raw/raw_read_lazy.py:22:0: W0611: Unused constants imported from core as core_constants (unused-import)
+src/cespy/raw/raw_read_lazy.py:229:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/raw/raw_read_lazy.py:224:36: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+src/cespy/raw/raw_read_lazy.py:472:15: W0718: Catching too general exception Exception (broad-exception-caught)
 ************* Module cespy.raw.raw_data_cache
-src/cespy/raw/raw_data_cache.py:304:0: C0303: Trailing whitespace (trailing-whitespace)
 src/cespy/raw/raw_data_cache.py:41:27: W0613: Unused argument 'cache' (unused-argument)
 src/cespy/raw/raw_data_cache.py:41:50: W0613: Unused argument 'key' (unused-argument)
 src/cespy/raw/raw_data_cache.py:60:8: W0107: Unnecessary pass statement (unnecessary-pass)
@@ -304,35 +226,20 @@ src/cespy/raw/raw_data_cache.py:109:18: W0212: Access to a protected member _cac
 src/cespy/raw/raw_data_cache.py:110:12: W0212: Access to a protected member _cache of a client class (protected-access)
 src/cespy/raw/raw_data_cache.py:162:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
 src/cespy/raw/raw_data_cache.py:297:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/raw/raw_data_cache.py:322:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/raw/raw_data_cache.py:411:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/raw/raw_data_cache.py:455:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/raw/raw_data_cache.py:472:19: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/raw/raw_data_cache.py:482:15: W0718: Catching too general exception Exception (broad-exception-caught)
-src/cespy/raw/raw_data_cache.py:494:12: W0702: No exception type(s) specified (bare-except)
-src/cespy/raw/raw_data_cache.py:15:0: W0611: Unused List imported from typing (unused-import)
-src/cespy/raw/raw_data_cache.py:15:0: W0611: Unused Tuple imported from typing (unused-import)
-src/cespy/raw/raw_data_cache.py:15:0: W0611: Unused Union imported from typing (unused-import)
+src/cespy/raw/raw_data_cache.py:321:15: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/raw/raw_data_cache.py:410:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/raw/raw_data_cache.py:454:15: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/raw/raw_data_cache.py:471:19: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/raw/raw_data_cache.py:481:15: W0718: Catching too general exception Exception (broad-exception-caught)
+src/cespy/raw/raw_data_cache.py:493:19: W0718: Catching too general exception Exception (broad-exception-caught)
 ************* Module cespy.raw.raw_stream
-src/cespy/raw/raw_stream.py:41:0: C0301: Line too long (105/100) (line-too-long)
-src/cespy/raw/raw_stream.py:176:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/raw/raw_stream.py:181:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/raw/raw_stream.py:185:0: C0303: Trailing whitespace (trailing-whitespace)
-src/cespy/raw/raw_stream.py:232:0: C0301: Line too long (105/100) (line-too-long)
-src/cespy/raw/raw_stream.py:264:0: C0301: Line too long (105/100) (line-too-long)
-src/cespy/raw/raw_stream.py:312:0: C0301: Line too long (105/100) (line-too-long)
-src/cespy/raw/raw_stream.py:397:0: C0301: Line too long (105/100) (line-too-long)
-src/cespy/raw/raw_stream.py:54:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/raw/raw_stream.py:63:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/raw/raw_stream.py:66:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
+src/cespy/raw/raw_stream.py:57:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/raw/raw_stream.py:66:8: W0107: Unnecessary pass statement (unnecessary-pass)
+src/cespy/raw/raw_stream.py:69:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
 src/cespy/raw/raw_stream.py:218:8: W0107: Unnecessary pass statement (unnecessary-pass)
-src/cespy/raw/raw_stream.py:285:8: C0206: Consider iterating with .items() (consider-using-dict-items)
-src/cespy/raw/raw_stream.py:412:8: C0200: Consider using enumerate instead of iterating with range and len (consider-using-enumerate)
-src/cespy/raw/raw_stream.py:422:8: C0206: Consider iterating with .items() (consider-using-dict-items)
-src/cespy/raw/raw_stream.py:18:0: W0611: Unused read_float32 imported from raw_read (unused-import)
-src/cespy/raw/raw_stream.py:18:0: W0611: Unused read_float64 imported from raw_read (unused-import)
-src/cespy/raw/raw_stream.py:18:0: W0611: Unused read_complex imported from raw_read (unused-import)
-src/cespy/raw/raw_stream.py:20:0: W0611: Unused constants imported from core as core_constants (unused-import)
+src/cespy/raw/raw_stream.py:293:8: C0206: Consider iterating with .items() (consider-using-dict-items)
+src/cespy/raw/raw_stream.py:428:8: C0200: Consider using enumerate instead of iterating with range and len (consider-using-enumerate)
+src/cespy/raw/raw_stream.py:438:8: C0206: Consider iterating with .items() (consider-using-dict-items)
 ************* Module cespy.raw.raw_write
 src/cespy/raw/raw_write.py:87:17: C0123: Use isinstance() rather than type() for a typecheck. (unidiomatic-typecheck)
 src/cespy/raw/raw_write.py:42:0: R0903: Too few public methods (1/2) (too-few-public-methods)
@@ -346,19 +253,17 @@ src/cespy/raw/raw_write.py:524:22: W0613: Unused argument 'trace' (unused-argume
 ************* Module cespy.raw.rawplot
 src/cespy/raw/rawplot.py:53:20: C0415: Import outside toplevel (numpy) (import-outside-toplevel)
 ************* Module cespy.raw.raw_read
-src/cespy/raw/raw_read.py:1075:0: C0301: Line too long (103/100) (line-too-long)
-src/cespy/raw/raw_read.py:1112:0: C0301: Line too long (104/100) (line-too-long)
 src/cespy/raw/raw_read.py:1:0: C0302: Too many lines in module (1356/1000) (too-many-lines)
-src/cespy/raw/raw_read.py:562:8: C0103: Attribute name "nPoints" doesn't conform to snake_case naming style (invalid-name)
-src/cespy/raw/raw_read.py:563:8: C0103: Attribute name "nVariables" doesn't conform to snake_case naming style (invalid-name)
-src/cespy/raw/raw_read.py:428:0: R0902: Too many instance attributes (16/7) (too-many-instance-attributes)
-src/cespy/raw/raw_read.py:472:4: R0914: Too many local variables (42/20) (too-many-locals)
-src/cespy/raw/raw_read.py:824:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
-src/cespy/raw/raw_read.py:472:4: R0912: Too many branches (102/12) (too-many-branches)
-src/cespy/raw/raw_read.py:472:4: R0915: Too many statements (240/50) (too-many-statements)
-src/cespy/raw/raw_read.py:496:19: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
-src/cespy/raw/raw_read.py:1061:4: R0912: Too many branches (21/12) (too-many-branches)
-src/cespy/raw/raw_read.py:1061:4: R0915: Too many statements (55/50) (too-many-statements)
+src/cespy/raw/raw_read.py:560:8: C0103: Attribute name "nPoints" doesn't conform to snake_case naming style (invalid-name)
+src/cespy/raw/raw_read.py:561:8: C0103: Attribute name "nVariables" doesn't conform to snake_case naming style (invalid-name)
+src/cespy/raw/raw_read.py:426:0: R0902: Too many instance attributes (16/7) (too-many-instance-attributes)
+src/cespy/raw/raw_read.py:470:4: R0914: Too many local variables (42/20) (too-many-locals)
+src/cespy/raw/raw_read.py:822:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+src/cespy/raw/raw_read.py:470:4: R0912: Too many branches (102/12) (too-many-branches)
+src/cespy/raw/raw_read.py:470:4: R0915: Too many statements (240/50) (too-many-statements)
+src/cespy/raw/raw_read.py:494:19: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+src/cespy/raw/raw_read.py:1059:4: R0912: Too many branches (21/12) (too-many-branches)
+src/cespy/raw/raw_read.py:1059:4: R0915: Too many statements (55/50) (too-many-statements)
 src/cespy/raw/raw_read.py:1117:22: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
 src/cespy/raw/raw_read.py:1247:12: R1704: Redefining argument with the local name 'step' (redefined-argument-from-local)
 src/cespy/raw/raw_read.py:1195:4: R0912: Too many branches (13/12) (too-many-branches)
@@ -366,10 +271,7 @@ src/cespy/raw/raw_read.py:1275:12: C0415: Import outside toplevel (pandas) (impo
 src/cespy/raw/raw_read.py:1308:12: C0415: Import outside toplevel (pandas) (import-outside-toplevel)
 src/cespy/raw/raw_read.py:1321:0: C0206: Consider iterating with .items() (consider-using-dict-items)
 src/cespy/raw/raw_read.py:1348:12: C0415: Import outside toplevel (pandas) (import-outside-toplevel)
-src/cespy/raw/raw_read.py:232:0: W0611: Unused import re (unused-import)
-src/cespy/raw/raw_read.py:256:0: W0611: Unused paths imported from core as core_paths (unused-import)
 ************* Module cespy.raw.raw_binary_parser
-src/cespy/raw/raw_binary_parser.py:369:0: C0301: Line too long (114/100) (line-too-long)
 src/cespy/raw/raw_binary_parser.py:99:8: W0622: Redefining built-in 'format' (redefined-builtin)
 src/cespy/raw/raw_binary_parser.py:124:32: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
 src/cespy/raw/raw_binary_parser.py:140:4: R0914: Too many local variables (21/20) (too-many-locals)
@@ -380,42 +282,31 @@ src/cespy/raw/raw_binary_parser.py:241:12: W0612: Unused variable 'trace_idx' (u
 src/cespy/raw/raw_binary_parser.py:360:23: W0718: Catching too general exception Exception (broad-exception-caught)
 src/cespy/raw/raw_binary_parser.py:280:4: R0912: Too many branches (13/12) (too-many-branches)
 src/cespy/raw/raw_binary_parser.py:293:32: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
-src/cespy/raw/raw_binary_parser.py:418:4: C0415: Import outside toplevel (time) (import-outside-toplevel)
-src/cespy/raw/raw_binary_parser.py:429:8: W0612: Unused variable 'data' (unused-variable)
-src/cespy/raw/raw_binary_parser.py:435:8: W0612: Unused variable 'traces' (unused-variable)
+src/cespy/raw/raw_binary_parser.py:422:4: C0415: Import outside toplevel (time) (import-outside-toplevel)
 ************* Module cespy.raw.raw_convert
-src/cespy/raw/raw_convert.py:50:0: C0116: Missing function or method docstring (missing-function-docstring)
-src/cespy/raw/raw_convert.py:92:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
-src/cespy/raw/raw_convert.py:134:12: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
-src/cespy/raw/raw_convert.py:145:29: C2801: Unnecessarily calls dunder method __next__. Use next built-in function. (unnecessary-dunder-call)
-src/cespy/raw/raw_convert.py:145:29: C2801: Unnecessarily calls dunder method __iter__. Use iter built-in function. (unnecessary-dunder-call)
-src/cespy/raw/raw_convert.py:148:0: C0206: Consider iterating with .items() (consider-using-dict-items)
-src/cespy/raw/raw_convert.py:169:12: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
-src/cespy/raw/raw_convert.py:170:4: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
-src/cespy/raw/raw_convert.py:50:0: R0912: Too many branches (23/12) (too-many-branches)
-src/cespy/raw/raw_convert.py:50:0: R0915: Too many statements (69/50) (too-many-statements)
-src/cespy/raw/raw_convert.py:45:0: W0611: Unused constants imported from core as core_constants (unused-import)
+src/cespy/raw/raw_convert.py:47:0: C0116: Missing function or method docstring (missing-function-docstring)
+src/cespy/raw/raw_convert.py:89:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+src/cespy/raw/raw_convert.py:131:12: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+src/cespy/raw/raw_convert.py:142:29: C2801: Unnecessarily calls dunder method __next__. Use next built-in function. (unnecessary-dunder-call)
+src/cespy/raw/raw_convert.py:142:29: C2801: Unnecessarily calls dunder method __iter__. Use iter built-in function. (unnecessary-dunder-call)
+src/cespy/raw/raw_convert.py:145:0: C0206: Consider iterating with .items() (consider-using-dict-items)
+src/cespy/raw/raw_convert.py:166:12: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+src/cespy/raw/raw_convert.py:167:4: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+src/cespy/raw/raw_convert.py:47:0: R0912: Too many branches (23/12) (too-many-branches)
+src/cespy/raw/raw_convert.py:47:0: R0915: Too many statements (69/50) (too-many-statements)
 ************* Module cespy.editor.asy_reader
-src/cespy/editor/asy_reader.py:56:15: E0602: Undefined variable 'Any' (undefined-variable)
-src/cespy/editor/asy_reader.py:57:16: E0602: Undefined variable 'Any' (undefined-variable)
-src/cespy/editor/asy_reader.py:58:17: E0602: Undefined variable 'Any' (undefined-variable)
-src/cespy/editor/asy_reader.py:59:18: E0602: Undefined variable 'Any' (undefined-variable)
 src/cespy/editor/asy_reader.py:97:24: C0103: Variable name "posX" doesn't conform to snake_case naming style (invalid-name)
 src/cespy/editor/asy_reader.py:98:24: C0103: Variable name "posY" doesn't conform to snake_case naming style (invalid-name)
 ************* Module cespy.editor.netlist_optimizer
-src/cespy/editor/netlist_optimizer.py:37:0: R0902: Too many instance attributes (11/7) (too-many-instance-attributes)
-src/cespy/editor/netlist_optimizer.py:86:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
-src/cespy/editor/netlist_optimizer.py:259:8: C0415: Import outside toplevel (editor.base_editor.scan_eng) (import-outside-toplevel)
-src/cespy/editor/netlist_optimizer.py:285:4: R0912: Too many branches (14/12) (too-many-branches)
-src/cespy/editor/netlist_optimizer.py:344:4: R0914: Too many local variables (25/20) (too-many-locals)
-src/cespy/editor/netlist_optimizer.py:346:8: C0415: Import outside toplevel (editor.base_editor.scan_eng, editor.base_editor.format_eng) (import-outside-toplevel)
-src/cespy/editor/netlist_optimizer.py:409:12: R1724: Unnecessary "elif" after "continue", remove the leading "el" from "elif" (no-else-continue)
-src/cespy/editor/netlist_optimizer.py:344:4: R0912: Too many branches (14/12) (too-many-branches)
-src/cespy/editor/netlist_optimizer.py:433:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
-src/cespy/editor/netlist_optimizer.py:19:0: W0611: Unused Set imported from typing (unused-import)
-src/cespy/editor/netlist_optimizer.py:21:0: W0611: Unused constants imported from core as core_constants (unused-import)
-src/cespy/editor/netlist_optimizer.py:22:0: W0611: Unused patterns imported from core as core_patterns (unused-import)
-src/cespy/editor/netlist_optimizer.py:23:0: W0611: Unused OptimizationError imported from exceptions (unused-import)
+src/cespy/editor/netlist_optimizer.py:33:0: R0902: Too many instance attributes (11/7) (too-many-instance-attributes)
+src/cespy/editor/netlist_optimizer.py:82:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
+src/cespy/editor/netlist_optimizer.py:255:8: C0415: Import outside toplevel (editor.base_editor.scan_eng) (import-outside-toplevel)
+src/cespy/editor/netlist_optimizer.py:281:4: R0912: Too many branches (14/12) (too-many-branches)
+src/cespy/editor/netlist_optimizer.py:340:4: R0914: Too many local variables (25/20) (too-many-locals)
+src/cespy/editor/netlist_optimizer.py:342:8: C0415: Import outside toplevel (editor.base_editor.scan_eng, editor.base_editor.format_eng) (import-outside-toplevel)
+src/cespy/editor/netlist_optimizer.py:405:12: R1724: Unnecessary "elif" after "continue", remove the leading "el" from "elif" (no-else-continue)
+src/cespy/editor/netlist_optimizer.py:340:4: R0912: Too many branches (14/12) (too-many-branches)
+src/cespy/editor/netlist_optimizer.py:429:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
 ************* Module cespy.editor.base_schematic
 src/cespy/editor/base_schematic.py:151:0: R0903: Too few public methods (0/2) (too-few-public-methods)
 src/cespy/editor/base_schematic.py:165:8: C0103: Attribute name "X" doesn't conform to snake_case naming style (invalid-name)
@@ -429,16 +320,11 @@ src/cespy/editor/base_schematic.py:299:4: C0103: Attribute name "verticalAlignme
 src/cespy/editor/base_schematic.py:291:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
 src/cespy/editor/base_schematic.py:305:0: C0115: Missing class docstring (missing-class-docstring)
 ************* Module cespy.editor.component_factory
-src/cespy/editor/component_factory.py:453:9: W0511: TODO: Parse additional attributes based on component type (fixme)
-src/cespy/editor/component_factory.py:54:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
-src/cespy/editor/component_factory.py:133:16: C0415: Import outside toplevel (re) (import-outside-toplevel)
-src/cespy/editor/component_factory.py:365:16: W0707: Consider explicitly re-raising using 'except ValueError as exc' and 'raise InvalidComponentError('component_type', f'Unknown component type: {component_type}') from exc' (raise-missing-from)
-src/cespy/editor/component_factory.py:407:8: C0415: Import outside toplevel (re) (import-outside-toplevel)
-src/cespy/editor/component_factory.py:407:8: W0611: Unused import re (unused-import)
-src/cespy/editor/component_factory.py:515:8: C0415: Import outside toplevel (time) (import-outside-toplevel)
-src/cespy/editor/component_factory.py:13:0: W0611: Unused Path imported from pathlib (unused-import)
-src/cespy/editor/component_factory.py:16:0: W0611: Unused constants imported from core as core_constants (unused-import)
-src/cespy/editor/component_factory.py:18:0: W0611: Unused ComponentNotFoundError imported from exceptions (unused-import)
+src/cespy/editor/component_factory.py:449:9: W0511: TODO: Parse additional attributes based on component type (fixme)
+src/cespy/editor/component_factory.py:52:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
+src/cespy/editor/component_factory.py:131:16: C0415: Import outside toplevel (re) (import-outside-toplevel)
+src/cespy/editor/component_factory.py:363:16: W0707: Consider explicitly re-raising using 'except ValueError as exc' and 'raise InvalidComponentError('component_type', f'Unknown component type: {component_type}') from exc' (raise-missing-from)
+src/cespy/editor/component_factory.py:511:8: C0415: Import outside toplevel (time) (import-outside-toplevel)
 ************* Module cespy.editor.component_interface
 src/cespy/editor/component_interface.py:27:8: W2301: Unnecessary ellipsis constant (unnecessary-ellipsis)
 src/cespy/editor/component_interface.py:36:8: W2301: Unnecessary ellipsis constant (unnecessary-ellipsis)
@@ -459,7 +345,6 @@ src/cespy/editor/component_interface.py:180:8: W2301: Unnecessary ellipsis const
 src/cespy/editor/component_interface.py:189:8: W2301: Unnecessary ellipsis constant (unnecessary-ellipsis)
 src/cespy/editor/component_interface.py:198:8: W2301: Unnecessary ellipsis constant (unnecessary-ellipsis)
 src/cespy/editor/component_interface.py:207:8: W2301: Unnecessary ellipsis constant (unnecessary-ellipsis)
-src/cespy/editor/component_interface.py:10:0: W0611: Unused Optional imported from typing (unused-import)
 ************* Module cespy.editor.circuit_validator
 src/cespy/editor/circuit_validator.py:118:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
 src/cespy/editor/circuit_validator.py:340:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
@@ -467,20 +352,17 @@ src/cespy/editor/circuit_validator.py:541:8: W0104: Statement seems to have no e
 src/cespy/editor/circuit_validator.py:525:8: W0613: Unused argument 'directives' (unused-argument)
 src/cespy/editor/circuit_validator.py:573:19: W0718: Catching too general exception Exception (broad-exception-caught)
 ************* Module cespy.editor.spice_editor
-src/cespy/editor/spice_editor.py:1:0: C0302: Too many lines in module (1611/1000) (too-many-lines)
-src/cespy/editor/spice_editor.py:1123:17: W0511: TODO: Improve this. END of line termination could be differnt (fixme)
-src/cespy/editor/spice_editor.py:1233:9: W0511: TODO: if adding a .MODEL or .SUBCKT it should verify if it already (fixme)
-src/cespy/editor/spice_editor.py:1238:17: W0511: TODO: Improve this. END of line termination could be (fixme)
-src/cespy/editor/spice_editor.py:1249:9: W0511: TODO: Make it more intelligent so it recognizes .models, .param and .subckt (fixme)
-src/cespy/editor/spice_editor.py:1477:9: W0511: TODO: if adding a .MODEL or .SUBCKT it should verify if it already (fixme)
-src/cespy/editor/spice_editor.py:1482:17: W0511: TODO: Improve this. END of line termination could be (fixme)
-src/cespy/editor/spice_editor.py:1493:9: W0511: TODO: Make it more intelligent so it recognizes .models, .param and .subckt (fixme)
-src/cespy/editor/spice_editor.py:577:4: R0912: Too many branches (19/12) (too-many-branches)
-src/cespy/editor/spice_editor.py:1261:4: C0103: Method name "remove_Xinstruction" doesn't conform to snake_case naming style (invalid-name)
-src/cespy/editor/spice_editor.py:326:0: R0904: Too many public methods (34/20) (too-many-public-methods)
-src/cespy/editor/spice_editor.py:50:0: W0611: Unused Pattern imported from typing (unused-import)
-src/cespy/editor/spice_editor.py:68:0: W0611: Unused paths imported from core as core_paths (unused-import)
-src/cespy/editor/spice_editor.py:69:0: W0611: Unused EncodingError imported from exceptions (unused-import)
+src/cespy/editor/spice_editor.py:1:0: C0302: Too many lines in module (1606/1000) (too-many-lines)
+src/cespy/editor/spice_editor.py:1118:17: W0511: TODO: Improve this. END of line termination could be differnt (fixme)
+src/cespy/editor/spice_editor.py:1228:9: W0511: TODO: if adding a .MODEL or .SUBCKT it should verify if it already (fixme)
+src/cespy/editor/spice_editor.py:1233:17: W0511: TODO: Improve this. END of line termination could be (fixme)
+src/cespy/editor/spice_editor.py:1244:9: W0511: TODO: Make it more intelligent so it recognizes .models, .param and .subckt (fixme)
+src/cespy/editor/spice_editor.py:1472:9: W0511: TODO: if adding a .MODEL or .SUBCKT it should verify if it already (fixme)
+src/cespy/editor/spice_editor.py:1477:17: W0511: TODO: Improve this. END of line termination could be (fixme)
+src/cespy/editor/spice_editor.py:1488:9: W0511: TODO: Make it more intelligent so it recognizes .models, .param and .subckt (fixme)
+src/cespy/editor/spice_editor.py:572:4: R0912: Too many branches (19/12) (too-many-branches)
+src/cespy/editor/spice_editor.py:1256:4: C0103: Method name "remove_Xinstruction" doesn't conform to snake_case naming style (invalid-name)
+src/cespy/editor/spice_editor.py:321:0: R0904: Too many public methods (34/20) (too-many-public-methods)
 ************* Module cespy.editor.base_editor_enhanced
 src/cespy/editor/base_editor_enhanced.py:42:0: R0902: Too many instance attributes (9/7) (too-many-instance-attributes)
 src/cespy/editor/base_editor_enhanced.py:589:19: W0718: Catching too general exception Exception (broad-exception-caught)
@@ -567,7 +449,7 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
  (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.simulators.ngspice_simulator:[282:327]
-==cespy.simulators.xyce_simulator:[363:383]
+==cespy.simulators.xyce_simulator:[363:396]
             + [logfile]
             + ["-r"]
             + [rawfile]
@@ -587,7 +469,20 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
                 )
         else:
             error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
-        return error (duplicate-code)
+        return error
+
+    @classmethod
+    def create_netlist(
+        cls,
+        circuit_file: Union[str, Path],
+        cmd_line_switches: Optional[List[Any]] = None,
+        timeout: Optional[float] = None,
+        *,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+        exe_log: bool = False,
+    ) -> Path:
+        """Create netlist (not supported by Xyce).""" (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.simulators.ngspice_simulator:[56:83]
 ==cespy.simulators.xyce_simulator:[56:83]
@@ -640,7 +535,7 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
             len(self.elements_analysed),
         )
 
-        # Calculate the number of runs (duplicate-code)
+        # Prepare callbacks and timeouts for all run calls (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.simulators.ngspice_simulator:[195:254]
 ==cespy.simulators.xyce_simulator:[283:344]
@@ -657,18 +552,20 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
             raise ValueError(f"Invalid Switch '{switch}'")
         return ret
 
+    # pylint: enable=too-many-branches
+
     @classmethod
     def run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls,
         netlist_file: Union[str, Path],
-        cmd_line_switches: Optional[Union[List[Any], str]] = None,
+        cmd_line_switches: Optional[Union[list[Any], str]] = None,
         timeout: Optional[float] = None,
         *,
         stdout: Optional[Any] = None,
         stderr: Optional[Any] = None,
         exe_log: bool = False,
     ) -> int:
-        """Executes a NGspice simulation run.
+        """Executes a Xyce simulation run.
 
         A raw file and a log file will be generated, with the same name as the netlist
         file, but with .raw and .log extension.
@@ -736,17 +633,16 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.toolkit.montecarlo:[621:631]
 ==cespy.sim.toolkit.worst_case:[269:280]
-            _logger.warning(
-                "The analysis was not executed. Please run the analysis before calling"
-                " this method"
-            )
-            return None
-
-        log_data: LogfileData = self.read_logfiles()
-        meas_data = log_data[meas_name]
-        if meas_data is None:
-            _logger.warning("Measurement %s not found in log files", meas_name)
-            return None (duplicate-code)
+                _logger.warning(
+                    "The analysis was not executed. Please run the analysis before calling"
+                    " this method"
+                )
+                return None
+            log_data: LogfileData = self.read_logfiles()
+            meas_data = log_data[meas_name]
+            if meas_data is None:
+                _logger.warning("Measurement %s not found in log files", meas_name)
+                return None (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.toolkit.fast_worst_case:[121:138]
 ==cespy.sim.toolkit.worst_case:[145:158]
@@ -800,8 +696,6 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
             _logger.error("==============================================")
             raise SpiceSimulatorError("Simulator executable not found.")
 
-        # note: if you want ascii raw files, use "-D filetype=ascii"
-
         if cmd_line_switches is None:
             cmd_line_switches = []
         elif isinstance(cmd_line_switches, str):
@@ -809,9 +703,10 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
         netlist_file = Path(netlist_file)
 
         logfile = netlist_file.with_suffix(core_constants.FileExtensions.LOG).as_posix()
-        rawfile = netlist_file.with_suffix(core_constants.FileExtensions.RAW).as_posix() (duplicate-code)
+        rawfile = netlist_file.with_suffix(core_constants.FileExtensions.RAW).as_posix()
+ (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.simulators.ltspice_simulator:[142:155]
+==cespy.simulators.ltspice_simulator:[137:150]
 ==cespy.simulators.xyce_simulator:[228:241]
         if switch is None:
             return []
@@ -821,7 +716,7 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
         if switch[0] != "-":
             switch = "-" + switch
 
-        # will be set anyway?
+        # default run switches
         if switch in cls._default_run_switches:
             _logger.info("Switch %s is already in the default switches", switch)
             return []
@@ -829,24 +724,21 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.toolkit.sim_analysis:[97:106]
 ==cespy.sim.toolkit.tolerance_deviations:[372:381]
-            self.editor,
-            wait_resource=wait_resource,
-            callback=callback,
-            callback_args=callback_args,
-            switches=switches,
-            timeout=timeout,
-            run_filename=run_filename,
-            exe_log=exe_log,
-        ) (duplicate-code)
+                    self.editor,
+                    wait_resource=wait_resource,
+                    callback=callback,
+                    callback_args=callback_args,
+                    switches=switches,
+                    timeout=timeout,
+                    run_filename=run_filename,
+                    exe_log=exe_log,
+                ) (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.sim_runner:[174:190]
 ==cespy.sim.sim_runner_refactored:[49:60]
 @dataclass
 class RunConfig:
-    """Configuration class for SimRunner.run() method.
-
-    Groups related parameters to reduce the number of arguments in the run method.
-    """
+    """Configuration for SimRunner.run() method."""
 
     wait_resource: bool = True
     callback: Optional[CallbackType] = None
@@ -854,12 +746,10 @@ class RunConfig:
     switches: Optional[List[str]] = None
     timeout: Optional[float] = None
     run_filename: Optional[str] = None
-    exe_log: bool = False
-
- (duplicate-code)
+    exe_log: bool = False (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.simulators.ngspice_simulator:[293:327]
-==cespy.simulators.qspice_simulator:[256:265]
+==cespy.simulators.qspice_simulator:[256:278]
                 error = run_function(
                     cmd_run,
                     timeout=timeout,
@@ -871,32 +761,20 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
         return error
 
     @classmethod
-    def set_compatibility_mode(cls, mode: str = _compatibility_mode) -> None:
-        """Set the compatibility mode. It has become mandatory in recent ngspice
-        versions, as the default 'all' is no longer valid.
-
-        A good default seems to be "kiltpsa" (KiCad, LTspice, PSPICE, netlists).
-
-        The following compatibility modes are available (as of end 2024, ngspice v44):
-
-        * `a : complete netlist transformed`
-        * `ps : PSPICE compatibility`
-        * `hs : HSPICE compatibility`
-        * `spe : Spectre compatibility`
-        * `lt : LTSPICE compatibility`
-        * `s3 : Spice3 compatibility`
-        * `ll : all (currently not used)`
-        * `ki : KiCad compatibility`
-        * `eg : EAGLE compatibility`
-        * `mc : for 'make check'`
-
-        :param mode: the compatibility mode to be set. Set to None to remove the
-            compatibility setting.
-        :type mode: str
-        """ (duplicate-code)
+    def create_netlist(
+        cls,
+        circuit_file: Union[str, Path],
+        cmd_line_switches: Optional[List[Any]] = None,
+        timeout: Optional[float] = None,
+        *,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+        exe_log: bool = False,
+    ) -> Path:
+        """Create netlist (not supported by Qspice).""" (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.simulators.ltspice_simulator:[267:322]
-==cespy.simulators.xyce_simulator:[374:383]
+==cespy.simulators.ltspice_simulator:[262:317]
+==cespy.simulators.xyce_simulator:[374:396]
                 error = run_function(
                     cmd_run,
                     timeout=timeout,
@@ -905,7 +783,20 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
                 )
         else:
             error = run_function(cmd_run, timeout=timeout, stdout=stdout, stderr=stderr)
-        return error (duplicate-code)
+        return error
+
+    @classmethod
+    def create_netlist(
+        cls,
+        circuit_file: Union[str, Path],
+        cmd_line_switches: Optional[List[Any]] = None,
+        timeout: Optional[float] = None,
+        *,
+        stdout: Optional[Any] = None,
+        stderr: Optional[Any] = None,
+        exe_log: bool = False,
+    ) -> Path:
+        """Create netlist (not supported by Xyce).""" (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.toolkit.fast_worst_case:[233:241]
 ==cespy.sim.toolkit.sensitivity_analysis:[247:255]
@@ -927,10 +818,7 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
             switches=switches,
             timeout=actual_timeout,
             exe_log=exe_log,
-        )
-
-        # Sequence a change of a component value at a time, setting it to the
-        # maximum value (duplicate-code)
+        ) (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.toolkit.fast_worst_case:[123:138]
 ==cespy.sim.toolkit.sensitivity_analysis:[155:166]
@@ -944,13 +832,9 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
                 return
             worst_case_elements[ref1] = val1, dev1, "component"
             self.elements_analysed.append(ref1)
-
-        def value_change(
-            val: Union[str, float], dev: ComponentDeviation, to: WorstCaseType
-        ) -> Union[str, float]:
-            """Sets the reference component to the maximum or minimum based on deviation type.""" (duplicate-code)
+ (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.simulators.ltspice_simulator:[210:223]
+==cespy.simulators.ltspice_simulator:[205:218]
 ==cespy.simulators.xyce_simulator:[346:356]
             _logger.error("using the create_from(<location>) class method")
             _logger.error("==============================================")
@@ -966,8 +850,8 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
         # '<netlist_file>.raw' and '<netlist_file>.log'
  (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
+==cespy.__init__:[96:104]
 ==cespy.sim.toolkit.sim_analysis:[98:106]
-==cespy:[96:104]
         wait_resource=wait_resource,
         callback=callback,
         callback_args=callback_args,
@@ -976,16 +860,6 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
         run_filename=run_filename,
         exe_log=exe_log,
     ) (duplicate-code)
-src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.sim.toolkit.montecarlo:[414:422]
-==cespy.sim.toolkit.sensitivity_analysis:[248:255]
-                wait_resource=True,
-                callback=actual_callback,
-                callback_args=actual_callback_args,
-                switches=switches,
-                timeout=actual_timeout,
-                exe_log=exe_log,
-            ) (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.toolkit.fast_worst_case:[176:183]
 ==cespy.sim.toolkit.sensitivity_analysis:[204:211]
@@ -1006,30 +880,34 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
             return None
 
         self._reset_netlist()  # reset the netlist
-        self.play_instructions()  # play the instructions
-        # Add the run number to the measurements by using a parameter (duplicate-code)
+        self.play_instructions()  # play the instructions (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.toolkit.sim_analysis:[97:104]
 ==cespy.sim.toolkit.tolerance_deviations:[385:392]
-            self.editor,
-            wait_resource=wait_resource,
-            callback=callback,
-            callback_args=callback_args,
-            switches=switches,
-            timeout=timeout,
-            run_filename=run_filename, (duplicate-code)
+                        self.editor,
+                        wait_resource=wait_resource,
+                        callback=callback,
+                        callback_args=callback_args,
+                        switches=switches,
+                        timeout=timeout,
+                        run_filename=run_filename, (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.sim_runner:[160:174]
 ==cespy.sim.sim_runner_refactored:[36:45]
 @dataclass
 class SimRunnerConfig:
-    """Configuration for SimRunner initialization."""
+    """Configuration class for SimRunner initialization.
+
+    Groups related parameters to reduce the number of arguments in SimRunner constructor.
+    """
 
     simulator: Optional[Union[str, Path, Type[Simulator]]] = None
     parallel_sims: int = 4
     timeout: float = 600.0
     verbose: bool = False
-    output_folder: Optional[str] = None (duplicate-code)
+    output_folder: Optional[str] = None
+
+ (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.simulators.qspice_simulator:[228:237]
 ==cespy.simulators.xyce_simulator:[346:354]
@@ -1042,16 +920,16 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
         elif isinstance(cmd_line_switches, str):
             cmd_line_switches = [cmd_line_switches] (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.sim.toolkit.montecarlo:[437:443]
+==cespy.sim.toolkit.montecarlo:[433:439]
 ==cespy.sim.toolkit.tolerance_deviations:[405:411]
-            if callback is not None:
-                return (
-                    sim.get_results() if sim is not None else None
-                    for sim in self.simulations
-                    if sim is not None
-                ) (duplicate-code)
+        if callback is not None:
+            return (
+                sim.get_results() if sim is not None else None
+                for sim in self.simulations
+                if sim is not None
+            ) (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.sim.toolkit.montecarlo:[789:795]
+==cespy.sim.toolkit.montecarlo:[778:784]
 ==cespy.sim.toolkit.worst_case:[242:248]
                 callback=callback,
                 callback_args=callback_args,
@@ -1060,14 +938,14 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
                 exe_log=exe_log,
             ) (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.sim.toolkit.montecarlo:[779:785]
+==cespy.sim.toolkit.montecarlo:[768:774]
 ==cespy.sim.toolkit.worst_case:[198:204]
-                callback=callback,
-                callback_args=callback_args,
-                switches=switches,
-                timeout=timeout,
-                exe_log=exe_log,
-            ) (duplicate-code)
+            callback=callback,
+            callback_args=callback_args,
+            switches=switches,
+            timeout=timeout,
+            exe_log=exe_log,
+        ) (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.sim.toolkit.sensitivity_analysis:[219:225]
 ==cespy.sim.toolkit.worst_case:[212:218]
@@ -1096,24 +974,38 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
         type=int,
         default=9000, (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
+==cespy.__init__:[96:102]
 ==cespy.sim.toolkit.tolerance_deviations:[386:392]
-==cespy:[96:102]
-                        wait_resource=wait_resource,
-                        callback=callback,
-                        callback_args=callback_args,
-                        switches=switches,
-                        timeout=timeout,
-                        run_filename=run_filename, (duplicate-code)
+        wait_resource=wait_resource,
+        callback=callback,
+        callback_args=callback_args,
+        switches=switches,
+        timeout=timeout,
+        run_filename=run_filename, (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.editor.asc_editor:[552:557]
-==cespy.editor.spice_editor:[967:972]
+==cespy.editor.spice_editor:[962:967]
         if isinstance(value, (int, float)):
             value_str = format_eng(value)
         else:
             value_str = value
         if match: (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.sim.toolkit.montecarlo:[727:732]
+==cespy.sim.toolkit.fast_worst_case:[219:230]
+==cespy.sim.toolkit.montecarlo:[409:418]
+        self.run(
+            wait_resource=True,
+            callback=actual_callback,
+            callback_args=actual_callback_args,
+            switches=switches,
+            timeout=actual_timeout,
+            exe_log=exe_log,
+        )
+
+        # Sequence a change of a component value at a time, setting it to the
+        # maximum value (duplicate-code)
+src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
+==cespy.sim.toolkit.montecarlo:[716:721]
 ==cespy.sim.toolkit.worst_case:[198:203]
                 callback=callback,
                 callback_args=callback_args,
@@ -1138,8 +1030,8 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
                     if typ == "component":
                         self.editor.set_component_value( (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.sim.task_queue:[41:48]
-==cespy.sim.toolkit.base_analysis:[35:42]
+==cespy.sim.task_queue:[40:47]
+==cespy.sim.toolkit.base_analysis:[33:40]
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
@@ -1148,7 +1040,7 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 
 @dataclass (duplicate-code)
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
-==cespy.log.qspice_log_reader:[142:147]
+==cespy.log.qspice_log_reader:[141:146]
 ==cespy.simulators.qspice_simulator:[225:230]
             _logger.error("================== ALERT! ====================")
             _logger.error("Unable to find the QSPICE executable.")
@@ -1166,16 +1058,13 @@ src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 src/cespy/editor/qsch_editor.py:1:0: R0801: Similar lines in 2 files
 ==cespy.simulators.qspice_simulator:[79:88]
 ==cespy.simulators.xyce_simulator:[62:68]
-            if exe.startswith("~"):
-                # expand here, as I use _spice_exe_win_paths also for linux, and
-                # expanding earlier will fail
-                exe = os.path.expanduser(exe)
-            if core_paths.is_valid_file(exe):
-                spice_exe = [exe]
-                break
-
-    # fall through (duplicate-code)
+        if exe.startswith("~"):
+            exe = os.path.expanduser(exe)
+        if core_paths.is_valid_file(exe):
+            spice_exe = [exe]
+            break
+        # check if file in path (duplicate-code)
 
 ------------------------------------------------------------------
-Your code has been rated at 9.57/10 (previous run: 9.60/10, -0.03)
+Your code has been rated at 9.68/10 (previous run: 9.68/10, +0.00)
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name,duplicate-code
 """
 Basic Simulation Examples - Getting Started with CESPy
 
@@ -6,22 +7,20 @@ This example demonstrates the fundamental simulation workflows using different
 SPICE simulators supported by CESPy.
 """
 
-import os
 import sys
 from pathlib import Path
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator
-from cespy import SimRunner, RawRead
-from cespy.editor import SpiceEditor
+from cespy import LTspice, NGspiceSimulator, Qspice, RawRead, SimRunner, XyceSimulator  # pylint: disable=wrong-import-position
+from cespy.editor import SpiceEditor  # pylint: disable=wrong-import-position
 
 
-def example_ltspice_simulation():
+def example_ltspice_simulation() -> None:
     """Basic LTSpice simulation example."""
     print("=== LTSpice Simulation Example ===")
-    
+
     # Create a simple RC circuit netlist
     netlist_content = """
 Version 4
@@ -51,32 +50,25 @@ SYMATTR InstName C1
 SYMATTR Value 1u
 TEXT 56 264 Left 2 !.tran 0 10m 0 10u
 """
-    
+
     # Create temporary netlist file
     netlist_path = Path("temp_rc_circuit.asc")
-    with open(netlist_path, 'w') as f:
+    with open(netlist_path, "w", encoding="utf-8") as f:
         f.write(netlist_content)
-    
+
     try:
-        # Initialize LTSpice simulator
-        simulator = LTspice()
-        
-        # Run simulation using SimRunner
-        runner = SimRunner()
-        runner.simulator = simulator
-        
-        # Configure simulation
-        runner.set_circuit(str(netlist_path))
-        
+        # Initialize SimRunner with LTspice simulator class
+        runner = SimRunner(simulator=LTspice)
+
         # Run the simulation
         print("Running LTSpice simulation...")
-        result = runner.run()
-        
+        result = runner.run(str(netlist_path))
+
         if result:
             print("✓ Simulation completed successfully")
-            
+
             # Read raw data if available
-            raw_file = netlist_path.with_suffix('.raw')
+            raw_file = netlist_path.with_suffix(".raw")
             if raw_file.exists():
                 raw_reader = RawRead(str(raw_file))
                 traces = raw_reader.get_trace_names()
@@ -85,8 +77,8 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
                 print("No raw data file found")
         else:
             print("✗ Simulation failed")
-            
-    except Exception as e:
+
+    except (IOError, OSError, ValueError, RuntimeError) as e:
         print(f"Error running LTSpice simulation: {e}")
     finally:
         # Cleanup
@@ -94,10 +86,10 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
             netlist_path.unlink()
 
 
-def example_ngspice_simulation():
+def example_ngspice_simulation() -> None:
     """Basic NGSpice simulation example."""
     print("\n=== NGSpice Simulation Example ===")
-    
+
     # Create a simple voltage divider netlist
     netlist_content = """
 * Simple voltage divider circuit
@@ -108,30 +100,25 @@ R2 vout 0 2k
 .print dc v(vout)
 .end
 """
-    
+
     # Create temporary netlist file
     netlist_path = Path("temp_divider.net")
-    with open(netlist_path, 'w') as f:
+    with open(netlist_path, "w", encoding="utf-8") as f:
         f.write(netlist_content)
-    
+
     try:
-        # Initialize NGSpice simulator
-        simulator = NGspiceSimulator()
-        
-        # Run simulation
-        runner = SimRunner()
-        runner.simulator = simulator
-        runner.set_circuit(str(netlist_path))
-        
+        # Run simulation using SimRunner with NGspiceSimulator class
+        runner = SimRunner(simulator=NGspiceSimulator)
+
         print("Running NGSpice simulation...")
-        result = runner.run()
-        
+        result = runner.run(str(netlist_path))
+
         if result:
             print("✓ NGSpice simulation completed successfully")
         else:
             print("✗ NGSpice simulation failed")
-            
-    except Exception as e:
+
+    except (IOError, OSError, ValueError, RuntimeError) as e:
         print(f"Error running NGSpice simulation: {e}")
     finally:
         # Cleanup
@@ -139,16 +126,12 @@ R2 vout 0 2k
             netlist_path.unlink()
 
 
-def example_qspice_simulation():
+def example_qspice_simulation() -> None:
     """Basic QSpice simulation example."""
     print("\n=== QSpice Simulation Example ===")
-    
-    try:
-        # Initialize QSpice simulator
-        simulator = Qspice()
-        
-        # Create a simple RC circuit
-        netlist_content = """
+
+    # Create a simple RC circuit
+    netlist_content = """
 * RC Low-pass filter
 V1 in 0 AC 1 0
 R1 in out 1k
@@ -156,40 +139,36 @@ C1 out 0 1n
 .ac dec 10 1 100meg
 .end
 """
-        
-        netlist_path = Path("temp_rc_filter.net")
-        with open(netlist_path, 'w') as f:
+
+    netlist_path = Path("temp_rc_filter.net")
+    try:
+        with open(netlist_path, "w", encoding="utf-8") as f:
             f.write(netlist_content)
-        
-        runner = SimRunner()
-        runner.simulator = simulator
-        runner.set_circuit(str(netlist_path))
-        
+
+        # Run simulation using SimRunner with Qspice class
+        runner = SimRunner(simulator=Qspice)
+
         print("Running QSpice simulation...")
-        result = runner.run()
-        
+        result = runner.run(str(netlist_path))
+
         if result:
             print("✓ QSpice simulation completed successfully")
         else:
             print("✗ QSpice simulation failed")
-            
-    except Exception as e:
+
+    except (IOError, OSError, ValueError, RuntimeError) as e:
         print(f"Error running QSpice simulation: {e}")
     finally:
-        if 'netlist_path' in locals() and netlist_path.exists():
+        if netlist_path.exists():
             netlist_path.unlink()
 
 
-def example_xyce_simulation():
+def example_xyce_simulation() -> None:
     """Basic Xyce simulation example."""
     print("\n=== Xyce Simulation Example ===")
-    
-    try:
-        # Initialize Xyce simulator
-        simulator = XyceSimulator()
-        
-        # Create a simple diode circuit
-        netlist_content = """
+
+    # Create a simple diode circuit
+    netlist_content = """
 * Simple diode circuit
 V1 in 0 DC 2.5
 R1 in cathode 1k
@@ -199,37 +178,36 @@ D1 cathode 0 DMOD
 .print dc v(cathode) i(V1)
 .end
 """
-        
-        netlist_path = Path("temp_diode.net")
-        with open(netlist_path, 'w') as f:
+
+    netlist_path = Path("temp_diode.net")
+    try:
+        with open(netlist_path, "w", encoding="utf-8") as f:
             f.write(netlist_content)
-        
-        runner = SimRunner()
-        runner.simulator = simulator
-        runner.set_circuit(str(netlist_path))
-        
+
+        # Run simulation using SimRunner with XyceSimulator class
+        runner = SimRunner(simulator=XyceSimulator)
+
         print("Running Xyce simulation...")
-        result = runner.run()
-        
+        result = runner.run(str(netlist_path))
+
         if result:
             print("✓ Xyce simulation completed successfully")
         else:
             print("✗ Xyce simulation failed")
-            
-    except Exception as e:
+
+    except (IOError, OSError, ValueError, RuntimeError) as e:
         print(f"Error running Xyce simulation: {e}")
     finally:
-        if 'netlist_path' in locals() and netlist_path.exists():
+        if netlist_path.exists():
             netlist_path.unlink()
 
 
-def example_parameter_sweep():
+def example_parameter_sweep() -> None:
     """Example of parameter sweep simulation."""
     print("\n=== Parameter Sweep Example ===")
-    
-    try:
-        # Create circuit with parameter to sweep
-        netlist_content = """
+
+    # Create circuit with parameter to sweep
+    netlist_content = """
 Version 4
 SHEET 1 880 680
 WIRE 176 80 80 80
@@ -255,62 +233,60 @@ SYMATTR Value 1u
 TEXT 56 264 Left 2 !.step param R 100 10k 100
 TEXT 56 288 Left 2 !.op
 """
-        
-        netlist_path = Path("temp_sweep.asc")
-        with open(netlist_path, 'w') as f:
+
+    netlist_path = Path("temp_sweep.asc")
+    try:
+        with open(netlist_path, "w", encoding="utf-8") as f:
             f.write(netlist_content)
-        
+
         # Use SpiceEditor to modify parameters
         editor = SpiceEditor(str(netlist_path))
-        
+
         # Run simulation with different parameters
-        simulator = LTspice()
-        runner = SimRunner()
-        runner.simulator = simulator
-        
+        runner = SimRunner(simulator=LTspice)
+
         print("Running parameter sweep simulation...")
-        
+
         # Sweep resistance values
         resistance_values = [100, 1000, 10000]
-        
+
         for r_val in resistance_values:
             print(f"  Simulating with R = {r_val} ohms")
-            
+
             # Modify the parameter
-            editor.set_parameter('R', str(r_val))
-            editor.save_netlist()
-            
-            runner.set_circuit(str(netlist_path))
-            result = runner.run()
-            
+            editor.set_parameter("R", str(r_val))
+            editor.save_netlist(run_netlist_file=str(netlist_path))
+
+            result = runner.run(str(netlist_path))
+
             if result:
                 print(f"    ✓ R={r_val} simulation completed")
             else:
                 print(f"    ✗ R={r_val} simulation failed")
-        
+
         print("✓ Parameter sweep completed")
-        
-    except Exception as e:
+
+    except (IOError, OSError, ValueError, RuntimeError) as e:
         print(f"Error in parameter sweep: {e}")
     finally:
-        if 'netlist_path' in locals() and netlist_path.exists():
+        if netlist_path.exists():
             netlist_path.unlink()
 
 
-def main():
+def main() -> None:
     """Run all basic simulation examples."""
     print("CESPy Basic Simulation Examples")
     print("=" * 40)
-    
+
     # Run examples for each simulator
     example_ltspice_simulation()
     example_ngspice_simulation()
     example_qspice_simulation()
     example_xyce_simulation()
-    
+
     # Advanced example
     example_parameter_sweep()
-    
+
     print("\n" + "=" * 40)
     print("Basic simulation examples completed!")
     print("\nNext steps:")

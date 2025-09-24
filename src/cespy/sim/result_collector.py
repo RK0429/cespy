@@ -6,16 +6,15 @@ This module provides functionality to collect, organize, and process simulation
 results, including raw data files, log files, and measurements.
 """
 
+import csv
 import json
 import logging
 import shutil
+import statistics
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-from ..log.logfile_data import LogfileData
-from ..raw.raw_read import RawRead
+from typing import Any, Dict, List, Optional, Set
 
 _logger = logging.getLogger("cespy.ResultCollector")
 
@@ -276,8 +275,6 @@ class ResultCollector:
         if not values:
             return {"count": 0}
 
-        import statistics
-
         return {
             "count": len(values),
             "min": min(values),
@@ -298,8 +295,6 @@ class ResultCollector:
             output_path: Path for CSV output
             batch_id: Optional batch to export (None for all)
         """
-        import csv
-
         # Determine which results to export
         if batch_id:
             batch = self._batches.get(batch_id)
@@ -314,7 +309,7 @@ class ResultCollector:
             return
 
         # Collect all measurement names
-        all_measurements = set()
+        all_measurements: set[str] = set()
         for result in results:
             all_measurements.update(result.measurements.keys())
 
@@ -447,12 +442,12 @@ class ResultCollector:
                     # Get the first value (for non-stepped simulations)
                     value = log_reader.get_measure_value(meas_name, step=0)
                     measurements[meas_name] = value
-                except:
+                except Exception:
                     # Try without step parameter
                     try:
                         value = log_reader.get_measure_value(meas_name)
                         measurements[meas_name] = value
-                    except:
+                    except Exception:
                         pass
 
             return measurements

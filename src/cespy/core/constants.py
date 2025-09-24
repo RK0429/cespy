@@ -10,7 +10,7 @@ from typing import List
 # File extensions
 
 
-class FileExtensions:
+class FileExtensions:  # pylint: disable=too-few-public-methods
     """File extensions used by various simulators and tools."""
 
     ASC = ".asc"  # LTSpice schematic
@@ -41,7 +41,7 @@ class FileExtensions:
 # Simulator identifiers
 
 
-class Simulators:
+class Simulators:  # pylint: disable=too-few-public-methods
     """Simulator names and identifiers."""
 
     LTSPICE = "ltspice"
@@ -55,7 +55,7 @@ class Simulators:
 # Default configuration values
 
 
-class Defaults:
+class Defaults:  # pylint: disable=too-few-public-methods
     """Default configuration values."""
 
     # Timeouts
@@ -80,7 +80,7 @@ class Defaults:
 # Encoding constants
 
 
-class Encodings:
+class Encodings:  # pylint: disable=too-few-public-methods
     """Text encoding constants."""
 
     UTF8 = "utf-8"
@@ -105,7 +105,7 @@ class Encodings:
 # Component type identifiers
 
 
-class ComponentTypes:
+class ComponentTypes:  # pylint: disable=too-few-public-methods
     """SPICE component type identifiers."""
 
     RESISTOR = "R"
@@ -146,7 +146,7 @@ class ComponentTypes:
 # LTSpice specific constants
 
 
-class LTSpiceConstants:
+class LTSpiceConstants:  # pylint: disable=too-few-public-methods
     """Constants specific to LTSpice."""
 
     # Parameter names
@@ -180,7 +180,7 @@ class LTSpiceConstants:
 # Raw file constants
 
 
-class RawFileConstants:
+class RawFileConstants:  # pylint: disable=too-few-public-methods
     """Constants for raw simulation output files."""
 
     # Data types
@@ -209,7 +209,7 @@ class RawFileConstants:
 # Simulation types
 
 
-class SimulationTypes:
+class SimulationTypes:  # pylint: disable=too-few-public-methods
     """Standard SPICE simulation types."""
 
     OP = "Operation Point"
@@ -226,7 +226,7 @@ class SimulationTypes:
 # Line terminators
 
 
-class LineTerminators:
+class LineTerminators:  # pylint: disable=too-few-public-methods
     """Line terminator constants."""
 
     UNIX = "\n"
@@ -240,7 +240,7 @@ class LineTerminators:
 # SPICE syntax constants
 
 
-class SpiceSyntax:
+class SpiceSyntax:  # pylint: disable=too-few-public-methods
     """SPICE netlist syntax constants."""
 
     COMMENT_CHAR = "*"
@@ -257,7 +257,7 @@ class SpiceSyntax:
 # Error messages
 
 
-class ErrorMessages:
+class ErrorMessages:  # pylint: disable=too-few-public-methods
     """Standard error messages."""
 
     SIMULATOR_NOT_FOUND = "Simulator executable not found: {}"
@@ -271,7 +271,7 @@ class ErrorMessages:
 # Server/Client constants
 
 
-class ServerConstants:
+class ServerConstants:  # pylint: disable=too-few-public-methods
     """Constants for client-server operations."""
 
     XML_RPC_PROTOCOL = "http"

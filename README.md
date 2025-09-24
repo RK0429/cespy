@@ -3,7 +3,9 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 
-A unified Python toolkit for automating SPICE circuit simulators, merging the capabilities of kupicelib and kuPyLTSpice. cespy provides comprehensive support for schematic editing, simulation execution, result parsing, and advanced circuit analysis across multiple SPICE engines.
+*Read this in other languages: [日本語](README_ja.md)*
+
+A unified Python toolkit for automating SPICE circuit simulators, merging the capabilities of spicelib and PyLTSpice. cespy provides comprehensive support for schematic editing, simulation execution, result parsing, and advanced circuit analysis across multiple SPICE engines.
 
 ## Features
 
@@ -54,6 +56,13 @@ A unified Python toolkit for automating SPICE circuit simulators, merging the ca
 - `cespy-rawplot` - Plot waveforms from raw files
 - `cespy-histogram` - Create histograms from measurement data
 - `cespy-raw-convert` - Convert between raw file formats
+
+### 🚀 **Enhanced Core Features**
+
+- **Performance Monitoring** - Built-in profiling and optimization tools
+- **API Consistency** - Compatibility wrappers and parameter validation
+- **Platform Management** - Cross-platform simulator detection and configuration
+- **Advanced Visualization** - Integrated plotting and analysis visualization
 
 ## Installation
 
@@ -125,12 +134,12 @@ plt.show()
 ### Monte Carlo Analysis
 
 ```python
-from cespy.sim.toolkit import Montecarlo
+from cespy.sim.toolkit import MonteCarloAnalysis
 from cespy import AscEditor
 
 # Set up circuit with tolerances
 circuit = AscEditor("filter.asc")
-mc = Montecarlo(circuit, num_runs=1000)
+mc = MonteCarloAnalysis(circuit, num_runs=1000)
 
 # Define component tolerances
 mc.set_tolerance("R1", 0.05)  # 5% tolerance
@@ -166,6 +175,7 @@ Full documentation is available at the [project repository](https://github.com/R
 
 ### Key Modules
 
+- **`cespy.core`** - Core utilities for patterns, performance, and platform management
 - **`cespy.editor`** - Schematic and netlist editing tools
 - **`cespy.simulators`** - Simulator-specific implementations
 - **`cespy.sim`** - Simulation execution and management
@@ -176,22 +186,46 @@ Full documentation is available at the [project repository](https://github.com/R
 
 ## Examples
 
-Check the `examples/` directory for more detailed examples:
+Check the `examples/` directory for comprehensive examples:
 
-- Basic circuit simulation
-- Parameter sweeps
-- Monte Carlo analysis
-- Remote simulation setup
-- Custom analysis scripts
+- `01_basic_simulation.py` - Getting started with all supported simulators
+- `02_circuit_editing.py` - Programmatic schematic and netlist manipulation
+- `03_analysis_toolkit.py` - Monte Carlo, worst-case, and sensitivity analysis
+- `04_data_processing.py` - Efficient data handling and visualization
+- `05_batch_distributed.py` - Parallel and distributed simulation workflows
+- `06_platform_integration.py` - Cross-platform compatibility and auto-detection
 
-## Migration from kupicelib/kuPyLTSpice
+Run all examples with: `python examples/run_all_examples.py`
 
-If you're migrating from kupicelib or kuPyLTSpice:
+## Migration from spicelib/PyLTSpice
 
-- kupicelib users: Most APIs remain the same, just update imports from `kupicelib` to `cespy`
-- kuPyLTSpice users: Replace `kuPyLTSpice.LTSpiceSimulation` with `cespy.simulate()` or `cespy.LTspice`
+If you're migrating from spicelib or PyLTSpice:
+
+- spicelib users: Most APIs remain the same, just update imports from `spicelib` to `cespy`
+- PyLTSpice users: Replace `PyLTSpice.LTSpiceSimulation` with `cespy.simulate()` or `cespy.LTspice`
 
 See the [migration guide](docs/migration_guide.md) for detailed instructions.
+
+## Development
+
+For development installation and testing:
+
+```bash
+# Install with development dependencies
+poetry install
+
+# Run tests
+poetry run pytest
+
+# Code quality checks
+poetry run black src/ tests/      # Format code
+poetry run flake8 src/ tests/     # Lint check
+poetry run mypy src/              # Type checking
+poetry run pylint src/            # Additional linting
+
+# Build documentation
+cd docs && make html
+```
 
 ## Contributing
 
@@ -203,14 +237,14 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 ## Authors
 
-- Nuno Brum (original kupicelib/kuPyLTSpice author)
+- Nuno Brum (original spicelib/PyLTSpice author)
 - Ryota Kobayashi (cespy unification and maintenance)
 
 ## Acknowledgments
 
 cespy is a unified version of:
 
-- **kupicelib** - A comprehensive SPICE automation library
-- **kuPyLTSpice** - A specialized LTSpice automation tool
+- **spicelib** - A comprehensive SPICE automation library
+- **PyLTSpice** - A specialized LTSpice automation tool
 
 Both projects were originally created by Nuno Brum.

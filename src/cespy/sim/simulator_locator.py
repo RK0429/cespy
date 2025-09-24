@@ -9,14 +9,14 @@ handle Wine environments, and validate installations.
 import logging
 import os
 import platform
+import re
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 # Core imports
 from ..core import constants as core_constants
-from ..core import paths as core_paths
 
 _logger = logging.getLogger("cespy.SimulatorLocator")
 
@@ -127,10 +127,12 @@ class SimulatorLocator:
         else:
             exe_name = None
 
-        if exe_name and shutil.which(exe_name):
-            path = Path(shutil.which(exe_name))
-            self._cached_location = path
-            return path, False
+        if exe_name:
+            which_result = shutil.which(exe_name)
+            if which_result:
+                path = Path(which_result)
+                self._cached_location = path
+                return path, False
 
         return None, False
 
@@ -268,7 +270,7 @@ class SimulatorLocator:
                 cmd.append("-v")
 
             # Run command with timeout
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5.0)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5.0, check=False)
 
             # Parse version from output
             output = result.stdout + result.stderr
@@ -276,12 +278,11 @@ class SimulatorLocator:
 
             if version:
                 return True, version
-            else:
-                return False, "Could not determine version"
+            return False, "Could not determine version"
 
         except subprocess.TimeoutExpired:
             return False, "Timeout while checking version"
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError) as e:
             return False, f"Error: {str(e)}"
 
     def _parse_version(self, output: str) -> Optional[str]:
@@ -293,11 +294,11 @@ class SimulatorLocator:
         Returns:
             Version string or None
         """
-        import re
-
         # Patterns for different simulators
         patterns = {
-            core_constants.Simulators.LTSPICE: r"LTspice\s+(?:IV|XVII|64)?\s*(?:Version\s+)?([0-9.]+)",
+            core_constants.Simulators.LTSPICE: (
+                r"LTspice\s+(?:IV|XVII|64)?\s*(?:Version\s+)?([0-9.]+)"
+            ),
             core_constants.Simulators.NGSPICE: r"ngspice-([0-9]+)",
             core_constants.Simulators.QSPICE: r"QSPICE\s+(?:Version\s+)?([0-9.]+)",
             core_constants.Simulators.XYCE: r"Xyce\s+(?:Version\s+)?([0-9.]+)",

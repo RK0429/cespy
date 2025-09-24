@@ -10,12 +10,10 @@ schematic formats.
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Pattern, Type, Union
 
-from ..core import constants as core_constants
 from ..core import patterns as core_patterns
-from ..exceptions import ComponentNotFoundError, InvalidComponentError
+from ..exceptions import InvalidComponentError
 
 _logger = logging.getLogger("cespy.ComponentFactory")
 
@@ -404,8 +402,6 @@ class ComponentFactory:
         Returns:
             Component instance or None if not a component line
         """
-        import re
-
         # Skip comments and empty lines
         line = spice_line.strip()
         if not line or line.startswith("*"):

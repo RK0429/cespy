@@ -127,7 +127,7 @@ class SimulatorAdapter(ISimulator):
             arguments.extend(raw_switches)
 
         # Prepare environment
-        environment = {}
+        environment: Dict[str, str] = {}
 
         return SimulationCommand(
             executable=executable,
@@ -139,7 +139,7 @@ class SimulatorAdapter(ISimulator):
 
     def parse_arguments(self, args: List[str]) -> Dict[str, Any]:
         """Parse command-line arguments into structured options."""
-        options = {}
+        options: Dict[str, Any] = {}
 
         # Simple parsing for common flags
         i = 0
@@ -175,10 +175,9 @@ class SimulatorAdapter(ISimulator):
                 cmd_line_switches=options.get("switches", []) if options else None,
                 timeout=options.get("timeout") if options else None,
             )
-        else:
-            raise NotImplementedError(
-                f"{self.simulator_name} does not support netlist creation from schematics"
-            )
+        raise NotImplementedError(
+            f"{self.simulator_name} does not support netlist creation from schematics"
+        )
 
     def get_default_options(self) -> Dict[str, Any]:
         """Get default simulation options for this simulator."""
@@ -225,7 +224,7 @@ class SimulatorAdapter(ISimulator):
             if key not in ["timeout", "threads"]:
                 try:
                     self.simulator_class.valid_switch(key, value)
-                except Exception as e:
+                except (ValueError, TypeError, AttributeError) as e:
                     errors.append(f"Invalid option {key}: {str(e)}")
 
         return len(errors) == 0, errors

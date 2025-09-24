@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import logging
 import math
-import re
 from collections import OrderedDict
 from typing import Any, Dict, Iterable, List, Optional, Protocol, TypeVar, Union, cast
 

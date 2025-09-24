@@ -31,8 +31,6 @@ License: GPL-3.0
 # From
 # https://stackoverflow.com/questions/23598289/how-to-get-windows-short-file-name-in-python
 import sys
-from typing import TYPE_CHECKING
-
 
 
 def get_short_path_name(long_name: str) -> str:

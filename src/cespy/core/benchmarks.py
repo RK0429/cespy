@@ -8,12 +8,17 @@ over time and detect regressions in critical code paths.
 
 import json
 import logging
+import re
 import tempfile
 import time
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Union
 
-from .performance import PerformanceMonitor
+from .constants import Simulators
+from .patterns import SPICE_PATTERNS
+from .performance import PerformanceMonitor, cached_regex
+from .platform import get_simulator_path
+from ..sim.toolkit import MonteCarloAnalysis
 
 _logger = logging.getLogger("cespy.Benchmarks")
 
@@ -57,20 +62,15 @@ class BenchmarkSuite:
             return
 
         try:
-            import json
-
             self.baseline_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.baseline_file, "w") as f:
+            with open(self.baseline_file, "w", encoding="utf-8") as f:
                 json.dump(self.results, f, indent=2)
             _logger.info("Saved baseline data with %d benchmarks", len(self.results))
-        except Exception as e:
+        except (OSError, IOError, PermissionError, TypeError, ValueError) as e:
             _logger.error("Failed to save baseline data: %s", e)
 
     def benchmark_regex_performance(self) -> Dict[str, float]:
         """Benchmark regex pattern compilation and matching performance."""
-        import re
-        from .patterns import SPICE_PATTERNS
-
         results = {}
         test_text = """
         R1 net1 net2 1k
@@ -98,11 +98,10 @@ class BenchmarkSuite:
         results["pattern_matching_time"] = (end_time - start_time) / 1000
 
         # Test with cached regex
-        from .performance import cached_regex
 
         start_time = time.perf_counter()
         for _ in range(1000):
-            for pattern_name, pattern_obj in SPICE_PATTERNS.items():
+            for pattern_obj in SPICE_PATTERNS.values():
                 cached_pattern = cached_regex(pattern_obj.pattern)
                 cached_pattern.findall(test_text)
         end_time = time.perf_counter()
@@ -125,14 +124,14 @@ class BenchmarkSuite:
 
             # Benchmark file writing
             start_time = time.perf_counter()
-            with open(test_file, "w") as f:
+            with open(test_file, "w", encoding="utf-8") as f:
                 f.write(content)
             end_time = time.perf_counter()
             results["file_write_time"] = end_time - start_time
 
             # Benchmark file reading
             start_time = time.perf_counter()
-            with open(test_file, "r") as f:
+            with open(test_file, "r", encoding="utf-8") as f:
                 f.read()
             end_time = time.perf_counter()
             results["file_read_time"] = end_time - start_time
@@ -140,7 +139,7 @@ class BenchmarkSuite:
             # Benchmark line-by-line reading
             start_time = time.perf_counter()
             lines = []
-            with open(test_file, "r") as f:
+            with open(test_file, "r", encoding="utf-8") as f:
                 for line in f:
                     lines.append(line)
             end_time = time.perf_counter()
@@ -150,9 +149,6 @@ class BenchmarkSuite:
 
     def benchmark_simulator_detection(self) -> Dict[str, float]:
         """Benchmark simulator detection and path resolution."""
-        from .platform import get_simulator_path
-        from .constants import Simulators
-
         results = {}
         simulators = [
             Simulators.LTSPICE,
@@ -185,11 +181,7 @@ class BenchmarkSuite:
             "D1 net1 net2 1N4148",
         ] * 1000
 
-        from .patterns import SPICE_PATTERNS
-
         component_pattern = SPICE_PATTERNS.get("component", r"(\S+)\s+(\S+.*)")
-
-        import re
 
         pattern = re.compile(component_pattern)
 
@@ -197,11 +189,11 @@ class BenchmarkSuite:
         for line in component_lines:
             match = pattern.match(line)
             if match:
-                match.group(1)
+                _ = match.group(1)  # Extract component name
                 # Simple value extraction
                 parts = line.split()
                 if len(parts) >= 4:
-                    parts[3]
+                    _ = parts[3]  # Extract component value
         end_time = time.perf_counter()
         results["component_parsing_time"] = (end_time - start_time) / len(
             component_lines
@@ -232,8 +224,6 @@ class BenchmarkSuite:
             # Test Monte Carlo analysis setup
             start_time = time.perf_counter()
             for _ in range(100):
-                from ..sim.toolkit import MonteCarloAnalysis
-
                 mc = MonteCarloAnalysis(circuit_file, num_runs=10)
                 mc.set_tolerance("R1", 0.05)
             end_time = time.perf_counter()
@@ -242,7 +232,8 @@ class BenchmarkSuite:
             # Clean up
             Path(circuit_file).unlink()
 
-        except Exception as e:
+        except (OSError, IOError, PermissionError, ImportError,
+                ModuleNotFoundError, AttributeError, ValueError) as e:
             _logger.warning("Failed to benchmark analysis setup: %s", e)
             results["montecarlo_setup_time"] = float("inf")
 
@@ -278,13 +269,16 @@ class BenchmarkSuite:
                     "Completed benchmark %s in %.3fs", name, end_time - start_time
                 )
 
-            except Exception as e:
+            except (AttributeError, TypeError, ValueError, OSError, IOError,
+                    ImportError, RuntimeError) as e:
                 _logger.error("Benchmark %s failed: %s", name, e)
                 self.results[name] = {"error": str(e)}
 
         return self.results
 
-    def compare_with_baseline(self, tolerance: float = 0.1) -> Dict[str, Any]:
+    def compare_with_baseline(
+        self, tolerance: float = 0.1
+    ) -> Dict[str, Any]:  # pylint: disable=too-many-branches
         """Compare current results with baseline performance.
 
         Args:
