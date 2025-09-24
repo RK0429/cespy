@@ -690,7 +690,11 @@ class Montecarlo(ToleranceDeviations, StatisticalAnalysis):
         exe_log: bool = True,
         measure: str | None = None,
         num_runs: int | None = None,
-    ) -> list[AnalysisResult] | tuple[float, float, dict[str, str | float], float, dict[str, str | float]] | None:
+    ) -> (
+        list[AnalysisResult]
+        | tuple[float, float, dict[str, str | float], float, dict[str, str | float]]
+        | None
+    ):
         """Run the Monte Carlo analysis.
 
         This method supports both the new BaseAnalysis interface (no args)

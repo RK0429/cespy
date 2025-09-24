@@ -232,7 +232,14 @@ class BenchmarkSuite:
             # Clean up
             Path(circuit_file).unlink()
 
-        except (OSError, PermissionError, ImportError, ModuleNotFoundError, AttributeError, ValueError) as e:
+        except (
+            OSError,
+            PermissionError,
+            ImportError,
+            ModuleNotFoundError,
+            AttributeError,
+            ValueError,
+        ) as e:
             _logger.warning("Failed to benchmark analysis setup: %s", e)
             results["montecarlo_setup_time"] = float("inf")
 

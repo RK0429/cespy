@@ -778,7 +778,7 @@ class RawRead:
                 if self.verbose:
                     _logger.debug("Binary RAW file with Fast access")
                 # Fast access means that the traces are grouped together.
-                for i, var in enumerate(self._traces):
+                for _, var in enumerate(self._traces):
                     if isinstance(var, DummyTrace):
                         # NOTE: Consider replacing this with a seek operation for better performance
                         raw_file.read(self.nPoints * self.data_size)

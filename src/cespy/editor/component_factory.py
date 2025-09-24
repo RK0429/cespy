@@ -359,10 +359,10 @@ class ComponentFactory:
         if isinstance(component_type, str):
             try:
                 component_type = ComponentType(component_type)
-            except ValueError:
+            except ValueError as exc:
                 raise InvalidComponentError(
                     "component_type", f"Unknown component type: {component_type}"
-                )
+                ) from exc
 
         # Get template
         template = COMPONENT_TEMPLATES.get(component_type)

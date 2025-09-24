@@ -11,7 +11,7 @@ import inspect
 import logging
 import warnings
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 _logger = logging.getLogger("cespy.APIConsistency")
 
@@ -68,8 +68,14 @@ def deprecated(
             return func(*args, **kwargs)
 
         # Add deprecation metadata
-        wrapper.__deprecated__ = True
-        wrapper.__deprecation_info__ = {'version': version, 'reason': reason, 'replacement': replacement, 'level': level}
+        wrapper_any = cast(Any, wrapper)
+        wrapper_any.__deprecated__ = True
+        wrapper_any.__deprecation_info__ = {
+            "version": version,
+            "reason": reason,
+            "replacement": replacement,
+            "level": level,
+        }
 
         return wrapper  # type: ignore
 
@@ -409,7 +415,8 @@ def ensure_api_consistency(func: F) -> F:
                     timeout_val = validator.validate_timeout_parameter(param_value)
                     validated_kwargs[param_name] = timeout_val
                 elif (
-                    param.annotation == bool or "bool" in str(param.annotation).lower()
+                    param.annotation is bool
+                    or "bool" in str(param.annotation).lower()
                 ):
                     validated_kwargs[param_name] = validator.validate_boolean_parameter(
                         param_value, param_name

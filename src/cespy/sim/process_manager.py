@@ -24,6 +24,14 @@ except ImportError:
     psutil = None  # type: ignore[assignment]
     HAS_PSUTIL = False
 
+if HAS_PSUTIL and psutil is not None:
+    _PSUTIL_EXCEPTIONS: tuple[type[BaseException], ...] = (
+        psutil.NoSuchProcess,
+        psutil.AccessDenied,
+    )
+else:
+    _PSUTIL_EXCEPTIONS = (Exception,)
+
 _logger = logging.getLogger("cespy.ProcessManager")
 
 
@@ -295,11 +303,7 @@ class ProcessManager:
                         result[pid]["memory_mb"] = (
                             info.psutil_process.memory_info().rss / 1024 / 1024
                         )
-                    except (
-                        (psutil.NoSuchProcess, psutil.AccessDenied)
-                        if psutil
-                        else Exception
-                    ):
+                    except _PSUTIL_EXCEPTIONS:
                         pass
 
             return result
@@ -323,11 +327,7 @@ class ProcessManager:
                             info.psutil_process.memory_info().rss / 1024 / 1024
                         )
                         process_count += 1
-                    except (
-                        (psutil.NoSuchProcess, psutil.AccessDenied)
-                        if psutil
-                        else Exception
-                    ):
+                    except _PSUTIL_EXCEPTIONS:
                         pass
 
         return {
@@ -367,7 +367,7 @@ class ProcessManager:
                         )
                         proc.kill()
                         cleaned += 1
-            except (psutil.NoSuchProcess, psutil.AccessDenied) if psutil else Exception:
+            except _PSUTIL_EXCEPTIONS:
                 pass
 
         return cleaned
@@ -427,11 +427,7 @@ class ProcessManager:
                 else:
                     # Unix nice values (-20 to 19)
                     proc.nice(priority)
-            except (
-                (psutil.NoSuchProcess, psutil.AccessDenied, OSError)
-                if psutil
-                else Exception
-            ):
+            except _PSUTIL_EXCEPTIONS + (OSError,):
                 pass
 
     def _terminate_process(self, process_info: ProcessInfo) -> None:

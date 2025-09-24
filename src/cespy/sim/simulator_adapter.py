@@ -108,7 +108,10 @@ class SimulatorAdapter(ISimulator):
         # Add simulator-specific flags
         if self.simulator_name == core_constants.Simulators.LTSPICE:
             arguments.extend(["-Run", "-b", str(netlist)])
-        elif self.simulator_name == core_constants.Simulators.NGSPICE or self.simulator_name == core_constants.Simulators.QSPICE:
+        elif self.simulator_name in {
+            core_constants.Simulators.NGSPICE,
+            core_constants.Simulators.QSPICE,
+        }:
             arguments.extend(["-b", str(netlist)])
         elif self.simulator_name == core_constants.Simulators.XYCE:
             arguments.append(str(netlist))

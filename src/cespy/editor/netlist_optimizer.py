@@ -280,7 +280,6 @@ class NetlistOptimizer:
     def _remove_dangling_components(self, lines: list[str]) -> tuple[list[str], int]:
         """Remove components with unconnected nodes."""
         # First, collect all nodes
-        {"0", "GND"}  # Ground nodes
         node_connections: defaultdict[str, int] = defaultdict(int)
 
         # Count node connections
@@ -362,7 +361,7 @@ class NetlistOptimizer:
         lines_to_modify = {}
 
         # Merge parallel capacitors
-        for nodes, caps in capacitors_by_nodes.items():
+        for _nodes, caps in capacitors_by_nodes.items():
             if len(caps) > 1:
                 # Sum capacitance values
                 total_cap = 0.0

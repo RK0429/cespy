@@ -262,7 +262,10 @@ class SimulatorLocator:
                 cmd.append("-v")
             elif self.simulator_type == core_constants.Simulators.NGSPICE:
                 cmd.append("--version")
-            elif self.simulator_type == core_constants.Simulators.QSPICE or self.simulator_type == core_constants.Simulators.XYCE:
+            elif self.simulator_type in {
+                core_constants.Simulators.QSPICE,
+                core_constants.Simulators.XYCE,
+            }:
                 cmd.append("-v")
 
             # Run command with timeout

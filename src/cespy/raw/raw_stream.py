@@ -337,7 +337,12 @@ class ThresholdCrossingProcessor(StreamProcessor):
             last_val = self._last_values[key]
             first_val = float(np.real(trace_data[0]))
 
-            if (self.rising and last_val < self.threshold <= first_val) or (not self.rising and last_val > self.threshold >= first_val):
+            rising_cross = self.rising and last_val < self.threshold <= first_val
+            falling_cross = (
+                not self.rising and last_val > self.threshold >= first_val
+            )
+
+            if rising_cross or falling_cross:
                 # Interpolate crossing time
                 t_cross = self._interpolate_crossing(
                     self._last_times[key], float(time_data[0]), last_val, first_val

@@ -569,6 +569,7 @@ class BaseEditor(ABC):
         :rtype: List[str]
         """
 
+    @abstractmethod
     def set_parameter(self, param: str, value: str | int | float) -> None:
         """Adds a parameter to the SPICE netlist.
 
