@@ -1293,7 +1293,9 @@ class RawRead:
             import pandas as pd
 
             df = self.to_dataframe(columns=columns, step=step)
-            pd.DataFrame.to_csv(df, filename, sep=separator, **kwargs)
+            if not isinstance(df, pd.DataFrame):
+                raise TypeError("Expected pandas.DataFrame from to_dataframe")
+            df.to_csv(filename, sep=separator, **kwargs)
         except ImportError:
             # Export to CSV using python built-in functions
             data = self.export(columns=columns, step=step)
@@ -1333,7 +1335,9 @@ class RawRead:
             import pandas as pd
 
             df = self.to_dataframe(columns=columns, step=step)
-            pd.DataFrame.to_excel(df, filename, **kwargs)
+            if not isinstance(df, pd.DataFrame):
+                raise TypeError("Expected pandas.DataFrame from to_dataframe")
+            df.to_excel(filename, **kwargs)
         except ImportError as exc:
             raise ImportError(
                 "The 'pandas' module is required to use this function.\n"

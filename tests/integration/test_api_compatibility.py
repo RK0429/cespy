@@ -6,7 +6,9 @@ import pytest
 
 from cespy import simulate
 from cespy.editor.spice_editor import SpiceEditor
+from cespy.exceptions import ComponentNotFoundError
 from cespy.raw.raw_read import RawRead
+from cespy.sim import SimRunner
 from cespy.simulators.ltspice_simulator import LTspice
 
 
@@ -29,20 +31,18 @@ C1 out 0 1u
         # Test that simulate function is callable with various parameters
         try:
             # This may fail if simulator not available, but should not raise import errors
-            result = simulate(
+            runner = simulate(
                 netlist_path,
                 engine="ltspice",
                 parallel_sims=1,
                 timeout=60.0,
                 verbose=False,
             )
-            # If it succeeds, should return a tuple of (raw_file, log_file)
-            if result is not None:
-                assert isinstance(result, tuple)
-                assert len(result) == 2
         except (RuntimeError, FileNotFoundError):
             # Expected if simulator not available
-            pass
+            return
+
+        assert isinstance(runner, SimRunner)
 
     def test_spice_editor_basic_workflow(self, temp_dir: Path) -> None:
         """Test basic SpiceEditor workflow."""
@@ -165,9 +165,7 @@ C1 out 0 1u
         editor = SpiceEditor(netlist_path)
 
         # Should raise exception for non-existent component
-        with pytest.raises(
-            Exception
-        ):  # Specific exception type depends on implementation
+        with pytest.raises(ComponentNotFoundError):
             editor.get_component_value("non_existent_component")
 
     def test_cross_module_integration(self, temp_dir: Path) -> None:

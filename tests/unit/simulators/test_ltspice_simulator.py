@@ -1,9 +1,11 @@
 """Unit tests for LTSpice simulator functionality."""
 
+from unittest.mock import MagicMock, mock_open, patch
+
 import pytest
-from unittest.mock import patch, mock_open, MagicMock
-from cespy.simulators.ltspice_simulator import LTspice
+
 from cespy.sim.simulator import SpiceSimulatorError
+from cespy.simulators.ltspice_simulator import LTspice
 
 
 class TestLTspiceSimulator:
@@ -58,11 +60,13 @@ class TestLTspiceSimulator:
     @pytest.mark.macos
     def test_macos_native_switch_restrictions(self) -> None:
         """Test that macOS native LTspice only supports batch mode."""
-        with patch.object(LTspice, "using_macos_native_sim", return_value=True):
-            with pytest.raises(
+        with (
+            patch.object(LTspice, "using_macos_native_sim", return_value=True),
+            pytest.raises(
                 ValueError, match="MacOS native LTspice supports only batch mode"
-            ):
-                LTspice.valid_switch("-alt")
+            ),
+        ):
+            LTspice.valid_switch("-alt")
 
     def test_guess_process_name(self) -> None:
         """Test process name guessing from executable path."""
@@ -86,20 +90,24 @@ class TestLTspiceSimulator:
         """Test executable detection on Windows."""
         mock_exists.return_value = True
 
-        with patch("sys.platform", "win32"):
-            with patch.object(LTspice, "_detect_windows_executable") as mock_detect:
-                LTspice.detect_executable()
-                mock_detect.assert_called_once()
+        with (
+            patch("sys.platform", "win32"),
+            patch.object(LTspice, "_detect_windows_executable") as mock_detect,
+        ):
+            LTspice.detect_executable()
+            mock_detect.assert_called_once()
 
     @patch("os.path.exists")
     def test_detect_executable_unix(self, mock_exists: MagicMock) -> None:
         """Test executable detection on Unix systems."""
         mock_exists.return_value = True
 
-        with patch("sys.platform", "linux"):
-            with patch.object(LTspice, "_detect_unix_executable") as mock_detect:
-                LTspice.detect_executable()
-                mock_detect.assert_called_once()
+        with (
+            patch("sys.platform", "linux"),
+            patch.object(LTspice, "_detect_unix_executable") as mock_detect,
+        ):
+            LTspice.detect_executable()
+            mock_detect.assert_called_once()
 
     @patch("os.path.exists")
     def test_windows_executable_detection(self, mock_exists: MagicMock) -> None:
@@ -112,7 +120,10 @@ class TestLTspiceSimulator:
         mock_exists.side_effect = exists_side_effect
 
         with patch("os.path.expanduser") as mock_expand:
-            mock_expand.side_effect = lambda x: x.replace("~", "C:/Users/test")
+            def replace_home(path: str) -> str:
+                return path.replace("~", "C:/Users/test")
+
+            mock_expand.side_effect = replace_home
 
             # pylint: disable=protected-access
             LTspice._detect_windows_executable()
@@ -130,7 +141,11 @@ class TestLTspiceSimulator:
         """Test Unix executable detection with wine."""
         # Mock environment variables
         mock_expandvars.return_value = "testuser"
-        mock_expanduser.side_effect = lambda x: x.replace("~", "/home/test")
+
+        def replace_unix_home(path: str) -> str:
+            return path.replace("~", "/home/test")
+
+        mock_expanduser.side_effect = replace_unix_home
 
         # Mock wine path existing
         def exists_side_effect(path: str) -> bool:
@@ -147,37 +162,41 @@ class TestLTspiceSimulator:
 
     def test_run_without_executable(self) -> None:
         """Test running simulation without executable raises error."""
-        with patch.object(LTspice, "is_available", return_value=False):
-            with pytest.raises(
-                SpiceSimulatorError, match="Simulator executable not found"
-            ):
-                LTspice.run("test.net")
+        with (
+            patch.object(LTspice, "is_available", return_value=False),
+            pytest.raises(SpiceSimulatorError, match="Simulator executable not found"),
+        ):
+            LTspice.run("test.net")
 
     @patch("cespy.sim.simulator.run_function")
     def test_run_basic_execution(self, mock_run: MagicMock) -> None:
         """Test basic simulation execution."""
         mock_run.return_value = 0
 
-        with patch.object(LTspice, "is_available", return_value=True):
-            with patch.object(LTspice, "spice_exe", ["/path/to/ltspice"]):
-                result = LTspice.run("test.net")
+        with (
+            patch.object(LTspice, "is_available", return_value=True),
+            patch.object(LTspice, "spice_exe", ["/path/to/ltspice"]),
+        ):
+            result = LTspice.run("test.net")
 
-                mock_run.assert_called_once()
-                assert result == 0
+            mock_run.assert_called_once()
+            assert result == 0
 
     @patch("cespy.sim.simulator.run_function")
     def test_run_with_switches(self, mock_run: MagicMock) -> None:
         """Test simulation with command line switches."""
         mock_run.return_value = 0
 
-        with patch.object(LTspice, "is_available", return_value=True):
-            with patch.object(LTspice, "spice_exe", ["/path/to/ltspice"]):
-                LTspice.run("test.net", cmd_line_switches=["-ascii", "-alt"])
+        with (
+            patch.object(LTspice, "is_available", return_value=True),
+            patch.object(LTspice, "spice_exe", ["/path/to/ltspice"]),
+        ):
+            LTspice.run("test.net", cmd_line_switches=["-ascii", "-alt"])
 
-                # Verify switches were passed
-                call_args = mock_run.call_args[0][0]  # Get the command list
-                assert "-ascii" in call_args
-                assert "-alt" in call_args
+            # Verify switches were passed
+            call_args = mock_run.call_args[0][0]  # Get the command list
+            assert "-ascii" in call_args
+            assert "-alt" in call_args
 
     @pytest.mark.windows
     @patch("cespy.sim.simulator.run_function")
@@ -185,17 +204,17 @@ class TestLTspiceSimulator:
         """Test Windows path handling in simulation."""
         mock_run.return_value = 0
 
-        with patch.object(LTspice, "is_available", return_value=True):
-            with patch.object(
-                LTspice, "spice_exe", ["C:/Program Files/ADI/LTspice/LTspice.exe"]
-            ):
-                with patch("sys.platform", "win32"):
-                    LTspice.run("C:/path/to/test.net")
+        with (
+            patch.object(LTspice, "is_available", return_value=True),
+            patch.object(LTspice, "spice_exe", ["C:/Program Files/ADI/LTspice/LTspice.exe"]),
+            patch("sys.platform", "win32"),
+        ):
+            LTspice.run("C:/path/to/test.net")
 
-                    call_args = mock_run.call_args[0][0]
-                    assert "-Run" in call_args
-                    assert "-b" in call_args
-                    assert "C:/path/to/test.net" in call_args
+            call_args = mock_run.call_args[0][0]
+            assert "-Run" in call_args
+            assert "-b" in call_args
+            assert "C:/path/to/test.net" in call_args
 
     @pytest.mark.linux
     @patch("cespy.sim.simulator.run_function")
@@ -203,14 +222,16 @@ class TestLTspiceSimulator:
         """Test wine path handling in simulation."""
         mock_run.return_value = 0
 
-        with patch.object(LTspice, "is_available", return_value=True):
-            with patch.object(LTspice, "spice_exe", ["wine", "/path/to/ltspice.exe"]):
-                with patch("sys.platform", "linux"):
-                    LTspice.run("/tmp/test.net")
+        with (
+            patch.object(LTspice, "is_available", return_value=True),
+            patch.object(LTspice, "spice_exe", ["wine", "/path/to/ltspice.exe"]),
+            patch("sys.platform", "linux"),
+        ):
+            LTspice.run("/tmp/test.net")
 
-                    call_args = mock_run.call_args[0][0]
-                    # Should prepend Z: for wine
-                    assert any("Z:/tmp/test.net" in arg for arg in call_args)
+            call_args = mock_run.call_args[0][0]
+            # Should prepend Z: for wine
+            assert any("Z:/tmp/test.net" in arg for arg in call_args)
 
     @pytest.mark.macos
     @patch("cespy.sim.simulator.run_function")
@@ -218,32 +239,36 @@ class TestLTspiceSimulator:
         """Test macOS native LTspice restrictions."""
         mock_run.return_value = 0
 
-        with patch.object(LTspice, "is_available", return_value=True):
-            with patch.object(LTspice, "using_macos_native_sim", return_value=True):
-                with patch.object(
-                    LTspice,
-                    "spice_exe",
-                    ["/Applications/LTspice.app/Contents/MacOS/LTspice"],
-                ):
-                    # Should fail for .asc files
-                    with pytest.raises(
-                        NotImplementedError,
-                        match="MacOS native LTspice cannot run simulations on '.asc' files",
-                    ):
-                        LTspice.run("test.asc")
+        with (
+            patch.object(LTspice, "is_available", return_value=True),
+            patch.object(LTspice, "using_macos_native_sim", return_value=True),
+            patch.object(
+                LTspice,
+                "spice_exe",
+                ["/Applications/LTspice.app/Contents/MacOS/LTspice"],
+            ),
+        ):
+            # Should fail for .asc files
+            with pytest.raises(
+                NotImplementedError,
+                match="MacOS native LTspice cannot run simulations on '.asc' files",
+            ):
+                LTspice.run("test.asc")
 
-                    # Should work for .net files
-                    LTspice.run("test.net")
-                    mock_run.assert_called_once()
+            # Should work for .net files
+            LTspice.run("test.net")
+            mock_run.assert_called_once()
 
     def test_create_netlist_macos_native_error(self) -> None:
         """Test netlist creation error on macOS native."""
-        with patch.object(LTspice, "using_macos_native_sim", return_value=True):
-            with pytest.raises(
+        with (
+            patch.object(LTspice, "using_macos_native_sim", return_value=True),
+            pytest.raises(
                 NotImplementedError,
                 match="MacOS native LTspice does not have netlist generation",
-            ):
-                LTspice.create_netlist("test.asc")
+            ),
+        ):
+            LTspice.create_netlist("test.asc")
 
     @patch("cespy.sim.simulator.run_function")
     @patch("builtins.open", new_callable=mock_open)
@@ -251,13 +276,15 @@ class TestLTspiceSimulator:
         """Test simulation with execution logging."""
         mock_run.return_value = 0
 
-        with patch.object(LTspice, "is_available", return_value=True):
-            with patch.object(LTspice, "spice_exe", ["/path/to/ltspice"]):
-                LTspice.run("test.net", exe_log=True)
+        with (
+            patch.object(LTspice, "is_available", return_value=True),
+            patch.object(LTspice, "spice_exe", ["/path/to/ltspice"]),
+        ):
+            LTspice.run("test.net", exe_log=True)
 
-                # Should open log file for writing
-                mock_file.assert_called_once()
-                assert "test.exe.log" in str(mock_file.call_args)
+            # Should open log file for writing
+            mock_file.assert_called_once()
+            assert "test.exe.log" in str(mock_file.call_args)
 
     def test_parameter_replacement_in_switches(self) -> None:
         """Test parameter replacement in command switches."""

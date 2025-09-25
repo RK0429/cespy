@@ -1,11 +1,13 @@
 """Unit tests for raw file reading functionality."""
 
-import pytest
-import numpy as np
-from pathlib import Path
 from collections import OrderedDict
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from cespy.raw.raw_classes import Axis, DummyTrace, TraceRead
 from cespy.raw.raw_read import RawRead
-from cespy.raw.raw_classes import TraceRead, Axis, DummyTrace
 
 
 def create_mock_raw_reader() -> RawRead:
@@ -189,7 +191,7 @@ Binary:
         raw_reader = create_mock_raw_reader()
 
         # Test getting non-existent trace
-        with pytest.raises(Exception):  # Should raise some kind of error
+        with pytest.raises(IndexError):
             raw_reader.get_trace("non_existent_trace")
 
     def test_dialect_detection_concept(self) -> None:

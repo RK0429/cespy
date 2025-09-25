@@ -638,7 +638,9 @@ class LogfileData:
 
         axis_x_max = max(axis_x_max, mx)
 
-        counts, bin_edges, _ = plt.hist(
+        fig, ax = plt.subplots()
+
+        counts, bin_edges, _ = ax.hist(
             x,
             bins,
             density=normalized,
@@ -659,12 +661,17 @@ class LogfileData:
             y = (1 / (sd * np.sqrt(2 * np.pi))) * np.exp(
                 -((bin_edges - mu) ** 2) / (2 * sd**2)
             )
-            plt.plot(bin_edges, y, "r--", linewidth=1)
-            plt.axvspan(mu - sigma * sd, mu + sigma * sd, alpha=0.2, color="cyan")
-            plt.ylabel("Distribution [Normalised]")
+            ax.plot(bin_edges, y, "r--", linewidth=1)
+            ax.axvspan(
+                mu - sigma * sd,
+                mu + sigma * sd,
+                alpha=0.2,
+                color="cyan",
+            )
+            ax.set_ylabel("Distribution [Normalised]")
         else:
-            plt.ylabel("Distribution")
-        plt.xlabel(param)
+            ax.set_ylabel("Distribution")
+        ax.set_xlabel(param)
 
         if title is None:
             fmt = "%g"
@@ -676,12 +683,13 @@ class LogfileData:
                 + r",\ \sigma=%d$"
             ) % (param, mu, sd, sigma)
 
-        plt.title(title)
+        ax.set_title(title)
 
-        plt.axis((axis_x_min, axis_x_max, 0.0, axis_y_max))
-        plt.grid(True)
+        ax.set_xlim(axis_x_min, axis_x_max)
+        ax.set_ylim(0.0, axis_y_max)
+        ax.grid(True)
         if image_file is not None:
-            plt.savefig(image_file)
+            fig.savefig(image_file)
         else:
             plt.show()
 

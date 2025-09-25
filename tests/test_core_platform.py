@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Tests for core platform management functionality."""
 
 import platform
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any, cast
 from unittest.mock import Mock, patch
 
 import pytest
@@ -19,6 +20,19 @@ from cespy.core.platform import (
     get_simulator_path,
     is_simulator_available,
 )
+
+pytest: Any = pytest
+
+
+def approx_float(
+    expected: float,
+    *,
+    rel: float | None = None,
+    abs: float | None = None,
+) -> Any:
+    """Typed wrapper for pytest.approx."""
+    approx_callable = cast(Callable[..., Any], pytest.approx)
+    return approx_callable(expected, rel=rel, abs=abs)
 
 
 class TestPlatformInfo:
@@ -43,7 +57,7 @@ class TestPlatformInfo:
         assert info.is_unix_like
         assert info.supports_wine
         assert info.recommended_workers == 6  # 75% of 8 cores
-        assert info.memory_per_worker_gb == pytest.approx(2.33, rel=0.1)  # (16-2)/6
+        assert float(info.memory_per_worker_gb) == approx_float(2.33, rel=0.1)
 
     def test_windows_platform_info(self) -> None:
         """Test Windows-specific platform info."""

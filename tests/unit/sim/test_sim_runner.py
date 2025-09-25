@@ -267,7 +267,7 @@ class TestRunTask:
         # pylint: disable=import-outside-toplevel
         from cespy.simulators.ltspice_simulator import LTspice
 
-        _mock_process = Mock()  # noqa: F841
+        _mock_process = Mock()
 
         task = RunTask(
             simulator=LTspice, runno=1, netlist_file=Path("test.net"), callback=Mock()

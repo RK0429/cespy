@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Integration tests for refactored analysis components."""
 
 import tempfile
+from collections.abc import Callable, Generator
 from pathlib import Path
-from typing import Any, Generator, List, Tuple
+from typing import Any, cast
 from unittest.mock import patch
 
 import pytest
@@ -19,6 +19,19 @@ from cespy.sim.toolkit import (
     StatisticalAnalysis,
     check_plotting_availability,
 )
+
+pytest: Any = pytest
+
+
+def approx_float(
+    expected: float,
+    *,
+    rel: float | None = None,
+    abs: float | None = None,
+) -> Any:
+    """Typed wrapper around pytest.approx for Pyright."""
+    approx_callable = cast(Callable[..., Any], pytest.approx)
+    return approx_callable(expected, rel=rel, abs=abs)
 
 
 @pytest.fixture
@@ -54,7 +67,7 @@ class TestBaseAnalysisIntegration:
 
     def test_progress_reporter_integration(self) -> None:
         """Test ProgressReporter integration."""
-        progress_calls: List[Tuple[int, int, str]] = []
+        progress_calls: list[tuple[int, int, str]] = []
 
         def progress_callback(current: int, total: int, message: str) -> None:
             progress_calls.append((current, total, message))
@@ -78,7 +91,7 @@ class TestStatisticalAnalysisIntegration:
         """Test StatisticalAnalysis instantiation."""
         # StatisticalAnalysis is abstract, can't instantiate directly
         with pytest.raises(TypeError):
-            _analysis = StatisticalAnalysis(  # type: ignore[abstract]  # noqa: F841
+            _analysis = StatisticalAnalysis(  # type: ignore[abstract]
                 str(sample_circuit_file), num_runs=10, seed=42
             )
 
@@ -103,9 +116,9 @@ class TestStatisticalAnalysisIntegration:
         stats = analysis.calculate_statistics("Vout_avg")
 
         assert stats["count"] == 5
-        assert stats["mean"] == pytest.approx(2.2, rel=1e-10)
-        assert stats["min"] == pytest.approx(2.0, rel=1e-10)
-        assert stats["max"] == pytest.approx(2.4, rel=1e-10)
+        assert float(stats["mean"]) == approx_float(2.2, rel=1e-10)
+        assert float(stats["min"]) == approx_float(2.0, rel=1e-10)
+        assert float(stats["max"]) == approx_float(2.4, rel=1e-10)
         assert stats["std"] > 0
 
     def test_histogram_data_generation(self, sample_circuit_file: Path) -> None:
@@ -156,9 +169,9 @@ class TestStatisticalAnalysisIntegration:
         assert len(valid_measurements) == 3
         assert corr_matrix.shape == (3, 3)
         # Diagonal should be 1.0 (self-correlation)
-        assert corr_matrix[0, 0] == pytest.approx(1.0, rel=1e-10)
-        assert corr_matrix[1, 1] == pytest.approx(1.0, rel=1e-10)
-        assert corr_matrix[2, 2] == pytest.approx(1.0, rel=1e-10)
+        assert float(corr_matrix[0, 0]) == approx_float(1.0, rel=1e-10)
+        assert float(corr_matrix[1, 1]) == approx_float(1.0, rel=1e-10)
+        assert float(corr_matrix[2, 2]) == approx_float(1.0, rel=1e-10)
 
 
 class TestMonteCarloAnalysisIntegration:
@@ -202,52 +215,54 @@ class TestMonteCarloAnalysisIntegration:
         mc.set_tolerance("C1", 0.10)  # 10% tolerance
 
         # Mock the component retrieval
-        with patch.object(mc, "get_components", return_value=["R1", "C1"]):
-            with patch.object(mc, "get_component_value_deviation_type") as mock_get_dev:
-                # Mock return values for component deviations
-                from cespy.sim.toolkit.tolerance_deviations import (
-                    ComponentDeviation,
-                    DeviationType,
-                )
+        with (
+            patch.object(mc, "get_components", return_value=["R1", "C1"]),
+            patch.object(mc, "get_component_value_deviation_type") as mock_get_dev,
+        ):
+            # Mock return values for component deviations
+            from cespy.sim.toolkit.tolerance_deviations import (
+                ComponentDeviation,
+                DeviationType,
+            )
 
-                def mock_deviation(ref: str) -> Tuple[float, ComponentDeviation]:
-                    if ref == "R1":
-                        return (
-                            1000.0,
-                            ComponentDeviation(
-                                max_val=0.05,
-                                min_val=0,
-                                typ=DeviationType.TOLERANCE,
-                                distribution="uniform",
-                            ),
-                        )
-                    elif ref == "C1":
-                        return 1e-6, ComponentDeviation(
-                            max_val=0.10,
+            def mock_deviation(ref: str) -> tuple[float, ComponentDeviation]:
+                if ref == "R1":
+                    return (
+                        1000.0,
+                        ComponentDeviation(
+                            max_val=0.05,
                             min_val=0,
                             typ=DeviationType.TOLERANCE,
-                            distribution="normal",
-                        )
-                    return 0, ComponentDeviation(
-                        max_val=0,
-                        min_val=0,
-                        typ=DeviationType.NONE,
-                        distribution="uniform",
+                            distribution="uniform",
+                        ),
                     )
+                if ref == "C1":
+                    return 1e-6, ComponentDeviation(
+                        max_val=0.10,
+                        min_val=0,
+                        typ=DeviationType.TOLERANCE,
+                        distribution="normal",
+                    )
+                return 0, ComponentDeviation(
+                    max_val=0,
+                    min_val=0,
+                    typ=DeviationType.NONE,
+                    distribution="uniform",
+                )
 
-                mock_get_dev.side_effect = mock_deviation
+            mock_get_dev.side_effect = mock_deviation
 
-                # Generate parameters for runs
-                all_params = mc.prepare_runs()
+            # Generate parameters for runs
+            all_params = mc.prepare_runs()
 
-                assert len(all_params) == 10
-                # Check that parameters contain component variations
-                param_names: set[str] = set()
-                for params in all_params:
-                    param_names.update(params.keys())
+            assert len(all_params) == 10
+            # Check that parameters contain component variations
+            param_names: set[str] = set()
+            for params in all_params:
+                param_names.update(params.keys())
 
-                # Should have run_id and possibly component parameters
-                assert "run_id" in param_names
+            # Should have run_id and possibly component parameters
+            assert "run_id" in param_names
 
     def test_backward_compatibility_methods(self, sample_circuit_file: Path) -> None:
         """Test that backward compatibility methods work."""
@@ -413,7 +428,7 @@ class TestErrorHandlingIntegration:
         # Statistics should only include successful runs
         stats = analysis.calculate_statistics("Vout")
         assert stats["count"] == 3  # Only successful runs
-        assert stats["mean"] == pytest.approx(2.1, rel=1e-10)
+        assert float(stats["mean"]) == approx_float(2.1, rel=1e-10)
 
         # Get overall statistics
         overall_stats = analysis.get_statistics()
@@ -476,7 +491,10 @@ class TestCrossModuleIntegration:
 
             # Should respect platform-specific worker count
             assert mc.max_workers == optimal_workers
-            assert mc.max_workers <= platform_info.cpu_count
+            assert mc.max_workers is not None
+            cpu_count = getattr(platform_info, "cpu_count", None)
+            if isinstance(cpu_count, int):
+                assert mc.max_workers <= cpu_count
 
     def test_regex_caching_in_analysis(self, sample_circuit_file: Path) -> None:
         """Test that analysis components use cached regex patterns."""

@@ -1,10 +1,13 @@
 """Tests to ensure all functionality from kuPyLTSpice and kupicelib is preserved."""
 
 import shutil
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any, cast
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 from cespy.client_server import SimClient, SimServer
 from cespy.editor import AscEditor, QschEditor, SpiceEditor
@@ -14,6 +17,27 @@ from cespy.raw import RawRead, RawWrite, Trace
 from cespy.sim import SimBatch, SimRunner
 from cespy.simulators import LTspice, NGspice, Qspice, Xyce
 from cespy.utils import sweep_lin, sweep_log
+
+TraceArray = NDArray[np.float64]
+
+pytest: Any = pytest
+
+
+def approx_float(
+    expected: float,
+    *,
+    rel: float | None = None,
+    abs: float | None = None,
+) -> Any:
+    """Typed wrapper for pytest.approx to satisfy Pyright strict mode."""
+    approx_callable = cast(Callable[..., Any], pytest.approx)
+    return approx_callable(expected, rel=rel, abs=abs)
+
+
+def _trace_data(trace: Any) -> TraceArray:
+    data = getattr(trace, "data", None)
+    assert isinstance(data, np.ndarray)
+    return cast(TraceArray, data)
 
 
 class TestEditorFunctionality:
@@ -245,19 +269,19 @@ class TestRawFileFunctionality:
 
         # Verify data integrity
         time_trace = reader.get_trace("time")
-        if hasattr(time_trace, "data"):
-            time_read = time_trace.data
-            np.testing.assert_array_almost_equal(time, time_read, decimal=6)
+        assert time_trace is not None
+        time_read = _trace_data(time_trace)
+        np.testing.assert_array_almost_equal(time, time_read, decimal=6)
 
         voltage_trace = reader.get_trace("V(out)")
-        if hasattr(voltage_trace, "data"):
-            voltage_read = voltage_trace.data
-            np.testing.assert_array_almost_equal(voltage, voltage_read, decimal=6)
+        assert voltage_trace is not None
+        voltage_read = _trace_data(voltage_trace)
+        np.testing.assert_array_almost_equal(voltage, voltage_read, decimal=6)
 
         current_trace = reader.get_trace("I(R1)")
-        if hasattr(current_trace, "data"):
-            current_read = current_trace.data
-            np.testing.assert_array_almost_equal(current, current_read, decimal=6)
+        assert current_trace is not None
+        current_read = _trace_data(current_trace)
+        np.testing.assert_array_almost_equal(current, current_read, decimal=6)
 
     def test_raw_file_properties(self, temp_dir: Path) -> None:
         """Test raw file property access."""
@@ -325,7 +349,7 @@ solver = Normal
         log_file.write_text(log_content)
 
         # Test log reader
-        _reader = LTSpiceLogReader(str(log_file))  # noqa: F841
+        _reader = LTSpiceLogReader(str(log_file))
 
         # Read and check circuit statistics
         # Note: get_parameter doesn't exist, circuit stats are in the log content
@@ -361,15 +385,15 @@ class TestUtilityFunctionality:
         # Test logarithmic sweep
         log_values = list(sweep_log(1, 1000, 4))
         assert len(log_values) == 4
-        assert log_values[0] == pytest.approx(1)
-        assert log_values[1] == pytest.approx(10)
-        assert log_values[2] == pytest.approx(100)
-        assert log_values[3] == pytest.approx(1000)
+        assert float(log_values[0]) == approx_float(1)
+        assert float(log_values[1]) == approx_float(10)
+        assert float(log_values[2]) == approx_float(100)
+        assert float(log_values[3]) == approx_float(1000)
 
     def test_histogram_functionality(self) -> None:
         """Test Histogram utility functionality."""
         # Create test data
-        _data = np.random.normal(0, 1, 1000)  # noqa: F841
+        _data = np.random.normal(0, 1, 1000)
 
         # Note: In current API, Histogram is actually create_histogram function
         # which creates a plot, not a data structure
@@ -408,13 +432,16 @@ class TestBackwardCompatibility:
         """Test that common kupicelib imports still work."""
         # These imports should work if backward compatibility is maintained
         try:
-            from cespy.editor import SpiceEditor  # noqa: F401
-            from cespy.raw import RawRead, RawWrite  # noqa: F401
-            from cespy.sim import SimRunner  # noqa: F401
-            from cespy.simulators import LTspice  # noqa: F401
+            from cespy.editor import SpiceEditor
+            from cespy.raw import RawRead, RawWrite
+            from cespy.sim import SimRunner
+            from cespy.simulators import LTspice
 
-            # All imports successful
-            assert True
+            # Access to appease static analysis
+            assert SpiceEditor
+            assert RawRead and RawWrite
+            assert SimRunner
+            assert LTspice
         except ImportError as e:
             pytest.fail(f"Import failed: {e}")
 

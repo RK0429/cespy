@@ -84,14 +84,14 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
 
         # Verify changes
         print("\nVerifying changes...")
-        with open(output_path, "r", encoding="utf-8") as f:
+        with open(output_path, encoding="utf-8") as f:
             content = f.read()
             if "2.2k" in content and "470n" in content:
                 print("✓ Component values updated successfully")
             if ".tran 0 20m 0 20u" in content:
                 print("✓ Simulation command updated successfully")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in ASC editing: {e}")
     finally:
         # Cleanup
@@ -189,7 +189,7 @@ E1 out_int 0 in+ in- 100000
         print("  Instructions: Added dynamically")
         print("✓ Circuit structure analyzed")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in SPICE editing: {e}")
     finally:
         # Cleanup
@@ -229,7 +229,7 @@ def example_component_factory() -> None:
 
         print("✓ Manual component creation examples completed")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in component creation: {e}")
 
 
@@ -318,7 +318,7 @@ Rout out 0 100
 
         print("✓ Parametric design examples completed")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in parametric design: {e}")
     finally:
         if netlist_path.exists():
@@ -400,7 +400,7 @@ L1 n1 n2 1m
         else:
             print("⚠ No new components added")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in circuit validation: {e}")
     finally:
         # Cleanup

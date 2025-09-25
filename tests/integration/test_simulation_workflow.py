@@ -1,6 +1,8 @@
 """Integration tests for complete simulation workflows."""
 
+from collections.abc import Sequence
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -44,11 +46,8 @@ C1 out 0 1u
 
         # Verify time axis
         time_axis = raw_data.get_axis()
-        if hasattr(time_axis, 'data'):
-            assert time_axis.data[-1] >= 2e-3  # Should run for at least 2ms
-        else:
-            # time_axis is a list[float]
-            assert time_axis[-1] >= 2e-3  # Should run for at least 2ms
+        axis_values = cast(Sequence[float], getattr(time_axis, "data", time_axis))
+        assert axis_values[-1] >= 2e-3  # Should run for at least 2ms
 
     @pytest.mark.requires_ltspice
     def test_parameter_sweep_workflow(self, temp_dir: Path) -> None:
@@ -68,6 +67,7 @@ C1 out 0 1u
 
         # Run simulation
         raw_file, log_file = simulate(netlist_path, engine="ltspice")
+        assert log_file.exists()
 
         # Parse results
         raw_data = RawRead(raw_file)
@@ -125,6 +125,7 @@ C1 out 0 1u
 
         # Run simulation with NGSpice
         raw_file, log_file = simulate(netlist_path, engine="ngspice")
+        assert log_file.exists()
 
         # Verify output
         assert raw_file.exists()

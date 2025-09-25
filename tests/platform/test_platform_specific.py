@@ -183,7 +183,7 @@ class TestFileSystemOperations:
     def test_file_search_functionality(self, temp_dir: Path) -> None:
         """Test file search across platform-specific paths."""
         # Create test files in various locations
-        containers = []
+        containers: list[Path] = []
 
         # Create test structure
         for i in range(3):

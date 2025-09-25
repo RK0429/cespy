@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Tests for core API consistency and deprecation management functionality."""
 
 import warnings
@@ -8,14 +7,14 @@ from unittest.mock import Mock
 import pytest
 
 from cespy.core.api_consistency import (
-    DeprecationLevel,
-    deprecated,
-    standardize_parameters,
-    APIStandardizer,
-    ParameterValidator,
-    ensure_api_consistency,
-    create_compatibility_wrapper,
     COMPATIBILITY_MAPPINGS,
+    APIStandardizer,
+    DeprecationLevel,
+    ParameterValidator,
+    create_compatibility_wrapper,
+    deprecated,
+    ensure_api_consistency,
+    standardize_parameters,
 )
 
 
@@ -108,11 +107,9 @@ class TestDeprecationDecorator:
         def test_function() -> None:
             pass
 
-        assert hasattr(test_function, "__deprecated__")
-        assert test_function.__deprecated__ is True
-        assert hasattr(test_function, "__deprecation_info__")
-
-        info = test_function.__deprecation_info__
+        assert getattr(test_function, "__deprecated__", False) is True
+        info = getattr(test_function, "__deprecation_info__", None)
+        assert isinstance(info, dict)
         assert info["version"] == "2.0"
         assert info["reason"] == "Test"
         assert info["replacement"] == "new_func"
@@ -332,10 +329,9 @@ class TestEnsureAPIConsistency:
         """Test automatic file path validation."""
 
         # pylint: disable=import-outside-toplevel
-        from typing import Optional
 
         @ensure_api_consistency
-        def test_function(file_path: Optional[str] = None) -> Optional[str]:
+        def test_function(file_path: str | None = None) -> str | None:
             return file_path
 
         # Test valid path
@@ -353,10 +349,9 @@ class TestEnsureAPIConsistency:
         """Test automatic timeout validation."""
 
         # pylint: disable=import-outside-toplevel
-        from typing import Optional
 
         @ensure_api_consistency
-        def test_function(timeout: Optional[float] = None) -> Optional[float]:
+        def test_function(timeout: float | None = None) -> float | None:
             return timeout
 
         # Test valid timeout
@@ -390,8 +385,9 @@ class TestCreateCompatibilityWrapper:
         """Test creation of compatibility wrapper."""
         # Create a mock module dict
         # pylint: disable=import-outside-toplevel
-        from typing import Dict, Any, Callable
-        module_dict: Dict[str, Callable[[Any], Any]] = {"NewFunction": lambda x: x * 2}
+        from collections.abc import Callable
+        from typing import Any
+        module_dict: dict[str, Callable[[Any], Any]] = {"NewFunction": lambda x: x * 2}
 
         # Create compatibility wrapper
         create_compatibility_wrapper("OldFunction", "NewFunction", "2.0", module_dict)
@@ -526,13 +522,15 @@ class TestErrorHandling:
         def failing_function() -> None:
             raise ValueError("Test error")
 
-        with pytest.raises(ValueError):
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always")
-                failing_function()
+        with (
+            pytest.raises(ValueError),
+            warnings.catch_warnings(record=True) as captured_warnings,
+        ):
+            warnings.simplefilter("always")
+            failing_function()
 
-                # Should still issue deprecation warning before exception
-                assert len(w) == 1
+        # Should still issue deprecation warning before exception
+        assert len(captured_warnings) == 1
 
 
 if __name__ == "__main__":

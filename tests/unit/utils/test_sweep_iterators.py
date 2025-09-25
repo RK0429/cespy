@@ -1,8 +1,9 @@
 """Unit tests for sweep iterator utilities."""
 
-import pytest
 import numpy as np
-from cespy.utils.sweep_iterators import sweep, sweep_n, sweep_log, sweep_log_n
+import pytest
+
+from cespy.utils.sweep_iterators import sweep, sweep_log, sweep_log_n, sweep_n
 
 
 class TestSweepIterators:
@@ -145,7 +146,7 @@ class TestSweepIterators:
         """Test sweep with different numeric types."""
         # Integer inputs
         result_int = list(sweep(0, 10, 2))
-        assert all(isinstance(x, (int, float)) for x in result_int)
+        assert all(isinstance(x, int | float) for x in result_int)
 
         # Float inputs
         result_float = list(sweep(0.0, 10.0, 2.0))

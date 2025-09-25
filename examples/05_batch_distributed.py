@@ -12,7 +12,7 @@ import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, cast
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -57,7 +57,7 @@ C1 vout 0 {C_val}
 
             def __init__(self) -> None:
                 """Initialize mock batch simulator."""
-                self.jobs: list[Dict[str, Any]] = []
+                self.jobs: list[dict[str, Any]] = []
                 self.simulator: Any = None
                 self.base_circuit: str | None = None
                 self.progress_callback: Any = None
@@ -71,7 +71,7 @@ C1 vout 0 {C_val}
                 self.simulator = simulator
 
             def add_job(
-                self, job_id: int, parameters: Dict[str, Any], output_file: str
+                self, job_id: int, parameters: dict[str, Any], output_file: str
             ) -> None:
                 """Add job to batch."""
                 self.jobs.append(
@@ -86,9 +86,9 @@ C1 vout 0 {C_val}
                 """Set progress callback."""
                 self.progress_callback = callback
 
-            def run_batch(self) -> list[Dict[str, Any]]:
+            def run_batch(self) -> list[dict[str, Any]]:
                 """Run batch simulation."""
-                results = []
+                results: list[dict[str, Any]] = []
                 total = len(self.jobs)
                 for i, job in enumerate(self.jobs):
                     if self.progress_callback:
@@ -114,7 +114,7 @@ C1 vout 0 {C_val}
         capacitance_values = [100e-12, 470e-12, 1e-9, 2.2e-9, 4.7e-9]  # farads
 
         # Generate all combinations
-        simulation_jobs = []
+        simulation_jobs: list[dict[str, Any]] = []
         job_id = 0
 
         for r_val in resistance_values:
@@ -148,14 +148,14 @@ C1 vout 0 {C_val}
             print(f"  Progress: {progress:.1f}% (Job {current_job})")
 
         batch_sim.set_progress_callback(progress_callback)
-        results = batch_sim.run_batch()
+        results: list[dict[str, Any]] = batch_sim.run_batch()
 
         elapsed_time = time.time() - start_time
         print(f"✓ Batch simulation completed in {elapsed_time:.2f} seconds")
 
         # Analyze batch results
-        successful_jobs = [job for job in results if job["status"] == "success"]
-        failed_jobs = [job for job in results if job["status"] == "failed"]
+        successful_jobs = [job for job in results if job.get("status") == "success"]
+        failed_jobs = [job for job in results if job.get("status") == "failed"]
 
         print("Results summary:")
         print(f"  Successful: {len(successful_jobs)}")
@@ -166,15 +166,16 @@ C1 vout 0 {C_val}
         if successful_jobs:
             print("Sample results:")
             for job in successful_jobs[:3]:  # Show first 3
-                params = job.get("parameters", {})
-                if isinstance(params, dict):
+                params_data = job.get("parameters", {})
+                if isinstance(params_data, dict):
+                    params = cast(dict[str, Any], params_data)
                     print(
                         f"  Job {job.get('job_id', 'unknown')}: "
                         f"R={params.get('R_val', 'N/A')}, "
                         f"C={params.get('C_val', 'N/A')}"
                     )
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in batch simulation: {e}")
     finally:
         # Cleanup
@@ -194,7 +195,7 @@ def example_parallel_simulation() -> None:
     print("\n=== Parallel Simulation Example ===")
 
     # Create multiple circuit variants
-    circuits = []
+    circuits: list[Path] = []
     for i in range(6):
         circuit_content = f"""* Parallel Simulation Circuit {i}
 .param gain={10 + i * 5}
@@ -220,7 +221,7 @@ C1 vout 0 1n
         print("Running sequential simulations...")
         start_time = time.time()
 
-        sequential_results = []
+        sequential_results: list[dict[str, Any]] = []
         for i, circuit_path in enumerate(circuits):
             runner = SimRunner(simulator=LTspice)
             result = runner.run(str(circuit_path))
@@ -247,8 +248,10 @@ C1 vout 0 1n
         start_time = time.time()
 
         with ThreadPoolExecutor(max_workers=3) as executor:
-            circuit_info = list(enumerate(circuits))
-            threaded_results = list(executor.map(run_single_simulation, circuit_info))
+            circuit_info: list[tuple[int, Path]] = list(enumerate(circuits))
+            threaded_results: list[dict[str, Any]] = list(
+                executor.map(run_single_simulation, circuit_info)
+            )
 
         threaded_time = time.time() - start_time
         print(f"Threaded time: {threaded_time:.2f} seconds")
@@ -266,7 +269,9 @@ C1 vout 0 1n
         # Use multiprocessing for CPU-bound simulations
         with ProcessPoolExecutor(max_workers=2) as mp_executor:
             circuit_info = list(enumerate(circuits[:4]))  # Limit for demo
-            process_results = list(mp_executor.map(run_single_simulation, circuit_info))
+            process_results: list[dict[str, Any]] = list(
+                mp_executor.map(run_single_simulation, circuit_info)
+            )
 
         process_time = time.time() - start_time
         print(f"Process-based time: {process_time:.2f} seconds")
@@ -281,7 +286,7 @@ C1 vout 0 1n
         print(f"  Threaded: {successful_threaded}/{len(threaded_results)}")
         print(f"  Process-based: {successful_process}/{len(process_results)}")
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in parallel simulation: {e}")
     finally:
         # Cleanup
@@ -319,7 +324,7 @@ C1 vout 0 {C1_val}
             f.write(server_circuit)
 
         # Configure server
-        server_config: Dict[str, Any] = {
+        server_config: dict[str, Any] = {
             "host": "localhost",
             "port": 9090,
             "max_workers": 3,
@@ -342,7 +347,7 @@ C1 vout 0 {C1_val}
         print("Setting up simulation clients...")
 
         # Create multiple clients for distributed work
-        client_jobs = []
+        client_jobs: list[dict[str, Any]] = []
 
         # Define different parameter sets for clients
         parameter_sets = [
@@ -375,10 +380,10 @@ C1 vout 0 {C1_val}
         # Simulate job execution (normally done by server)
         print("Executing distributed jobs...")
 
-        job_results: list[Dict[str, Any]] = []
+        job_results: list[dict[str, Any]] = []
         for job in client_jobs:
             # Simulate job processing
-            job_id = job.get("job_id", 0)
+            job_id = int(job.get("job_id", 0))
             print(f"  Processing job {job_id}...")
 
             # In real implementation, this would be handled by the server
@@ -387,17 +392,19 @@ C1 vout 0 {C1_val}
             runner = SimRunner(simulator=LTspice)
 
             # Apply parameters to the circuit
-            request = job.get("request", {})
+            request_data = job.get("request", {})
             circuit_file = ""
-            parameters = {}
-            if isinstance(request, dict):
-                circuit_file = request.get("circuit_file", "")
-                parameters = request.get("parameters", {})
+            parameters: dict[str, Any] = {}
+            if isinstance(request_data, dict):
+                request = cast(dict[str, Any], request_data)
+                circuit_file = str(request.get("circuit_file", ""))
+                params = request.get("parameters", {})
+                if isinstance(params, dict):
+                    parameters = cast(dict[str, Any], params)
 
             editor = SpiceEditor(circuit_file)
-            if isinstance(parameters, dict):
-                for param, value in parameters.items():
-                    editor.set_parameter(param, value)
+            for param, value in parameters.items():
+                editor.set_parameter(str(param), value)
             temp_file = Path(f"temp_job_{job_id}.net")
             editor.save_netlist(str(temp_file))
 
@@ -436,7 +443,7 @@ C1 vout 0 {C1_val}
             exec_time = float(job_result.get("execution_time", 0.0))
             print(f"  {status} Job {job_id}: {exec_time:.3f}s")
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in client-server simulation: {e}")
     finally:
         if circuit_path.exists():
@@ -490,7 +497,7 @@ C3 vout 0 {C3}
         runner.run(str(circuit_path))
 
         # Timed runs
-        times = []
+        times: list[float] = []
         for i in range(5):
             start_time = time.time()
             result = runner.run(str(circuit_path))
@@ -509,7 +516,7 @@ C3 vout 0 {C3}
         optimized_runner = SimRunner(simulator=LTspice)
 
         # Apply optimizations
-        optimizations = {
+        optimizations: dict[str, str] = {
             "solver": "gear",  # Faster solver for many circuits
             "reltol": "1e-3",  # Relaxed tolerance for speed
             "abstol": "1e-9",  # Relaxed tolerance
@@ -531,7 +538,7 @@ C3 vout 0 {C3}
         # Use the optimized path
 
         # Measure optimized performance
-        optimized_times = []
+        optimized_times: list[float] = []
         for i in range(5):
             start_time = time.time()
             result = optimized_runner.run(str(optimized_path))
@@ -573,14 +580,14 @@ C3 vout 0 {C3}
 
         # Persistent file test
         start_time = time.time()
-        for i in range(3):
+        for _ in range(3):
             persistent_runner = SimRunner(simulator=LTspice)
             persistent_runner.run(str(circuit_path))
         persistent_time = time.time() - start_time
 
         # Temporary file test
         start_time = time.time()
-        for i in range(3):
+        for _ in range(3):
             with tempfile.NamedTemporaryFile(
                 mode="w", suffix=".net", delete=False
             ) as tmp_file:
@@ -617,7 +624,7 @@ C3 vout 0 {C3}
         if optimized_path.exists():
             optimized_path.unlink()
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in performance optimization: {e}")
     finally:
         if circuit_path.exists():

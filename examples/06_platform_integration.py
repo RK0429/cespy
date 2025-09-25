@@ -14,12 +14,17 @@ import shutil
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, XyceSimulator  # pylint: disable=wrong-import-position
+from cespy import (  # pylint: disable=wrong-import-position
+    LTspice,
+    NGspiceSimulator,
+    Qspice,
+    XyceSimulator,
+)
 from cespy.utils.detect_encoding import detect_encoding  # pylint: disable=wrong-import-position
 
 
@@ -62,17 +67,17 @@ def example_platform_detection() -> None:
         print(f"  Architecture tuple: {platform.architecture()}")
         print(f"  Executable: {sys.executable}")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in platform detection: {e}")
 
 
-def example_simulator_detection() -> Dict[str, Any]:
+def example_simulator_detection() -> dict[str, Any]:
     """Demonstrate automatic simulator detection across platforms."""
     # pylint: disable=too-many-branches,too-many-statements
     print("\n=== Simulator Detection Example ===")
 
     # Common simulator installation paths by platform
-    simulator_paths = {
+    simulator_paths: dict[str, dict[str, list[str]]] = {
         "Windows": {
             "ltspice": [
                 r"C:\Program Files\LTC\LTspiceXVII\XVIIx64.exe",
@@ -128,7 +133,7 @@ def example_simulator_detection() -> Dict[str, Any]:
         current_platform = platform.system()
         print(f"Detecting simulators on {current_platform}...")
 
-        detected_simulators = {}
+        detected_simulators: dict[str, str | None] = {}
 
         if current_platform in simulator_paths:
             platform_paths = simulator_paths[current_platform]
@@ -167,7 +172,7 @@ def example_simulator_detection() -> Dict[str, Any]:
         # Initialize simulators with detected paths
         print("\nInitializing simulators...")
 
-        available_simulators: Dict[str, Any] = {}
+        available_simulators: dict[str, Any] = {}
 
         # LTSpice
         try:
@@ -179,7 +184,7 @@ def example_simulator_detection() -> Dict[str, Any]:
                 print("  ✓ LTSpice initialized")
             else:
                 print("  ✗ LTSpice not available")
-        except (IOError, OSError, ValueError) as e:
+        except (OSError, ValueError) as e:
             print(f"  ✗ LTSpice initialization failed: {e}")
 
         # NGSpice
@@ -190,7 +195,7 @@ def example_simulator_detection() -> Dict[str, Any]:
                 print("  ✓ NGSpice initialized")
             else:
                 print("  ✗ NGSpice not available")
-        except (IOError, OSError, ValueError) as e:
+        except (OSError, ValueError) as e:
             print(f"  ✗ NGSpice initialization failed: {e}")
 
         # QSpice
@@ -201,7 +206,7 @@ def example_simulator_detection() -> Dict[str, Any]:
                 print("  ✓ QSpice initialized")
             else:
                 print("  ✗ QSpice not available")
-        except (IOError, OSError, ValueError) as e:
+        except (OSError, ValueError) as e:
             print(f"  ✗ QSpice initialization failed: {e}")
 
         # Xyce
@@ -212,7 +217,7 @@ def example_simulator_detection() -> Dict[str, Any]:
                 print("  ✓ Xyce initialized")
             else:
                 print("  ✗ Xyce not available")
-        except (IOError, OSError, ValueError) as e:
+        except (OSError, ValueError) as e:
             print(f"  ✗ Xyce initialization failed: {e}")
 
         print(f"\nSummary: {len(available_simulators)} simulators available")
@@ -222,7 +227,7 @@ def example_simulator_detection() -> Dict[str, Any]:
         # Note: This function was meant to return simulators for demo
         return available_simulators
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in simulator detection: {e}")
         return {}
 
@@ -232,7 +237,7 @@ def example_file_encoding_handling() -> None:
     print("\n=== File Encoding Handling Example ===")
 
     # Define test_files early to avoid unbound variable issues
-    test_files = []
+    test_files: list[Path] = []
 
     try:
         # Create test files with different encodings
@@ -285,23 +290,23 @@ R1 vin vout 1k
 
             # Try to read with detected encoding
             try:
-                with open(file_path, "r", encoding=detected_encoding) as f:
+                with open(file_path, encoding=detected_encoding) as f:
                     content = f.read()
                     lines = len(content.splitlines())
                     print(f"    ✓ Successfully read {lines} lines")
-            except (IOError, OSError, ValueError) as e:
+            except (OSError, ValueError) as e:
                 print(f"    ✗ Failed to read: {e}")
 
         # Test robust reading function
         print("\nTesting robust file reading...")
 
-        def read_file_robust(file_path: Path) -> Tuple[str, str]:
+        def read_file_robust(file_path: Path) -> tuple[str, str]:
             """Robust file reading with encoding fallbacks."""
             encodings_to_try = ["utf-8", "windows-1252", "ascii", "latin1"]
 
             for encoding in encodings_to_try:
                 try:
-                    with open(file_path, "r", encoding=encoding) as f:
+                    with open(file_path, encoding=encoding) as f:
                         return f.read(), encoding
                 except UnicodeDecodeError:
                     continue
@@ -316,7 +321,7 @@ R1 vin vout 1k
             print(f"  {file_path.name}: read with {used_encoding}")
             print(f"    Content preview: {content[:50].replace(chr(10), ' ')}...")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in encoding handling: {e}")
     finally:
         # Cleanup
@@ -341,7 +346,7 @@ def example_path_handling() -> None:
         print(f"  Path list separator: '{os.pathsep}'")
 
         # Test paths with different conventions
-        test_paths = [
+        test_paths: list[str] = [
             "circuits/amplifier.asc",  # Unix-style relative
             "circuits\\amplifier.asc",  # Windows-style relative
             "/home/user/circuits/amp.asc",  # Unix-style absolute
@@ -413,7 +418,7 @@ def example_path_handling() -> None:
             relative = file_path.relative_to(test_dir)
             print(f"  {file_path.name} relative to test_dir: {relative}")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in path handling: {e}")
     finally:
         # Cleanup
@@ -439,15 +444,14 @@ def example_api_compatibility() -> None:
             # This simulates how users might have used older versions
             ltspice_old_style = LTspice()
             print(f"    ✓ LTSpice (old style) - compatible: {ltspice_old_style}")
-        except (IOError, OSError, ValueError) as e:
+        except (OSError, ValueError) as e:
             print(f"    ✗ LTSpice (old style) - error: {e}")
 
         # New pattern: Modern API
         print("  Testing modern API...")
         try:
-            from cespy import (  # Modern unified interface  # noqa: F401  # pylint: disable=import-outside-toplevel
-                simulate,
-            )
+            # Modern unified interface; import lazily to avoid simulator overhead
+            from cespy import simulate  # pylint: disable=import-outside-toplevel
 
             print(f"    ✓ Modern unified simulate() function available: {simulate}")
         except ImportError:
@@ -475,8 +479,8 @@ def example_api_compatibility() -> None:
 
         # API migration helper
         def migrate_parameters(
-            old_params: Dict[str, Any],
-        ) -> Tuple[Dict[str, Any], List[str]]:
+            old_params: dict[str, Any],
+        ) -> tuple[dict[str, Any], list[str]]:
             """Helper to migrate old parameter names to new ones."""
             migration_map = {
                 "netlist_file": "circuit",
@@ -484,8 +488,8 @@ def example_api_compatibility() -> None:
                 "output_file": "output",
             }
 
-            new_params = {}
-            migration_warnings = []
+            new_params: dict[str, Any] = {}
+            migration_warnings: list[str] = []
 
             for old_key, value in old_params.items():
                 if old_key in migration_map:
@@ -508,7 +512,7 @@ def example_api_compatibility() -> None:
         print("\nTesting version compatibility...")
 
         # Simulate version checking
-        def check_version_compatibility() -> List[str]:
+        def check_version_compatibility() -> list[str]:
             """Check if current version is compatible with user's code."""
             import cespy  # pylint: disable=import-outside-toplevel
 
@@ -578,7 +582,7 @@ def example_api_compatibility() -> None:
 
         print(f"    New function result: {new_function()}")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in API compatibility: {e}")
 
 
@@ -683,7 +687,7 @@ line_endings = {line_endings}
                 print(f"  Max parallel jobs: {max_jobs}")
                 print(f"  Memory limit: {memory_limit} MB")
 
-        except (IOError, OSError, ValueError) as e:
+        except (OSError, ValueError) as e:
             print(f"  ✗ Configuration loading failed: {e}")
 
         # Setup script example
@@ -734,7 +738,7 @@ if __name__ == "__main__":
         config_path.unlink()
         setup_path.unlink()
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in environment configuration: {e}")
 
 

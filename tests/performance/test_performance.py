@@ -61,14 +61,13 @@ class TestRawFilePerformance:
             mem_after = process.memory_info().rss / 1024 / 1024
             mem_increase = mem_after - mem_before
             assert mem_increase < 1000  # Should not use more than 1GB additional memory
+            print(
+                f"Write time: {write_time:.2f}s, File size: {file_size_mb:.1f}MB, "
+                f"Memory increase: {mem_increase:.1f}MB"
+            )
         except Exception:
             # Skip if RawWrite API is different
             pytest.skip("RawWrite API needs adjustment for performance test")
-
-        print(
-            f"Write time: {write_time:.2f}s, File size: {file_size_mb:.1f}MB, "
-            f"Memory increase: {mem_increase:.1f}MB"
-        )
 
     def test_large_raw_file_read(self, temp_dir: Path) -> None:
         """Test reading large raw files."""
@@ -282,7 +281,7 @@ class TestSimulationPerformance:
     def test_parallel_simulation_performance(self, temp_dir: Path) -> None:
         """Test performance of parallel simulations."""
         # Create multiple simple netlists
-        netlists = []
+        netlists: list[Path] = []
         for i in range(10):
             netlist_path = temp_dir / f"parallel_{i}.net"
             content = f"""* Parallel Test {i}
@@ -348,9 +347,9 @@ C1 out 0 1u
         start_time = time.time()
         runner.run(netlist_path)
 
-        # Should timeout
-        with pytest.raises(Exception):  # Timeout exception
-            runner.wait_completion()
+        # Should report timeout without successful completion
+        success = runner.wait_completion()
+        assert success is False
 
         elapsed = time.time() - start_time
         assert elapsed < 3  # Should timeout within 3 seconds

@@ -9,9 +9,10 @@ and statistical summaries.
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
+from numpy.typing import NDArray
 
 from .base_analysis import StatisticalAnalysis
 
@@ -20,6 +21,7 @@ _logger = logging.getLogger("cespy.Visualization")
 # Optional plotting imports (graceful degradation if not available)
 try:
     import matplotlib.pyplot as plt
+    from matplotlib.axes import Axes
     from matplotlib.figure import Figure
 
     HAS_MATPLOTLIB = True
@@ -28,8 +30,10 @@ except ImportError:
     plt = None  # type: ignore[assignment]
 
     if TYPE_CHECKING:
+        from matplotlib.axes import Axes
         from matplotlib.figure import Figure
     else:
+        Axes = Any  # type: ignore[assignment,misc]
         Figure = Any  # type: ignore[assignment,misc]
     _logger.warning("Matplotlib not available - plotting functionality disabled")
 
@@ -213,16 +217,18 @@ class AnalysisVisualizer:
 
         # Create figure
         assert plt is not None, "matplotlib is required for visualization"
-        fig, axes = plt.subplots(
+        fig, axes_obj = plt.subplots(
             n_measurements,
             n_measurements,
             figsize=(3 * n_measurements, 3 * n_measurements),
         )
-
-        if n_measurements == 1:
-            axes = np.array([[axes]])
-        elif n_measurements == 2:
-            axes = axes.reshape(2, 2)
+        axes_array: NDArray[Any]
+        if isinstance(axes_obj, np.ndarray):
+            axes_array = axes_obj.reshape(n_measurements, n_measurements)
+        else:
+            # When a single subplot is requested, matplotlib returns a scalar Axes
+            axes_array = np.empty((1, 1), dtype=object)
+            axes_array[0, 0] = axes_obj
 
         # Get correlation matrix if requested
         corr_matrix = np.array([[]])
@@ -234,7 +240,7 @@ class AnalysisVisualizer:
 
         for i, name_y in enumerate(measurement_names):
             for j, name_x in enumerate(measurement_names):
-                ax = axes[i, j]
+                ax = axes_array[i, j]
 
                 if i == j:
                     # Diagonal: histogram
@@ -362,14 +368,20 @@ class AnalysisVisualizer:
 
         # Create figure with subplots
         assert plt is not None, "matplotlib is required for visualization"
-        fig, (ax1, ax2) = plt.subplots(
+        fig, axes_obj = plt.subplots(
             2, 1, figsize=(self.figsize[0], self.figsize[1] * 1.5)
         )
+        if isinstance(axes_obj, np.ndarray):
+            axes_flat = axes_obj.ravel()
+            ax1 = cast(Axes, axes_flat[0])
+            ax2 = cast(Axes, axes_flat[1])
+        else:
+            raise RuntimeError("Matplotlib returned unexpected axes type")
 
         # Plot running mean
         ax1.plot(window_centers, window_means, "b-", label="Running Mean", **kwargs)
         ax1.axhline(
-            np.mean(values_array),
+            float(np.mean(values_array)),
             color="red",
             linestyle="--",
             label=f"Final Mean: {np.mean(values_array):.3e}",
@@ -382,7 +394,7 @@ class AnalysisVisualizer:
         # Plot running standard deviation
         ax2.plot(window_centers, window_stds, "g-", label="Running Std Dev", **kwargs)
         ax2.axhline(
-            np.std(values_array),
+            float(np.std(values_array)),
             color="red",
             linestyle="--",
             label=f"Final Std: {np.std(values_array):.3e}",

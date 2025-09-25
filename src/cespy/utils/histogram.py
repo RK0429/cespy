@@ -6,6 +6,7 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -138,12 +139,14 @@ def plot_multiple_measurements(
     n_cols = min(3, n_meas)
     n_rows = (n_meas + n_cols - 1) // n_cols
 
-    _, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
-    axes = [axes] if n_meas == 1 else axes.flatten()
+    _, axes_obj = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
+    axes_list: list[Any] = (
+        axes_obj.ravel().tolist() if isinstance(axes_obj, np.ndarray) else [axes_obj]
+    )
 
     for idx, (name, values) in enumerate(measurements.items()):
-        if idx < len(axes):
-            ax = axes[idx]
+        if idx < len(axes_list):
+            ax = axes_list[idx]
             ax.hist(values, bins=args.bins, edgecolor="black", alpha=0.7)
             ax.set_title(name)
             ax.set_xlabel("Value")
@@ -155,7 +158,7 @@ def plot_multiple_measurements(
             # Add statistics
             mean_val = np.mean(values)
             std_val = np.std(values)
-            ax.axvline(mean_val, color="red", linestyle="--", linewidth=2)
+            ax.axvline(float(mean_val), color="red", linestyle="--", linewidth=2)
             ax.text(
                 0.02,
                 0.98,
@@ -167,8 +170,8 @@ def plot_multiple_measurements(
             )
 
     # Hide extra subplots
-    for idx in range(n_meas, len(axes)):
-        axes[idx].set_visible(False)
+    for idx in range(n_meas, len(axes_list)):
+        axes_list[idx].set_visible(False)
 
     plt.tight_layout()
     if args.output:

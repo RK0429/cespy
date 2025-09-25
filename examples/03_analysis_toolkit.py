@@ -8,8 +8,9 @@ worst-case analysis, sensitivity analysis, and other statistical techniques.
 """
 
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -67,7 +68,7 @@ R2 vout 0 {R2_nom*(1+R2_tol*AGAUSS(0,1,1))}
 
         for comp, params in component_variations.items():
             tolerance = params["tolerance"]
-            if isinstance(tolerance, (int, float)):
+            if isinstance(tolerance, int | float):
                 mc_analysis.set_tolerance(
                     ref=comp,
                     new_tolerance=float(tolerance),
@@ -93,7 +94,7 @@ R2 vout 0 {R2_nom*(1+R2_tol*AGAUSS(0,1,1))}
         else:
             print("✗ Monte Carlo analysis failed")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in Monte Carlo analysis: {e}")
     finally:
         if netlist_path.exists():
@@ -197,7 +198,7 @@ Rout out 0 100
         except (AttributeError, ValueError) as e:
             print(f"✗ Worst-case analysis error: {e}")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in worst-case analysis: {e}")
     finally:
         if netlist_path.exists():
@@ -241,7 +242,7 @@ C2 vout 0 {C2_nom}
         components = ["R1", "R2", "C1", "C2"]
         tolerances = [0.05, 0.05, 0.1, 0.1]
 
-        for comp, tol in zip(components, tolerances):
+        for comp, tol in zip(components, tolerances, strict=False):
             fast_wc.set_tolerance(comp, tol)
 
         print("Running fast worst-case analysis...")
@@ -257,7 +258,7 @@ C2 vout 0 {C2_nom}
         else:
             print("✗ Fast worst-case analysis failed")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in fast worst-case analysis: {e}")
     finally:
         if netlist_path.exists():
@@ -328,7 +329,7 @@ Q1 coll base emit BJT_MODEL
         else:
             print("✗ Sensitivity analysis failed")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in sensitivity analysis: {e}")
     finally:
         if netlist_path.exists():
@@ -373,22 +374,13 @@ R3 vout 0 {R3_nom}
 
             def run_analysis(
                 self,
-                callback: Union[type[ProcessCallback], Callable[..., Any], None] = None,
-                callback_args: Union[Tuple[Any, ...], Dict[str, Any], None] = None,
-                switches: Optional[list[str]] = None,
-                timeout: Optional[float] = None,
+                callback: type[ProcessCallback] | Callable[..., Any] | None = None,
+                callback_args: tuple[Any, ...] | dict[str, Any] | None = None,
+                switches: list[str] | None = None,
+                timeout: float | None = None,
                 exe_log: bool = False,
-                measure: Optional[str] = None,
-            ) -> Union[
-                Tuple[
-                    float,
-                    float,
-                    Dict[str, Union[str, float]],
-                    float,
-                    Dict[str, Union[str, float]],
-                ],
-                None,
-            ]:
+                measure: str | None = None,
+            ) -> tuple[float, float, dict[str, str | float], float, dict[str, str | float]] | None:
                 """Run the analysis."""
                 # Acknowledge unused parameters
                 _ = (callback, callback_args, switches, timeout, exe_log, measure)
@@ -440,7 +432,7 @@ R3 vout 0 {R3_nom}
             name = comp["name"]
             tolerance = comp["tolerance"]
             distribution = comp.get("distribution", "uniform")
-            if isinstance(name, str) and isinstance(tolerance, (int, float)):
+            if isinstance(name, str) and isinstance(tolerance, int | float):
                 tol_analysis.set_tolerance(
                     ref=name,
                     new_tolerance=float(tolerance),
@@ -460,7 +452,7 @@ R3 vout 0 {R3_nom}
         else:
             print("✗ Tolerance analysis failed")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in tolerance analysis: {e}")
     finally:
         if netlist_path.exists():
@@ -572,7 +564,7 @@ R_load out gnd 100
         else:
             print("✗ Failure mode analysis failed")
 
-    except (IOError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         print(f"Error in failure mode analysis: {e}")
     finally:
         if netlist_path.exists():

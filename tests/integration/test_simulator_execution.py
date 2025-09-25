@@ -1,14 +1,28 @@
 """Integration tests for simulator execution across different SPICE engines."""
 
 import shutil
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 
 from cespy.log.ltsteps import LTSpiceLogReader
 from cespy.raw.raw_read import RawRead
 from cespy.sim import SimRunner
+from cespy.sim.run_task import RunTask
 from cespy.simulators import LTspice, NGspice, Qspice, Xyce
+
+AxisData = Sequence[float]
+
+
+def _axis_name(axis: Any) -> str:
+    return cast(str, getattr(axis, "name", ""))
+
+
+def _axis_data(axis: Any) -> AxisData:
+    data = getattr(axis, "data", [])
+    return cast(AxisData, data)
 
 
 class TestLTSpiceExecution:
@@ -63,8 +77,9 @@ C1 out 0 1u
 
         # Check time range
         time_axis = raw_data.get_axis()
-        assert hasattr(time_axis, 'data')
-        assert time_axis.data[-1] >= 2e-3  # Should simulate to at least 2ms
+        time_data = _axis_data(time_axis)
+        assert len(time_data) > 0
+        assert time_data[-1] >= 2e-3  # Should simulate to at least 2ms
 
     @pytest.mark.requires_ltspice
     def test_ltspice_ac_analysis(self, temp_dir: Path) -> None:
@@ -102,13 +117,14 @@ C1 out 0 1u
 
         # AC analysis should have frequency as x-axis
         axis = raw_data.get_axis()
-        assert hasattr(axis, 'name')
-        assert axis.name == "frequency"
+        axis_name = _axis_name(axis)
+        assert axis_name == "frequency"
 
         # Check frequency range
-        assert hasattr(axis, 'data')
-        assert axis.data[0] >= 1  # Start at 1Hz
-        assert axis.data[-1] <= 1e5  # End at 100kHz
+        axis_data = _axis_data(axis)
+        assert len(axis_data) > 0
+        assert axis_data[0] >= 1  # Start at 1Hz
+        assert axis_data[-1] <= 1e5  # End at 100kHz
 
     @pytest.mark.requires_ltspice
     def test_ltspice_dc_sweep(self, temp_dir: Path) -> None:
@@ -146,13 +162,14 @@ R2 out 0 1k
 
         # DC sweep should have V1 as x-axis
         axis = raw_data.get_axis()
-        assert hasattr(axis, 'name')
-        assert axis.name in ["V1", "v1", "v-sweep"]
+        axis_name = _axis_name(axis)
+        assert axis_name in ["V1", "v1", "v-sweep"]
 
         # Check voltage range
-        assert hasattr(axis, 'data')
-        assert axis.data[0] == 0  # Start at 0V
-        assert axis.data[-1] == 5  # End at 5V
+        axis_data = _axis_data(axis)
+        assert len(axis_data) > 0
+        assert axis_data[0] == 0  # Start at 0V
+        assert axis_data[-1] == 5  # End at 5V
 
     @pytest.mark.requires_ltspice
     def test_ltspice_parameter_stepping(self, temp_dir: Path) -> None:
@@ -278,10 +295,10 @@ write ngspice_tran.raw
 
         # Verify time domain data
         time_axis = raw_data.get_axis()
-        assert hasattr(time_axis, 'name')
-        assert time_axis.name == "time"
-        assert hasattr(time_axis, 'data')
-        assert time_axis.data[-1] >= 2e-3
+        assert _axis_name(time_axis) == "time"
+        time_data = _axis_data(time_axis)
+        assert len(time_data) > 0
+        assert time_data[-1] >= 2e-3
 
 
 class TestQspiceExecution:
@@ -392,7 +409,7 @@ C1 out 0 1u
         netlist_path.write_text(netlist_content)
 
         # Define callback to capture results
-        results = []
+        results: list[tuple[Path, Path]] = []
 
         def capture_results(raw_file: Path, log_file: Path) -> None:
             """Capture simulation results.
@@ -417,7 +434,7 @@ C1 out 0 1u
     def test_multiple_simulations_parallel(self, temp_dir: Path) -> None:
         """Test running multiple simulations in parallel."""
         # Create multiple netlists
-        netlists = []
+        netlists: list[Path] = []
         for i in range(3):
             netlist_path = temp_dir / f"parallel_test_{i}.net"
             netlist_content = f"""* Parallel Test {i}
@@ -434,7 +451,7 @@ C1 out 0 1u
         runner = SimRunner(simulator=LTspice, parallel_sims=3)
 
         # Start all simulations
-        tasks = []
+        tasks: list[RunTask] = []
         for netlist in netlists:
             task = runner.run(netlist)
             assert task is not None

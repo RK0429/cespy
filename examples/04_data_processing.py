@@ -10,10 +10,11 @@ lazy loading, streaming, caching, and visualization of simulation results.
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -29,26 +30,51 @@ from cespy.raw import (  # pylint: disable=wrong-import-position
 from cespy.raw.raw_classes import DummyTrace  # pylint: disable=wrong-import-position
 from cespy.utils.histogram import create_histogram  # pylint: disable=wrong-import-position
 
+plt = cast(Any, plt)
 
-def create_sample_raw_data() -> Dict[str, Any]:
+FloatArray = npt.NDArray[np.float64]
+ComplexArray = npt.NDArray[np.complex128]
+
+
+def _as_float_array(data: Any) -> FloatArray:
+    """Return *data* as a float64 numpy array for deterministic typing."""
+    return np.asarray(data, dtype=np.float64)
+
+
+def _trace_data(trace: Any) -> FloatArray | None:
+    """Extract and normalize the numeric data from a trace-like object."""
+    if isinstance(trace, DummyTrace):
+        return None
+    if hasattr(trace, "get_wave"):
+        return _as_float_array(trace.get_wave())
+    if hasattr(trace, "data"):
+        return _as_float_array(trace.data)
+    return None
+
+
+def create_sample_raw_data() -> dict[str, dict[str, FloatArray]]:
     """Create sample raw data for demonstration."""
     print("Creating sample raw data...")
 
     # Generate synthetic simulation data
-    time_points = np.linspace(0, 1e-3, 10000)  # 1ms, 10k points
-    frequency_points = np.logspace(1, 6, 1000)  # 10Hz to 1MHz
+    time_points: FloatArray = _as_float_array(np.linspace(0, 1e-3, 10000))
+    frequency_points: FloatArray = _as_float_array(np.logspace(1, 6, 1000))
 
     # Time domain signals
-    vin_time = np.sin(2 * np.pi * 1000 * time_points)  # 1kHz sine
-    vout_time = 0.8 * np.sin(
-        2 * np.pi * 1000 * time_points - 0.1
-    )  # Delayed, attenuated
+    vin_time: FloatArray = _as_float_array(
+        np.sin(2 * np.pi * 1000 * time_points)
+    )
+    vout_time: FloatArray = _as_float_array(
+        0.8 * np.sin(2 * np.pi * 1000 * time_points - 0.1)
+    )
 
     # Frequency domain signals
-    gain_freq = 20 * np.log10(
-        1 / np.sqrt(1 + (frequency_points / 1000) ** 2)
-    )  # Low-pass response
-    phase_freq = -np.arctan(frequency_points / 1000) * 180 / np.pi
+    gain_freq: FloatArray = _as_float_array(
+        20 * np.log10(1 / np.sqrt(1 + (frequency_points / 1000) ** 2))
+    )
+    phase_freq: FloatArray = _as_float_array(
+        -np.arctan(frequency_points / 1000) * 180 / np.pi
+    )
 
     return {
         "transient": {"time": time_points, "vin": vin_time, "vout": vout_time},
@@ -85,8 +111,9 @@ def example_basic_raw_operations() -> None:
         # Get basic information
         print(f"Number of traces: {len(raw_reader.get_trace_names())}")
         time_trace = raw_reader.get_trace("time")
-        if not isinstance(time_trace, DummyTrace):
-            print(f"Number of points: {len(time_trace.data)}")
+        time_data = _trace_data(time_trace)
+        if time_data is not None:
+            print(f"Number of points: {len(time_data)}")
         print(f"Traces available: {raw_reader.get_trace_names()}")
 
         # Get specific traces with type checking
@@ -102,9 +129,9 @@ def example_basic_raw_operations() -> None:
             print("Error: Unable to access trace data")
             return
 
-        time_data = time_trace.data
-        vin_data = vin_trace.data
-        vout_data = vout_trace.data
+        time_data = _as_float_array(time_trace.data)
+        vin_data = _as_float_array(vin_trace.data)
+        vout_data = _as_float_array(vout_trace.data)
 
         print(f"Time range: {time_data[0]:.2e} to {time_data[-1]:.2e} seconds")
         print(f"Vin range: {min(vin_data):.3f} to {max(vin_data):.3f} V")
@@ -118,7 +145,7 @@ def example_basic_raw_operations() -> None:
         print(f"RMS Values: Vin = {vin_rms:.3f} V, Vout = {vout_rms:.3f} V")
         print(f"Gain: {gain:.2f} dB")
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in basic raw operations: {e}")
     finally:
         # Cleanup
@@ -137,9 +164,10 @@ def example_lazy_loading() -> None:
     try:
         # Create a large dataset
         print("Creating large dataset...")
-        large_time = np.linspace(0, 1, 1000000)  # 1M points
-        large_signal = np.sin(2 * np.pi * 100 * large_time) + 0.1 * np.random.randn(
-            len(large_time)
+        large_time: FloatArray = _as_float_array(np.linspace(0, 1, 1_000_000))
+        large_signal: FloatArray = _as_float_array(
+            np.sin(2 * np.pi * 100 * large_time)
+            + 0.1 * np.random.randn(len(large_time))
         )
 
         # Write large raw file
@@ -157,10 +185,10 @@ def example_lazy_loading() -> None:
         start_time = time.time()
         normal_reader = RawRead(str(large_raw_path))
         normal_trace = normal_reader.get_trace("V(signal)")
-        if isinstance(normal_trace, DummyTrace):
+        normal_data = _trace_data(normal_trace)
+        if normal_data is None:
             print("Error: Unable to access normal trace data")
             return
-        normal_data = normal_trace.data
         normal_time = time.time() - start_time
         print(f"Normal loading: {normal_time:.3f} seconds")
         print(f"  Loaded {len(normal_data)} data points")
@@ -173,15 +201,10 @@ def example_lazy_loading() -> None:
         print(f"Lazy initialization: {lazy_init_time:.3f} seconds")
 
         # Access subset of data
-        if not isinstance(lazy_trace, DummyTrace):
+        lazy_data = _trace_data(lazy_trace)
+        if lazy_data is not None:
             start_time = time.time()
-            # LazyTrace needs to use get_wave() method
-            if hasattr(lazy_trace, "get_wave"):
-                full_data = lazy_trace.get_wave()
-                subset_data = full_data[:10000]  # First 10k points
-            else:
-                # For regular traces that support slicing
-                subset_data = lazy_trace.data[:10000]  # type: ignore
+            subset_data = lazy_data[:10_000]
             subset_time = time.time() - start_time
             print(f"Subset access (10k points): {subset_time:.3f} seconds")
             print(f"  Retrieved {len(subset_data)} data points")
@@ -195,21 +218,16 @@ def example_lazy_loading() -> None:
                 start_idx = i * chunk_size
                 end_idx = min((i + 1) * chunk_size, len(large_time))
 
-                # Get the chunk data
-                if hasattr(lazy_trace, "get_wave"):
-                    full_data = lazy_trace.get_wave()
-                    chunk_data = full_data[start_idx:end_idx]
-                else:
-                    chunk_data = lazy_trace.data[start_idx:end_idx]  # type: ignore
+                chunk_data = lazy_data[start_idx:end_idx]
 
-                chunk_mean = np.mean(chunk_data)
+                chunk_mean = float(np.mean(chunk_data))
                 print(
                     f"  Chunk {i+1}: points {start_idx}-{end_idx}, mean = {chunk_mean:.3f}"
                 )
         else:
             print("Note: Lazy trace is a DummyTrace")
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in lazy loading: {e}")
     finally:
         if "large_raw_path" in locals() and large_raw_path.exists():
@@ -222,17 +240,17 @@ def example_data_streaming() -> None:
     print("\n=== Data Streaming Example ===")
 
     # Define file_paths early to avoid unbound variable issues
-    file_paths = []
+    file_paths: list[Path] = []
 
     try:
         # Create multiple raw files to simulate large dataset
         print("Creating multiple raw files for streaming...")
         for i in range(3):
             # Each file represents a different simulation run
-            time_data = np.linspace(0, 1e-3, 50000)
-            signal_data = np.sin(
-                2 * np.pi * (1000 + i * 100) * time_data
-            )  # Different frequencies
+            time_data = _as_float_array(np.linspace(0, 1e-3, 50000))
+            signal_data = _as_float_array(
+                np.sin(2 * np.pi * (1000 + i * 100) * time_data)
+            )
 
             raw_writer = RawWrite()
             time_trace = Trace("time", time_data)
@@ -250,7 +268,7 @@ def example_data_streaming() -> None:
         print("Processing files with streaming...")
 
         # Process data in streaming fashion
-        processed_results = []
+        processed_results: list[dict[str, float]] = []
 
         for file_index, file_path in enumerate(file_paths):
             print(f"  Processing file {file_index + 1}...")
@@ -261,33 +279,35 @@ def example_data_streaming() -> None:
 
             # Read data using RawRead as fallback since streaming API may differ
             reader = RawRead(str(file_path))
-            stream_data = {}
+            stream_data: dict[str, FloatArray] = {}
             for trace_name in reader.get_trace_names():
                 trace = reader.get_trace(trace_name)
-                if not isinstance(trace, DummyTrace) and hasattr(trace, "data"):
-                    stream_data[trace_name] = trace.data
+                trace_data = _trace_data(trace)
+                if trace_data is not None:
+                    stream_data[trace_name] = trace_data
 
             # Calculate FFT for frequency analysis
             trace_name = f"V(out_{file_index})"
-            if trace_name in stream_data:
-                signal = stream_data[trace_name]
-                time_step = stream_data["time"][1] - stream_data["time"][0]
+            signal = stream_data.get(trace_name)
+            time_data = stream_data.get("time")
+            if signal is not None and time_data is not None:
+                time_step = float(time_data[1] - time_data[0])
 
                 # Calculate FFT
-                fft_result = np.fft.fft(signal)
-                freqs = np.fft.fftfreq(len(signal), time_step)
+                fft_result: ComplexArray = np.fft.fft(signal).astype(np.complex128)
+                freqs: FloatArray = _as_float_array(np.fft.fftfreq(len(signal), time_step))
 
                 # Find dominant frequency
                 dominant_freq_idx = (
                     np.argmax(np.abs(fft_result[1 : len(fft_result) // 2])) + 1
                 )
-                dominant_freq = abs(freqs[dominant_freq_idx])
+                dominant_freq = float(abs(freqs[dominant_freq_idx]))
 
                 processed_results.append(
                     {
                         "file": file_index,
                         "dominant_frequency": dominant_freq,
-                        "signal_rms": np.sqrt(np.mean(signal**2)),
+                        "signal_rms": float(np.sqrt(np.mean(signal**2))),
                     }
                 )
 
@@ -302,7 +322,7 @@ def example_data_streaming() -> None:
                 f"RMS = {result['signal_rms']:.3f}"
             )
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in data streaming: {e}")
     finally:
         # Cleanup
@@ -318,15 +338,15 @@ def example_data_caching() -> None:
     print("\n=== Data Caching Example ===")
 
     # Define cache_files early to avoid unbound variable issues
-    cache_files = []
+    cache_files: list[Path] = []
 
     try:
         # Create sample data files
         print("Creating data files for caching demo...")
         for i in range(3):
-            time_data = np.linspace(0, 1e-3, 100000)
-            signal_data = np.sin(2 * np.pi * 1000 * time_data) * np.exp(
-                -time_data * 100
+            time_data = _as_float_array(np.linspace(0, 1e-3, 100000))
+            signal_data = _as_float_array(
+                np.sin(2 * np.pi * 1000 * time_data) * np.exp(-time_data * 100)
             )
 
             raw_writer = RawWrite()
@@ -347,14 +367,16 @@ def example_data_caching() -> None:
 
         # First access (cache miss)
         start_time = time.time()
-        processed_values = []
+        processed_values: list[float] = []
         for file_path in cache_files:
             # Use RawRead to get data and cache manually
             reader = RawRead(str(file_path))
             trace = reader.get_trace("V(decay)")
             if not isinstance(trace, DummyTrace) and hasattr(trace, "data"):
-                data = trace.data
-                processed = np.mean(data)  # Simple processing
+                data = _trace_data(trace)
+                if data is None:
+                    continue
+                processed = float(np.mean(data))
                 processed_values.append(processed)
         first_access_time = time.time() - start_time
         print(f"First access (cache miss): {first_access_time:.3f} seconds")
@@ -362,13 +384,15 @@ def example_data_caching() -> None:
 
         # Second access (simulate cache hit by reading again)
         start_time = time.time()
-        processed_values_2 = []
+        processed_values_2: list[float] = []
         for file_path in cache_files:
             reader = RawRead(str(file_path))
             trace = reader.get_trace("V(decay)")
             if not isinstance(trace, DummyTrace) and hasattr(trace, "data"):
-                data = trace.data
-                processed = np.mean(data)  # Same processing
+                data = _trace_data(trace)
+                if data is None:
+                    continue
+                processed = float(np.mean(data))
                 processed_values_2.append(processed)
         second_access_time = time.time() - start_time
         print(f"Second access (simulated cache hit): {second_access_time:.3f} seconds")
@@ -393,10 +417,10 @@ def example_data_caching() -> None:
 
         # Test cache eviction
         print("Testing cache eviction with large data...")
-        large_data = np.random.randn(1000000)  # Large array to trigger eviction
+        large_data = _as_float_array(np.random.randn(1_000_000))
 
         raw_writer = RawWrite()
-        time_trace = Trace("time", np.linspace(0, 1, len(large_data)))
+        time_trace = Trace("time", _as_float_array(np.linspace(0, 1, len(large_data))))
         large_trace = Trace("V(large)", large_data)
 
         raw_writer.add_trace(time_trace)
@@ -408,8 +432,9 @@ def example_data_caching() -> None:
         # This should trigger cache eviction
         reader = RawRead(str(large_file))
         trace = reader.get_trace("V(large)")
-        if not isinstance(trace, DummyTrace) and hasattr(trace, "data"):
-            _ = trace.data  # Access data to potentially trigger cache
+        trace_data = _trace_data(trace)
+        if trace_data is not None:
+            _ = trace_data  # Access data to potentially trigger cache
 
         if hasattr(cache_system, "get_statistics"):
             final_stats = cache_system.get_statistics()
@@ -423,7 +448,7 @@ def example_data_caching() -> None:
         if large_file.exists():
             large_file.unlink()
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in data caching: {e}")
     finally:
         # Cleanup
@@ -446,10 +471,10 @@ def example_histogram_analysis() -> None:
         np.random.seed(42)  # For reproducible results
 
         # Normal distribution (component values)
-        normal_data = np.random.normal(2.5, 0.1, 10000)  # Mean=2.5V, std=0.1V
+        normal_data = _as_float_array(np.random.normal(2.5, 0.1, 10000))
 
         # Lognormal distribution (failure times)
-        lognormal_data = np.random.lognormal(5, 0.5, 10000)  # Mean log=5, std log=0.5
+        lognormal_data = _as_float_array(np.random.lognormal(5, 0.5, 10000))
 
         # Mixed distribution (measurement errors) - for future use
         # mixed_data = np.concatenate(
@@ -465,9 +490,9 @@ def example_histogram_analysis() -> None:
         print("Analyzing normal distribution...")
 
         # Calculate statistics using numpy
-        normal_mean = np.mean(normal_data)
-        normal_std = np.std(normal_data)
-        normal_median = np.median(normal_data)
+        normal_mean = float(np.mean(normal_data))
+        normal_std = float(np.std(normal_data))
+        normal_median = float(np.median(normal_data))
 
         print("Normal distribution statistics:")
         print(f"  Mean: {normal_mean:.3f}")
@@ -475,7 +500,7 @@ def example_histogram_analysis() -> None:
         print(f"  Median: {normal_median:.3f}")
 
         # Calculate percentiles
-        percentiles = np.percentile(normal_data, [1, 5, 95, 99])
+        percentiles = _as_float_array(np.percentile(normal_data, [1, 5, 95, 99]))
         print(f"  1st percentile: {percentiles[0]:.3f}")
         print(f"  5th percentile: {percentiles[1]:.3f}")
         print(f"  95th percentile: {percentiles[2]:.3f}")
@@ -484,7 +509,7 @@ def example_histogram_analysis() -> None:
         # Yield analysis
         spec_lower = 2.2
         spec_upper = 2.8
-        within_spec = np.sum((normal_data >= spec_lower) & (normal_data <= spec_upper))
+        within_spec = int(np.sum((normal_data >= spec_lower) & (normal_data <= spec_upper)))
         yield_pct = (within_spec / len(normal_data)) * 100
         dpm = (1 - within_spec / len(normal_data)) * 1e6
         print(f"  Yield (2.2V-2.8V): {yield_pct:.2f}%")
@@ -493,8 +518,8 @@ def example_histogram_analysis() -> None:
         print("\nAnalyzing lognormal distribution...")
 
         # Calculate lognormal statistics
-        lognormal_mean = np.mean(lognormal_data)
-        lognormal_median = np.median(lognormal_data)
+        lognormal_mean = float(np.mean(lognormal_data))
+        lognormal_median = float(np.median(lognormal_data))
 
         print("Lognormal distribution statistics:")
         print(f"  Mean: {lognormal_mean:.1f}")
@@ -511,7 +536,7 @@ def example_histogram_analysis() -> None:
             data=list(lognormal_data), title="Failure Time Distribution", bins=50
         )
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in histogram analysis: {e}")
 
 
@@ -526,63 +551,55 @@ def example_visualization() -> None:
 
         print("Creating visualizations...")
 
-        # Time domain plot
-        plt.figure(figsize=(12, 8))
+        # Time and frequency domain plots in a 2x2 grid
+        fig_basic, axes_basic = plt.subplots(2, 2, figsize=(12, 8))
+        axes_basic = cast(Any, axes_basic)
 
-        plt.subplot(2, 2, 1)
-        plt.plot(
-            sample_data["transient"]["time"] * 1e3,
-            sample_data["transient"]["vin"],
-            "b-",
-            label="Input",
-        )
-        plt.plot(
-            sample_data["transient"]["time"] * 1e3,
-            sample_data["transient"]["vout"],
-            "r-",
-            label="Output",
-        )
-        plt.xlabel("Time (ms)")
-        plt.ylabel("Voltage (V)")
-        plt.title("Time Domain Response")
-        plt.legend()
-        plt.grid(True)
+        time_axis_ms = sample_data["transient"]["time"] * 1e3
+        ax_time = axes_basic[0, 0]
+        ax_time.plot(time_axis_ms, sample_data["transient"]["vin"], "b-", label="Input")
+        ax_time.plot(time_axis_ms, sample_data["transient"]["vout"], "r-", label="Output")
+        ax_time.set_xlabel("Time (ms)")
+        ax_time.set_ylabel("Voltage (V)")
+        ax_time.set_title("Time Domain Response")
+        ax_time.legend()
+        ax_time.grid(True)
 
-        # Frequency domain plot
-        plt.subplot(2, 2, 2)
-        plt.semilogx(sample_data["ac"]["frequency"], sample_data["ac"]["gain"], "b-")
-        plt.xlabel("Frequency (Hz)")
-        plt.ylabel("Gain (dB)")
-        plt.title("Frequency Response - Magnitude")
-        plt.grid(True)
+        frequency_axis = sample_data["ac"]["frequency"]
+        ax_gain = axes_basic[0, 1]
+        ax_gain.semilogx(frequency_axis, sample_data["ac"]["gain"], "b-")
+        ax_gain.set_xlabel("Frequency (Hz)")
+        ax_gain.set_ylabel("Gain (dB)")
+        ax_gain.set_title("Frequency Response - Magnitude")
+        ax_gain.grid(True)
 
-        plt.subplot(2, 2, 3)
-        plt.semilogx(sample_data["ac"]["frequency"], sample_data["ac"]["phase"], "r-")
-        plt.xlabel("Frequency (Hz)")
-        plt.ylabel("Phase (degrees)")
-        plt.title("Frequency Response - Phase")
-        plt.grid(True)
+        ax_phase = axes_basic[1, 0]
+        ax_phase.semilogx(frequency_axis, sample_data["ac"]["phase"], "r-")
+        ax_phase.set_xlabel("Frequency (Hz)")
+        ax_phase.set_ylabel("Phase (degrees)")
+        ax_phase.set_title("Frequency Response - Phase")
+        ax_phase.grid(True)
 
-        # Distribution plot
-        plt.subplot(2, 2, 4)
-        noise_data = np.random.normal(0, 0.1, 1000)
-        plt.hist(noise_data, bins=30, alpha=0.7, color="green")
-        plt.xlabel("Noise Level (V)")
-        plt.ylabel("Count")
-        plt.title("Noise Distribution")
-        plt.grid(True)
+        ax_hist = axes_basic[1, 1]
+        noise_data = _as_float_array(np.random.normal(0, 0.1, 1000))
+        ax_hist.hist(noise_data, bins=30, alpha=0.7, color="green")
+        ax_hist.set_xlabel("Noise Level (V)")
+        ax_hist.set_ylabel("Count")
+        ax_hist.set_title("Noise Distribution")
+        ax_hist.grid(True)
 
-        plt.tight_layout()
+        fig_basic.tight_layout()
 
         # Save plot
         plot_path = Path("cespy_data_visualization.png")
-        plt.savefig(plot_path, dpi=150, bbox_inches="tight")
+        fig_basic.savefig(plot_path, dpi=150, bbox_inches="tight")
         print(f"✓ Visualization saved to {plot_path}")
 
-        plt.close()  # Close to prevent display in headless environments
+        plt.close(fig_basic)
 
         # Advanced plot with subplots for different analysis types
-        _, axes = plt.subplots(2, 3, figsize=(15, 10))
+        fig_adv, axes = plt.subplots(2, 3, figsize=(15, 10))
+        axes = cast(Any, axes)
 
         # Transient analysis
         axes[0, 0].plot(
@@ -626,20 +643,19 @@ def example_visualization() -> None:
         axes[1, 1].grid(True)
 
         # Polar plot for complex impedance
-        magnitude = 10 ** (sample_data["ac"]["gain"] / 20)
-        phase_rad = sample_data["ac"]["phase"] * np.pi / 180
-        axes[1, 2] = plt.subplot(2, 3, 6, projection="polar")
-        axes[1, 2].plot(phase_rad, magnitude)
-        axes[1, 2].set_title("Polar Plot")
-
-        plt.tight_layout()
+        magnitude = _as_float_array(10 ** (sample_data["ac"]["gain"] / 20))
+        phase_rad = _as_float_array(sample_data["ac"]["phase"] * np.pi / 180)
+        polar_ax = fig_adv.add_subplot(2, 3, 6, projection="polar")
+        polar_ax.plot(phase_rad, magnitude)
+        polar_ax.set_title("Polar Plot")
+        fig_adv.tight_layout()
 
         # Save advanced plot
         advanced_plot_path = Path("cespy_advanced_visualization.png")
-        plt.savefig(advanced_plot_path, dpi=150, bbox_inches="tight")
+        fig_adv.savefig(advanced_plot_path, dpi=150, bbox_inches="tight")
         print(f"✓ Advanced visualization saved to {advanced_plot_path}")
 
-        plt.close()
+        plt.close(fig_adv)
 
         # Clean up plot files for example
         if plot_path.exists():
@@ -647,7 +663,7 @@ def example_visualization() -> None:
         if advanced_plot_path.exists():
             advanced_plot_path.unlink()
 
-    except (IOError, ValueError, OSError) as e:
+    except (ValueError, OSError) as e:
         print(f"Error in visualization: {e}")
 
 

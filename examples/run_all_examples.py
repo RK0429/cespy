@@ -10,10 +10,9 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Tuple
 
 
-def run_example(example_file: Path) -> Tuple[bool, float]:
+def run_example(example_file: Path) -> tuple[bool, float]:
     """Run a single example file and capture results."""
     print(f"\n{'='*60}")
     print(f"Running: {example_file}")
@@ -65,7 +64,7 @@ def main() -> int:
     examples_dir = Path(__file__).parent
 
     # Define example files in execution order
-    example_files = [
+    example_files: list[str] = [
         "01_basic_simulation.py",
         "02_circuit_editing.py",
         "03_analysis_toolkit.py",
@@ -75,7 +74,7 @@ def main() -> int:
     ]
 
     # Check that all example files exist
-    missing_files = []
+    missing_files: list[str] = []
     for filename in example_files:
         file_path = examples_dir / filename
         if not file_path.exists():
@@ -96,7 +95,7 @@ def main() -> int:
 
     # Run examples
     start_time = time.time()
-    results = []
+    results: list[dict[str, object]] = []
 
     for filename in example_files:
         file_path = examples_dir / filename
@@ -110,8 +109,8 @@ def main() -> int:
     print("EXECUTION SUMMARY")
     print("=" * 80)
 
-    successful = [r for r in results if r["success"]]
-    failed = [r for r in results if not r["success"]]
+    successful = [r for r in results if bool(r.get("success"))]
+    failed = [r for r in results if not bool(r.get("success"))]
 
     print(f"Total examples: {len(results)}")
     print(f"Successful: {len(successful)}")
@@ -121,8 +120,11 @@ def main() -> int:
 
     print("\nDetailed Results:")
     for result in results:
-        status = "✓" if result["success"] else "✗"
-        print(f"  {status} {result['file']:<30} {result['time']:>8.2f}s")
+        status = "✓" if bool(result.get("success")) else "✗"
+        time_value = result.get("time")
+        time_taken = float(time_value) if isinstance(time_value, int | float) else 0.0
+        file_value = result.get("file", "unknown")
+        print(f"  {status} {file_value!s:<30} {time_taken:>8.2f}s")
 
     if failed:
         print("\nFailed Examples:")

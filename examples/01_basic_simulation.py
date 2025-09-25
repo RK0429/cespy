@@ -13,7 +13,14 @@ from pathlib import Path
 # Add the cespy package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from cespy import LTspice, NGspiceSimulator, Qspice, RawRead, SimRunner, XyceSimulator  # pylint: disable=wrong-import-position
+from cespy import (  # pylint: disable=wrong-import-position
+    LTspice,
+    NGspiceSimulator,
+    Qspice,
+    RawRead,
+    SimRunner,
+    XyceSimulator,
+)
 from cespy.editor import SpiceEditor  # pylint: disable=wrong-import-position
 
 
@@ -78,7 +85,7 @@ TEXT 56 264 Left 2 !.tran 0 10m 0 10u
         else:
             print("✗ Simulation failed")
 
-    except (IOError, OSError, ValueError, RuntimeError) as e:
+    except (OSError, ValueError, RuntimeError) as e:
         print(f"Error running LTSpice simulation: {e}")
     finally:
         # Cleanup
@@ -118,7 +125,7 @@ R2 vout 0 2k
         else:
             print("✗ NGSpice simulation failed")
 
-    except (IOError, OSError, ValueError, RuntimeError) as e:
+    except (OSError, ValueError, RuntimeError) as e:
         print(f"Error running NGSpice simulation: {e}")
     finally:
         # Cleanup
@@ -156,7 +163,7 @@ C1 out 0 1n
         else:
             print("✗ QSpice simulation failed")
 
-    except (IOError, OSError, ValueError, RuntimeError) as e:
+    except (OSError, ValueError, RuntimeError) as e:
         print(f"Error running QSpice simulation: {e}")
     finally:
         if netlist_path.exists():
@@ -195,7 +202,7 @@ D1 cathode 0 DMOD
         else:
             print("✗ Xyce simulation failed")
 
-    except (IOError, OSError, ValueError, RuntimeError) as e:
+    except (OSError, ValueError, RuntimeError) as e:
         print(f"Error running Xyce simulation: {e}")
     finally:
         if netlist_path.exists():
@@ -266,7 +273,7 @@ TEXT 56 288 Left 2 !.op
 
         print("✓ Parameter sweep completed")
 
-    except (IOError, OSError, ValueError, RuntimeError) as e:
+    except (OSError, ValueError, RuntimeError) as e:
         print(f"Error in parameter sweep: {e}")
     finally:
         if netlist_path.exists():

@@ -3,6 +3,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 
@@ -220,7 +221,9 @@ TEXT 32 200 Left 2 !.tran 1m
             with open(pyproject_path, "rb") as f:
                 config = tomllib.load(f)
 
-            scripts = config.get("tool", {}).get("poetry", {}).get("scripts", {})
+            tool_section = cast(dict[str, Any], config.get("tool", {}))
+            poetry_section = cast(dict[str, Any], tool_section.get("poetry", {}))
+            scripts = cast(dict[str, str], poetry_section.get("scripts", {}))
             expected_scripts = [
                 "cespy-asc-to-qsch",
                 "cespy-run-server",
@@ -238,7 +241,7 @@ TEXT 32 200 Left 2 !.tran 1m
                 assert (
                     ":" in entry_point
                 ), f"Invalid entry point format for {script}: {entry_point}"
-                module, function = entry_point.split(":")
+                module, _ = entry_point.split(":")
                 assert module.startswith(
                     "cespy."
                 ), f"Entry point should start with cespy.: {entry_point}"

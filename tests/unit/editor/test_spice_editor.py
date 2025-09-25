@@ -1,8 +1,11 @@
 """Unit tests for SpiceEditor class."""
 
 from pathlib import Path
+
 import pytest
-from cespy.editor.spice_editor import SpiceEditor, SpiceCircuit
+
+from cespy.editor.spice_editor import SpiceCircuit, SpiceEditor
+from cespy.exceptions import ComponentNotFoundError
 
 
 class TestSpiceCircuit:
@@ -120,7 +123,7 @@ R1 in out 1k
 
         editor = SpiceEditor(netlist_path)
 
-        with pytest.raises(Exception):  # Should raise ComponentNotFoundError
+        with pytest.raises(ComponentNotFoundError):
             editor.get_component_value("R2")
 
     def test_case_insensitive_components(self, temp_dir: Path) -> None:

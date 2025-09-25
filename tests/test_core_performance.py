@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Tests for core performance monitoring and optimization functionality."""
 
 import re
@@ -292,10 +291,12 @@ class TestPerformanceTimer:
 
         performance_monitor.reset_metrics()
 
-        with pytest.raises(ValueError):
-            with performance_timer("error_operation"):
-                time.sleep(0.01)
-                raise ValueError("Test error")
+        with (
+            pytest.raises(ValueError),
+            performance_timer("error_operation"),
+        ):
+            time.sleep(0.01)
+            raise ValueError("Test error")
 
         # Should still record metrics despite exception
         metrics = performance_monitor.get_metrics("error_operation")

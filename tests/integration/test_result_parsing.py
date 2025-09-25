@@ -1,15 +1,43 @@
 """Integration tests for parsing simulation results (.raw and .log files)."""
 
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any, cast
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 from cespy.log.ltsteps import LTSpiceLogReader
 from cespy.log.qspice_log_reader import QspiceLogReader
 from cespy.log.semi_dev_op_reader import opLogReader
 from cespy.raw.raw_read import RawRead
 from cespy.raw.raw_write import RawWrite, Trace
+
+TraceArray = NDArray[np.generic]
+
+pytest: Any = pytest
+
+
+def approx_float(
+    expected: float,
+    *,
+    rel: float | None = None,
+    abs: float | None = None,
+) -> Any:
+    """Typed wrapper for pytest.approx used throughout the tests."""
+    approx_callable = cast(Callable[..., Any], pytest.approx)
+    return approx_callable(expected, rel=rel, abs=abs)
+
+
+def _trace_data(trace: Any) -> TraceArray:
+    data = getattr(trace, "data", None)
+    assert isinstance(data, np.ndarray)
+    return cast(TraceArray, data)
+
+
+def _trace_name(trace: Any) -> str:
+    return cast(str, getattr(trace, "name", ""))
 
 
 class TestRawFileParsing:
@@ -55,20 +83,20 @@ class TestRawFileParsing:
 
             # Verify data
             time_trace = reader.get_trace("time")
-            if hasattr(time_trace, "data") and time_trace.data is not None:
-                time_data = time_trace.data
-                assert len(time_data) == 100
-                assert time_data[0] == 0
-                assert time_data[-1] == pytest.approx(1e-3)
+            assert time_trace is not None
+            time_data = _trace_data(time_trace)
+            assert len(time_data) == 100
+            assert time_data[0] == 0
+            assert float(time_data[-1]) == approx_float(1e-3)
 
             # Verify voltage trace
             voltage_trace = reader.get_trace("V(out)")
-            if hasattr(voltage_trace, "data") and voltage_trace.data is not None:
-                voltage_data = voltage_trace.data
-                assert len(voltage_data) == 100
-                # Check it's a sine wave (starts at 0, goes positive)
-                assert voltage_data[0] == pytest.approx(0, abs=1e-6)
-                assert voltage_data[25] == pytest.approx(0, abs=0.1)  # Zero crossing
+            assert voltage_trace is not None
+            voltage_data = _trace_data(voltage_trace)
+            assert len(voltage_data) == 100
+            # Check it's a sine wave (starts at 0, goes positive)
+            assert float(voltage_data[0]) == approx_float(0, abs=1e-6)
+            assert float(voltage_data[25]) == approx_float(0, abs=0.1)  # Zero crossing
         except Exception:
             # Skip if raw file parsing doesn't work
             pytest.skip("Raw file parsing API needs adjustment")
@@ -108,23 +136,22 @@ class TestRawFileParsing:
             # Get frequency axis
             try:
                 freq_axis = reader.get_axis()
-                if hasattr(freq_axis, "name"):
-                    assert freq_axis.name == "frequency"
-                if hasattr(freq_axis, "data"):
-                    assert len(freq_axis.data) == 50
+                assert _trace_name(freq_axis) == "frequency"
+                freq_data = _trace_data(freq_axis)
+                assert len(freq_data) == 50
             except Exception:
                 # Skip if axis access is different
                 pass
 
             # Get complex voltage data
             voltage_trace = reader.get_trace("V(out)")
-            if hasattr(voltage_trace, "data") and voltage_trace.data is not None:
-                assert voltage_trace.data.dtype == complex
+            assert voltage_trace is not None
+            voltage_data = _trace_data(voltage_trace)
+            assert voltage_data.dtype == complex
 
             # Verify magnitude decreases with frequency (RC filter behavior)
-            if hasattr(voltage_trace, "data") and voltage_trace.data is not None:
-                magnitudes = np.abs(voltage_trace.data)
-                assert magnitudes[0] > magnitudes[-1]
+            magnitudes = np.abs(voltage_data)
+            assert magnitudes[0] > magnitudes[-1]
         except Exception:
             # Skip if AC analysis parsing doesn't work
             pytest.skip("AC analysis parsing API needs adjustment")
@@ -153,10 +180,12 @@ class TestRawFileParsing:
         raw_file = temp_dir / "test_stepped.raw"
         try:
             writer = RawWrite(plot_name="Transient Analysis")
-            if hasattr(writer, "set_no_points"):
-                writer.set_no_points(num_points)
-            if hasattr(writer, "set_no_steps"):
-                writer.set_no_steps(num_steps)
+            set_no_points = getattr(writer, "set_no_points", None)
+            if callable(set_no_points):
+                set_no_points(num_points)
+            set_no_steps = getattr(writer, "set_no_steps", None)
+            if callable(set_no_steps):
+                set_no_steps(num_steps)
             for trace in traces:
                 writer.add_trace(trace)
             writer.save(raw_file)
@@ -170,18 +199,20 @@ class TestRawFileParsing:
         # Verify step information
         try:
             assert reader.get_raw_property("No. Points") == num_points
-            if hasattr(reader, "nsteps"):
-                assert reader.nsteps == num_steps
+            nsteps = getattr(reader, "nsteps", None)
+            if isinstance(nsteps, int):
+                assert nsteps == num_steps
 
             # Get data for each step
-            for step in range(num_steps):
+            for _ in range(num_steps):
                 try:
-                    step_data = reader.get_trace("V(out)")
-                    if hasattr(step_data, "data") and step_data.data is not None:
-                        assert len(step_data.data) >= num_points
-                        # Verify amplitude increases with step
-                        max_voltage = np.max(np.abs(step_data.data))
-                        assert max_voltage > 0
+                    step_trace = reader.get_trace("V(out)")
+                    assert step_trace is not None
+                    step_array = _trace_data(step_trace)
+                    assert len(step_array) >= num_points
+                    # Verify amplitude increases with step
+                    max_voltage = np.max(np.abs(step_array))
+                    assert max_voltage > 0
                 except Exception:
                     # Skip if step access is different
                     pass
@@ -214,16 +245,16 @@ class TestRawFileParsing:
 
             # Operating point should have single values
             v_in_trace = reader.get_trace("V(in)")
-            if hasattr(v_in_trace, "data") and v_in_trace.data is not None:
-                v_in = v_in_trace.data
-                assert len(v_in) == 1
-                assert v_in[0] == 5.0
+            assert v_in_trace is not None
+            v_in = _trace_data(v_in_trace)
+            assert len(v_in) == 1
+            assert v_in[0] == 5.0
 
             v_out_trace = reader.get_trace("V(out)")
-            if hasattr(v_out_trace, "data") and v_out_trace.data is not None:
-                v_out = v_out_trace.data
-                assert len(v_out) == 1
-                assert v_out[0] == 2.5
+            assert v_out_trace is not None
+            v_out = _trace_data(v_out_trace)
+            assert len(v_out) == 1
+            assert v_out[0] == 2.5
         except Exception:
             # Skip if operating point parsing doesn't work
             pytest.skip("Operating point parsing API needs adjustment")
@@ -261,11 +292,12 @@ solver = Normal
             reader = LTSpiceLogReader(str(log_file))
 
             # Check basic info
-            if hasattr(reader, "get_parameter"):
-                assert reader.get_parameter("tnom") == 27
-                assert reader.get_parameter("temp") == 27
-                assert reader.get_parameter("method") == "trap"
-                assert reader.get_parameter("totiter") == 543
+            get_parameter = getattr(reader, "get_parameter", None)
+            if callable(get_parameter):
+                assert get_parameter("tnom") == 27
+                assert get_parameter("temp") == 27
+                assert get_parameter("method") == "trap"
+                assert get_parameter("totiter") == 543
         except Exception:
             # Skip if LTSpiceLogReader API is different
             pytest.skip("LTSpiceLogReader API needs adjustment")
@@ -294,8 +326,9 @@ Total elapsed time: 0.456 seconds.
             reader = LTSpiceLogReader(str(log_file))
 
             # Get steps
-            if hasattr(reader, "get_steps"):
-                steps = reader.get_steps()
+            get_steps = getattr(reader, "get_steps", None)
+            if callable(get_steps):
+                steps = cast(list[dict[str, str]], get_steps())
                 assert len(steps) == 3
 
                 # Verify step values
@@ -343,21 +376,23 @@ Date: Mon Jan 01 12:00:00 2024
             reader = opLogReader(str(log_file))
 
             # Get MOSFET data
-            if hasattr(reader, "get_mosfets"):
-                mosfets = reader.get_mosfets()
+            get_mosfets = getattr(reader, "get_mosfets", None)
+            if callable(get_mosfets):
+                mosfets = cast(list[dict[str, float | str]], get_mosfets())
                 assert len(mosfets) == 1
                 assert mosfets[0]["name"] == "m1"
-                assert mosfets[0]["Id"] == pytest.approx(1.23e-3)
-                assert mosfets[0]["Vgs"] == pytest.approx(2.5)
-                assert mosfets[0]["Vth"] == pytest.approx(0.75)
+                assert float(mosfets[0]["Id"]) == approx_float(1.23e-3)
+                assert float(mosfets[0]["Vgs"]) == approx_float(2.5)
+                assert float(mosfets[0]["Vth"]) == approx_float(0.75)
 
             # Get BJT data
-            if hasattr(reader, "get_bjts"):
-                bjts = reader.get_bjts()
+            get_bjts = getattr(reader, "get_bjts", None)
+            if callable(get_bjts):
+                bjts = cast(list[dict[str, float | str]], get_bjts())
                 assert len(bjts) == 1
                 assert bjts[0]["name"] == "q1"
-                assert bjts[0]["Ic"] == pytest.approx(5e-4)
-                assert bjts[0]["Beta"] == pytest.approx(100)
+                assert float(bjts[0]["Ic"]) == approx_float(5e-4)
+                assert float(bjts[0]["Beta"]) == approx_float(100)
         except Exception:
             # Skip if opLogReader API is different
             pytest.skip("opLogReader API needs adjustment")
@@ -392,12 +427,13 @@ Total simulation time: 0.567s
             reader = QspiceLogReader(str(log_file))
 
             # Get measurements
-            if hasattr(reader, "get_measurements"):
-                measurements = reader.get_measurements()
+            get_measurements = getattr(reader, "get_measurements", None)
+            if callable(get_measurements):
+                measurements = cast(dict[str, float], get_measurements())
                 assert "vout_rms" in measurements
-                assert measurements["vout_rms"] == pytest.approx(0.707)
+                assert float(measurements["vout_rms"]) == approx_float(0.707)
                 assert "period" in measurements
-                assert measurements["period"] == pytest.approx(1e-3)
+                assert float(measurements["period"]) == approx_float(1e-3)
         except Exception:
             # Skip if QspiceLogReader API is different
             pytest.skip("QspiceLogReader API needs adjustment")
@@ -484,26 +520,16 @@ class TestRawFileCompatibility:
         # Verify both have same data
         time_bin_trace = reader_bin.get_trace("time")
         time_asc_trace = reader_asc.get_trace("time")
-
-        if (
-            hasattr(time_bin_trace, "data")
-            and time_bin_trace.data is not None
-            and hasattr(time_asc_trace, "data")
-            and time_asc_trace.data is not None
-        ):
-            np.testing.assert_array_almost_equal(
-                time_bin_trace.data, time_asc_trace.data
-            )
+        assert time_bin_trace is not None
+        assert time_asc_trace is not None
+        time_bin = np.asarray(_trace_data(time_bin_trace), dtype=float)
+        time_asc = np.asarray(_trace_data(time_asc_trace), dtype=float)
+        np.testing.assert_array_almost_equal(time_bin, time_asc)
 
         voltage_bin_trace = reader_bin.get_trace("V(out)")
         voltage_asc_trace = reader_asc.get_trace("V(out)")
-
-        if (
-            hasattr(voltage_bin_trace, "data")
-            and voltage_bin_trace.data is not None
-            and hasattr(voltage_asc_trace, "data")
-            and voltage_asc_trace.data is not None
-        ):
-            np.testing.assert_array_almost_equal(
-                voltage_bin_trace.data, voltage_asc_trace.data
-            )
+        assert voltage_bin_trace is not None
+        assert voltage_asc_trace is not None
+        voltage_bin = np.asarray(_trace_data(voltage_bin_trace), dtype=float)
+        voltage_asc = np.asarray(_trace_data(voltage_asc_trace), dtype=float)
+        np.testing.assert_array_almost_equal(voltage_bin, voltage_asc)

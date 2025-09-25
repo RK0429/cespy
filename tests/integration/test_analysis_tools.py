@@ -1,7 +1,8 @@
 """Integration tests for analysis tools (Monte Carlo, Worst-Case, etc.)."""
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, cast
 
 import numpy as np
 import pytest
@@ -10,6 +11,19 @@ from cespy.raw.raw_read import RawRead
 from cespy.sim import SimRunner
 from cespy.sim.toolkit import MonteCarloAnalysis, SensitivityAnalysis, WorstCaseAnalysis
 from cespy.simulators import LTspice
+
+pytest: Any = pytest
+
+
+def approx_float(
+    expected: float,
+    *,
+    rel: float | None = None,
+    abs: float | None = None,
+) -> Any:
+    """Typed wrapper around pytest.approx for strict type checking."""
+    approx_callable = cast(Callable[..., Any], pytest.approx)
+    return approx_callable(expected, rel=rel, abs=abs)
 
 
 class TestMonteCarloAnalysis:
@@ -120,7 +134,7 @@ R4 4 0 4k
         mc.set_tolerance("R4", 0.2, distribution="flat")  # Flat distribution ±20%
 
         # Generate component values
-        values: List[Dict[str, float]] = mc.prepare_runs()
+        values: list[dict[str, float]] = mc.prepare_runs()
 
         # Verify distributions
         assert len(values) == 100
@@ -161,7 +175,7 @@ R2 out 0 10k
         wc.set_tolerance("R1", 0.05)  # ±5%
         wc.set_tolerance("R2", 0.05)  # ±5%
 
-        _results = wc.run_testbench()  # noqa: F841
+        _results = wc.run_testbench()
 
         # Add a measurement to track V(out)
         wc.editor.add_instruction(".meas op vout find V(out) when time=0")
@@ -181,8 +195,8 @@ R2 out 0 10k
         # Max case: R1 min, R2 max -> Vout higher
         assert min_val < 5.0
         assert max_val > 5.0
-        assert min_val == pytest.approx(4.76, rel=0.01)  # ~5 * 0.95/1.05
-        assert max_val == pytest.approx(5.24, rel=0.01)  # ~5 * 1.05/0.95
+        assert float(min_val) == approx_float(4.76, rel=0.01)
+        assert float(max_val) == approx_float(5.24, rel=0.01)
 
     @pytest.mark.requires_ltspice
     def test_worst_case_with_multiple_outputs(self, temp_dir: Path) -> None:
@@ -294,19 +308,19 @@ R4 out 0 4k
         sa.run_testbench()
 
         # Get sensitivity data for each component
-        results: Dict[str, Any] = {}
+        results: dict[str, Any] = {}
         for comp in components:
             sens_data = sa.get_sensitivity_data(comp, "vout")
             if sens_data is not None:
                 results[comp] = {
                     "sensitivity": (
                         sens_data
-                        if isinstance(sens_data, (int, float))
+                        if isinstance(sens_data, int | float)
                         else sens_data.get("sensitivity", 0)
                     ),
                     "percent_change": (
                         sens_data
-                        if isinstance(sens_data, (int, float))
+                        if isinstance(sens_data, int | float)
                         else sens_data.get("percent_change", 0)
                     ),
                 }
@@ -355,20 +369,20 @@ C2 out 0 100n
         sa.run_testbench()
 
         # Get sensitivity data for each component
-        results: Dict[str, Any] = {}
+        results: dict[str, Any] = {}
         for comp in components:
             mag_sens = sa.get_sensitivity_data(comp, "vout_mag")
             phase_sens = sa.get_sensitivity_data(comp, "vout_phase")
             if mag_sens is not None or phase_sens is not None:
                 results[comp] = {
                     "sensitivity": (
-                        mag_sens if isinstance(mag_sens, (int, float)) else 0
+                        mag_sens if isinstance(mag_sens, int | float) else 0
                     ),
                     "magnitude_sensitivity": (
-                        mag_sens if isinstance(mag_sens, (int, float)) else 0
+                        mag_sens if isinstance(mag_sens, int | float) else 0
                     ),
                     "phase_sensitivity": (
-                        phase_sens if isinstance(phase_sens, (int, float)) else 0
+                        phase_sens if isinstance(phase_sens, int | float) else 0
                     ),
                 }
 
@@ -408,21 +422,21 @@ R4 out 0 100k
         sa.run_testbench()
 
         # Get sensitivity data and rank manually
-        sensitivities = []
+        sensitivities: list[tuple[str, float]] = []
         for comp in components:
             sens_data = sa.get_sensitivity_data(comp, "vout")
             if sens_data is not None:
-                sens_val = sens_data if isinstance(sens_data, (int, float)) else 0
+                sens_val = sens_data if isinstance(sens_data, int | float) else 0
                 sensitivities.append((comp, abs(sens_val)))
 
         # Sort by absolute sensitivity
-        ranked = sorted(sensitivities, key=lambda x: x[1], reverse=True)
+        ranked = sorted(sensitivities, key=lambda item: item[1], reverse=True)
 
         # Should return components ranked by absolute sensitivity
         assert len(ranked) == 4
 
         # R3 and R4 should have highest impact on output
-        top_components = [item[0] for item in ranked[:2]]
+        top_components: list[str] = [item[0] for item in ranked[:2]]
         assert "R3" in top_components or "R4" in top_components
 
         # R1 should have lowest impact (small value, far from output)
@@ -465,10 +479,10 @@ R2 out 0 10k
             mc.set_tolerance(comp, tol, distribution=dist)
 
         mc.run_analysis()
-        _delay_stats = mc.get_measurement_statistics("delay")  # noqa: F841
+        _delay_stats = mc.get_measurement_statistics("delay")
 
         # Get individual delay values for comparison
-        delay_values = []
+        delay_values: list[float] = []
         for result in mc.results:
             if result.measurements and "delay" in result.measurements:
                 delay_values.append(result.measurements["delay"])
