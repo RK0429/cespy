@@ -255,6 +255,10 @@ class ResultCollector:
         task_ids = self._results_by_netlist.get(netlist_path, [])
         return [self._results[tid] for tid in task_ids if tid in self._results]
 
+    def get_all_results(self) -> list[SimulationResult]:
+        """Return a copy of all collected simulation results."""
+        return list(self._results.values())
+
     def get_measurement_summary(self, measurement_name: str) -> dict[str, Any]:
         """Get statistical summary for a measurement across all results.
 

@@ -111,7 +111,7 @@ class SimRunner(SimRunnerRefactored):
         Returns:
             List of SimulationResult objects
         """
-        return list(self._result_collector._results.values())  # pylint: disable=protected-access
+        return self._result_collector.get_all_results()
 
     def get_successful_results(self) -> list[Any]:
         """Get successful simulation results.

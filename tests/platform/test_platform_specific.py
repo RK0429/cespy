@@ -267,7 +267,7 @@ class TestPlatformSpecificPaths:
         ltspice = LTspice()
 
         # Get default library paths
-        lib_paths = ltspice._default_lib_paths
+        lib_paths = ltspice.default_lib_paths
 
         # Expand and check paths
         for lib_path in lib_paths:

@@ -347,6 +347,11 @@ class SimRunner(AnyRunner):
                 "RunTask logger level set to DEBUG"
             )
 
+    @property
+    def executor(self) -> ThreadPoolExecutor:
+        """Return the thread pool executor coordinating simulations."""
+        return self._executor
+
     def __del__(self) -> None:
         """Class Destructor : Closes Everything."""
         # Wait for all pending simulations to finish

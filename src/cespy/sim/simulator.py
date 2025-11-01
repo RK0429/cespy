@@ -137,6 +137,16 @@ class Simulator(ABC):
     _default_lib_paths: ClassVar[list[str]] = []
 
     @classmethod
+    def get_default_lib_paths(cls) -> list[str]:
+        """Return the default library search paths."""
+        return list(cls._default_lib_paths)
+
+    @property
+    def default_lib_paths(self) -> list[str]:
+        """Instance accessor for default library search paths."""
+        return self.get_default_lib_paths()
+
+    @classmethod
     def create_from(
         cls, path_to_exe: str | Path, process_name: str | None = None
     ) -> type[Simulator]:

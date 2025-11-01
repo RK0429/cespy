@@ -165,7 +165,7 @@ class TestSimRunner:
         """Test aborting all running simulations."""
         # Test that executor shutdown is called properly
         # pylint: disable=protected-access
-        with patch.object(self.runner._executor, "shutdown") as mock_shutdown:
+        with patch.object(self.runner.executor, "shutdown") as mock_shutdown:
             # Simulate destruction/cleanup
             self.runner.__del__()
 
@@ -220,7 +220,7 @@ class TestSimRunner:
         # Test manual cleanup
         if hasattr(runner, "_executor"):
             # pylint: disable=protected-access
-            with patch.object(runner._executor, "shutdown") as mock_shutdown:
+            with patch.object(runner.executor, "shutdown") as mock_shutdown:
                 if hasattr(runner, "__del__"):
                     runner.__del__()
                     mock_shutdown.assert_called()
@@ -231,8 +231,8 @@ class TestSimRunner:
 
         # Check that max_workers is set correctly
         # pylint: disable=protected-access
-        if hasattr(runner, "_executor") and hasattr(runner._executor, "_max_workers"):
-            assert runner._executor._max_workers == 1
+        if hasattr(runner, "_executor") and hasattr(runner.executor, "_max_workers"):
+            assert runner.executor._max_workers == 1
         else:
             # Skip if internal implementation is different
             pass

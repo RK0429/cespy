@@ -21,6 +21,9 @@ from cespy import LTspice  # pylint: disable=wrong-import-position
 from cespy.client_server import SimClient, SimServer  # pylint: disable=wrong-import-position
 from cespy.editor import SpiceEditor  # pylint: disable=wrong-import-position
 from cespy.sim import SimRunner  # pylint: disable=wrong-import-position
+from cespy.sim.simulator import Simulator  # pylint: disable=wrong-import-position
+
+SimulatorType = type[Simulator]
 
 # Note: SimBatch is not available in cespy.sim
 
@@ -223,7 +226,7 @@ C1 vout 0 1n
 
         sequential_results: list[dict[str, Any]] = []
         for i, circuit_path in enumerate(circuits):
-            runner = SimRunner(simulator=LTspice)
+            runner = SimRunner(simulator=cast(SimulatorType, LTspice))
             result = runner.run(str(circuit_path))
             sequential_results.append(
                 {"circuit": i, "success": result, "time": time.time()}
@@ -237,7 +240,7 @@ C1 vout 0 1n
 
         def run_single_simulation(circuit_info: tuple[int, Path]) -> dict[str, object]:
             circuit_id, circuit_path = circuit_info
-            runner = SimRunner(simulator=LTspice)
+            runner = SimRunner(simulator=cast(SimulatorType, LTspice))
 
             start = time.time()
             result = runner.run(str(circuit_path))
@@ -334,7 +337,7 @@ C1 vout 0 {C1_val}
         # Simulate server setup (in real usage, server runs in separate process)
         print("Configuring simulation server...")
         server = SimServer(
-            simulator=LTspice,
+            simulator=cast(SimulatorType, LTspice),
             parallel_sims=int(server_config["max_workers"]),
             port=int(server_config["port"]),
             host=str(server_config["host"]),
@@ -389,7 +392,7 @@ C1 vout 0 {C1_val}
             # In real implementation, this would be handled by the server
             # Since ServerSimRunner doesn't have set_circuit/set_parameters methods,
             # we'll simulate the behavior with a regular SimRunner
-            runner = SimRunner(simulator=LTspice)
+            runner = SimRunner(simulator=cast(SimulatorType, LTspice))
 
             # Apply parameters to the circuit
             request_data = job.get("request", {})
@@ -491,7 +494,7 @@ C3 vout 0 {C3}
         # Test 1: Basic simulation timing
         print("Test 1: Basic simulation timing...")
 
-        runner = SimRunner(simulator=LTspice)
+        runner = SimRunner(simulator=cast(SimulatorType, LTspice))
 
         # Warm-up run
         runner.run(str(circuit_path))
@@ -513,7 +516,7 @@ C3 vout 0 {C3}
         print("\nTest 2: Optimized simulation settings...")
 
         # Configure for performance
-        optimized_runner = SimRunner(simulator=LTspice)
+        optimized_runner = SimRunner(simulator=cast(SimulatorType, LTspice))
 
         # Apply optimizations
         optimizations: dict[str, str] = {
@@ -581,7 +584,7 @@ C3 vout 0 {C3}
         # Persistent file test
         start_time = time.time()
         for _ in range(3):
-            persistent_runner = SimRunner(simulator=LTspice)
+            persistent_runner = SimRunner(simulator=cast(SimulatorType, LTspice))
             persistent_runner.run(str(circuit_path))
         persistent_time = time.time() - start_time
 
@@ -594,7 +597,7 @@ C3 vout 0 {C3}
                 tmp_file.write(complex_circuit)
                 tmp_path = tmp_file.name
 
-            temp_runner = SimRunner(simulator=LTspice)
+            temp_runner = SimRunner(simulator=cast(SimulatorType, LTspice))
             temp_runner.run(tmp_path)
 
             Path(tmp_path).unlink()  # Clean up

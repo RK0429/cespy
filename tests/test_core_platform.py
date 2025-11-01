@@ -124,8 +124,7 @@ class TestPlatformManager:
     def test_os_type_detection(self, mock_machine: Mock, mock_system: Mock) -> None:
         """Test OS type detection logic."""
         # Reset singleton for testing
-        PlatformManager._instance = None
-        PlatformManager._platform_info = None
+        PlatformManager.clear_cached_state()
 
         mock_system.return_value = "Linux"
         mock_machine.return_value = "x86_64"
@@ -135,8 +134,7 @@ class TestPlatformManager:
         assert manager.info.architecture == Architecture.X86_64
 
         # Cleanup
-        PlatformManager._instance = None
-        PlatformManager._platform_info = None
+        PlatformManager.clear_cached_state()
 
     def test_simulator_search_paths(self) -> None:
         """Test simulator search path generation."""
@@ -365,16 +363,14 @@ class TestErrorHandling:
         mock_run.side_effect = Exception("Command failed")
 
         # Reset singleton for testing
-        PlatformManager._instance = None
-        PlatformManager._platform_info = None
+        PlatformManager.clear_cached_state()
 
         manager = PlatformManager()
         # Should use default fallback value
         assert manager.info.total_memory_gb == 4.0
 
         # Cleanup
-        PlatformManager._instance = None
-        PlatformManager._platform_info = None
+        PlatformManager.clear_cached_state()
 
     def test_invalid_simulator_name(self) -> None:
         """Test handling of invalid simulator names."""

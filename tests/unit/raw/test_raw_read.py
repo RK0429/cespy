@@ -14,7 +14,7 @@ def create_mock_raw_reader() -> RawRead:
     """Create a mock RawRead object with necessary attributes initialized."""
     raw_reader = RawRead.__new__(RawRead)
     # pylint: disable=protected-access
-    raw_reader._traces = []
+    raw_reader.traces = []
     raw_reader.aliases = {}
     raw_reader.nPoints = 0
     raw_reader.spice_params = OrderedDict()
@@ -72,7 +72,7 @@ Binary:
         trace2 = TraceRead("V(out)", "voltage", 100, None)
         trace3 = TraceRead("I(R1)", "current", 100, None)
 
-        raw_reader._traces = [trace1, trace2, trace3]
+        raw_reader.traces = [trace1, trace2, trace3]
 
         names = raw_reader.get_trace_names()
         assert len(names) == 3
@@ -94,7 +94,7 @@ Binary:
         trace_voltage = TraceRead("V(out)", "voltage", 100, None)
         trace_voltage.data = voltage_data
 
-        raw_reader._traces = [trace_time, trace_voltage]
+        raw_reader.traces = [trace_time, trace_voltage]
 
         # Test retrieving by name
         retrieved = raw_reader.get_trace("V(out)")
@@ -113,7 +113,7 @@ Binary:
         axis_trace = Axis("time", "time", 100)
         axis_trace.data = time_data
 
-        raw_reader._traces = [axis_trace]
+        raw_reader.traces = [axis_trace]
         raw_reader.axis = axis_trace
 
         axis = raw_reader.get_axis()
@@ -148,7 +148,7 @@ Binary:
         trace = TraceRead("time", "time", 100, None)
         trace.data = time_data
 
-        raw_reader._traces = [trace]
+        raw_reader.traces = [trace]
 
         retrieved_trace = raw_reader.get_trace("time")
         # Type guard: DummyTrace doesn't have data attribute
@@ -212,7 +212,7 @@ Binary:
         trace = TraceRead("large_signal", "voltage", 10000, None)
         trace.data = large_data
 
-        raw_reader._traces = [trace]
+        raw_reader.traces = [trace]
 
         retrieved = raw_reader.get_trace("large_signal")
         # Type guard: DummyTrace doesn't have data attribute

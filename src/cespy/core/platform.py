@@ -99,6 +99,12 @@ class PlatformManager:
     _instance: Optional["PlatformManager"] = None
     _platform_info: PlatformInfo | None = None
 
+    @classmethod
+    def clear_cached_state(cls) -> None:
+        """Reset singleton state. Intended for deterministic testing."""
+        cls._instance = None
+        cls._platform_info = None
+
     def __new__(cls) -> "PlatformManager":
         """Singleton pattern for platform manager."""
         if cls._instance is None:

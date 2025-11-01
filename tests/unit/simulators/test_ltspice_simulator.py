@@ -92,7 +92,7 @@ class TestLTspiceSimulator:
 
         with (
             patch("sys.platform", "win32"),
-            patch.object(LTspice, "_detect_windows_executable") as mock_detect,
+            patch.object(LTspice, "detect_windows_executable") as mock_detect,
         ):
             LTspice.detect_executable()
             mock_detect.assert_called_once()
@@ -104,7 +104,7 @@ class TestLTspiceSimulator:
 
         with (
             patch("sys.platform", "linux"),
-            patch.object(LTspice, "_detect_unix_executable") as mock_detect,
+            patch.object(LTspice, "detect_unix_executable") as mock_detect,
         ):
             LTspice.detect_executable()
             mock_detect.assert_called_once()
@@ -126,7 +126,7 @@ class TestLTspiceSimulator:
             mock_expand.side_effect = replace_home
 
             # pylint: disable=protected-access
-            LTspice._detect_windows_executable()
+            LTspice.detect_windows_executable()
 
             # Should find the first available executable
             assert len(LTspice.spice_exe) > 0
@@ -154,7 +154,7 @@ class TestLTspiceSimulator:
         mock_exists.side_effect = exists_side_effect
 
         # pylint: disable=protected-access
-        LTspice._detect_unix_executable()
+        LTspice.detect_unix_executable()
 
         # Should detect wine executable
         if LTspice.spice_exe:
